@@ -10,7 +10,4 @@ export default defineConfig({
   tanstackStart: {
     // Enable SSR for Nitro Vercel deployment
   },
-  nitro: {
-    preset: "vercel",
-  },
 });
