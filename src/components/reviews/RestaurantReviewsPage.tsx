@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
+import { API_URL as API_BASE } from "@/lib/apiBase";
 
 const PLACE_IDS = ["ChIJGYC22DMTXz4R3SvDLEgu8Z4"];
-
-const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
 
 interface Review {
   authorName: string;

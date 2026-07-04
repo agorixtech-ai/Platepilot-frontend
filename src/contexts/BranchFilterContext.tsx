@@ -2,7 +2,7 @@ import { createContext, useContext, useState, useEffect, useMemo, type ReactNode
 import { getAccessToken } from "@/lib/auth";
 import { MOCK_BRANCHES, toLocations, type Location } from "@/lib/locations";
 
-const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
+import { API_URL as API_BASE } from "@/lib/apiBase";
 const STORAGE_KEY = "platepilot_branch";
 
 interface BranchFilterState {

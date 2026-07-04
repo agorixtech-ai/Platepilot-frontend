@@ -43,12 +43,11 @@ import {
   deepFillY,
 } from "@/components/dashboard/shared";
 import type { Tone } from "@/components/dashboard/shared";
+import { API_URL as API_BASE } from "@/lib/apiBase";
 
 export const Route = createFileRoute("/dashboard/reports")({
   component: ReportsPage,
 });
-
-const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
 
 interface ReportSummary {
   total_revenue: number;
