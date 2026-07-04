@@ -325,7 +325,7 @@ function MainPanel({
   children?: ReactNode;
   userName: string;
 }) {
-  const { state } = useSidebar();
+  const { state, isMobile } = useSidebar();
   const firstName = userName.split(" ")[0] ?? userName;
   const hour = new Date().getHours();
   const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
@@ -334,7 +334,7 @@ function MainPanel({
     <SidebarInset className="flex flex-col overflow-hidden bg-background dashboard-canvas">
       <header className="sticky top-0 z-[var(--z-sticky)] shrink-0 border-b border-border/60 bg-card/90 backdrop-blur-xl">
         <div className="mx-auto flex h-[4.25rem] w-full max-w-[1600px] items-center gap-3 px-4 sm:px-6 md:px-8">
-          {state === "collapsed" && (
+          {(state === "collapsed" || isMobile) && (
             <SidebarTrigger className="h-9 w-9 shrink-0 rounded-xl text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground [&_svg]:size-4" />
           )}
 
@@ -375,11 +375,13 @@ function MainPanel({
 
       {/* Location switcher + date range — the owner's first touch every visit */}
       <div className="shrink-0 border-b border-border/60 bg-background/60 backdrop-blur-xl">
-        <div className="mx-auto flex w-full max-w-[1600px] items-center gap-3 px-4 py-2.5 sm:px-6 md:px-8">
+        <div className="mx-auto flex w-full max-w-[1600px] flex-col items-stretch gap-2 px-4 py-2.5 sm:flex-row sm:items-center sm:gap-3 sm:px-6 md:px-8">
           <div className="min-w-0 flex-1">
             <LocationSwitcher />
           </div>
-          <DateRangePicker />
+          <div className="self-start sm:self-auto">
+            <DateRangePicker />
+          </div>
         </div>
       </div>
 
