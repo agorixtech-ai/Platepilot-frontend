@@ -11,6 +11,13 @@ export default defineConfig({
     // Use default TanStack Start configuration
   },
   nitro: {
-    preset: "vercel-edge",
+    preset: "vercel",
+    // @lovable.dev/vite-tanstack-config forces output into dist/; restore the
+    // vercel preset's Build Output API layout that Vercel requires.
+    output: {
+      dir: "{{ rootDir }}/.vercel/output",
+      serverDir: "{{ output.dir }}/functions/__server.func",
+      publicDir: "{{ output.dir }}/static/{{ baseURL }}",
+    },
   },
 });
