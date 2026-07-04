@@ -8,6 +8,7 @@ import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 
 export default defineConfig({
   tanstackStart: {
-    // Use default TanStack Start server entry for Vercel compatibility
+    // Configure for static SPA deployment
+    ssr: false,
   },
 });
