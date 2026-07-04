@@ -8,6 +8,7 @@ import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 
 export default defineConfig({
   tanstackStart: {
-    // Enable SSR for Nitro Vercel deployment
+    // Disable SSR for static SPA deployment
+    ssr: false,
   },
 });
