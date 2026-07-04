@@ -11,4 +11,7 @@ export default defineConfig({
     // Configure for static SPA deployment
     ssr: false,
   },
+  nitro: {
+    preset: "vercel-static",
+  },
 });
