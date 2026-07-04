@@ -10,8 +10,7 @@
   ],
   "functions": {
     "api/index": {
-      "runtime": "nodejs20.x",
-      "memory": 1024
+      "runtime": "@vercel/node"
     }
   },
   "headers": [
