@@ -12,6 +12,6 @@ export default defineConfig({
     ssr: false,
   },
   nitro: {
-    preset: "vercel-static",
+    preset: "vercel",
   },
 });
