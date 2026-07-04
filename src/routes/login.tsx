@@ -1,8 +1,15 @@
 import React, { useState, useEffect, useRef } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { Mail, Lock, Eye, EyeOff, ArrowRight, RotateCcw, ShieldCheck } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, ArrowRight, RotateCcw, ShieldCheck, FlaskConical } from "lucide-react";
 import { toast } from "sonner";
-import { login as apiLogin, sendOtp, verifyOtp, saveTokens, getGoogleOAuthUrl } from "../lib/auth";
+import {
+  login as apiLogin,
+  sendOtp,
+  verifyOtp,
+  saveTokens,
+  getGoogleOAuthUrl,
+  testLogin,
+} from "../lib/auth";
 import { AuthPageShell, AuthVisualPanel } from "@/components/auth/AuthPageShell";
 import { AuthIconBox, AuthStepIndicator, AuthSubmitButton } from "@/components/auth/AuthFormShared";
 
@@ -220,6 +227,18 @@ function LoginPage() {
       .finally(() => setIsLoading(false));
   };
 
+  // TEMPORARY: one-click demo login (test@gmail.com / test@123), no OTP
+  const handleTestLogin = () => {
+    setIsLoading(true);
+    testLogin()
+      .then(() => {
+        toast.success("Signed in as test user!");
+        navigate({ to: "/dashboard" });
+      })
+      .catch((err) => toast.error(err.message || "Test login failed."))
+      .finally(() => setIsLoading(false));
+  };
+
   const handleResend = () => {
     if (countdown > 0) return;
     setIsLoading(true);
@@ -420,6 +439,17 @@ function LoginPage() {
               />
             </svg>
             Continue with Google
+          </button>
+
+          {/* Test user (TEMPORARY — remove before production) */}
+          <button
+            type="button"
+            onClick={handleTestLogin}
+            disabled={isLoading}
+            className="auth-btn-secondary mt-2 w-full py-3 border border-dashed rounded-xl text-sm font-semibold transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <FlaskConical className="w-4 h-4" />
+            Login as Test User
           </button>
 
           <p className="text-center text-[12px] text-muted-foreground font-medium mt-6">

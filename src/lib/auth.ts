@@ -99,6 +99,15 @@ export async function verifyEmail(email: string, otp: string): Promise<AuthToken
   return data;
 }
 
+// TEMPORARY: demo login for the fixed test account (test@gmail.com / test@123).
+// Skips the OTP email step; remove together with the backend /test-login route.
+export async function testLogin(): Promise<AuthTokens> {
+  const res = await apiFetch("/test-login", { method: "POST" });
+  const data = await handleResponse<AuthTokens>(res);
+  saveTokens(data);
+  return data;
+}
+
 export async function login(
   email: string,
   password: string,
