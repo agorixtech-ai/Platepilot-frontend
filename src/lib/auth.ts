@@ -1,4 +1,5 @@
-const API_BASE = "http://localhost:8000/api/auth";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
+const API_BASE = `${API_URL.replace(/\/$/, "")}/auth`;
 
 export interface User {
   id: string;

@@ -48,7 +48,7 @@ export const Route = createFileRoute("/dashboard/reports")({
   component: ReportsPage,
 });
 
-const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000";
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
 
 interface ReportSummary {
   total_revenue: number;
@@ -142,7 +142,7 @@ function ReportsPage() {
     queryFn: async () => {
       const params = new URLSearchParams({ from_date: fromDate, to_date: toDate });
       if (branch && branch !== "all") params.set("branch", branch);
-      const res = await fetch(`${API_BASE}/api/reports/summary?${params}`);
+      const res = await fetch(`${API_BASE}/reports/summary?${params}`);
       if (!res.ok) throw new Error("Failed to generate report");
       return res.json();
     },
@@ -180,7 +180,7 @@ function ReportsPage() {
             onClick={() => {
               const params = new URLSearchParams({ from_date: fromDate, to_date: toDate });
               if (branch && branch !== "all") params.set("branch", branch);
-              window.open(`${API_BASE}/api/reports/summary/csv?${params}`, "_blank");
+              window.open(`${API_BASE}/reports/summary/csv?${params}`, "_blank");
             }}
           >
             <Download className="h-3.5 w-3.5" />

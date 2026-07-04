@@ -2,7 +2,7 @@ import { createContext, useContext, useState, useEffect, useMemo, type ReactNode
 import { getAccessToken } from "@/lib/auth";
 import { MOCK_BRANCHES, toLocations, type Location } from "@/lib/locations";
 
-const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000";
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
 const STORAGE_KEY = "platepilot_branch";
 
 interface BranchFilterState {
@@ -47,7 +47,7 @@ export function BranchFilterProvider({ children }: { children: ReactNode }) {
     async function load() {
       try {
         const token = getAccessToken();
-        const res = await fetch(`${API_BASE}/api/dashboard/branches`, {
+        const res = await fetch(`${API_BASE}/dashboard/branches`, {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
         });
         if (res.ok) {

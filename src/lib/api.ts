@@ -1,6 +1,9 @@
 import { getAccessToken, clearTokens, refreshAccessToken } from "./auth";
 
-const BASE = "http://localhost:8000";
+// VITE_API_URL includes the /api suffix; request paths here start from the
+// backend origin (/health, /api/...), so strip it.
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
+const BASE = API_URL.replace(/\/api\/?$/, "");
 
 // ── Core fetch wrapper ────────────────────────────────────
 async function request<T>(path: string, options: RequestInit = {}, retry = true): Promise<T> {
