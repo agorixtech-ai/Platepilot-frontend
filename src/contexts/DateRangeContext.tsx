@@ -1,6 +1,11 @@
 import { createContext, useContext, useState, type ReactNode } from "react";
-import type { DateRange } from "@/services/locationData";
 import type { Period } from "@/services/dashboardService";
+
+export type DateRange =
+  | { kind: "today" }
+  | { kind: "7d" }
+  | { kind: "30d" }
+  | { kind: "custom"; from: Date; to: Date };
 
 interface DateRangeState {
   range: DateRange;

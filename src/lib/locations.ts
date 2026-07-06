@@ -15,15 +15,6 @@ export const LOCATION_COLORS = [
   "var(--color-chart-5)", // teal   #0D9488
 ] as const;
 
-/** Fallback location names when the backend has no branch data yet. */
-export const MOCK_BRANCHES = [
-  "Downtown",
-  "Marina Walk",
-  "Jumeirah",
-  "Deira City",
-  "Al Barsha",
-] as const;
-
 export function locationColor(index: number): string {
   return LOCATION_COLORS[index % LOCATION_COLORS.length];
 }

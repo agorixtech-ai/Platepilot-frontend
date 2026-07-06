@@ -96,6 +96,39 @@ export interface BranchSummaryItem {
   active_alerts: number;
 }
 
+export interface LocationSnapshot {
+  branch: string;
+  revenue: number;
+  orders: number;
+  avg_order: number;
+  /** % vs the previous equivalent period; null when there is no prior data */
+  delta_pct: number | null;
+  /** % vs the location's own trailing 7-day daily average */
+  vs_seven_day_pct: number;
+  sparkline: number[]; // last 14 days of revenue
+  pending_issues: number;
+}
+
+export interface ComparisonSeries {
+  labels: string[];
+  series: { branch: string; values: number[] }[];
+}
+
+export interface HourlySales {
+  date: string | null;
+  labels: string[];
+  values: number[];
+}
+
+export interface RecentTransaction {
+  id: string;
+  channel: string;
+  time: string | null; // "YYYY-MM-DD HH:MM:SS"
+  amount: number;
+  status: string;
+  items: string;
+}
+
 async function apiFetch<T>(path: string): Promise<T> {
   const token = typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
   const headers: Record<string, string> = { "Content-Type": "application/json" };
@@ -146,6 +179,26 @@ export const dashboardService = {
   getBranchSummary(period: Period) {
     return apiFetch<{ period: string; currency: string; items: BranchSummaryItem[] }>(
       `/dashboard/branch-summary${qs({ period })}`,
+    );
+  },
+
+  getLocationSnapshots(period: Period) {
+    return apiFetch<{ period: string; currency: string; items: LocationSnapshot[] }>(
+      `/dashboard/location-snapshots${qs({ period })}`,
+    );
+  },
+
+  getComparisonSeries(period: Period) {
+    return apiFetch<ComparisonSeries>(`/dashboard/comparison-series${qs({ period })}`);
+  },
+
+  getHourlySales(branch: string) {
+    return apiFetch<HourlySales>(`/dashboard/hourly-sales${qs({ branch })}`);
+  },
+
+  getRecentTransactions(branch?: string | null, limit = 25) {
+    return apiFetch<{ items: RecentTransaction[] }>(
+      `/dashboard/recent-transactions${qs({ branch, limit })}`,
     );
   },
 };

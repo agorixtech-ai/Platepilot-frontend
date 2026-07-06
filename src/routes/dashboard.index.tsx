@@ -27,7 +27,6 @@ import {
   CartesianGrid,
   Tooltip,
   Legend,
-  Cell,
 } from "recharts";
 
 import { cn } from "@/lib/utils";
@@ -133,15 +132,18 @@ function KpiCardWithSparkline({
   index?: number;
 }) {
   const numericValue = parseFloat(value.replace(/[^0-9.-]+/g, "")) || 0;
-  const { count } = useCounterAnimation(numericValue, { duration: 1200, decimals: value.includes(".") ? 1 : 0 });
-  
-  const displayValue = value.includes("%") 
+  const { count } = useCounterAnimation(numericValue, {
+    duration: 1200,
+    decimals: value.includes(".") ? 1 : 0,
+  });
+
+  const displayValue = value.includes("%")
     ? `${count.toFixed(1)}%`
     : value.includes("k")
-    ? `${(count / 1000).toFixed(1)}k`
-    : value.includes("M")
-    ? `${(count / 1000000).toFixed(2)}M`
-    : count.toLocaleString();
+      ? `${(count / 1000).toFixed(1)}k`
+      : value.includes("M")
+        ? `${(count / 1000000).toFixed(2)}M`
+        : count.toLocaleString();
   const toneBgs: Record<Tone, string> = {
     primary: "bg-primary/15 text-primary",
     success: "bg-success/15 text-success",
@@ -152,10 +154,12 @@ function KpiCardWithSparkline({
   };
 
   const cardContent = (
-    <Card className={cn(
-      "border-border/40 bg-card card-interactive cursor-pointer",
-      `animate-fade-in-up stagger-${(index || 1) + 1}`
-    )}>
+    <Card
+      className={cn(
+        "border-border/40 bg-card card-interactive cursor-pointer",
+        `animate-fade-in-up stagger-${(index || 1) + 1}`,
+      )}
+    >
       <CardContent className="p-4 space-y-3">
         <div className="flex items-start justify-between gap-2">
           <div className={cn("flex h-9 w-9 items-center justify-center rounded-xl", toneBgs[tone])}>
@@ -208,123 +212,6 @@ function KpiCardWithSparkline({
     return <Link to={to as any}>{cardContent}</Link>;
   }
   return cardContent;
-}
-
-// ── Menu Wastage Analysis ─────────────────────────────────────────────────────
-
-const WASTAGE_DATA = [
-  { name: "Chicken Biryani", waste: 18.4 },
-  { name: "Veg Fried Rice", waste: 15.2 },
-  { name: "Paneer Butter Masala", waste: 12.8 },
-  { name: "Pizza Margherita", waste: 10.5 },
-  { name: "Hakka Noodles", waste: 8.7 },
-  { name: "Butter Chicken", waste: 7.9 },
-  { name: "Veg Burger", waste: 6.1 },
-  { name: "Pasta Alfredo", waste: 4.8 },
-];
-
-const WASTAGE_TOTAL = WASTAGE_DATA.reduce((s, d) => s + d.waste, 0);
-
-function getWasteColor(value: number) {
-  if (value >= 12) return "url(#waste-high)";
-  if (value >= 8) return "url(#waste-mid)";
-  return "url(#waste-low)";
-}
-
-function getWasteLevel(value: number): { label: string; color: string } {
-  if (value >= 12) return { label: "High", color: "var(--color-destructive)" };
-  if (value >= 8) return { label: "Medium", color: "var(--color-warning)" };
-  return { label: "Low", color: "var(--color-success)" };
-}
-
-function MenuWastageChart() {
-  const maxWaste = Math.max(...WASTAGE_DATA.map((d) => d.waste));
-
-  const renderTooltip = ({ active, payload }: any) => {
-    if (!active || !payload?.length) return null;
-    const d = payload[0]?.payload;
-    const level = getWasteLevel(d.waste);
-    return (
-      <div className="rounded-lg border border-border/60 bg-card px-3 py-2 shadow-lg text-[11px] min-w-[140px]">
-        <p className="font-bold text-foreground text-[12px] mb-1">{d.name}</p>
-        <div className="flex items-center justify-between gap-3">
-          <span className="text-muted-foreground">Wastage</span>
-          <span className="font-bold text-foreground tabular-nums">{d.waste} kg</span>
-        </div>
-        <div className="flex items-center justify-between gap-3 mt-0.5">
-          <span className="text-muted-foreground">Level</span>
-          <span style={{ color: level.color }} className="font-bold">
-            {level.label}
-          </span>
-        </div>
-      </div>
-    );
-  };
-
-  return (
-    <ResponsiveContainer width="100%" height={280}>
-      <BarChart
-        data={WASTAGE_DATA}
-        layout="vertical"
-        margin={{ top: 8, right: 60, bottom: 8, left: 8 }}
-        barCategoryGap="18%"
-      >
-        <defs>
-          <linearGradient id="waste-high" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stopColor="var(--color-destructive-dark)" />
-            <stop offset="100%" stopColor="var(--color-destructive)" />
-          </linearGradient>
-          <linearGradient id="waste-mid" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stopColor="var(--color-warning-dark)" />
-            <stop offset="100%" stopColor="var(--color-warning)" />
-          </linearGradient>
-          <linearGradient id="waste-low" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stopColor="var(--color-success-dark)" />
-            <stop offset="100%" stopColor="var(--color-success)" />
-          </linearGradient>
-        </defs>
-        <CartesianGrid
-          strokeDasharray="3 3"
-          stroke="var(--color-sidebar-border)"
-          strokeOpacity={0.3}
-          horizontal={false}
-        />
-        <XAxis
-          type="number"
-          domain={[0, Math.ceil(maxWaste + 2)]}
-          tick={{ fontSize: 10, fill: "var(--color-sidebar-foreground)", opacity: 0.55 }}
-          tickCount={5}
-        />
-        <YAxis
-          type="category"
-          dataKey="name"
-          width={120}
-          tick={{ fontSize: 10, fill: "var(--color-sidebar-foreground)", opacity: 0.7 }}
-          tickLine={false}
-          axisLine={false}
-        />
-        <Tooltip content={renderTooltip} cursor={{ fill: "var(--color-muted)", opacity: 0.1 }} />
-        <Bar
-          dataKey="waste"
-          radius={[0, 6, 6, 0]}
-          maxBarSize={24}
-          animationDuration={1000}
-          animationEasing="ease-out"
-          label={{
-            position: "right",
-            fontSize: 10,
-            fill: "var(--color-sidebar-foreground)",
-            fontWeight: 700,
-            formatter: (v: number) => `${v} kg`,
-          }}
-        >
-          {WASTAGE_DATA.map((d, i) => (
-            <Cell key={i} fill={getWasteColor(d.waste)} />
-          ))}
-        </Bar>
-      </BarChart>
-    </ResponsiveContainer>
-  );
 }
 
 // ── Main component ────────────────────────────────────────────────────────────
@@ -613,9 +500,9 @@ function OverviewPage() {
       </div>
 
       {/* ── Performance Row ─────────────────────────────────────────────────── */}
-      <div className="grid gap-5 grid-cols-1 lg:grid-cols-3">
-        {/* Performance Trends — original AreaTrend with metric selector (2 cols) */}
-        <Card className="lg:col-span-2 flex flex-col border border-border/60 bg-card card-interactive shadow-sm animate-fade-in-up stagger-4">
+      <div className="grid gap-5 grid-cols-1">
+        {/* Performance Trends — original AreaTrend with metric selector */}
+        <Card className="flex flex-col border border-border/60 bg-card card-interactive shadow-sm animate-fade-in-up stagger-4">
           <CardHeader className="border-b border-border/40 px-5 pb-2 pt-4">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
@@ -684,70 +571,6 @@ function OverviewPage() {
             />
           </CardContent>
         </Card>
-
-        {/* Menu Wastage Analysis */}
-        <Card className="flex flex-col border border-sidebar-border/60 bg-sidebar text-sidebar-foreground card-interactive shadow-md relative overflow-hidden animate-fade-in-up stagger-5">
-          <CardHeader className="border-b border-sidebar-border/50 px-4 pb-3 pt-4">
-            <div className="flex items-start justify-between">
-              <div>
-                <div className="flex items-center gap-1.5">
-                  <span className="relative h-2 w-2 rounded-full bg-sidebar-primary shadow-[0_0_6px_var(--color-sidebar-primary)]">
-                    <span className="absolute inset-0 animate-ping rounded-full bg-sidebar-primary opacity-40" />
-                  </span>
-                  <CardTitle className="text-[13px] font-bold text-sidebar-foreground">
-                    Menu Wastage Analysis
-                  </CardTitle>
-                </div>
-                <p className="mt-1 ml-3.5 text-[10px] text-sidebar-foreground/60">
-                  Top dishes with the highest ingredient wastage
-                </p>
-              </div>
-              <div className="flex flex-col items-end gap-1 text-[9px] font-semibold">
-                <span className="flex items-center gap-1">
-                  <span
-                    className="inline-block h-1.5 w-1.5 rounded-full"
-                    style={{ background: "var(--color-destructive)" }}
-                  />{" "}
-                  High Waste
-                </span>
-                <span className="flex items-center gap-1">
-                  <span
-                    className="inline-block h-1.5 w-1.5 rounded-full"
-                    style={{ background: "var(--color-warning)" }}
-                  />{" "}
-                  Medium Waste
-                </span>
-                <span className="flex items-center gap-1">
-                  <span
-                    className="inline-block h-1.5 w-1.5 rounded-full"
-                    style={{ background: "var(--color-success)" }}
-                  />{" "}
-                  Low Waste
-                </span>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent className="flex flex-1 flex-col px-4 pb-4 pt-3">
-            <div className="w-full min-h-[280px]">
-              <MenuWastageChart />
-            </div>
-
-            <div className="mt-3 flex items-center justify-between rounded-lg border border-sidebar-border/50 px-3 py-2.5 relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-r from-destructive/8 via-warning/5 to-success/8 opacity-60" />
-              <div className="flex items-center gap-3 relative z-10">
-                <span className="text-[11px] font-medium text-sidebar-foreground/70">
-                  Total Menu Waste
-                </span>
-                <span className="text-[13px] font-black tabular-nums text-sidebar-foreground">
-                  {WASTAGE_TOTAL.toFixed(1)} kg
-                </span>
-              </div>
-              <span className="text-[10px] text-sidebar-foreground/50 relative z-10">
-                Updated: Today
-              </span>
-            </div>
-          </CardContent>
-        </Card>
       </div>
 
       {/* ── Bottom Row ──────────────────────────────────────────────────────── */}
@@ -766,9 +589,7 @@ function OverviewPage() {
               </CardTitle>
               <ChevronRight className="h-3 w-3 shrink-0 text-muted-foreground" />
             </div>
-            <p className="text-[10px] text-muted-foreground pl-0">
-              Click to view full detail
-            </p>
+            <p className="text-[10px] text-muted-foreground pl-0">Click to view full detail</p>
           </CardHeader>
           <CardContent className="px-4 pb-4 flex-1 flex flex-col gap-3">
             {reconciliationQuery.isLoading ? (
@@ -1300,14 +1121,38 @@ function OverviewPage() {
                           >
                             <defs>
                               <linearGradient id="deep-revenue" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stopColor="var(--color-primary)" stopOpacity={0.5} />
-                                <stop offset="45%" stopColor="var(--color-primary)" stopOpacity={0.8} />
-                                <stop offset="100%" stopColor="var(--color-primary)" stopOpacity={1} />
+                                <stop
+                                  offset="0%"
+                                  stopColor="var(--color-primary)"
+                                  stopOpacity={0.5}
+                                />
+                                <stop
+                                  offset="45%"
+                                  stopColor="var(--color-primary)"
+                                  stopOpacity={0.8}
+                                />
+                                <stop
+                                  offset="100%"
+                                  stopColor="var(--color-primary)"
+                                  stopOpacity={1}
+                                />
                               </linearGradient>
                               <linearGradient id="deep-cost" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stopColor="var(--color-destructive)" stopOpacity={0.38} />
-                                <stop offset="45%" stopColor="var(--color-destructive)" stopOpacity={0.65} />
-                                <stop offset="100%" stopColor="var(--color-destructive)" stopOpacity={0.92} />
+                                <stop
+                                  offset="0%"
+                                  stopColor="var(--color-destructive)"
+                                  stopOpacity={0.38}
+                                />
+                                <stop
+                                  offset="45%"
+                                  stopColor="var(--color-destructive)"
+                                  stopOpacity={0.65}
+                                />
+                                <stop
+                                  offset="100%"
+                                  stopColor="var(--color-destructive)"
+                                  stopOpacity={0.92}
+                                />
                               </linearGradient>
                             </defs>
                             <CartesianGrid
