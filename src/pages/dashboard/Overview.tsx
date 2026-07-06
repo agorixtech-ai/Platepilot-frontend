@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import {
@@ -61,10 +61,6 @@ import { useDateRange, rangeToPeriod } from "@/contexts/DateRangeContext";
 import { AllLocationsOverview } from "@/components/dashboard/AllLocationsOverview";
 import { SingleLocationView } from "@/components/dashboard/SingleLocationView";
 import { useCounterAnimation } from "@/hooks/useCounterAnimation";
-
-export const Route = createFileRoute("/dashboard/")({
-  component: OverviewPage,
-});
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -1357,3 +1353,5 @@ function OverviewPage() {
     </div>
   );
 }
+
+export default OverviewPage;

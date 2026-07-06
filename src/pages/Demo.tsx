@@ -1,34 +1,9 @@
+import { AppPage } from "@/components/ionic/AppPage";
 import { useState } from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { Link } from "react-router-dom";
 import { ArrowRight, Calendar, Check, Loader2 } from "lucide-react";
 
 const GOOGLE_SCRIPT_URL = import.meta.env.VITE_GOOGLE_SCRIPT_URL;
-
-export const Route = createFileRoute("/demo")({
-  component: DemoPage,
-  head: () => ({
-    meta: [
-      { title: "Schedule a Demo — RestaurantIQ" },
-      {
-        name: "description",
-        content:
-          "Book a personalized demo of RestaurantIQ. See how AI-powered analysis transforms your restaurant operations.",
-      },
-    ],
-    links: [
-      { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      {
-        rel: "preconnect",
-        href: "https://fonts.gstatic.com",
-        crossOrigin: "anonymous",
-      },
-      {
-        rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap",
-      },
-    ],
-  }),
-});
 
 function DemoPage() {
   const [submitted, setSubmitted] = useState(false);
@@ -273,5 +248,13 @@ function DemoPage() {
         </div>
       </main>
     </div>
+  );
+}
+
+export default function DemoPageRoute() {
+  return (
+    <AppPage title="Schedule a Demo — RestaurantIQ">
+      <DemoPage />
+    </AppPage>
   );
 }

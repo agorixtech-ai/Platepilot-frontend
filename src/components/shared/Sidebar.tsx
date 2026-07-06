@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link } from "react-router-dom";
 import { useState } from "react";
 import { LayoutDashboard, ShoppingCart, FileText, Users, Settings, LogOut } from "lucide-react";
 import {

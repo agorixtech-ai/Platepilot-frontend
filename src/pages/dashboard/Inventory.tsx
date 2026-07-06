@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import {
   Package,
@@ -38,10 +37,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { dashboardService, type StockItem } from "@/services/dashboardService";
 import { useBranchFilter } from "@/contexts/BranchFilterContext";
 import { DASHBOARD_LIVE_QUERY, paletteColor } from "@/components/dashboard/shared";
-
-export const Route = createFileRoute("/dashboard/inventory")({
-  component: InventoryPage,
-});
 
 const STATUS_CONFIG = {
   critical: {
@@ -971,3 +966,5 @@ function InventoryPage() {
     </div>
   );
 }
+
+export default InventoryPage;

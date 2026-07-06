@@ -1,5 +1,4 @@
 import { useState, lazy, Suspense, useMemo, useCallback } from "react";
-import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import {
   Building2,
@@ -96,10 +95,6 @@ const BRANCH_COORDS: Record<string, [number, number]> = {
 };
 
 const LazyBranchMap = lazy(() => import("@/components/dashboard/BranchMap"));
-
-export const Route = createFileRoute("/dashboard/branches")({
-  component: BranchesPage,
-});
 
 /* ── Helpers ─────────────────────────────────────────────────────────────── */
 
@@ -1727,3 +1722,5 @@ function BranchesPage() {
     </div>
   );
 }
+
+export default BranchesPage;

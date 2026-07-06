@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import {
   ShoppingCart,
@@ -39,10 +38,6 @@ import { useBranchFilter } from "@/contexts/BranchFilterContext";
 import { dashboardService } from "@/services/dashboardService";
 import { DASHBOARD_LIVE_QUERY, paletteColor, fmtCurrency } from "@/components/dashboard/shared";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-
-export const Route = createFileRoute("/dashboard/pos")({
-  component: PosSalesPage,
-});
 
 const PAGE_SIZE = 25;
 
@@ -716,3 +711,5 @@ function PosSalesPage() {
     </div>
   );
 }
+
+export default PosSalesPage;

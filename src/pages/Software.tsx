@@ -1,25 +1,6 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { AppPage } from "@/components/ionic/AppPage";
 import { useEffect, useRef, useState } from "react";
 import { NavBar } from "@/components/NavBar";
-
-export const Route = createFileRoute("/software")({
-  head: () => ({
-    meta: [
-      { title: "Our Software — Agorix" },
-      {
-        name: "description",
-        content:
-          "Our software powers realtime AI-driven analysis and decision making through an AI+Human loop.",
-      },
-      { property: "og:title", content: "Our Software — Agorix" },
-      {
-        property: "og:description",
-        content: "Realtime AI-driven analysis and AI+Human loop decision making.",
-      },
-    ],
-  }),
-  component: SoftwarePage,
-});
 
 /* ─── Animated counter ─────────────────────────────────────────────────── */
 function AnimatedCounter({
@@ -800,5 +781,13 @@ function SoftwarePage() {
         </div>
       </footer>
     </main>
+  );
+}
+
+export default function SoftwarePageRoute() {
+  return (
+    <AppPage title="Our Software — Agorix">
+      <SoftwarePage />
+    </AppPage>
   );
 }

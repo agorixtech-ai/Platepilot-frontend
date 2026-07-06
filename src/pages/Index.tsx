@@ -1,22 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { AppPage } from "@/components/ionic/AppPage";
 import { useEffect, useRef, useState } from "react";
 import { Antenna, Brain, Crosshair, RefreshCw, User, Zap } from "lucide-react";
 import { AgorixHero } from "@/components/AgorixHero";
-
-export const Route = createFileRoute("/")({
-  head: () => ({
-    meta: [
-      { title: "Agorix — The Superintelligence AI-Automation" },
-      {
-        name: "description",
-        content: "AI-Powered Operating system. Launch a GPU instance or talk to our team.",
-      },
-      { property: "og:title", content: "Agorix — The Superintelligence AI-Automation" },
-      { property: "og:description", content: "AI-Powered Operating system." },
-    ],
-  }),
-  component: Index,
-});
 
 /* ─── Glitch heading ─────────────────────────────────────────────────────── */
 function GlitchHeading({ text }: { text: string }) {
@@ -1443,5 +1428,13 @@ function PlatformCard({
       </a>
       <div className="sw-card-line" style={{ background: accent }} />
     </div>
+  );
+}
+
+export default function IndexRoute() {
+  return (
+    <AppPage title="Agorix — The Superintelligence AI-Automation">
+      <Index />
+    </AppPage>
   );
 }

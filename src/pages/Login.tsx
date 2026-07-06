@@ -1,6 +1,16 @@
+import { AppPage } from "@/components/ionic/AppPage";
 import React, { useState, useEffect, useRef } from "react";
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { Mail, Lock, Eye, EyeOff, ArrowRight, RotateCcw, ShieldCheck, FlaskConical } from "lucide-react";
+import { Link, useHistory } from "react-router-dom";
+import {
+  Mail,
+  Lock,
+  Eye,
+  EyeOff,
+  ArrowRight,
+  RotateCcw,
+  ShieldCheck,
+  FlaskConical,
+} from "lucide-react";
 import { toast } from "sonner";
 import {
   login as apiLogin,
@@ -12,21 +22,6 @@ import {
 } from "../lib/auth";
 import { AuthPageShell, AuthVisualPanel } from "@/components/auth/AuthPageShell";
 import { AuthIconBox, AuthStepIndicator, AuthSubmitButton } from "@/components/auth/AuthFormShared";
-
-export const Route = createFileRoute("/login")({
-  component: LoginPage,
-  head: () => ({
-    meta: [{ title: "Sign In — Agorix" }, { name: "description", content: "Sign in to Agorix." }],
-    links: [
-      { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      {
-        rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap",
-      },
-    ],
-  }),
-});
 
 /* ── OTP Box Input ────────────────────────────────────────── */
 function OtpInput({
@@ -128,7 +123,7 @@ function LoginPage() {
   const [otp, setOtp] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [countdown, setCountdown] = useState(0);
-  const navigate = useNavigate();
+  const history = useHistory();
 
   // Google OAuth callback
   useEffect(() => {
@@ -150,9 +145,9 @@ function LoginPage() {
         },
       });
       toast.success("Signed in with Google!");
-      navigate({ to: "/dashboard" });
+      history.push("/dashboard");
     }
-  }, [navigate]);
+  }, [history]);
 
   const startCountdown = () => {
     setCountdown(60);
@@ -218,7 +213,7 @@ function LoginPage() {
     verifyOtp(email, otp, "login")
       .then(() => {
         toast.success("Welcome back!");
-        navigate({ to: "/dashboard" });
+        history.push("/dashboard");
       })
       .catch((err) => {
         toast.error(err.message || "Invalid code.");
@@ -233,7 +228,7 @@ function LoginPage() {
     testLogin()
       .then(() => {
         toast.success("Signed in as test user!");
-        navigate({ to: "/dashboard" });
+        history.push("/dashboard");
       })
       .catch((err) => toast.error(err.message || "Test login failed."))
       .finally(() => setIsLoading(false));
@@ -577,5 +572,13 @@ function LoginPage() {
         </div>
       )}
     </AuthPageShell>
+  );
+}
+
+export default function LoginPageRoute() {
+  return (
+    <AppPage title="Sign In — Agorix">
+      <LoginPage />
+    </AppPage>
   );
 }

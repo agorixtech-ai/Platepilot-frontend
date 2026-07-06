@@ -1,9 +1,3 @@
-import { createFileRoute } from "@tanstack/react-router";
-
-export const Route = createFileRoute("/dashboard/ai")({
-  component: RouteComponent,
-});
-
 function RouteComponent() {
   return (
     <div className="space-y-6">
@@ -17,3 +11,5 @@ function RouteComponent() {
     </div>
   );
 }
+
+export default RouteComponent;

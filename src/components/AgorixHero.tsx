@@ -290,8 +290,15 @@ export function AgorixHero() {
       wrap.style.height = `${STAGE_H * ratio}px`;
     };
     resize();
+    // Observe the wrapper too: inside the Ionic shell the page can mount
+    // before layout, so the initial measurement may be 0-width.
+    const observer = new ResizeObserver(resize);
+    if (wrapRef.current) observer.observe(wrapRef.current);
     window.addEventListener("resize", resize);
-    return () => window.removeEventListener("resize", resize);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", resize);
+    };
   }, []);
 
   // AI cycle: advance only after streaming finishes + 800ms pause

@@ -1142,3 +1142,27 @@
     text-align: left;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * Ionic shell integration
+ * The app runs inside IonApp/IonPage; pages keep the Tailwind design
+ * system, so Ionic surfaces must inherit the theme instead of painting
+ * their own defaults.
+ * ═══════════════════════════════════════════════════════════════════════ */
+
+ion-app,
+.app-ion-page {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+}
+
+/* Document-style scrolling inside a fixed IonPage */
+.app-page-scroll {
+  height: 100%;
+  width: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+}

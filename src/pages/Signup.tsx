@@ -1,28 +1,11 @@
+import { AppPage } from "@/components/ionic/AppPage";
 import React, { useState, useRef } from "react";
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { Link, useHistory } from "react-router-dom";
 import { Mail, Lock, Eye, EyeOff, User, ArrowRight, RotateCcw, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { register as apiRegister, verifyEmail, getGoogleOAuthUrl } from "../lib/auth";
 import { AuthPageShell, AuthVisualPanel } from "@/components/auth/AuthPageShell";
 import { AuthIconBox, AuthStepIndicator, AuthSubmitButton } from "@/components/auth/AuthFormShared";
-
-export const Route = createFileRoute("/signup")({
-  component: SignupPage,
-  head: () => ({
-    meta: [
-      { title: "Create Account — Agorix" },
-      { name: "description", content: "Create your Agorix account." },
-    ],
-    links: [
-      { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      {
-        rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap",
-      },
-    ],
-  }),
-});
 
 /* ── OTP Input ───────────────────────────────────────────── */
 function OtpInput({
@@ -124,7 +107,7 @@ function SignupPage() {
   const [otp, setOtp] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [countdown, setCountdown] = useState(0);
-  const navigate = useNavigate();
+  const history = useHistory();
 
   const startCountdown = () => {
     setCountdown(60);
@@ -189,7 +172,7 @@ function SignupPage() {
     verifyEmail(email, otp)
       .then(() => {
         toast.success("Account verified! Welcome to Agorix.");
-        navigate({ to: "/dashboard" });
+        history.push("/dashboard");
       })
       .catch((err) => {
         toast.error(err.message || "Invalid code.");
@@ -559,5 +542,13 @@ function SignupPage() {
         </div>
       )}
     </AuthPageShell>
+  );
+}
+
+export default function SignupPageRoute() {
+  return (
+    <AppPage title="Create Account — Agorix">
+      <SignupPage />
+    </AppPage>
   );
 }

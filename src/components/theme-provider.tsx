@@ -1,5 +1,4 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import { ScriptOnce } from "@tanstack/react-router";
 
 export type Theme = "light" | "dark" | "system";
 
@@ -71,13 +70,9 @@ export function ThemeProvider({
   };
 
   return (
-    <>
-      {/* SSR-only: runs once before hydration, then removes itself — avoids head script mismatch */}
-      <ScriptOnce>{THEME_INIT_SCRIPT}</ScriptOnce>
-      <ThemeProviderContext.Provider value={{ theme, resolvedTheme, setTheme, toggleTheme }}>
-        {children}
-      </ThemeProviderContext.Provider>
-    </>
+    <ThemeProviderContext.Provider value={{ theme, resolvedTheme, setTheme, toggleTheme }}>
+      {children}
+    </ThemeProviderContext.Provider>
   );
 }
 
@@ -87,4 +82,6 @@ export function useTheme() {
   return ctx;
 }
 
-export const THEME_INIT_SCRIPT = `(function(){try{var t=localStorage.getItem('${STORAGE_KEY}')||'dark';var d=t==='dark'||(t==='system'&&window.matchMedia('(prefers-color-scheme: dark)').matches);var c=document.documentElement.classList;c.remove('light','dark');c.add(d?'dark':'light');document.documentElement.style.colorScheme=d?'dark':'light';}catch(e){}})();`;
+/* The pre-paint theme init script lives inline in index.html so the correct
+   theme class is applied before first render (no FOUC). Keep it in sync with
+   STORAGE_KEY above. */

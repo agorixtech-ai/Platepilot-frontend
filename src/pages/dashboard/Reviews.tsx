@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
 import { Search, Star, MapPin, ThumbsUp, ThumbsDown, Loader2, ArrowLeft } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,10 +6,6 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { API_URL as API_BASE } from "@/lib/apiBase";
-
-export const Route = createFileRoute("/dashboard/reviews")({
-  component: ReviewsPage,
-});
 
 const DEFAULT_PLACE_IDS = ["ChIJGYC22DMTXz4R3SvDLEgu8Z4"];
 
@@ -531,3 +526,5 @@ function ReviewsPage() {
     </div>
   );
 }
+
+export default ReviewsPage;
