@@ -107,7 +107,7 @@ Key constraints when editing:
 
 ## Environment
 
-Backend expects `http://localhost:8000`. The base URL is hardcoded in `src/lib/auth.ts` and `src/lib/api.ts` — change both if the backend moves.
+Backend expects `http://localhost:8000`. All API base URLs derive from `src/lib/apiBase.ts` (`API_ORIGIN` / `API_URL`), which reads `VITE_API_URL` and defaults to `http://localhost:8000/api` — set the env var if the backend moves; never add another base-URL constant.
 
 ## Deployment
 
