@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from "react";
-import { Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
+import { Link, useHistory, useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import {
   LayoutDashboard,
@@ -132,7 +132,7 @@ function NavSection({
                   )}
                 >
                   <Link
-                    to={to as any}
+                    to={to}
                     className="flex items-center gap-2.5 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:gap-0"
                   >
                     <span
@@ -181,12 +181,12 @@ function NavSection({
 }
 
 export function DashboardLayout({ children }: { children?: ReactNode }) {
-  const navigate = useNavigate();
-  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const history = useHistory();
+  const { pathname } = useLocation();
 
   useEffect(() => {
-    if (!getStoredUser()) navigate({ to: "/login" });
-  }, [navigate]);
+    if (!getStoredUser()) history.replace("/login");
+  }, [history]);
 
   const profileQuery = useQuery({
     queryKey: ["auth", "me"],
@@ -212,7 +212,7 @@ export function DashboardLayout({ children }: { children?: ReactNode }) {
       clearTokens();
     }
     toast.success("Signed out successfully.");
-    navigate({ to: "/login" });
+    history.push("/login");
   };
 
   const initials = (user?.full_name ?? "U")
@@ -386,7 +386,7 @@ function MainPanel({
       </div>
 
       <div className="flex-1 overflow-y-auto px-4 py-5 sm:px-6 md:px-8 md:py-6">
-        <div className="mx-auto w-full max-w-[1600px]">{children ?? <Outlet />}</div>
+        <div className="mx-auto w-full max-w-[1600px]">{children}</div>
       </div>
     </SidebarInset>
   );

@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, useMemo, type ReactNode } from "react";
 import { getAccessToken } from "@/lib/auth";
-import { MOCK_BRANCHES, toLocations, type Location } from "@/lib/locations";
+import { toLocations, type Location } from "@/lib/locations";
 
 import { API_URL as API_BASE } from "@/lib/apiBase";
 const STORAGE_KEY = "platepilot_branch";
@@ -53,12 +53,12 @@ export function BranchFilterProvider({ children }: { children: ReactNode }) {
         if (res.ok) {
           const data = await res.json();
           const items: string[] = data.items || data.branches || [];
-          setBranches(items.length ? items : [...MOCK_BRANCHES]);
+          setBranches(items);
         } else {
-          setBranches([...MOCK_BRANCHES]);
+          setBranches([]);
         }
       } catch {
-        setBranches([...MOCK_BRANCHES]);
+        setBranches([]);
       } finally {
         setIsLoadingBranches(false);
       }

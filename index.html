@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en" suppressHydrationWarning>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>PlatePilot</title>
+    <meta name="description" content="AI-Powered Restaurant Operations" />
+    <meta name="author" content="PlatePilot" />
+    <meta property="og:title" content="PlatePilot" />
+    <meta property="og:description" content="AI-Powered Restaurant Operations" />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+    />
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem("ui-theme") || "dark";
+          var d =
+            t === "dark" ||
+            (t === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+          var c = document.documentElement.classList;
+          c.remove("light", "dark");
+          c.add(d ? "dark" : "light");
+          document.documentElement.style.colorScheme = d ? "dark" : "light";
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

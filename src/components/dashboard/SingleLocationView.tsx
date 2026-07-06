@@ -1,14 +1,6 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
+import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { ArrowDown, ArrowUp, ArrowUpDown, Search } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -17,14 +9,14 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useBranchFilter } from "@/contexts/BranchFilterContext";
 import { fmtCurrency } from "@/components/dashboard/shared";
-import { getHourlySales, getRecentOrders, type RecentOrder } from "@/services/locationData";
+import { dashboardService } from "@/services/dashboardService";
 
 // ── Hourly sales ─────────────────────────────────────────────────────────────
 
 function HourlySalesChart({ branch, color }: { branch: string; color: string }) {
   const { data } = useQuery({
     queryKey: ["locations", "hourly", branch],
-    queryFn: () => getHourlySales(branch),
+    queryFn: () => dashboardService.getHourlySales(branch),
   });
 
   const chartData = useMemo(
@@ -35,9 +27,9 @@ function HourlySalesChart({ branch, color }: { branch: string; color: string }) 
   return (
     <Card className="border border-border/60 bg-card shadow-sm animate-fade-in-up stagger-2">
       <CardHeader className="border-b border-border/40 px-5 pb-3 pt-4">
-        <CardTitle className="text-[13px] font-bold text-foreground">Hourly sales — today</CardTitle>
+        <CardTitle className="text-[13px] font-bold text-foreground">Hourly sales</CardTitle>
         <p className="mt-0.5 text-[10px] text-muted-foreground">
-          Revenue by hour — lunch and dinner peaks
+          Revenue by hour{data?.date ? ` on ${data.date}` : ""} — latest day of sales
         </p>
       </CardHeader>
       <CardContent className="px-5 pb-5 pt-3">
@@ -101,9 +93,10 @@ function HourlySalesChart({ branch, color }: { branch: string; color: string }) 
 
 type SortKey = "time" | "id" | "channel" | "amount" | "status";
 
-const STATUS_STYLE: Record<RecentOrder["status"], string> = {
+const STATUS_STYLE: Record<string, string> = {
   completed: "bg-success-soft text-success border-0",
   preparing: "bg-info-soft text-info border-0",
+  pending: "bg-info-soft text-info border-0",
   cancelled: "bg-destructive-soft text-destructive border-0",
 };
 
@@ -112,10 +105,20 @@ function RecentOrdersTable({ branch }: { branch: string }) {
   const [sortKey, setSortKey] = useState<SortKey>("time");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
 
-  const { data: orders = [] } = useQuery({
+  const { data } = useQuery({
     queryKey: ["locations", "recent-orders", branch],
-    queryFn: () => getRecentOrders(branch),
+    queryFn: () => dashboardService.getRecentTransactions(branch, 25),
   });
+  // keep the full datetime for sorting; the row renders just HH:MM
+  const orders = useMemo(
+    () =>
+      (data?.items ?? []).map((o) => ({
+        ...o,
+        id: o.id.startsWith("#") ? o.id : `#${o.id}`,
+        time: o.time ?? "",
+      })),
+    [data],
+  );
 
   const rows = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -141,7 +144,15 @@ function RecentOrdersTable({ branch }: { branch: string }) {
     }
   };
 
-  const SortHeader = ({ label, k, className }: { label: string; k: SortKey; className?: string }) => (
+  const SortHeader = ({
+    label,
+    k,
+    className,
+  }: {
+    label: string;
+    k: SortKey;
+    className?: string;
+  }) => (
     <th className={cn("p-2.5 text-left", className)}>
       <button
         onClick={() => toggleSort(k)}
@@ -168,7 +179,7 @@ function RecentOrdersTable({ branch }: { branch: string }) {
           <div>
             <CardTitle className="text-[13px] font-bold text-foreground">Recent orders</CardTitle>
             <p className="mt-0.5 text-[10px] text-muted-foreground">
-              {rows.length} orders today · click a column to sort
+              {rows.length} most recent orders · click a column to sort
             </p>
           </div>
           <div className="relative w-full sm:w-56">
@@ -201,15 +212,19 @@ function RecentOrdersTable({ branch }: { branch: string }) {
               {rows.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="p-6 text-center text-muted-foreground">
-                    No orders match “{query}”
+                    {query ? <>No orders match “{query}”</> : "No orders recorded yet"}
                   </td>
                 </tr>
               ) : (
                 rows.map((o) => (
                   <tr key={o.id} className="transition-colors hover:bg-secondary/40">
-                    <td className="p-2.5 tabular-nums text-muted-foreground">{o.time}</td>
+                    <td className="p-2.5 tabular-nums text-muted-foreground">
+                      {o.time ? o.time.slice(11, 16) : "—"}
+                    </td>
                     <td className="p-2.5 font-semibold text-foreground">{o.id}</td>
-                    <td className="max-w-[260px] truncate p-2.5 text-muted-foreground">{o.items}</td>
+                    <td className="max-w-[260px] truncate p-2.5 text-muted-foreground">
+                      {o.items}
+                    </td>
                     <td className="p-2.5 text-muted-foreground">{o.channel}</td>
                     <td className="p-2.5 text-right font-bold tabular-nums text-foreground">
                       {fmtCurrency(o.amount)}
@@ -217,7 +232,10 @@ function RecentOrdersTable({ branch }: { branch: string }) {
                     <td className="p-2.5">
                       <Badge
                         variant="outline"
-                        className={cn("px-2 py-0.5 text-[9.5px] font-extrabold uppercase", STATUS_STYLE[o.status])}
+                        className={cn(
+                          "px-2 py-0.5 text-[9.5px] font-extrabold uppercase",
+                          STATUS_STYLE[o.status] ?? "bg-muted text-muted-foreground border-0",
+                        )}
                       >
                         {o.status}
                       </Badge>

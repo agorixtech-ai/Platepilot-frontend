@@ -9,21 +9,57 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { AlertTriangle, ArrowDownRight, ArrowUpRight, CheckCircle2, ShoppingCart } from "lucide-react";
+import {
+  AlertTriangle,
+  ArrowDownRight,
+  ArrowUpRight,
+  CheckCircle2,
+  ShoppingCart,
+} from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useBranchFilter } from "@/contexts/BranchFilterContext";
-import { useDateRange, rangeKey } from "@/contexts/DateRangeContext";
+import { useDateRange, rangeKey, rangeToPeriod } from "@/contexts/DateRangeContext";
 import { useCounterAnimation } from "@/hooks/useCounterAnimation";
 import { fmtCurrency } from "@/components/dashboard/shared";
 import type { Location } from "@/lib/locations";
-import {
-  getSnapshots,
-  getAttentionItems,
-  getComparisonSeries,
-  type LocationSnapshot,
-} from "@/services/locationData";
+import { dashboardService, type LocationSnapshot } from "@/services/dashboardService";
+
+interface AttentionItem {
+  branch: string;
+  severity: "critical" | "warning";
+  message: string;
+}
+
+/** Anomalies worth the owner's attention, worst first — from real snapshot data. */
+function getAttentionItems(snapshots: LocationSnapshot[]): AttentionItem[] {
+  const items: AttentionItem[] = [];
+  for (const s of snapshots) {
+    if (s.vs_seven_day_pct <= -25) {
+      items.push({
+        branch: s.branch,
+        severity: "critical",
+        message: `Revenue down ${Math.abs(s.vs_seven_day_pct).toFixed(0)}% vs its 7-day average`,
+      });
+    } else if (s.vs_seven_day_pct <= -12) {
+      items.push({
+        branch: s.branch,
+        severity: "warning",
+        message: `Trailing its 7-day average by ${Math.abs(s.vs_seven_day_pct).toFixed(0)}%`,
+      });
+    }
+    if (s.pending_issues >= 2) {
+      items.push({
+        branch: s.branch,
+        severity: "warning",
+        message: `${s.pending_issues} incomplete orders need review`,
+      });
+    }
+  }
+  const rank = { critical: 0, warning: 1 } as const;
+  return items.sort((a, b) => rank[a.severity] - rank[b.severity]);
+}
 
 // ── Sparkline ────────────────────────────────────────────────────────────────
 
@@ -64,7 +100,7 @@ function LocationCard({
   index: number;
 }) {
   const { count } = useCounterAnimation(snap.revenue, { duration: 1200, decimals: 0 });
-  const up = snap.deltaPct >= 0;
+  const up = (snap.delta_pct ?? 0) >= 0;
   return (
     <button
       onClick={onSelect}
@@ -76,18 +112,23 @@ function LocationCard({
     >
       <div className="flex items-center justify-between gap-2">
         <div className="flex min-w-0 items-center gap-2">
-          <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: loc.color }} />
+          <span
+            className="h-2.5 w-2.5 shrink-0 rounded-full"
+            style={{ backgroundColor: loc.color }}
+          />
           <span className="truncate text-[12.5px] font-bold text-foreground">{loc.name}</span>
         </div>
-        <span
-          className={cn(
-            "flex shrink-0 items-center gap-0.5 text-[11px] font-bold tabular-nums",
-            up ? "text-success" : "text-destructive",
-          )}
-        >
-          {up ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
-          {Math.abs(snap.deltaPct).toFixed(1)}%
-        </span>
+        {snap.delta_pct != null && (
+          <span
+            className={cn(
+              "flex shrink-0 items-center gap-0.5 text-[11px] font-bold tabular-nums",
+              up ? "text-success" : "text-destructive",
+            )}
+          >
+            {up ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
+            {Math.abs(snap.delta_pct).toFixed(1)}%
+          </span>
+        )}
       </div>
 
       <p className="mt-3 text-[19px] font-black tracking-tight text-foreground tabular-nums">
@@ -95,7 +136,7 @@ function LocationCard({
       </p>
       <p className="text-[10.5px] text-muted-foreground">
         <ShoppingCart className="mr-1 inline h-3 w-3 align-[-2px]" />
-        {snap.orders.toLocaleString()} orders · AED {snap.avgOrder.toFixed(0)} avg
+        {snap.orders.toLocaleString()} orders · AED {snap.avg_order.toFixed(0)} avg
       </p>
 
       <div className="mt-3 flex items-end justify-between gap-2">
@@ -176,14 +217,18 @@ function ComparisonChart({ locations }: { locations: Location[] }) {
   const [hidden, setHidden] = useState<Set<string>>(new Set());
 
   const { data } = useQuery({
-    queryKey: ["locations", "comparison", rangeKey(range), branches],
-    queryFn: () => getComparisonSeries(branches, range),
+    queryKey: ["locations", "comparison", rangeKey(range)],
+    queryFn: () => dashboardService.getComparisonSeries(rangeToPeriod(range)),
     enabled: branches.length > 0,
   });
 
   const chartData = useMemo(() => {
     if (!data) return [];
-    return data.labels.map((label, i) => {
+    return data.labels.map((iso, i) => {
+      const label = new Date(iso).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+      });
       const row: Record<string, string | number> = { label };
       for (const s of data.series) row[s.branch] = s.values[i];
       return row;
@@ -266,7 +311,9 @@ function ComparisonChart({ locations }: { locations: Location[] }) {
               <Tooltip
                 content={({ active, payload, label }) => {
                   if (!active || !payload?.length) return null;
-                  const rows = [...payload].sort((a, b) => (b.value as number) - (a.value as number));
+                  const rows = [...payload].sort(
+                    (a, b) => (b.value as number) - (a.value as number),
+                  );
                   return (
                     <div className="rounded-xl border border-border/60 bg-popover px-3.5 py-2.5 text-[11px] shadow-lg">
                       <p className="mb-1.5 font-bold text-foreground">{label}</p>
@@ -276,7 +323,9 @@ function ComparisonChart({ locations }: { locations: Location[] }) {
                             className="h-2 w-2 shrink-0 rounded-full"
                             style={{ backgroundColor: row.stroke as string }}
                           />
-                          <span className="min-w-[84px] text-muted-foreground">{row.dataKey as string}</span>
+                          <span className="min-w-[84px] text-muted-foreground">
+                            {row.dataKey as string}
+                          </span>
                           <span className="ml-auto font-bold tabular-nums text-foreground">
                             {fmtCurrency(row.value as number)}
                           </span>
@@ -315,11 +364,24 @@ export function AllLocationsOverview() {
   const { range } = useDateRange();
   const branches = locations.map((l) => l.name);
 
-  const { data: snapshots } = useQuery({
-    queryKey: ["locations", "snapshots", rangeKey(range), branches],
-    queryFn: () => getSnapshots(branches, range),
+  const { data: snapshotData } = useQuery({
+    queryKey: ["locations", "snapshots", rangeKey(range)],
+    queryFn: () => dashboardService.getLocationSnapshots(rangeToPeriod(range)),
     enabled: branches.length > 0,
   });
+  const snapshots = snapshotData?.items;
+
+  if (!isLoadingBranches && branches.length === 0) {
+    return (
+      <div className="flex flex-col items-center gap-1.5 rounded-xl border border-border/60 bg-card px-4 py-8 text-center animate-fade-in-up">
+        <ShoppingCart className="h-5 w-5 text-muted-foreground/50" />
+        <p className="text-[12px] font-medium text-muted-foreground">No location data yet</p>
+        <p className="text-[10.5px] text-muted-foreground/70">
+          Locations will appear here once POS sales are synced
+        </p>
+      </div>
+    );
+  }
 
   if (isLoadingBranches || !snapshots) {
     return (
