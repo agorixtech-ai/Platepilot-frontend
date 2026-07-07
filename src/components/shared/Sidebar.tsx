@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { LayoutDashboard, ShoppingCart, FileText, Users, Settings, LogOut } from "lucide-react";
+import { AppLogo } from "@/components/AppLogo";
 import {
   Sidebar as SidebarComponent,
   SidebarContent,
@@ -43,15 +44,13 @@ export function Sidebar() {
     <SidebarComponent collapsible="icon" className="border-r border-sidebar-border bg-sidebar">
       {/* Logo */}
       <SidebarHeader className="px-4 py-4">
-        <Link
+        <AppLogo
           to="/"
-          className="flex items-center gap-2 font-extrabold text-xl tracking-tight text-sidebar-foreground select-none group-data-[collapsible=icon]:justify-center"
-        >
-          <span className="text-primary">λ</span>
-          <span className="text-sidebar-foreground/70 font-bold text-lg group-data-[collapsible=icon]:hidden">
-            gorix
-          </span>
-        </Link>
+          showText
+          className="group-data-[collapsible=icon]:justify-center"
+          textWrapperClassName="group-data-[collapsible=icon]:hidden"
+          textClassName="font-extrabold text-xl tracking-tight text-sidebar-foreground"
+        />
       </SidebarHeader>
 
       <SidebarSeparator className="bg-sidebar-border" />

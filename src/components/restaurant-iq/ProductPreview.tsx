@@ -10,7 +10,7 @@ export function ProductPreview() {
           <span className="h-3 w-3 rounded-full bg-muted-foreground/30" />
           <span className="h-3 w-3 rounded-full bg-muted-foreground/50" />
           <span className="ml-3 text-xs font-medium text-muted-foreground">
-            Agorix · Operations Dashboard
+            Platepilot · Operations Dashboard
           </span>
         </div>
 

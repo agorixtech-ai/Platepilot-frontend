@@ -36,7 +36,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { dashboardService, type StockItem } from "@/services/dashboardService";
 import { useBranchFilter } from "@/contexts/BranchFilterContext";
-import { DASHBOARD_LIVE_QUERY, paletteColor } from "@/components/dashboard/shared";
+import { DASHBOARD_LIVE_QUERY } from "@/components/dashboard/shared";
 
 const STATUS_CONFIG = {
   critical: {
@@ -215,7 +215,7 @@ function InventoryPage() {
       </div>
 
       {/* ── KPI Row ──────────────────────────────────────────────────── */}
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-5">
         {[
           {
             label: "TOTAL ITEMS",
@@ -267,8 +267,14 @@ function InventoryPage() {
                   ? "bg-warning/15 text-warning"
                   : "bg-destructive/15 text-destructive",
           },
-        ].map((c) => (
-          <Card key={c.label} className="border border-border/60 bg-card shadow-sm">
+        ].map((c, index) => (
+          <Card
+            key={c.label}
+            className={cn(
+              "border border-border/60 bg-card shadow-sm",
+              index === 4 && "col-span-2 md:col-span-1",
+            )}
+          >
             <CardContent className="px-5 py-4">
               <div className="flex items-center justify-between mb-3">
                 <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
@@ -295,7 +301,7 @@ function InventoryPage() {
       {/* ── Alert Banner (if critical items exist) ───────────────────── */}
       {criticalCount > 0 && !stockLoading && (
         <Card className="border border-destructive/30 bg-destructive/[0.04] shadow-sm">
-          <CardContent className="px-5 py-4 flex items-center gap-4">
+          <CardContent className="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-destructive/15 shrink-0">
               <ShieldAlert className="h-5 w-5 text-destructive" />
             </div>
@@ -325,24 +331,24 @@ function InventoryPage() {
         </Card>
       )}
 
-      {/* ── Charts Row: Stock Levels Bar + Status Distribution Pie ──── */}
+      {/* ── Charts Row ───────────────────────────────────────────────── */}
       {items.length > 0 && (
-        <div className="grid grid-cols-1 gap-3 lg:grid-cols-5">
+        <div className="grid items-stretch gap-4 md:grid-cols-5">
           {/* Stock Levels Bar Chart */}
-          <Card className="border border-border/60 bg-card shadow-sm lg:col-span-3">
-            <CardHeader className="px-5 pb-2 pt-5">
+          <Card className="flex h-full flex-col border border-border/60 bg-card shadow-sm md:col-span-3">
+            <CardHeader className="border-b border-border/40 px-5 pb-3 pt-4">
               <div className="flex items-center gap-2">
                 <div className="h-2.5 w-2.5 rounded-full bg-primary" />
-                <CardTitle className="text-[14px] font-bold text-foreground">
+                <CardTitle className="text-[13px] font-bold text-foreground">
                   Stock Levels — Top 10 Items
                 </CardTitle>
               </div>
-              <p className="text-[11px] text-muted-foreground mt-0.5">
+              <p className="mt-0.5 text-[10px] text-muted-foreground">
                 Current unit counts for highest-stocked items
               </p>
             </CardHeader>
-            <CardContent className="px-5 py-3">
-              <div className="h-[280px]">
+            <CardContent className="px-5 pb-5 pt-3">
+              <div className="h-[280px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart
                     data={barChartData}
@@ -423,18 +429,19 @@ function InventoryPage() {
           </Card>
 
           {/* Status Distribution Pie */}
-          <Card className="border border-border/60 bg-card shadow-sm lg:col-span-2 bg-gradient-to-br from-card to-muted/10">
-            <CardHeader className="px-5 pb-2 pt-5">
-              <CardTitle className="text-[14px] font-bold text-foreground">
+          <Card className="flex h-full flex-col border border-border/60 bg-card shadow-sm md:col-span-2">
+            <CardHeader className="border-b border-border/40 px-5 pb-3 pt-4">
+              <CardTitle className="text-[13px] font-bold text-foreground">
                 Status Distribution
               </CardTitle>
-              <p className="text-[11px] text-muted-foreground mt-0.5">
+              <p className="mt-0.5 text-[10px] text-muted-foreground">
                 Breakdown of inventory health across all items
               </p>
             </CardHeader>
-            <CardContent className="px-5 py-3 flex flex-col items-center">
-              <div className="h-[180px] w-full relative">
-                <ResponsiveContainer width="100%" height="100%">
+            <CardContent className="px-5 pb-5 pt-3">
+              <div className="flex h-[280px] flex-col">
+                <div className="relative min-h-0 flex-1">
+                  <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
                       data={statusPieData}
@@ -468,17 +475,14 @@ function InventoryPage() {
                     />
                   </PieChart>
                 </ResponsiveContainer>
-                {/* Center label */}
-                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                  <p className="text-[22px] font-bold text-foreground tabular-nums">
-                    {items.length}
-                  </p>
-                  <p className="text-[9px] text-muted-foreground font-medium">Total Items</p>
+                <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+                  <p className="text-[22px] font-bold tabular-nums text-foreground">{items.length}</p>
+                  <p className="text-[9px] font-medium text-muted-foreground">Total Items</p>
                 </div>
               </div>
 
               {/* Legend with click-to-filter */}
-              <div className="w-full mt-3 space-y-2">
+              <div className="mt-2 shrink-0 space-y-1.5">
                 {[
                   {
                     key: "ok" as const,
@@ -530,100 +534,115 @@ function InventoryPage() {
                   );
                 })}
               </div>
+              </div>
             </CardContent>
           </Card>
         </div>
       )}
 
-      {/* ── Filters + View Toggle ────────────────────────────────────── */}
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="relative flex-1 min-w-[200px] max-w-sm">
-          <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search stock items..."
-            className="h-9 w-full rounded-lg border border-border/60 bg-card pl-9 pr-3 text-[12px] text-foreground placeholder:text-muted-foreground outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition"
-          />
-        </div>
-        <div className="flex items-center gap-0.5 rounded-full border border-border/40 bg-muted/30 p-0.5">
-          {(["", "critical", "low", "ok"] as const).map((s) => (
-            <button
-              key={s}
-              onClick={() => setStatusFilter(statusFilter === s ? "" : s)}
-              className={cn(
-                "rounded-full px-3 py-1 text-[11px] font-semibold transition-all",
-                statusFilter === s
-                  ? "bg-primary text-primary-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted",
-              )}
-            >
-              {s ? STATUS_CONFIG[s].label : "All"}
-            </button>
-          ))}
-        </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setSortAsc(!sortAsc)}
-          className="gap-1.5 text-[11px] text-muted-foreground"
-        >
-          <ArrowDownUp className="h-3.5 w-3.5" />
-          {sortAsc ? "Lowest first" : "Highest first"}
-        </Button>
-        <div className="ml-auto flex items-center gap-0.5 rounded-lg border border-border/40 bg-muted/30 p-0.5">
-          <button
-            onClick={() => setViewMode("cards")}
-            className={cn(
-              "rounded-md px-2.5 py-1 text-[10px] font-semibold transition-all",
-              viewMode === "cards"
-                ? "bg-primary text-primary-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground",
-            )}
-          >
-            Cards
-          </button>
-          <button
-            onClick={() => setViewMode("list")}
-            className={cn(
-              "rounded-md px-2.5 py-1 text-[10px] font-semibold transition-all",
-              viewMode === "list"
-                ? "bg-primary text-primary-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground",
-            )}
-          >
-            List
-          </button>
-        </div>
-      </div>
-
       {/* ── Stock Items ──────────────────────────────────────────────── */}
-      {stockLoading ? (
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {Array.from({ length: 8 }).map((_, i) => (
-            <Card key={i} className="border border-border/60 bg-card shadow-sm animate-pulse">
-              <CardContent className="px-4 py-5">
-                <div className="h-4 w-24 rounded bg-muted/60 mb-3" />
-                <div className="h-6 w-16 rounded bg-muted/60 mb-2" />
-                <div className="h-2 w-full rounded bg-muted/40" />
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      ) : filtered.length === 0 ? (
-        <Card className="border border-border/60 bg-card shadow-sm">
-          <CardContent className="py-16 text-center">
-            <Package className="h-10 w-10 text-muted-foreground/40 mx-auto mb-3" />
-            <p className="text-[13px] font-semibold text-muted-foreground">
-              No items match your filters
-            </p>
-            <p className="text-[11px] text-muted-foreground/60 mt-1">
-              Try adjusting the search or status filter
-            </p>
-          </CardContent>
-        </Card>
-      ) : viewMode === "cards" ? (
+      <Card className="overflow-hidden border border-border/60 bg-card shadow-sm">
+        <CardHeader className="border-b border-border/40 px-5 pb-3 pt-4">
+          <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <CardTitle className="text-[13px] font-bold text-foreground">Stock Items</CardTitle>
+                <p className="mt-0.5 text-[10px] text-muted-foreground">
+                  {stockLoading
+                    ? "Loading inventory..."
+                    : `Showing ${filtered.length} of ${items.length} tracked items`}
+                </p>
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="relative min-w-[180px] flex-1 sm:flex-none sm:w-[200px]">
+                  <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+                  <input
+                    type="text"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="Search stock items..."
+                    className="h-8 w-full rounded-lg border border-border/60 bg-background pl-9 pr-3 text-[11px] text-foreground placeholder:text-muted-foreground outline-none transition focus:border-primary/50 focus:ring-1 focus:ring-primary/20"
+                  />
+                </div>
+                <div className="flex items-center gap-0.5 rounded-full border border-border/40 bg-muted/30 p-0.5">
+                  {(["", "critical", "low", "ok"] as const).map((s) => (
+                    <button
+                      key={s}
+                      onClick={() => setStatusFilter(statusFilter === s ? "" : s)}
+                      className={cn(
+                        "rounded-full px-2.5 py-1 text-[10px] font-semibold transition-all",
+                        statusFilter === s
+                          ? "bg-primary text-primary-foreground shadow-sm"
+                          : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                      )}
+                    >
+                      {s ? STATUS_CONFIG[s].label : "All"}
+                    </button>
+                  ))}
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setSortAsc(!sortAsc)}
+                  className="h-8 gap-1.5 px-2 text-[10px] text-muted-foreground"
+                >
+                  <ArrowDownUp className="h-3.5 w-3.5" />
+                  {sortAsc ? "Lowest" : "Highest"}
+                </Button>
+                <div className="flex items-center gap-0.5 rounded-lg border border-border/40 bg-muted/30 p-0.5">
+                  <button
+                    onClick={() => setViewMode("cards")}
+                    className={cn(
+                      "rounded-md px-2.5 py-1 text-[10px] font-semibold transition-all",
+                      viewMode === "cards"
+                        ? "bg-primary text-primary-foreground shadow-sm"
+                        : "text-muted-foreground hover:text-foreground",
+                    )}
+                  >
+                    Cards
+                  </button>
+                  <button
+                    onClick={() => setViewMode("list")}
+                    className={cn(
+                      "rounded-md px-2.5 py-1 text-[10px] font-semibold transition-all",
+                      viewMode === "list"
+                        ? "bg-primary text-primary-foreground shadow-sm"
+                        : "text-muted-foreground hover:text-foreground",
+                    )}
+                  >
+                    List
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </CardHeader>
+
+        <CardContent className="p-5">
+          {stockLoading ? (
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="animate-pulse rounded-xl border border-border/60 bg-card px-4 py-5"
+                >
+                  <div className="mb-3 h-4 w-24 rounded bg-muted/60" />
+                  <div className="mb-2 h-6 w-16 rounded bg-muted/60" />
+                  <div className="h-2 w-full rounded bg-muted/40" />
+                </div>
+              ))}
+            </div>
+          ) : filtered.length === 0 ? (
+            <div className="py-16 text-center">
+              <Package className="mx-auto mb-3 h-10 w-10 text-muted-foreground/40" />
+              <p className="text-[13px] font-semibold text-muted-foreground">
+                No items match your filters
+              </p>
+              <p className="mt-1 text-[11px] text-muted-foreground/60">
+                Try adjusting the search or status filter
+              </p>
+            </div>
+          ) : viewMode === "cards" ? (
         /* ── Cards View ──────────────────────────────────────────────── */
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {filtered.map((item) => {
@@ -715,11 +734,10 @@ function InventoryPage() {
             );
           })}
         </div>
-      ) : (
-        /* ── List View ───────────────────────────────────────────────── */
-        <Card className="border border-border/60 bg-card shadow-sm overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-[11.5px]">
+          ) : (
+            /* ── List View ───────────────────────────────────────────────── */
+            <div className="overflow-x-auto rounded-xl border border-border/40">
+              <table className="w-full text-[11.5px]">
               <thead>
                 <tr className="border-b border-border/40 bg-muted/30">
                   {["ITEM", "STATUS", "STOCK LEVEL", ""].map((h) => (
@@ -805,9 +823,10 @@ function InventoryPage() {
                 })}
               </tbody>
             </table>
-          </div>
-        </Card>
-      )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* ── Item Detail Dialog ───────────────────────────────────────── */}
       <Dialog open={!!selectedItem} onOpenChange={() => setSelectedItem(null)}>

@@ -171,7 +171,7 @@ function SignupPage() {
     setIsLoading(true);
     verifyEmail(email, otp)
       .then(() => {
-        toast.success("Account verified! Welcome to Agorix.");
+        toast.success("Account verified! Welcome to Platepilot.");
         history.push("/dashboard");
       })
       .catch((err) => {
@@ -547,7 +547,7 @@ function SignupPage() {
 
 export default function SignupPageRoute() {
   return (
-    <AppPage title="Create Account — Agorix">
+    <AppPage title="Create Account — Platepilot">
       <SignupPage />
     </AppPage>
   );

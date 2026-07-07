@@ -5,6 +5,8 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import {
   DollarSign,
   AlertTriangle,
+  ArrowDownRight,
+  ArrowUpRight,
   Percent,
   RefreshCw,
   TrendingUp,
@@ -60,6 +62,7 @@ import { useBranchFilter } from "@/contexts/BranchFilterContext";
 import { useDateRange, rangeToPeriod } from "@/contexts/DateRangeContext";
 import { AllLocationsOverview } from "@/components/dashboard/AllLocationsOverview";
 import { SingleLocationView } from "@/components/dashboard/SingleLocationView";
+import { WasteComposition } from "@/components/dashboard/WasteComposition";
 import { useCounterAnimation } from "@/hooks/useCounterAnimation";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -127,19 +130,23 @@ function KpiCardWithSparkline({
   to?: string;
   index?: number;
 }) {
-  const numericValue = parseFloat(value.replace(/[^0-9.-]+/g, "")) || 0;
+  // Animate the numeric part but keep the original formatting intact —
+  // "AED 147.00" must land on "AED 147.00", not a bare "147".
+  const match = value.match(/^(.*?)(-?[\d,]+(?:\.\d+)?)(.*)$/);
+  const [, prefix = "", numPart = "0", suffix = ""] = match ?? [];
+  const decimals = numPart.includes(".") ? numPart.split(".")[1].length : 0;
+  const numericValue = parseFloat(numPart.replace(/,/g, "")) || 0;
   const { count } = useCounterAnimation(numericValue, {
     duration: 1200,
-    decimals: value.includes(".") ? 1 : 0,
+    decimals,
   });
 
-  const displayValue = value.includes("%")
-    ? `${count.toFixed(1)}%`
-    : value.includes("k")
-      ? `${(count / 1000).toFixed(1)}k`
-      : value.includes("M")
-        ? `${(count / 1000000).toFixed(2)}M`
-        : count.toLocaleString();
+  const displayValue = match
+    ? `${prefix}${count.toLocaleString(undefined, {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals,
+      })}${suffix}`
+    : value;
   const toneBgs: Record<Tone, string> = {
     primary: "bg-primary/15 text-primary",
     success: "bg-success/15 text-success",
@@ -161,6 +168,25 @@ function KpiCardWithSparkline({
           <div className={cn("flex h-9 w-9 items-center justify-center rounded-xl", toneBgs[tone])}>
             <Icon className="h-4 w-4" />
           </div>
+          {delta && (
+            <span
+              className={cn(
+                "flex items-center gap-0.5 rounded-md px-1.5 py-0.5 text-[10px] font-bold tabular-nums",
+                delta.tone === "success"
+                  ? "bg-success/10 text-success"
+                  : delta.tone === "destructive"
+                    ? "bg-destructive/10 text-destructive"
+                    : "bg-muted text-muted-foreground",
+              )}
+            >
+              {delta.direction === "up" ? (
+                <ArrowUpRight className="h-3 w-3" />
+              ) : delta.direction === "down" ? (
+                <ArrowDownRight className="h-3 w-3" />
+              ) : null}
+              {delta.value}
+            </span>
+          )}
         </div>
         <div>
           <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
@@ -170,6 +196,31 @@ function KpiCardWithSparkline({
             {displayValue}
           </p>
         </div>
+        {sparklineData.length >= 2 && (
+          <svg
+            viewBox="0 0 100 24"
+            preserveAspectRatio="none"
+            className="h-5 w-full text-primary/60"
+          >
+            <polyline
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              strokeLinejoin="round"
+              strokeLinecap="round"
+              vectorEffect="non-scaling-stroke"
+              points={sparklineData
+                .map((v, i) => {
+                  const min = Math.min(...sparklineData);
+                  const max = Math.max(...sparklineData);
+                  const x = (i / (sparklineData.length - 1)) * 100;
+                  const y = 21 - (max === min ? 0.5 : (v - min) / (max - min)) * 18;
+                  return `${x},${y}`;
+                })
+                .join(" ")}
+            />
+          </svg>
+        )}
         {sub ? (
           <div className="flex items-center gap-1.5 text-[10px] font-semibold">
             {sub.dot && (
@@ -567,13 +618,18 @@ function OverviewPage() {
             />
           </CardContent>
         </Card>
+
+        {/* Waste Composition Analysis */}
+        {/* <div className="animate-fade-in-up stagger-5">
+          <WasteComposition />
+        </div> */}
       </div>
 
       {/* ── Bottom Row ──────────────────────────────────────────────────────── */}
       <div className="grid gap-4 grid-cols-1 md:grid-cols-2 xl:grid-cols-5">
         {/* POS vs Tally Reconciliation */}
         <Card
-          className="flex flex-col cursor-pointer border border-border/60 bg-card card-interactive shadow-sm animate-fade-in-up stagger-6"
+          className="flex flex-col h-full cursor-pointer border border-border/60 bg-card card-interactive shadow-sm animate-fade-in-up stagger-6"
           onClick={() => {
             if (recon) setIsReconOpen(true);
           }}
@@ -732,7 +788,7 @@ function OverviewPage() {
         </div>
 
         {/* Stock at Risk — real tally_vouchers data */}
-        <Card className="flex flex-col border border-border/60 bg-card card-interactive shadow-sm animate-fade-in-up stagger-8">
+        <Card className="flex flex-col h-full border border-border/60 bg-card card-interactive shadow-sm animate-fade-in-up stagger-8">
           <CardHeader className="border-b border-border/40 px-4 pb-2 pt-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5">
@@ -803,7 +859,7 @@ function OverviewPage() {
         </Card>
 
         {/* Branch Comparison — real /api/dashboard/branch-summary */}
-        <Card className="flex flex-col border border-border/60 bg-card card-interactive shadow-sm animate-fade-in-up stagger-8">
+        <Card className="flex flex-col h-full border border-border/60 bg-card card-interactive shadow-sm animate-fade-in-up stagger-8">
           <CardHeader className="border-b border-border/40 px-4 pb-2 pt-4">
             <div className="flex items-center justify-between gap-1.5">
               <CardTitle className="text-[12px] font-bold text-foreground">
@@ -894,7 +950,7 @@ function OverviewPage() {
         </Card>
 
         {/* Top Menu Items — real pos_sales aggregation */}
-        <Card className="flex flex-col border border-border/60 bg-card shadow-sm">
+        <Card className="flex flex-col h-full border border-border/60 bg-card shadow-sm">
           <CardHeader className="border-b border-border/40 px-4 pb-2 pt-4">
             <div className="flex items-center justify-between">
               <CardTitle className="text-[12px] font-bold text-foreground">

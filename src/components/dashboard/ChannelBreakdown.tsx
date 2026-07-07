@@ -15,7 +15,7 @@ export function ChannelBreakdown({ period }: { period: Period }) {
   });
 
   return (
-    <Card className="flex flex-col border border-border/60 bg-card shadow-sm">
+    <Card className="flex flex-col h-full border border-border/60 bg-card shadow-sm">
       <CardHeader className="border-b border-border/40 px-4 pb-2 pt-4">
         <div className="flex items-center justify-between">
           <CardTitle className="text-[12px] font-bold text-foreground">Sales by Channel</CardTitle>

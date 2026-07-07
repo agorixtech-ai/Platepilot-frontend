@@ -153,10 +153,10 @@ export function PeriodChip({
     <button
       onClick={onClick}
       className={cn(
-        "rounded-full px-3 py-1 text-[11px] font-semibold transition-all duration-200 ease-out",
+        "rounded-full border px-3 py-1 text-[11px] font-semibold transition-all duration-200 ease-out",
         active
-          ? "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 hover:scale-105"
-          : "text-muted-foreground hover:text-foreground hover:bg-muted/70 hover:scale-105",
+          ? "border-primary/40 bg-primary/15 text-primary shadow-sm hover:bg-primary/20 hover:scale-105"
+          : "border-transparent text-muted-foreground hover:text-foreground hover:bg-muted/70 hover:scale-105",
       )}
     >
       {label}
