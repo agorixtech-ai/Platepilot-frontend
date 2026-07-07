@@ -1,14 +1,15 @@
 import { Link } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
+import { LOGO_ALT, LOGO_SRC } from "@/components/AppLogo";
 
 const T = {
-  bg: "#111113",
+  bg: "#050505",
   ink: "#080808",
   text: "#fff",
   nav: "rgba(255,255,255,0.72)",
   border: "rgba(255,255,255,0.08)",
   borderStrong: "rgba(255,255,255,0.22)",
-  accent: "#38bdf8",
+  accent: "#00FF88",
 } as const;
 
 const btnBase = {
@@ -157,21 +158,13 @@ export function AgorixNav({
             textDecoration: "none",
           }}
         >
-          <svg
-            width="26"
-            height="29"
-            viewBox="0 0 26 29"
-            style={{ display: "block", flexShrink: 0 }}
-          >
-            <path
-              d="M13 1.2 24 7.5v14L13 27.8 2 21.5v-14z"
-              fill="none"
-              stroke={T.accent}
-              strokeWidth="2.2"
-              strokeLinejoin="round"
-            />
-            <circle cx="13" cy="14.5" r="4.4" fill={T.accent} />
-          </svg>
+          <img
+            src={LOGO_SRC}
+            alt={LOGO_ALT}
+            width={36}
+            height={36}
+            style={{ display: "block", flexShrink: 0, borderRadius: 10, objectFit: "cover" }}
+          />
           <span
             style={{
               fontWeight: 700,
@@ -181,7 +174,7 @@ export function AgorixNav({
               color: T.text,
             }}
           >
-            AGORIX
+            PLATEPILOT
           </span>
         </Link>
 

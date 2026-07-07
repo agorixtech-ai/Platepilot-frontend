@@ -30,10 +30,10 @@ export function DateRangePicker() {
           key={p.kind}
           onClick={() => setRange({ kind: p.kind })}
           className={cn(
-            "rounded-full px-3 py-1 text-[11px] font-semibold transition-all duration-200 ease-out",
+            "rounded-full border px-3 py-1 text-[11px] font-semibold transition-all duration-200 ease-out",
             range.kind === p.kind
-              ? "bg-primary text-primary-foreground shadow-sm"
-              : "text-muted-foreground hover:bg-muted/70 hover:text-foreground",
+              ? "border-primary/40 bg-primary/15 text-primary shadow-sm"
+              : "border-transparent text-muted-foreground hover:bg-muted/70 hover:text-foreground",
           )}
         >
           {p.label}
@@ -44,10 +44,10 @@ export function DateRangePicker() {
         <PopoverTrigger asChild>
           <button
             className={cn(
-              "flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-semibold transition-all duration-200 ease-out",
+              "flex items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] font-semibold transition-all duration-200 ease-out",
               range.kind === "custom"
-                ? "bg-primary text-primary-foreground shadow-sm"
-                : "text-muted-foreground hover:bg-muted/70 hover:text-foreground",
+                ? "border-primary/40 bg-primary/15 text-primary shadow-sm"
+                : "border-transparent text-muted-foreground hover:bg-muted/70 hover:text-foreground",
             )}
           >
             <CalendarIcon className="h-3 w-3" />

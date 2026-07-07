@@ -20,23 +20,25 @@
 
 /*
  * ═══════════════════════════════════════════════════════════════════════
- * PlatePilot COLOR THEORY — "Charcoal & Signal Blue" (dark-first)
+ * PlatePilot COLOR THEORY — "Neon Kitchen" (dark-first)
  * ═══════════════════════════════════════════════════════════════════════
  *
  * 60 · 30 · 10
- *   60%  Deep charcoal neutrals (blue-tinted, H~257) → canvas, cards, borders
- *   30%  Elevated charcoal sidebar/surfaces          → navigation shell
- *   10%  Signal blue #3B82F6                         → CTAs, active states
+ *   60%  Deep black neutrals (teal-tinted, H~160) → canvas, cards, borders
+ *   30%  Elevated teal-charcoal sidebar/surfaces   → navigation shell
+ *   10%  Neon green #00FF88                         → CTAs, active states
  *
  * Dark is the primary theme. Three surface depths:
- *   base #0B0F14 → elevated #11161D → card #161C26
- * Text: #E6EAF0 (high) / #98A2B2 (medium) / #5C6675 (disabled).
- * Borders are 1px white at 6–10% opacity — shadows barely read on dark.
+ *   base #050505 → elevated #0A0E0E → card #111111
+ * Text: #FFFFFF (high) / #888888 (medium) / #5C6675 (disabled).
+ * Borders are 1px white at 6–10% opacity — subtle #1F1F1F dividers.
  *
  * Charts carry a 5-hue location palette (one per restaurant), validated
  * for colorblind separation and 3:1 contrast on the card surface:
- *   cyan #0891B2 · rose #F43F5E · violet #8B5CF6 · orange #D97706 · teal #0D9488
- * Semantic: green = up, red = down/alert, amber = warning, blue = info.
+ *   green · orange · blue · violet · cyan (see --chart-1..5; chart-1 is a
+ *   deeper spring green, deliberately NOT the neon primary)
+ * Semantic: emerald = up/good (calmer than the neon primary so "good" and
+ * "selected" stay distinct), red = down/alert, amber = warning, cyan = info.
  */
 
 @theme inline {
@@ -186,35 +188,24 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
-/* ── Light theme — Liquid Glass Purple AI ───────────────────────────── */
+/* ── Light theme — Restaurant OS (light canvas + dark sidebar) ──────── */
 :root {
   /*
    * ═══════════════════════════════════════════════════════════════════
    * 🎛  COLOR CONTROL PANEL — single source of truth for the whole app
    * ═══════════════════════════════════════════════════════════════════
-   * Change these few seeds and EVERY color (light + dark) re-themes:
-   * surfaces, text, borders, shadows, buttons, charts, sidebar, glows.
    *
-   * The brand is a 3-color gradient (AI/purple style): a fuchsia-magenta
-   * that sweeps through violet into indigo — "united" as one purple blend.
+   * Light theme identity: clean #f4f7f6 canvas, white cards, brand green
+   * #00a651 accents, and a persistent dark forest-green sidebar (#001a1a).
    *
-   *   --h-warm               → 1st stop: fuchsia / magenta
-   *   --h-pink               → 2nd stop: violet
-   *   --h-purple             → 3rd stop: indigo / blue-violet
-   *   --h-brand              → the solid primary/CTA hue (mid of the sweep)
-   *   --h-neutral            → hue tint of all grays/surfaces/text
-   *   --c-brand              → brand chroma (how vivid the accents are)
-   *
-   * oklch(Lightness Chroma Hue) — we hold L/C per token and drive Hue
-   * (and the main chroma) from these seeds. Swap for a whole new identity,
-   * e.g. an ocean brand:  --h-warm: 190; --h-pink: 220; --h-purple: 260;
+   * Dark theme overrides live in `.dark` (neon green on deep black).
    */
-  --h-warm: 225;
-  --h-pink: 250;
-  --h-purple: 262;
-  --h-brand: 260;
-  --h-neutral: 257;
-  --c-brand: 0.19;
+  --h-warm: 65;
+  --h-pink: 155;
+  --h-purple: 170;
+  --h-brand: 155;
+  --h-neutral: 165;
+  --c-brand: 0.17;
 
   --radius: 1rem;
 
@@ -226,18 +217,18 @@
   --text-body: 0.875rem;
   --text-caption: 0.75rem;
 
-  --shadow-xs: 0 1px 2px oklch(0.2 0.02 var(--h-neutral) / 5%);
-  --shadow-sm: 0 1px 3px oklch(0.2 0.02 var(--h-neutral) / 8%), 0 1px 2px oklch(0.2 0.02 var(--h-neutral) / 4%);
-  --shadow-md: 0 4px 12px oklch(0.2 0.02 var(--h-neutral) / 8%), 0 2px 4px oklch(0.2 0.02 var(--h-neutral) / 4%);
-  --shadow-lg: 0 12px 24px oklch(0.2 0.02 var(--h-neutral) / 10%), 0 4px 8px oklch(0.2 0.02 var(--h-neutral) / 5%);
-  --shadow-xl: 0 24px 48px oklch(0.2 0.02 var(--h-neutral) / 12%), 0 8px 16px oklch(0.2 0.02 var(--h-neutral) / 6%);
-  --shadow-card: 0 1px 3px oklch(0.2 0.02 var(--h-neutral) / 6%), 0 1px 2px oklch(0.2 0.02 var(--h-neutral) / 4%);
-  --shadow-card-hover: 0 8px 24px oklch(0.2 0.02 var(--h-neutral) / 10%), 0 2px 8px oklch(0.55 0.18 var(--h-neutral) / 10%);
+  --shadow-xs: 0 1px 2px oklch(0.2 0.01 var(--h-neutral) / 4%);
+  --shadow-sm: 0 1px 3px oklch(0.2 0.01 var(--h-neutral) / 6%), 0 1px 2px oklch(0.2 0.01 var(--h-neutral) / 3%);
+  --shadow-md: 0 4px 12px oklch(0.2 0.01 var(--h-neutral) / 7%), 0 2px 4px oklch(0.2 0.01 var(--h-neutral) / 3%);
+  --shadow-lg: 0 12px 24px oklch(0.2 0.01 var(--h-neutral) / 8%), 0 4px 8px oklch(0.2 0.01 var(--h-neutral) / 4%);
+  --shadow-xl: 0 24px 48px oklch(0.2 0.01 var(--h-neutral) / 10%), 0 8px 16px oklch(0.2 0.01 var(--h-neutral) / 5%);
+  --shadow-card: 0 1px 3px oklch(0.2 0.01 var(--h-neutral) / 5%), 0 1px 2px oklch(0.2 0.01 var(--h-neutral) / 3%);
+  --shadow-card-hover: 0 4px 16px oklch(0.2 0.01 var(--h-neutral) / 8%), 0 2px 6px oklch(0.58 0.17 var(--h-brand) / 5%);
 
-  /* liquid glass surface tokens */
-  --glass-bg: oklch(1 0 0 / 55%);
-  --glass-border: oklch(1 0 0 / 60%);
-  --glass-border-outer: oklch(0.2 0.02 var(--h-neutral) / 8%);
+  /* light surface tokens */
+  --glass-bg: oklch(1 0 0 / 98%);
+  --glass-border: oklch(0.9 0.005 var(--h-neutral));
+  --glass-border-outer: oklch(0.2 0.01 var(--h-neutral) / 6%);
   --glass-shine: linear-gradient(
     135deg,
     oklch(1 0 0 / 50%) 0%,
@@ -247,47 +238,48 @@
   --glass-blur: 20px;
   --glass-saturate: 180%;
 
-  /* 60% — cool gray neutrals */
-  --background: oklch(0.965 0.005 var(--h-neutral));
-  --foreground: oklch(0.22 0.02 var(--h-neutral));
-  --card: oklch(1 0 0 / 60%);
-  --card-foreground: oklch(0.22 0.02 var(--h-neutral));
-  --popover: oklch(1 0 0 / 75%);
-  --popover-foreground: oklch(0.22 0.02 var(--h-neutral));
-  --muted: oklch(0.94 0.006 var(--h-neutral));
-  --muted-foreground: oklch(0.48 0.02 var(--h-neutral));
-  --border: oklch(0.2 0.02 var(--h-neutral) / 10%);
-  --input: oklch(0.2 0.02 var(--h-neutral) / 10%);
+  /* 60% — light cool-grey canvas (#f4f7f6) + white cards */
+  --background: oklch(0.975 0.006 var(--h-neutral));
+  --foreground: oklch(0.21 0.005 var(--h-neutral));
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.21 0.005 var(--h-neutral));
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.21 0.005 var(--h-neutral));
+  --muted: oklch(0.96 0.005 var(--h-neutral));
+  --muted-foreground: oklch(0.55 0.015 250);
+  --border: oklch(0.9 0.005 var(--h-neutral));
+  --input: oklch(0.9 0.005 var(--h-neutral));
 
   /* 30% — supporting surfaces */
-  --secondary: oklch(0.94 0.008 var(--h-neutral));
-  --secondary-foreground: oklch(0.32 0.03 var(--h-neutral));
-  --accent: oklch(0.93 0.01 var(--h-neutral));
-  --accent-foreground: oklch(0.28 0.04 var(--h-neutral));
+  --secondary: oklch(0.965 0.006 var(--h-neutral));
+  --secondary-foreground: oklch(0.32 0.02 var(--h-neutral));
+  --accent: oklch(0.955 0.008 var(--h-neutral));
+  --accent-foreground: oklch(0.28 0.03 var(--h-neutral));
 
-  /* 10% — warm→pink→violet gradient brand (all driven by the control panel) */
-  --accent-warm: oklch(0.72 0.17 var(--h-warm));
-  --accent-pink: oklch(0.64 var(--c-brand) var(--h-pink));
-  --accent-purple: oklch(0.56 0.2 var(--h-purple));
+  /* brand green gradient (#00a651 family) */
+  --accent-warm: oklch(0.62 0.18 var(--h-brand));
+  --accent-pink: oklch(0.58 0.17 var(--h-brand));
+  --accent-purple: oklch(0.48 0.14 var(--h-purple));
   --gradient-brand: linear-gradient(
     135deg,
-    var(--accent-warm) 0%,
-    var(--accent-pink) 50%,
-    var(--accent-purple) 100%
+    oklch(0.62 0.18 var(--h-brand)) 0%,
+    oklch(0.58 0.17 var(--h-brand)) 50%,
+    oklch(0.48 0.14 var(--h-purple)) 100%
   );
   --gradient-brand-soft: linear-gradient(
     135deg,
-    oklch(0.72 0.17 var(--h-warm) / 12%) 0%,
-    oklch(0.64 var(--c-brand) var(--h-pink) / 12%) 50%,
-    oklch(0.56 0.2 var(--h-purple) / 12%) 100%
+    oklch(0.58 0.17 var(--h-brand) / 10%) 0%,
+    oklch(0.58 0.17 var(--h-brand) / 6%) 50%,
+    oklch(0.48 0.14 var(--h-purple) / 8%) 100%
   );
 
-  --primary: oklch(0.6 var(--c-brand) var(--h-brand));
+  /* brand green #00a651 — primary actions */
+  --primary: oklch(0.58 0.17 var(--h-brand));
   --primary-foreground: oklch(0.99 0 0);
-  --primary-soft: oklch(0.95 0.05 var(--h-pink));
-  --primary-dark: oklch(0.46 0.2 var(--h-purple));
-  --primary-hover: oklch(0.56 var(--c-brand) var(--h-brand));
-  --ring: oklch(0.6 var(--c-brand) var(--h-brand) / 40%);
+  --primary-soft: oklch(0.58 0.17 var(--h-brand) / 12%);
+  --primary-dark: oklch(0.48 0.15 var(--h-brand));
+  --primary-hover: oklch(0.52 0.16 var(--h-brand));
+  --ring: oklch(0.58 0.17 var(--h-brand) / 35%);
 
   /* status */
   --destructive: oklch(0.55 0.2 27);
@@ -295,34 +287,36 @@
   --destructive-soft: oklch(0.96 0.04 27);
   --destructive-dark: oklch(0.42 0.17 27);
   --destructive-hover: oklch(0.5 0.19 27);
-  --success: oklch(0.56 0.13 160);
+  /* success is deliberately NOT the brand green: calmer emerald, lower chroma,
+     so "good" stays distinguishable from "interactive/selected" */
+  --success: oklch(0.55 0.12 165);
   --success-foreground: oklch(0.99 0 0);
-  --success-soft: oklch(0.95 0.04 160);
-  --success-dark: oklch(0.44 0.11 162);
-  --success-hover: oklch(0.5 0.12 160);
-  --warning: oklch(0.72 0.14 75);
-  --warning-foreground: oklch(0.22 0.05 75);
-  --warning-soft: oklch(0.96 0.05 75);
-  --warning-dark: oklch(0.58 0.12 75);
-  --warning-hover: oklch(0.66 0.13 75);
-  --info: oklch(0.52 0.14 220);
+  --success-soft: oklch(0.55 0.12 165 / 12%);
+  --success-dark: oklch(0.46 0.1 165);
+  --success-hover: oklch(0.5 0.11 165);
+  --warning: oklch(0.75 0.15 65);
+  --warning-foreground: oklch(0.25 0.05 65);
+  --warning-soft: oklch(0.75 0.15 65 / 12%);
+  --warning-dark: oklch(0.62 0.13 65);
+  --warning-hover: oklch(0.7 0.14 65);
+  --info: oklch(0.55 0.15 250);
   --info-foreground: oklch(0.99 0 0);
-  --info-soft: oklch(0.94 0.04 220);
-  --info-dark: oklch(0.42 0.12 220);
-  --info-hover: oklch(0.48 0.14 220);
+  --info-soft: oklch(0.55 0.15 250 / 10%);
+  --info-dark: oklch(0.45 0.13 250);
+  --info-hover: oklch(0.5 0.14 250);
 
-  /* primary scale — pink (light) → purple (dark) ramp, hues from seeds */
-  --primary-50: oklch(0.97 0.02 var(--h-pink));
-  --primary-100: oklch(0.93 0.06 var(--h-pink));
-  --primary-200: oklch(0.86 0.11 var(--h-pink));
-  --primary-300: oklch(0.76 0.17 var(--h-brand));
-  --primary-400: oklch(0.67 0.21 var(--h-brand));
-  --primary-500: oklch(0.6 var(--c-brand) var(--h-brand));
-  --primary-600: oklch(0.53 0.23 var(--h-brand));
-  --primary-700: oklch(0.45 0.21 var(--h-purple));
-  --primary-800: oklch(0.36 0.17 var(--h-purple));
-  --primary-900: oklch(0.27 0.12 var(--h-purple));
-  --primary-950: oklch(0.18 0.08 var(--h-purple));
+  /* primary scale — brand green ramp */
+  --primary-50: oklch(0.97 0.02 var(--h-brand));
+  --primary-100: oklch(0.93 0.05 var(--h-brand));
+  --primary-200: oklch(0.86 0.09 var(--h-brand));
+  --primary-300: oklch(0.76 0.14 var(--h-brand));
+  --primary-400: oklch(0.67 0.16 var(--h-brand));
+  --primary-500: oklch(0.58 0.17 var(--h-brand));
+  --primary-600: oklch(0.52 0.16 var(--h-brand));
+  --primary-700: oklch(0.45 0.14 var(--h-brand));
+  --primary-800: oklch(0.36 0.11 var(--h-brand));
+  --primary-900: oklch(0.27 0.08 var(--h-brand));
+  --primary-950: oklch(0.18 0.05 var(--h-brand));
 
   /* secondary scale H280 */
   --secondary-50: oklch(0.98 0.004 var(--h-neutral));
@@ -349,35 +343,40 @@
   --neutral-900: oklch(0.2 0.02 var(--h-neutral));
   --neutral-950: oklch(0.14 0.02 var(--h-neutral));
 
-  /* charts — 5-hue location palette (one per restaurant), CVD-validated */
-  --chart-1: oklch(0.609 0.111 221.7); /* cyan   #0891B2 */
-  --chart-2: oklch(0.645 0.215 16.4); /* rose   #F43F5E */
-  --chart-3: oklch(0.606 0.219 292.7); /* violet #8B5CF6 */
-  --chart-4: oklch(0.666 0.157 58.3); /* orange #D97706 */
+  /* charts — light theme location palette */
+  --chart-1: oklch(0.58 0.17 155); /* brand  #00a651 */
+  --chart-2: oklch(0.75 0.15 65); /* orange #f39c12 */
+  --chart-3: oklch(0.55 0.15 250); /* blue   #3B82F6 */
+  --chart-4: oklch(0.55 0.18 290); /* purple #8B5CF6 */
   --chart-5: oklch(0.6 0.104 184.7); /* teal   #0D9488 */
 
-  /* sidebar — deep charcoal shell (always dark) */
-  --sidebar: oklch(0.2 0.016 var(--h-neutral));
-  --sidebar-foreground: oklch(0.92 0.01 var(--h-neutral));
-  --sidebar-primary: oklch(0.623 0.188 var(--h-brand));
+  /* sidebar — dark forest green (#001a1a), always dark even in light mode */
+  --sidebar: oklch(0.14 0.04 185);
+  --sidebar-foreground: oklch(0.72 0.01 var(--h-neutral));
+  --sidebar-primary: oklch(0.58 0.17 var(--h-brand));
   --sidebar-primary-foreground: oklch(0.99 0 0);
-  --sidebar-accent: oklch(1 0 0 / 7%);
-  --sidebar-accent-foreground: oklch(0.96 0.005 var(--h-neutral));
-  --sidebar-border: oklch(1 0 0 / 9%);
-  --sidebar-ring: oklch(0.623 0.188 var(--h-brand) / 45%);
+  --sidebar-accent: oklch(0.58 0.17 var(--h-brand) / 12%);
+  --sidebar-accent-foreground: oklch(0.58 0.17 var(--h-brand));
+  --sidebar-border: oklch(1 0 0 / 8%);
+  --sidebar-ring: oklch(0.58 0.17 var(--h-brand) / 40%);
 }
 
-/* ── Dark theme — OLED Liquid Glass + Purple AI accent ─────────────── */
+/* ── Dark theme — OLED black + neon green accent ───────────────────── */
 .dark {
-  /* three surface depths: base #0B0F14 → elevated #11161D → card #161C26 */
-  --background: oklch(0.167 0.012 var(--h-neutral));
-  --foreground: oklch(0.936 0.009 var(--h-neutral));
-  --card: oklch(0.225 0.022 var(--h-neutral));
-  --card-foreground: oklch(0.936 0.009 var(--h-neutral));
-  --popover: oklch(0.252 0.029 var(--h-neutral));
-  --popover-foreground: oklch(0.936 0.009 var(--h-neutral));
+  --c-brand: 0.22;
+  --h-neutral: 160;
+
+  /* three surface depths: base → sidebar/elevated → card (cards one step
+     lighter than before so panels separate from the canvas without borders
+     doing all the work) */
+  --background: oklch(0.07 0.008 var(--h-neutral));
+  --foreground: oklch(0.99 0 0);
+  --card: oklch(0.16 0.008 var(--h-neutral));
+  --card-foreground: oklch(0.99 0 0);
+  --popover: oklch(0.19 0.01 var(--h-neutral));
+  --popover-foreground: oklch(0.99 0 0);
   --muted: oklch(1 0 0 / 7%);
-  --muted-foreground: oklch(0.709 0.026 var(--h-neutral));
+  --muted-foreground: oklch(0.58 0.01 var(--h-neutral));
   --secondary: oklch(1 0 0 / 8%);
   --secondary-foreground: oklch(0.92 0.01 var(--h-neutral));
   --border: oklch(1 0 0 / 8%);
@@ -399,13 +398,13 @@
     oklch(0.64 0.2 var(--h-purple) / 18%) 100%
   );
 
-  /* signal blue #3B82F6 — primary actions and highlights */
-  --primary: oklch(0.623 0.188 var(--h-brand));
-  --primary-foreground: oklch(0.99 0 0);
-  --primary-soft: oklch(0.623 0.188 var(--h-brand) / 16%);
-  --primary-dark: oklch(0.52 0.17 var(--h-purple));
-  --primary-hover: oklch(0.714 0.143 254.6);
-  --ring: oklch(0.623 0.188 var(--h-brand) / 45%);
+  /* neon green #00FF88 — primary actions and highlights */
+  --primary: oklch(0.87 0.22 var(--h-brand));
+  --primary-foreground: oklch(0.08 0.025 var(--h-brand));
+  --primary-soft: oklch(0.87 0.22 var(--h-brand) / 14%);
+  --primary-dark: oklch(0.72 0.19 var(--h-brand));
+  --primary-hover: oklch(0.83 0.21 var(--h-brand));
+  --ring: oklch(0.87 0.22 var(--h-brand) / 45%);
 
   --accent: oklch(1 0 0 / 6%);
   --accent-foreground: oklch(0.94 0.005 var(--h-neutral));
@@ -416,21 +415,22 @@
   --destructive-soft: oklch(0.711 0.166 22.2 / 14%);
   --destructive-dark: oklch(0.58 0.17 25);
   --destructive-hover: oklch(0.76 0.16 22);
-  --success: oklch(0.773 0.153 163.2);
-  --success-foreground: oklch(0.14 0.03 163);
-  --success-soft: oklch(0.773 0.153 163.2 / 14%);
-  --success-dark: oklch(0.62 0.13 163);
-  --success-hover: oklch(0.82 0.15 163);
+  /* calmer emerald, clearly dimmer than the neon primary (see :root note) */
+  --success: oklch(0.72 0.14 165);
+  --success-foreground: oklch(0.13 0.03 165);
+  --success-soft: oklch(0.72 0.14 165 / 14%);
+  --success-dark: oklch(0.6 0.12 165);
+  --success-hover: oklch(0.77 0.14 165);
   --warning: oklch(0.837 0.164 84.4);
   --warning-foreground: oklch(0.18 0.05 84);
   --warning-soft: oklch(0.837 0.164 84.4 / 14%);
   --warning-dark: oklch(0.7 0.14 80);
   --warning-hover: oklch(0.87 0.16 86);
-  --info: oklch(0.714 0.143 254.6);
-  --info-foreground: oklch(0.14 0.03 255);
-  --info-soft: oklch(0.714 0.143 254.6 / 14%);
-  --info-dark: oklch(0.6 0.14 255);
-  --info-hover: oklch(0.76 0.13 254);
+  --info: oklch(0.75 0.14 195);
+  --info-foreground: oklch(0.14 0.03 195);
+  --info-soft: oklch(0.75 0.14 195 / 14%);
+  --info-dark: oklch(0.62 0.12 195);
+  --info-hover: oklch(0.8 0.13 195);
 
   --shadow-xs: 0 1px 2px oklch(0 0 0 / 35%);
   --shadow-sm: 0 1px 3px oklch(0 0 0 / 40%), 0 1px 2px oklch(0 0 0 / 25%);
@@ -438,7 +438,7 @@
   --shadow-lg: 0 12px 28px oklch(0 0 0 / 50%), 0 4px 10px oklch(0 0 0 / 30%);
   --shadow-xl: 0 24px 48px oklch(0 0 0 / 55%), 0 8px 20px oklch(0 0 0 / 35%);
   --shadow-card: 0 0 0 1px oklch(1 0 0 / 6%), 0 2px 4px oklch(0 0 0 / 30%);
-  --shadow-card-hover: 0 0 0 1px oklch(0.68 var(--c-brand) var(--h-brand) / 22%), 0 12px 32px oklch(0 0 0 / 45%);
+  --shadow-card-hover: 0 0 0 1px oklch(0.87 0.22 var(--h-brand) / 22%), 0 12px 32px oklch(0 0 0 / 45%), 0 0 24px oklch(0.87 0.22 var(--h-brand) / 8%);
 
   /* liquid glass dark tokens */
   --glass-bg: oklch(1 0 0 / 4%);
@@ -488,22 +488,23 @@
   --neutral-900: oklch(0.88 0.002 0);
   --neutral-950: oklch(0.96 0.002 0);
 
-  /* location palette — validated on the card surface (#161C26) */
-  --chart-1: oklch(0.609 0.111 221.7); /* cyan   #0891B2 */
-  --chart-2: oklch(0.645 0.215 16.4); /* rose   #F43F5E */
-  --chart-3: oklch(0.606 0.219 292.7); /* violet #8B5CF6 */
-  --chart-4: oklch(0.666 0.157 58.3); /* orange #D97706 */
-  --chart-5: oklch(0.6 0.104 184.7); /* teal   #0D9488 */
+  /* charts — five distinct hues for branch identity; chart-1 is a deeper
+     spring green so it never reads as the neon primary/selected state */
+  --chart-1: oklch(0.75 0.19 152); /* green  */
+  --chart-2: oklch(0.79 0.17 65); /* orange */
+  --chart-3: oklch(0.7 0.14 250); /* blue   */
+  --chart-4: oklch(0.74 0.16 290); /* violet */
+  --chart-5: oklch(0.78 0.13 195); /* cyan   */
 
-  /* sidebar — elevated charcoal (#11161D depth) */
-  --sidebar: oklch(0.198 0.016 var(--h-neutral));
+  /* sidebar — teal-charcoal shell (#0A0E0E depth) */
+  --sidebar: oklch(0.11 0.014 var(--h-neutral));
   --sidebar-foreground: oklch(0.92 0.01 var(--h-neutral));
-  --sidebar-primary: oklch(0.623 0.188 var(--h-brand));
-  --sidebar-primary-foreground: oklch(0.99 0 0);
-  --sidebar-accent: oklch(1 0 0 / 7%);
-  --sidebar-accent-foreground: oklch(0.96 0.005 var(--h-neutral));
+  --sidebar-primary: oklch(0.87 0.22 var(--h-brand));
+  --sidebar-primary-foreground: oklch(0.08 0.025 var(--h-brand));
+  --sidebar-accent: oklch(0.87 0.22 var(--h-brand) / 10%);
+  --sidebar-accent-foreground: oklch(0.87 0.22 var(--h-brand));
   --sidebar-border: oklch(1 0 0 / 9%);
-  --sidebar-ring: oklch(0.623 0.188 var(--h-brand) / 45%);
+  --sidebar-ring: oklch(0.87 0.22 var(--h-brand) / 45%);
 }
 
 @keyframes fade-up {
@@ -669,7 +670,8 @@
     background: var(--gradient-brand);
     box-shadow:
       var(--shadow-sm),
-      0 8px 18px color-mix(in oklch, var(--primary) 14%, transparent);
+      0 8px 18px color-mix(in oklch, var(--primary) 14%, transparent),
+      0 0 20px color-mix(in oklch, var(--primary) 12%, transparent);
   }
 
   .brand-gradient-interactive:hover {
@@ -919,41 +921,48 @@
   color: var(--foreground);
 }
 
-/* ── Marketing pages — pink-purple ambient glow ────────────────────── */
+/* ── Marketing pages — light: clean; dark: neon green glow ───────── */
 .marketing-glow {
   background:
-    radial-gradient(ellipse 55% 45% at 12% -10%, oklch(0.72 0.17 var(--h-warm) / 8%) 0%, transparent 55%),
-    radial-gradient(ellipse 60% 45% at 50% -12%, oklch(0.66 var(--c-brand) var(--h-pink) / 8%) 0%, transparent 58%),
-    radial-gradient(ellipse 55% 45% at 88% -10%, oklch(0.55 0.22 var(--h-purple) / 7%) 0%, transparent 58%),
+    radial-gradient(ellipse 70% 50% at 50% -15%, oklch(0.58 0.17 var(--h-brand) / 4%) 0%, transparent 55%),
     var(--background);
 }
 
 .dark .marketing-glow {
   background:
-    radial-gradient(ellipse 55% 45% at 12% -10%, oklch(0.76 0.16 var(--h-warm) / 9%) 0%, transparent 55%),
-    radial-gradient(ellipse 60% 45% at 50% -12%, oklch(0.72 var(--c-brand) var(--h-pink) / 9%) 0%, transparent 58%),
-    radial-gradient(ellipse 55% 45% at 88% -10%, oklch(0.64 0.22 var(--h-purple) / 8%) 0%, transparent 58%),
+    radial-gradient(ellipse 55% 45% at 12% -10%, oklch(0.79 0.17 var(--h-warm) / 7%) 0%, transparent 55%),
+    radial-gradient(ellipse 60% 45% at 50% -12%, oklch(0.87 0.22 var(--h-pink) / 8%) 0%, transparent 58%),
+    radial-gradient(ellipse 55% 45% at 88% -10%, oklch(0.6 0.12 var(--h-purple) / 7%) 0%, transparent 58%),
     var(--background);
 }
 
-/* Dashboard canvas — liquid glass background with vibrant mesh */
+/* Dashboard canvas — light: flat grey; dark: green mesh */
 .dashboard-canvas {
   background:
-    radial-gradient(ellipse 55% 40% at 8% -5%, oklch(0.72 0.17 var(--h-warm) / 5%) 0%, transparent 48%),
-    radial-gradient(ellipse 60% 45% at 50% -5%, oklch(0.66 var(--c-brand) var(--h-pink) / 6%) 0%, transparent 50%),
-    radial-gradient(ellipse 40% 35% at 92% 8%, oklch(0.55 0.22 var(--h-purple) / 5%) 0%, transparent 45%),
+    radial-gradient(ellipse 80% 50% at 50% -20%, oklch(0.58 0.17 var(--h-brand) / 3%) 0%, transparent 50%),
     var(--background);
 }
 
 .dark .dashboard-canvas {
   background:
-    radial-gradient(ellipse 55% 40% at 8% -5%, oklch(0.76 0.16 var(--h-warm) / 6%) 0%, transparent 48%),
-    radial-gradient(ellipse 60% 45% at 50% -5%, oklch(0.72 var(--c-brand) var(--h-pink) / 7%) 0%, transparent 50%),
-    radial-gradient(ellipse 40% 35% at 92% 8%, oklch(0.64 0.22 var(--h-purple) / 6%) 0%, transparent 45%),
+    radial-gradient(ellipse 55% 40% at 8% -5%, oklch(0.87 0.22 var(--h-pink) / 5%) 0%, transparent 48%),
+    radial-gradient(ellipse 60% 45% at 50% -5%, oklch(0.87 0.22 var(--h-brand) / 6%) 0%, transparent 50%),
+    radial-gradient(ellipse 40% 35% at 92% 8%, oklch(0.6 0.12 var(--h-purple) / 5%) 0%, transparent 45%),
     var(--background);
 }
 
-/* Dashboard shell — dark purple glass sidebar */
+/* Dashboard shell — shared chrome height keeps sidebar + topbar borders aligned */
+.dashboard-shell {
+  --dashboard-header-height: 4.25rem;
+}
+
+.dashboard-shell [data-sidebar="header"],
+.dashboard-shell .dashboard-topbar-inner {
+  height: var(--dashboard-header-height);
+  min-height: var(--dashboard-header-height);
+  box-sizing: border-box;
+}
+
 .dashboard-shell [data-sidebar="sidebar"] {
   background: var(--sidebar) !important;
   color: var(--sidebar-foreground) !important;

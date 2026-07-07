@@ -1,5 +1,5 @@
-import { Link } from "react-router-dom";
 import type { ReactNode } from "react";
+import { AppLogo } from "@/components/AppLogo";
 
 const AUTH_ANIMATIONS = `
   @keyframes spin-slow { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
@@ -40,12 +40,12 @@ export function AuthPageShell({
       >
         <div className="w-full md:w-[50%] p-7 md:p-10 flex flex-col">
           <div className="mb-8">
-            <Link
+            <AppLogo
               to="/"
-              className="font-extrabold text-2xl tracking-tight text-foreground select-none hover:opacity-80 transition-opacity"
-            >
-              λ<span className="font-bold text-xl">gorix</span>
-            </Link>
+              showText
+              className="hover:opacity-80 transition-opacity"
+              textClassName="font-extrabold text-2xl tracking-tight text-foreground"
+            />
           </div>
           <div className="flex-1 flex flex-col justify-center max-w-[380px] w-full mx-auto">
             {children}

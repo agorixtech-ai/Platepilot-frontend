@@ -754,7 +754,7 @@ function SoftwarePage() {
           "The most powerful decisions emerge when AI amplifies human judgment — not when it
           replaces it."
         </p>
-        <div className="sw-quote-attr">— Agorix Software Design Principles</div>
+        <div className="sw-quote-attr">— Platepilot Software Design Principles</div>
       </div>
 
       {/* ── CTA band ────────────────────────────────────────────────────── */}
@@ -772,7 +772,7 @@ function SoftwarePage() {
 
       {/* ── Footer ──────────────────────────────────────────────────────── */}
       <footer className="sw-footer">
-        <span>© 2025 Agorix. All rights reserved.</span>
+        <span>© 2025 Platepilot. All rights reserved.</span>
         <div style={{ display: "flex", gap: "2rem" }}>
           <a href="/software">Software</a>
           <a href="#privacy">Privacy</a>
@@ -786,7 +786,7 @@ function SoftwarePage() {
 
 export default function SoftwarePageRoute() {
   return (
-    <AppPage title="Our Software — Agorix">
+    <AppPage title="Our Software — Platepilot">
       <SoftwarePage />
     </AppPage>
   );

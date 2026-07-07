@@ -13,9 +13,10 @@ import {
   Building2,
   Sparkles,
   BarChart3,
-  UtensilsCrossed,
   Star,
+  UtensilsCrossed,
 } from "lucide-react";
+import { AppLogo } from "@/components/AppLogo";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -70,13 +71,14 @@ const MAIN_ITEMS: NavItem[] = [
 
 const OPS_ITEMS: NavItem[] = [
   { icon: Package, label: "Inventory", to: "/dashboard/inventory" },
+  { icon: UtensilsCrossed, label: "Menu Engineering", to: "/dashboard/menu-engineering" },
   { icon: Truck, label: "Suppliers", to: "/dashboard/suppliers" },
   { icon: Building2, label: "Branches", to: "/dashboard/branches" },
   { icon: Star, label: "Reviews", to: "/dashboard/reviews" },
 ];
 
 const AI_ITEMS: NavItem[] = [
-  { icon: Sparkles, label: "PlatePilot AI", to: "/dashboard/ai", badge: "AI" },
+  { icon: Sparkles, label: "Pilot AI", to: "/dashboard/ai", badge: "AI" },
   { icon: BarChart3, label: "Reports", to: "/dashboard/reports" },
 ];
 
@@ -122,12 +124,12 @@ function NavSection({
                     isActive && [
                       "bg-sidebar-accent/50 text-sidebar-foreground translate-x-1",
                       "shadow-[inset_0_1px_0_0_oklch(1_0_0/8%)]",
-                      "hover:bg-sidebar-accent hover:shadow-[0_4px_24px_oklch(0.62_0.19_260/18%)]",
+                      "hover:bg-sidebar-accent hover:shadow-[0_4px_24px_var(--sidebar-ring)]",
                       "group-data-[collapsible=icon]:translate-x-0",
                       "group-data-[collapsible=icon]:!bg-sidebar-primary group-data-[collapsible=icon]:text-sidebar-primary-foreground",
-                      "group-data-[collapsible=icon]:shadow-[0_0_14px_oklch(0.62_0.19_260/35%)]",
+                      "group-data-[collapsible=icon]:shadow-[0_0_14px_var(--sidebar-ring)]",
                       "group-data-[collapsible=icon]:ring-2 group-data-[collapsible=icon]:ring-sidebar-primary/30",
-                      "group-data-[collapsible=icon]:hover:!bg-sidebar-primary group-data-[collapsible=icon]:hover:shadow-[0_0_18px_oklch(0.62_0.19_260/45%)]",
+                      "group-data-[collapsible=icon]:hover:!bg-sidebar-primary group-data-[collapsible=icon]:hover:shadow-[0_0_18px_var(--sidebar-ring)]",
                     ],
                   )}
                 >
@@ -140,7 +142,7 @@ function NavSection({
                         "flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-all duration-200",
                         "group-data-[collapsible=icon]:h-auto group-data-[collapsible=icon]:w-auto group-data-[collapsible=icon]:rounded-none group-data-[collapsible=icon]:bg-transparent group-data-[collapsible=icon]:shadow-none group-data-[collapsible=icon]:ring-0",
                         isActive
-                          ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-[0_0_18px_oklch(0.62_0.19_260/40%)] ring-2 ring-sidebar-primary/30 group-data-[collapsible=icon]:bg-transparent group-data-[collapsible=icon]:text-inherit group-data-[collapsible=icon]:shadow-none group-data-[collapsible=icon]:ring-0"
+                          ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-[0_0_18px_var(--sidebar-ring)] ring-2 ring-sidebar-primary/30 group-data-[collapsible=icon]:bg-transparent group-data-[collapsible=icon]:text-inherit group-data-[collapsible=icon]:shadow-none group-data-[collapsible=icon]:ring-0"
                           : "bg-transparent group-hover/nav:bg-sidebar-foreground/10 group-hover/nav:scale-110 group-hover/nav:ring-1 group-hover/nav:ring-sidebar-foreground/10 group-data-[collapsible=icon]:group-hover/nav:scale-100 group-data-[collapsible=icon]:group-hover/nav:ring-0 group-data-[collapsible=icon]:group-hover/nav:bg-transparent",
                       )}
                     >
@@ -230,24 +232,17 @@ export function DashboardLayout({ children }: { children?: ReactNode }) {
         <SidebarProvider className="dashboard-shell min-h-screen bg-background">
         <Sidebar collapsible="icon" className="border-r border-sidebar-border/80 bg-sidebar">
           {/* Logo Header */}
-          <SidebarHeader className="!gap-0 !p-0 h-14 shrink-0 border-b border-sidebar-border/80">
+          <SidebarHeader className="!gap-0 !p-0 shrink-0 border-b border-sidebar-border/80">
             <div className="flex h-full w-full items-center justify-between gap-2 px-3 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
-              <Link
+              <AppLogo
                 to="/"
-                className="flex min-w-0 flex-1 items-center gap-3 select-none group-data-[collapsible=icon]:flex-none group-data-[collapsible=icon]:justify-center"
-              >
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-sidebar-primary text-sidebar-primary-foreground shadow-sm">
-                  <UtensilsCrossed className="h-4 w-4" />
-                </span>
-                <div className="min-w-0 group-data-[collapsible=icon]:hidden">
-                  <p className="truncate text-[15px] font-bold leading-tight tracking-tight text-sidebar-foreground">
-                    PlatePilot
-                  </p>
-                  <p className="truncate text-[10px] leading-tight text-sidebar-primary/80 font-medium">
-                    Restaurant OS
-                  </p>
-                </div>
-              </Link>
+                showText
+                subtitle="Restaurant OS"
+                className="flex-1 group-data-[collapsible=icon]:flex-none group-data-[collapsible=icon]:justify-center"
+                textWrapperClassName="group-data-[collapsible=icon]:hidden"
+                textClassName="text-sidebar-foreground"
+                subtitleClassName="text-sidebar-primary/80"
+              />
               <SidebarTrigger
                 title="Collapse sidebar"
                 className="h-9 w-9 shrink-0 rounded-xl text-sidebar-foreground/50 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground group-data-[collapsible=icon]:hidden"
@@ -333,7 +328,7 @@ function MainPanel({
   return (
     <SidebarInset className="flex flex-col overflow-hidden bg-background dashboard-canvas">
       <header className="sticky top-0 z-[var(--z-sticky)] shrink-0 border-b border-border/60 bg-card/90 backdrop-blur-xl">
-        <div className="mx-auto flex h-[4.25rem] w-full max-w-[1600px] items-center gap-3 px-4 sm:px-6 md:px-8">
+        <div className="dashboard-topbar-inner flex w-full items-center gap-3 px-4 sm:px-6 md:px-8">
           {(state === "collapsed" || isMobile) && (
             <SidebarTrigger className="h-9 w-9 shrink-0 rounded-xl text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground [&_svg]:size-4" />
           )}
@@ -375,7 +370,7 @@ function MainPanel({
 
       {/* Location switcher + date range — the owner's first touch every visit */}
       <div className="shrink-0 border-b border-border/60 bg-background/60 backdrop-blur-xl">
-        <div className="mx-auto flex w-full max-w-[1600px] flex-col items-stretch gap-2 px-4 py-2.5 sm:flex-row sm:items-center sm:gap-3 sm:px-6 md:px-8">
+        <div className="flex w-full flex-col items-stretch gap-2 px-4 py-2.5 sm:flex-row sm:items-center sm:gap-3 sm:px-6 md:px-8">
           <div className="min-w-0 flex-1">
             <LocationSwitcher />
           </div>
@@ -386,7 +381,7 @@ function MainPanel({
       </div>
 
       <div className="flex-1 overflow-y-auto px-4 py-5 sm:px-6 md:px-8 md:py-6">
-        <div className="mx-auto w-full max-w-[1600px]">{children}</div>
+        <div className="w-full">{children}</div>
       </div>
     </SidebarInset>
   );

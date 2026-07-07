@@ -2,10 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { AgorixNav } from "@/components/AgorixNav";
 
-/** Matches landing page (`index.tsx`) palette */
+/** Matches landing page (`index.tsx`) palette — neon kitchen dark */
 const T = {
-  bg: "#111113",
-  ink: "#080808",
+  bg: "#050505",
+  ink: "#000000",
   text: "#fff",
   soft: "rgba(255,255,255,0.75)",
   muted: "rgba(255,255,255,0.45)",
@@ -17,17 +17,17 @@ const T = {
   borderStrong: "rgba(255,255,255,0.22)",
   surface: "rgba(255,255,255,0.02)",
   inset: "rgba(255,255,255,0.04)",
-  accent: "#38bdf8",
-  accentSoft: "rgba(56,189,248,0.12)",
-  accentBorder: "rgba(56,189,248,0.28)",
-  accentGlow: "rgba(56,189,248,0.5)",
-  purple: "#a78bfa",
-  warn: "#fb923c",
-  lime: "#C8F135",
-  limeDark: "#1c2200",
-  gradient: "linear-gradient(135deg, #5b7cfa 0%, #a78bfa 50%, #38bdf8 100%)",
-  gradientA: "linear-gradient(90deg, #9499ff 0%, #59c2ff 100%)",
-  gradientB: "linear-gradient(90deg, #59c2ff 0%, #77ffaf 100%)",
+  accent: "#00FF88",
+  accentSoft: "rgba(0,255,136,0.12)",
+  accentBorder: "rgba(0,255,136,0.28)",
+  accentGlow: "rgba(0,255,136,0.5)",
+  purple: "#00E676",
+  warn: "#FFA500",
+  lime: "#00FF88",
+  limeDark: "#0A1A10",
+  gradient: "linear-gradient(135deg, #00FF88 0%, #00E676 50%, #14B8A6 100%)",
+  gradientA: "linear-gradient(90deg, #00FF88 0%, #00E676 100%)",
+  gradientB: "linear-gradient(90deg, #00E676 0%, #14B8A6 100%)",
 } as const;
 
 const gradientClip = (gradient: string) =>

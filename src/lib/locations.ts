@@ -8,11 +8,11 @@
  */
 
 export const LOCATION_COLORS = [
-  "var(--color-chart-1)", // cyan   #0891B2
-  "var(--color-chart-2)", // rose   #F43F5E
-  "var(--color-chart-3)", // violet #8B5CF6
-  "var(--color-chart-4)", // orange #D97706
-  "var(--color-chart-5)", // teal   #0D9488
+  "var(--color-chart-1)", // green  — brand-adjacent, never the neon primary
+  "var(--color-chart-2)", // orange
+  "var(--color-chart-3)", // blue
+  "var(--color-chart-4)", // violet
+  "var(--color-chart-5)", // cyan
 ] as const;
 
 export function locationColor(index: number): string {

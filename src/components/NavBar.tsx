@@ -1,6 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import "./NavBar.css";
 import { useState, useEffect, useRef } from "react";
+import { LOGO_ALT, LOGO_SRC } from "@/components/AppLogo";
 
 export function NavBar() {
   const location = useLocation();
@@ -33,7 +34,8 @@ export function NavBar() {
     <div className="sw-nav-shell">
       <nav className="sw-nav">
         <Link to="/" className="sw-logo">
-          <span className="font-bold">λgorix</span>
+          <img src={LOGO_SRC} alt={LOGO_ALT} className="h-9 w-9 rounded-lg object-cover" />
+          <span>PlatePilot</span>
         </Link>
         <div className="sw-nav-links">
           {navItems.map((item) => {

@@ -25,6 +25,7 @@ import { useCounterAnimation } from "@/hooks/useCounterAnimation";
 import { fmtCurrency } from "@/components/dashboard/shared";
 import type { Location } from "@/lib/locations";
 import { dashboardService, type LocationSnapshot } from "@/services/dashboardService";
+import { WasteComposition } from "@/components/dashboard/WasteComposition";
 
 interface AttentionItem {
   branch: string;
@@ -245,7 +246,7 @@ function ComparisonChart({ locations }: { locations: Location[] }) {
     });
 
   return (
-    <Card className="border border-border/60 bg-card shadow-sm animate-fade-in-up stagger-3">
+    <Card className="flex h-full flex-col border border-border/60 bg-card shadow-sm animate-fade-in-up stagger-3">
       <CardHeader className="border-b border-border/40 px-5 pb-3 pt-4">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -417,7 +418,10 @@ export function AllLocationsOverview() {
         })}
       </div>
 
-      <ComparisonChart locations={locations} />
+      <div className="grid items-stretch gap-4 lg:grid-cols-2">
+        <ComparisonChart locations={locations} />
+        <WasteComposition />
+      </div>
     </div>
   );
 }

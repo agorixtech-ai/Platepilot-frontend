@@ -129,6 +129,54 @@ export interface RecentTransaction {
   items: string;
 }
 
+export interface WasteCompositionItem {
+  dish: string;
+  category: string;
+  qty: number;
+  cost: number;
+  pct: number;
+  top_reason: string | null;
+  reasons: Record<string, number>;
+}
+
+export interface WasteCompositionData {
+  period: string;
+  currency: string;
+  total_cost: number;
+  total_qty: number;
+  last_sync: string | null;
+  items: WasteCompositionItem[];
+}
+
+export interface RecipeIngredient {
+  name: string;
+  qty: number;
+  unit: string; // "g" | "ml" | "pc"
+  cost_aed: number;
+}
+
+export interface MenuEngineeringItem {
+  id: string;
+  dish: string;
+  category: string;
+  price: number;
+  cost: number;
+  margin_pct: number;
+  /** live: units sold in POS over the trailing 30 days */
+  sold_30d: number;
+  /** live: POS revenue over the trailing 30 days */
+  revenue_30d: number;
+  /** live: units wasted over the trailing 30 days (waste_records) */
+  waste_qty_30d: number;
+  /** live: waste cost (AED) over the trailing 30 days */
+  waste_cost_30d: number;
+  /** waste cost as % of the dish's 30-day revenue */
+  waste_pct: number;
+  /** popularity × profitability quadrant vs menu medians */
+  quadrant: "star" | "plow_horse" | "puzzle" | "dog";
+  ingredients: RecipeIngredient[];
+}
+
 async function apiFetch<T>(path: string): Promise<T> {
   const token = typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
   const headers: Record<string, string> = { "Content-Type": "application/json" };
@@ -199,6 +247,18 @@ export const dashboardService = {
   getRecentTransactions(branch?: string | null, limit = 25) {
     return apiFetch<{ items: RecentTransaction[] }>(
       `/dashboard/recent-transactions${qs({ branch, limit })}`,
+    );
+  },
+
+  getWasteComposition(period: Period, branch?: string | null, limit = 10) {
+    return apiFetch<WasteCompositionData>(
+      `/dashboard/waste-composition${qs({ period, branch, limit })}`,
+    );
+  },
+
+  getMenuEngineering() {
+    return apiFetch<{ currency: string; items: MenuEngineeringItem[] }>(
+      `/dashboard/menu-engineering`,
     );
   },
 };

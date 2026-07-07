@@ -1361,7 +1361,7 @@ function Index() {
           The most powerful decisions emerge when AI amplifies human judgment — not when it replaces
           it.
         </p>
-        <div className="quote-attr">— Agorix Software Design Principles</div>
+        <div className="quote-attr">— Platepilot Software Design Principles</div>
       </div>
 
       {/* ══════════════════════════════════════════════════════════════════ */}
@@ -1388,7 +1388,7 @@ function Index() {
       {/* FOOTER                                                             */}
       {/* ══════════════════════════════════════════════════════════════════ */}
       <footer className="sw-footer">
-        <span>© 2025 Agorix. All rights reserved.</span>
+        <span>© 2025 Platepilot. All rights reserved.</span>
         <div className="sw-footer-links">
           <a href="/software">Software</a>
           <a href="#privacy">Privacy</a>
@@ -1433,7 +1433,7 @@ function PlatformCard({
 
 export default function IndexRoute() {
   return (
-    <AppPage title="Agorix — The Superintelligence AI-Automation">
+    <AppPage title="Platepilot — The Superintelligence AI-Automation">
       <Index />
     </AppPage>
   );
