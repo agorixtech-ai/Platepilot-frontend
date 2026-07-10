@@ -323,6 +323,7 @@ function MainPanel({
   userName: string;
 }) {
   const { state, isMobile } = useSidebar();
+  const { pathname } = useLocation();
   const firstName = userName.split(" ")[0] ?? userName;
   const hour = new Date().getHours();
   const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
@@ -370,8 +371,12 @@ function MainPanel({
         </div>
       </header>
 
-      {/* Location switcher + date range — the owner's first touch every visit */}
-      <div className="shrink-0 border-b border-border/60 bg-background/60 backdrop-blur-xl">
+      {/* Location switcher + date range — the owner's first touch every visit.
+          Hidden on Market Prices: external gov data, not scoped to branches/periods. */}
+      <div
+        className="shrink-0 border-b border-border/60 bg-background/60 backdrop-blur-xl"
+        hidden={pathname === "/dashboard/market-prices"}
+      >
         <div className="flex w-full flex-col items-stretch gap-2 px-4 py-2.5 sm:flex-row sm:items-center sm:gap-3 sm:px-6 md:px-8">
           <div className="min-w-0 flex-1">
             <LocationSwitcher />
