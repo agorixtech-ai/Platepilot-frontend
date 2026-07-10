@@ -15,6 +15,7 @@ import {
   BarChart3,
   Star,
   UtensilsCrossed,
+  Tag,
 } from "lucide-react";
 import { AppLogo } from "@/components/AppLogo";
 import { toast } from "sonner";
@@ -73,6 +74,7 @@ const OPS_ITEMS: NavItem[] = [
   { icon: Package, label: "Inventory", to: "/dashboard/inventory" },
   { icon: UtensilsCrossed, label: "Menu Engineering", to: "/dashboard/menu-engineering" },
   { icon: Truck, label: "Suppliers", to: "/dashboard/suppliers" },
+  { icon: Tag, label: "Market Prices", to: "/dashboard/market-prices" },
   { icon: Building2, label: "Branches", to: "/dashboard/branches" },
   { icon: Star, label: "Reviews", to: "/dashboard/reviews" },
 ];
@@ -230,77 +232,77 @@ export function DashboardLayout({ children }: { children?: ReactNode }) {
     <BranchFilterProvider>
       <DateRangeProvider>
         <SidebarProvider className="dashboard-shell min-h-screen bg-background">
-        <Sidebar collapsible="icon" className="border-r border-sidebar-border/80 bg-sidebar">
-          {/* Logo Header */}
-          <SidebarHeader className="!gap-0 !p-0 shrink-0 border-b border-sidebar-border/80">
-            <div className="flex h-full w-full items-center justify-between gap-2 px-3 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
-              <AppLogo
-                to="/"
-                showText
-                subtitle="Restaurant OS"
-                className="flex-1 group-data-[collapsible=icon]:flex-none group-data-[collapsible=icon]:justify-center"
-                textWrapperClassName="group-data-[collapsible=icon]:hidden"
-                textClassName="text-sidebar-foreground"
-                subtitleClassName="text-sidebar-primary/80"
-              />
-              <SidebarTrigger
-                title="Collapse sidebar"
-                className="h-9 w-9 shrink-0 rounded-xl text-sidebar-foreground/50 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground group-data-[collapsible=icon]:hidden"
-              />
-            </div>
-          </SidebarHeader>
-
-          {/* Navigation */}
-          <SidebarContent className="py-2 overflow-x-hidden">
-            <NavSection items={MAIN_ITEMS} label="Main" pathname={pathname} />
-            <SidebarSeparator className="mx-3 my-1 bg-sidebar-border/60" />
-            <NavSection items={OPS_ITEMS} label="Operations" pathname={pathname} />
-            <SidebarSeparator className="mx-3 my-1 bg-sidebar-border/60" />
-            <NavSection items={AI_ITEMS} label="Intelligence" pathname={pathname} />
-            <SidebarSeparator className="mx-3 my-1 bg-sidebar-border/60" />
-            <NavSection items={ADMIN_ITEMS} label="Administration" pathname={pathname} />
-          </SidebarContent>
-
-          {/* Footer — Tenant + User */}
-          <SidebarFooter className="border-t border-sidebar-border/80 p-3 gap-2">
-            {/* User profile */}
-            <Link
-              to="/dashboard/profile"
-              className="flex items-center gap-2.5 rounded-xl px-2 py-2 transition-all duration-200 hover:bg-sidebar-accent/80 group-data-[collapsible=icon]:justify-center"
-            >
-              <Avatar className="h-8 w-8 shrink-0 ring-2 ring-sidebar-border/60">
-                <AvatarFallback className="bg-primary/20 text-primary text-xs font-bold">
-                  {initials}
-                </AvatarFallback>
-              </Avatar>
-              <div className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
-                <p className="truncate text-[12px] font-semibold leading-tight text-sidebar-foreground">
-                  {user?.full_name ?? "User"}
-                </p>
-                <p className="truncate text-[10px] text-sidebar-foreground/50">{role}</p>
+          <Sidebar collapsible="icon" className="border-r border-sidebar-border/80 bg-sidebar">
+            {/* Logo Header */}
+            <SidebarHeader className="!gap-0 !p-0 shrink-0 border-b border-sidebar-border/80">
+              <div className="flex h-full w-full items-center justify-between gap-2 px-3 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
+                <AppLogo
+                  to="/"
+                  showText
+                  subtitle="Restaurant OS"
+                  className="flex-1 group-data-[collapsible=icon]:flex-none group-data-[collapsible=icon]:justify-center"
+                  textWrapperClassName="group-data-[collapsible=icon]:hidden"
+                  textClassName="text-sidebar-foreground"
+                  subtitleClassName="text-sidebar-primary/80"
+                />
+                <SidebarTrigger
+                  title="Collapse sidebar"
+                  className="h-9 w-9 shrink-0 rounded-xl text-sidebar-foreground/50 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground group-data-[collapsible=icon]:hidden"
+                />
               </div>
-            </Link>
+            </SidebarHeader>
 
-            {/* Actions row */}
-            <div className="flex items-center gap-1 group-data-[collapsible=icon]:hidden">
-              <ThemeToggle
-                buttonClassName="text-sidebar-foreground/55 hover:text-sidebar-foreground hover:bg-sidebar-accent"
-                contentAlign="center"
-              />
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleLogout}
-                className="h-8 flex-1 justify-start gap-2 rounded-lg px-2 text-[11px] font-medium text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-destructive"
+            {/* Navigation */}
+            <SidebarContent className="py-2 overflow-x-hidden">
+              <NavSection items={MAIN_ITEMS} label="Main" pathname={pathname} />
+              <SidebarSeparator className="mx-3 my-1 bg-sidebar-border/60" />
+              <NavSection items={OPS_ITEMS} label="Operations" pathname={pathname} />
+              <SidebarSeparator className="mx-3 my-1 bg-sidebar-border/60" />
+              <NavSection items={AI_ITEMS} label="Intelligence" pathname={pathname} />
+              <SidebarSeparator className="mx-3 my-1 bg-sidebar-border/60" />
+              <NavSection items={ADMIN_ITEMS} label="Administration" pathname={pathname} />
+            </SidebarContent>
+
+            {/* Footer — Tenant + User */}
+            <SidebarFooter className="border-t border-sidebar-border/80 p-3 gap-2">
+              {/* User profile */}
+              <Link
+                to="/dashboard/profile"
+                className="flex items-center gap-2.5 rounded-xl px-2 py-2 transition-all duration-200 hover:bg-sidebar-accent/80 group-data-[collapsible=icon]:justify-center"
               >
-                <LogOut className="h-3.5 w-3.5" />
-                Sign out
-              </Button>
-            </div>
-          </SidebarFooter>
+                <Avatar className="h-8 w-8 shrink-0 ring-2 ring-sidebar-border/60">
+                  <AvatarFallback className="bg-primary/20 text-primary text-xs font-bold">
+                    {initials}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
+                  <p className="truncate text-[12px] font-semibold leading-tight text-sidebar-foreground">
+                    {user?.full_name ?? "User"}
+                  </p>
+                  <p className="truncate text-[10px] text-sidebar-foreground/50">{role}</p>
+                </div>
+              </Link>
 
-          <SidebarRail />
-        </Sidebar>
+              {/* Actions row */}
+              <div className="flex items-center gap-1 group-data-[collapsible=icon]:hidden">
+                <ThemeToggle
+                  buttonClassName="text-sidebar-foreground/55 hover:text-sidebar-foreground hover:bg-sidebar-accent"
+                  contentAlign="center"
+                />
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleLogout}
+                  className="h-8 flex-1 justify-start gap-2 rounded-lg px-2 text-[11px] font-medium text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-destructive"
+                >
+                  <LogOut className="h-3.5 w-3.5" />
+                  Sign out
+                </Button>
+              </div>
+            </SidebarFooter>
+
+            <SidebarRail />
+          </Sidebar>
 
           <MainPanel onLogout={handleLogout} userName={user?.full_name ?? "there"}>
             {children}

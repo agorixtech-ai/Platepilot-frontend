@@ -5,12 +5,52 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from "@/components/ui/table";
+import { useAgentQuery } from "@/hooks/useApi";
 
 interface Message {
   id: string;
   role: "user" | "assistant";
   content: string;
   timestamp: Date;
+  tableData?: Record<string, unknown>[] | null;
+}
+
+function ResultTable({ rows }: { rows: Record<string, unknown>[] }) {
+  const columns = Object.keys(rows[0]);
+  return (
+    <div className="mt-3 max-h-64 overflow-auto rounded-lg border border-border/60">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            {columns.map((col) => (
+              <TableHead key={col} className="whitespace-nowrap text-xs">
+                {col}
+              </TableHead>
+            ))}
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {rows.map((row, i) => (
+            <TableRow key={i}>
+              {columns.map((col) => (
+                <TableCell key={col} className="whitespace-nowrap text-xs">
+                  {String(row[col] ?? "")}
+                </TableCell>
+              ))}
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
+  );
 }
 
 function RouteComponent() {
@@ -23,8 +63,9 @@ function RouteComponent() {
     },
   ]);
   const [input, setInput] = useState("");
-  const [isTyping, setIsTyping] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const agentQuery = useAgentQuery();
+  const isTyping = agentQuery.isPending;
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -33,30 +74,45 @@ function RouteComponent() {
   }, [messages]);
 
   const handleSend = async () => {
-    if (!input.trim()) return;
+    if (!input.trim() || isTyping) return;
 
+    const question = input;
     const userMessage: Message = {
       id: Date.now().toString(),
       role: "user",
-      content: input,
+      content: question,
       timestamp: new Date(),
     };
 
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
-    setIsTyping(true);
 
-    // Simulate AI response
-    setTimeout(() => {
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: "assistant",
-        content: "I understand your request. I'm here to help you with your restaurant operations, analytics, and any questions you might have. What would you like to know?",
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, assistantMessage]);
-      setIsTyping(false);
-    }, 1500);
+    try {
+      const res = await agentQuery.mutateAsync(question);
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: (Date.now() + 1).toString(),
+          role: "assistant",
+          content: res.answer,
+          timestamp: new Date(),
+          tableData: res.used_data ? res.table_data : null,
+        },
+      ]);
+    } catch (err) {
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: (Date.now() + 1).toString(),
+          role: "assistant",
+          content:
+            err instanceof Error
+              ? err.message
+              : "Something went wrong reaching Pilot AI. Please try again.",
+          timestamp: new Date(),
+        },
+      ]);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -93,13 +149,20 @@ function RouteComponent() {
                   </Avatar>
                 )}
                 <div
-                  className={`max-w-[70%] rounded-2xl px-4 py-3 ${
+                  className={`rounded-2xl px-4 py-3 ${
+                    message.tableData && message.tableData.length > 0
+                      ? "max-w-[90%]"
+                      : "max-w-[70%]"
+                  } ${
                     message.role === "user"
                       ? "bg-primary text-primary-foreground"
                       : "bg-muted"
                   }`}
                 >
                   <p className="text-sm leading-relaxed">{message.content}</p>
+                  {message.tableData && message.tableData.length > 0 && (
+                    <ResultTable rows={message.tableData} />
+                  )}
                   <p className="mt-1 text-xs opacity-70">
                     {message.timestamp.toLocaleTimeString([], {
                       hour: "2-digit",

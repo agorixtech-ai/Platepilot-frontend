@@ -3,6 +3,7 @@ import {
   healthApi,
   posSalesApi,
   tallyApi,
+  agentApi,
   type PosSalesParams,
   type TallyParams,
 } from "../lib/api";
@@ -117,5 +118,12 @@ export function useTallyVouchers(params: TallyParams = {}) {
   return useQuery({
     queryKey: KEYS.tally(params),
     queryFn: () => tallyApi.list(params),
+  });
+}
+
+// ── AI Agent ──────────────────────────────────────────────
+export function useAgentQuery() {
+  return useMutation({
+    mutationFn: (question: string) => agentApi.query(question),
   });
 }

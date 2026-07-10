@@ -100,3 +100,19 @@ export const tallyApi = {
     return request<PaginatedResponse<TallyVoucher>>(`/api/tally-vouchers?${q}`);
   },
 };
+
+// ── AI Agent ──────────────────────────────────────────────
+export interface AgentQueryResponse {
+  answer: string;
+  used_data: boolean;
+  table_data: Record<string, unknown>[] | null;
+  query_log: Record<string, unknown>[];
+}
+
+export const agentApi = {
+  query: (question: string) =>
+    request<AgentQueryResponse>("/api/agent/query", {
+      method: "POST",
+      body: JSON.stringify({ question }),
+    }),
+};
