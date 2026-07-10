@@ -9,6 +9,7 @@ import Tally from "./dashboard/Tally";
 import Inventory from "./dashboard/Inventory";
 import MenuEngineering from "./dashboard/MenuEngineering";
 import Suppliers from "./dashboard/Suppliers";
+import MarketPrices from "./dashboard/MarketPrices";
 import Branches from "./dashboard/Branches";
 import Reviews from "./dashboard/Reviews";
 import Ai from "./dashboard/Ai";
@@ -34,6 +35,7 @@ export default function DashboardPage() {
           <Route exact path="/dashboard/inventory" component={Inventory} />
           <Route exact path="/dashboard/menu-engineering" component={MenuEngineering} />
           <Route exact path="/dashboard/suppliers" component={Suppliers} />
+          <Route exact path="/dashboard/market-prices" component={MarketPrices} />
           <Route exact path="/dashboard/branches" component={Branches} />
           <Route exact path="/dashboard/reviews" component={Reviews} />
           <Route exact path="/dashboard/ai" component={Ai} />
