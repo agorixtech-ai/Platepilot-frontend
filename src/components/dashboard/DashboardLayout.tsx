@@ -55,6 +55,7 @@ import { BranchFilterProvider } from "@/contexts/BranchFilterContext";
 import { DateRangeProvider } from "@/contexts/DateRangeContext";
 import { LocationSwitcher } from "@/components/dashboard/LocationSwitcher";
 import { DateRangePicker } from "@/components/dashboard/DateRangePicker";
+import { FloatingAiAssistant } from "@/components/ui/glowing-ai-chat-assistant";
 
 export type NavItem = {
   icon: React.ElementType;
@@ -372,10 +373,11 @@ function MainPanel({
       </header>
 
       {/* Location switcher + date range — the owner's first touch every visit.
-          Hidden on Market Prices: external gov data, not scoped to branches/periods. */}
+          Hidden on Market Prices (external gov data, not branch/period scoped)
+          and Pilot AI (chat scopes itself; questions carry their own timeframe). */}
       <div
         className="shrink-0 border-b border-border/60 bg-background/60 backdrop-blur-xl"
-        hidden={pathname === "/dashboard/market-prices"}
+        hidden={pathname === "/dashboard/market-prices" || pathname === "/dashboard/ai"}
       >
         <div className="flex w-full flex-col items-stretch gap-2 px-4 py-2.5 sm:flex-row sm:items-center sm:gap-3 sm:px-6 md:px-8">
           <div className="min-w-0 flex-1">
@@ -390,6 +392,9 @@ function MainPanel({
       <div className="flex-1 overflow-y-auto px-4 py-5 sm:px-6 md:px-8 md:py-6">
         <div className="w-full">{children}</div>
       </div>
+
+      {/* Pilot AI chat widget on every page; the AI page IS the chat already. */}
+      {pathname !== "/dashboard/ai" && <FloatingAiAssistant />}
     </SidebarInset>
   );
 }
