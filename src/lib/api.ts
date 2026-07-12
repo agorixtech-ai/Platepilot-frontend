@@ -102,6 +102,11 @@ export const tallyApi = {
 };
 
 // ── AI Agent ──────────────────────────────────────────────
+export interface AgentHistoryMessage {
+  role: "user" | "assistant";
+  content: string;
+}
+
 export interface AgentQueryResponse {
   answer: string;
   used_data: boolean;
@@ -110,9 +115,30 @@ export interface AgentQueryResponse {
 }
 
 export const agentApi = {
-  query: (question: string) =>
+  query: (question: string, branch?: string, history?: AgentHistoryMessage[]) =>
     request<AgentQueryResponse>("/api/agent/query", {
       method: "POST",
-      body: JSON.stringify({ question }),
+      body: JSON.stringify({ question, branch, history }),
     }),
+};
+
+export interface ConversationMeta {
+  id: string;
+  title: string;
+  updated_at: string;
+}
+
+export const conversationsApi = {
+  list: () => request<{ items: ConversationMeta[] }>("/api/agent/conversations"),
+  get: (id: string) =>
+    request<{ id: string; title: string; messages: Record<string, unknown>[] }>(
+      `/api/agent/conversations/${id}`,
+    ),
+  save: (id: string, title: string, messages: unknown[]) =>
+    request<{ success: boolean }>(`/api/agent/conversations/${id}`, {
+      method: "PUT",
+      body: JSON.stringify({ title, messages }),
+    }),
+  remove: (id: string) =>
+    request<{ success: boolean }>(`/api/agent/conversations/${id}`, { method: "DELETE" }),
 };
