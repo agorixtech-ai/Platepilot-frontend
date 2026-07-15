@@ -129,21 +129,23 @@ export interface RecentTransaction {
   items: string;
 }
 
+/** One over-purchased ingredient: Tally purchases beyond what sold dishes'
+    recipes required over the period (theoretical-vs-actual variance). */
 export interface WasteCompositionItem {
-  dish: string;
-  category: string;
-  qty: number;
+  name: string; // stockitem
+  unit: string; // "kg" | "l" | "pcs"
+  qty: number; // waste = bought_qty − needed_qty, in stock unit
+  bought_qty: number;
+  needed_qty: number;
   cost: number;
   pct: number;
-  top_reason: string | null;
-  reasons: Record<string, number>;
 }
 
 export interface WasteCompositionData {
   period: string;
   currency: string;
   total_cost: number;
-  total_qty: number;
+  over_count: number; // ingredients purchased beyond recipe needs
   last_sync: string | null;
   items: WasteCompositionItem[];
 }
@@ -153,6 +155,12 @@ export interface RecipeIngredient {
   qty: number;
   unit: string; // "g" | "ml" | "pc"
   cost_aed: number;
+  /** "tally" = computed live from purchase vouchers; "static" = seeded estimate */
+  cost_source?: "tally" | "static";
+  stockitem?: string;
+  qty_in_stock_unit?: number;
+  stock_unit?: string;
+  cost_per_stock_unit?: number;
 }
 
 export interface MenuEngineeringItem {
@@ -162,15 +170,19 @@ export interface MenuEngineeringItem {
   price: number;
   cost: number;
   margin_pct: number;
+  /** cost as % of menu price (complement of margin_pct) */
+  food_cost_pct: number;
+  /** price − cost, AED */
+  gross_profit: number;
   /** live: units sold in POS over the trailing 30 days */
   sold_30d: number;
   /** live: POS revenue over the trailing 30 days */
   revenue_30d: number;
-  /** live: units wasted over the trailing 30 days (waste_records) */
+  /** portions-worth of ingredient variance (purchases vs. recipe usage) over 30 days */
   waste_qty_30d: number;
-  /** live: waste cost (AED) over the trailing 30 days */
+  /** allocated ingredient-variance cost (AED) over the trailing 30 days */
   waste_cost_30d: number;
-  /** waste cost as % of the dish's 30-day revenue */
+  /** allocated waste cost as % of the dish's 30-day revenue */
   waste_pct: number;
   /** popularity × profitability quadrant vs menu medians */
   quadrant: "star" | "plow_horse" | "puzzle" | "dog";

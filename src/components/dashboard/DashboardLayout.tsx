@@ -14,6 +14,7 @@ import {
   Sparkles,
   BarChart3,
   Star,
+  BookOpenText,
   UtensilsCrossed,
   Tag,
 } from "lucide-react";
@@ -73,6 +74,7 @@ const MAIN_ITEMS: NavItem[] = [
 
 const OPS_ITEMS: NavItem[] = [
   { icon: Package, label: "Inventory", to: "/dashboard/inventory" },
+  { icon: BookOpenText, label: "Menu", to: "/dashboard/menu" },
   { icon: UtensilsCrossed, label: "Menu Engineering", to: "/dashboard/menu-engineering" },
   { icon: Truck, label: "Suppliers", to: "/dashboard/suppliers" },
   { icon: Tag, label: "Market Prices", to: "/dashboard/market-prices" },
@@ -373,11 +375,16 @@ function MainPanel({
       </header>
 
       {/* Location switcher + date range — the owner's first touch every visit.
-          Hidden on Market Prices (external gov data, not branch/period scoped)
-          and Pilot AI (chat scopes itself; questions carry their own timeframe). */}
+          Hidden on Market Prices (external gov data, not branch/period scoped),
+          Pilot AI (chat scopes itself; questions carry their own timeframe),
+          and Menu Engineering (fixed 30-day, whole-menu view). */}
       <div
         className="shrink-0 border-b border-border/60 bg-background/60 backdrop-blur-xl"
-        hidden={pathname === "/dashboard/market-prices" || pathname === "/dashboard/ai"}
+        hidden={
+          pathname === "/dashboard/market-prices" ||
+          pathname === "/dashboard/ai" ||
+          pathname === "/dashboard/menu-engineering"
+        }
       >
         <div className="flex w-full flex-col items-stretch gap-2 px-4 py-2.5 sm:flex-row sm:items-center sm:gap-3 sm:px-6 md:px-8">
           <div className="min-w-0 flex-1">
