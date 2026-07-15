@@ -62,7 +62,6 @@ import { useBranchFilter } from "@/contexts/BranchFilterContext";
 import { useDateRange, rangeToPeriod } from "@/contexts/DateRangeContext";
 import { AllLocationsOverview } from "@/components/dashboard/AllLocationsOverview";
 import { SingleLocationView } from "@/components/dashboard/SingleLocationView";
-import { WasteComposition } from "@/components/dashboard/WasteComposition";
 import { useCounterAnimation } from "@/hooks/useCounterAnimation";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -618,11 +617,6 @@ function OverviewPage() {
             />
           </CardContent>
         </Card>
-
-        {/* Waste Composition Analysis */}
-        {/* <div className="animate-fade-in-up stagger-5">
-          <WasteComposition />
-        </div> */}
       </div>
 
       {/* ── Bottom Row ──────────────────────────────────────────────────────── */}

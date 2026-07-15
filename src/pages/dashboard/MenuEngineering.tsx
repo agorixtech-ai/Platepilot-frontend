@@ -17,12 +17,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ItemAvatar } from "@/components/dashboard/ItemAvatar";
 import { fmtCurrency } from "@/components/dashboard/shared";
@@ -95,21 +90,39 @@ function RecipeDialog({
               </div>
             </DialogHeader>
 
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
               {[
-                { label: "Menu price", value: fmtCurrency(dish.price) },
-                { label: "Portion cost", value: fmtCurrency(dish.cost) },
-                { label: "Margin", value: `${dish.margin_pct.toFixed(1)}%` },
-                { label: "Sold (30d)", value: dish.sold_30d.toLocaleString() },
+                {
+                  label: "Menu price",
+                  value: fmtCurrency(dish.price),
+                  hint: "What the customer pays",
+                },
+                {
+                  label: "Portion cost",
+                  value: fmtCurrency(dish.cost),
+                  hint: "What one plate costs you to make",
+                },
+                {
+                  label: "Margin",
+                  value: `${dish.margin_pct.toFixed(1)}%`,
+                  hint: "Your profit on each plate",
+                },
+                {
+                  label: "Sold (30d)",
+                  value: dish.sold_30d.toLocaleString(),
+                  hint: "Plates sold in the last 30 days",
+                },
                 {
                   label: "Wasted (30d)",
-                  value: `${dish.waste_qty_30d.toLocaleString()} u`,
+                  value: `${dish.waste_qty_30d.toLocaleString(undefined, { maximumFractionDigits: 1 })} u`,
                   tone: "text-destructive",
+                  hint: "Ingredients bought but not needed, counted as plates",
                 },
                 {
                   label: "Waste cost",
                   value: fmtCurrency(dish.waste_cost_30d),
                   tone: "text-destructive",
+                  hint: "Money lost on that extra buying — 0 means nothing wasted",
                 },
               ].map((kpi) => (
                 <div
@@ -127,6 +140,9 @@ function RecipeDialog({
                   >
                     {kpi.value}
                   </p>
+                  <p className="mt-0.5 text-[8.5px] leading-snug text-muted-foreground">
+                    {kpi.hint}
+                  </p>
                 </div>
               ))}
             </div>
@@ -137,16 +153,36 @@ function RecipeDialog({
               </p>
               <div className="divide-y divide-border/30 rounded-lg border border-border/40">
                 {dish.ingredients.map((ing) => (
-                  <div key={ing.name} className="flex items-center gap-2 px-3 py-2">
-                    <span className="min-w-0 flex-1 truncate text-[11.5px] font-medium text-foreground">
-                      {ing.name}
-                    </span>
-                    <span className="shrink-0 text-[11.5px] font-bold tabular-nums text-foreground">
-                      {ing.qty.toLocaleString()} {ing.unit}
-                    </span>
-                    <span className="w-16 shrink-0 text-right text-[10.5px] tabular-nums text-muted-foreground">
-                      {fmtCurrency(ing.cost_aed)}
-                    </span>
+                  <div key={ing.name} className="px-3 py-2">
+                    <div className="flex items-center gap-2">
+                      <span className="min-w-0 flex-1 truncate text-[11.5px] font-medium text-foreground">
+                        {ing.name}
+                      </span>
+                      <Badge
+                        variant="outline"
+                        className={cn(
+                          "border px-1 py-0 text-[8px] font-bold uppercase",
+                          ing.cost_source === "tally"
+                            ? "border-emerald-500/40 text-emerald-600 dark:text-emerald-400"
+                            : "border-border/60 text-muted-foreground",
+                        )}
+                      >
+                        {ing.cost_source === "tally" ? "live" : "est."}
+                      </Badge>
+                      <span className="shrink-0 text-[11.5px] font-bold tabular-nums text-foreground">
+                        {ing.qty.toLocaleString()} {ing.unit}
+                      </span>
+                      <span className="w-16 shrink-0 text-right text-[10.5px] tabular-nums text-muted-foreground">
+                        {fmtCurrency(ing.cost_aed)}
+                      </span>
+                    </div>
+                    {ing.cost_source === "tally" && (
+                      <p className="mt-0.5 text-[9.5px] tabular-nums text-muted-foreground">
+                        {ing.stockitem}: {ing.qty_in_stock_unit} {ing.stock_unit} ×{" "}
+                        {fmtCurrency(ing.cost_per_stock_unit ?? 0)}/{ing.stock_unit} (Tally purchase
+                        price)
+                      </p>
+                    )}
                   </div>
                 ))}
                 <div className="flex items-center justify-between bg-muted/30 px-3 py-2">
@@ -155,6 +191,15 @@ function RecipeDialog({
                   </span>
                   <span className="text-[11.5px] font-black tabular-nums text-foreground">
                     {fmtCurrency(dish.cost)}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between bg-muted/30 px-3 py-2">
+                  <span className="text-[11px] font-bold text-foreground">
+                    Food cost {dish.food_cost_pct.toFixed(1)}%
+                  </span>
+                  <span className="text-[11.5px] font-black tabular-nums text-emerald-600 dark:text-emerald-400">
+                    Gross profit {fmtCurrency(dish.gross_profit)} ({dish.margin_pct.toFixed(1)}
+                    %)
                   </span>
                 </div>
               </div>
@@ -192,9 +237,7 @@ function MenuEngineeringPage() {
   }, [data, search, quadrantFilter]);
 
   const all = data?.items ?? [];
-  const avgMargin = all.length
-    ? all.reduce((sum, i) => sum + i.margin_pct, 0) / all.length
-    : 0;
+  const avgMargin = all.length ? all.reduce((sum, i) => sum + i.margin_pct, 0) / all.length : 0;
   const starCount = all.filter((i) => i.quadrant === "star").length;
   const dogCount = all.filter((i) => i.quadrant === "dog").length;
 
@@ -340,11 +383,24 @@ function MenuEngineeringPage() {
                   <tr className="border-b border-border/40 text-[9.5px] font-bold uppercase tracking-wider text-muted-foreground">
                     <th className="px-5 py-2.5">Dish</th>
                     <th className="px-3 py-2.5">Category</th>
-                    <th className="px-3 py-2.5 text-right">Price</th>
-                    <th className="px-3 py-2.5 text-right">Cost</th>
-                    <th className="px-3 py-2.5 text-right">Margin</th>
-                    <th className="px-3 py-2.5 text-right">Sold (30d)</th>
-                    <th className="px-3 py-2.5 text-right">Wasted (30d)</th>
+                    <th className="px-3 py-2.5 text-right" title="What the customer pays">
+                      Price
+                    </th>
+                    <th className="px-3 py-2.5 text-right" title="What one plate costs you to make">
+                      Cost
+                    </th>
+                    <th className="px-3 py-2.5 text-right" title="Your profit on each plate">
+                      Margin
+                    </th>
+                    <th className="px-3 py-2.5 text-right" title="Plates sold in the last 30 days">
+                      Sold (30d)
+                    </th>
+                    <th
+                      className="px-3 py-2.5 text-right"
+                      title="Ingredients bought but not needed, counted as plates, with the money lost"
+                    >
+                      Wasted (30d)
+                    </th>
                     <th className="px-3 py-2.5">Class</th>
                     <th className="px-3 py-2.5" />
                   </tr>
@@ -390,7 +446,10 @@ function MenuEngineeringPage() {
                       <td className="px-3 py-2.5 text-right text-[11.5px] tabular-nums">
                         <span className="inline-flex items-center gap-1 text-destructive">
                           <Trash2 className="h-3 w-3" />
-                          {item.waste_qty_30d.toLocaleString()} u
+                          {item.waste_qty_30d.toLocaleString(undefined, {
+                            maximumFractionDigits: 1,
+                          })}{" "}
+                          u
                         </span>
                         <span className="ml-1.5 text-[10px] text-muted-foreground">
                           ({fmtCurrency(item.waste_cost_30d)})
