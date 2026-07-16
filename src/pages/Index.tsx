@@ -362,6 +362,7 @@ function Index() {
 
   return (
     <main
+      className="agorix-landing"
       style={{
         background: "#111113",
         color: "#fff",
@@ -372,9 +373,11 @@ function Index() {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
-        /* ── Shared resets ── */
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        main a { text-decoration: none; }
+        /* ── Shared resets — scoped to this page: Ionic keeps this page
+           mounted during SPA navigation, so unscoped rules would leak into
+           other pages and override their Tailwind utilities ── */
+        .agorix-landing, .agorix-landing * { box-sizing: border-box; margin: 0; padding: 0; }
+        .agorix-landing a { text-decoration: none; }
 
         /* ── Hero shell ── */
         .hero-shell {
@@ -1390,7 +1393,6 @@ function Index() {
       <footer className="sw-footer">
         <span>© 2025 Platepilot. All rights reserved.</span>
         <div className="sw-footer-links">
-          <a href="/software">Software</a>
           <a href="#privacy">Privacy</a>
           <a href="#terms">Terms</a>
           <a href="#security">Security</a>

@@ -46,7 +46,7 @@ function OtpInput({
   };
 
   return (
-    <div className="flex gap-3 justify-center">
+    <div className="flex gap-2 sm:gap-3 justify-center">
       {digits.map((d, i) => (
         <input
           key={i}
@@ -61,7 +61,7 @@ function OtpInput({
           onChange={(e) => set(i, e.target.value)}
           onKeyDown={(e) => onKey(i, e)}
           onPaste={onPaste}
-          className={`w-12 text-center text-xl font-bold border rounded-2xl outline-none transition-all duration-200
+          className={`min-w-0 flex-1 max-w-12 sm:max-w-14 h-12 sm:h-14 text-center text-lg sm:text-xl font-bold border rounded-2xl outline-none transition-all duration-200
             ${
               d
                 ? "bg-white/10 border-white/25 text-white shadow-sm"
@@ -69,7 +69,6 @@ function OtpInput({
             }
             focus:border-primary/80 focus:ring-2 focus:ring-primary/20
             disabled:opacity-40 disabled:cursor-not-allowed`}
-          style={{ height: "56px" }}
         />
       ))}
     </div>

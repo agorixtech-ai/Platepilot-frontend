@@ -29,7 +29,7 @@
  *   10%  Neon green #00FF88                         → CTAs, active states
  *
  * Dark is the primary theme. Three surface depths:
- *   base #050505 → elevated #0A0E0E → card #111111
+ *   base #111113 → elevated #0A0E0E → card #111111
  * Text: #FFFFFF (high) / #888888 (medium) / #5C6675 (disabled).
  * Borders are 1px white at 6–10% opacity — subtle #1F1F1F dividers.
  *
@@ -218,12 +218,21 @@
   --text-caption: 0.75rem;
 
   --shadow-xs: 0 1px 2px oklch(0.2 0.01 var(--h-neutral) / 4%);
-  --shadow-sm: 0 1px 3px oklch(0.2 0.01 var(--h-neutral) / 6%), 0 1px 2px oklch(0.2 0.01 var(--h-neutral) / 3%);
-  --shadow-md: 0 4px 12px oklch(0.2 0.01 var(--h-neutral) / 7%), 0 2px 4px oklch(0.2 0.01 var(--h-neutral) / 3%);
-  --shadow-lg: 0 12px 24px oklch(0.2 0.01 var(--h-neutral) / 8%), 0 4px 8px oklch(0.2 0.01 var(--h-neutral) / 4%);
-  --shadow-xl: 0 24px 48px oklch(0.2 0.01 var(--h-neutral) / 10%), 0 8px 16px oklch(0.2 0.01 var(--h-neutral) / 5%);
-  --shadow-card: 0 1px 3px oklch(0.2 0.01 var(--h-neutral) / 5%), 0 1px 2px oklch(0.2 0.01 var(--h-neutral) / 3%);
-  --shadow-card-hover: 0 4px 16px oklch(0.2 0.01 var(--h-neutral) / 8%), 0 2px 6px oklch(0.58 0.17 var(--h-brand) / 5%);
+  --shadow-sm:
+    0 1px 3px oklch(0.2 0.01 var(--h-neutral) / 6%), 0 1px 2px oklch(0.2 0.01 var(--h-neutral) / 3%);
+  --shadow-md:
+    0 4px 12px oklch(0.2 0.01 var(--h-neutral) / 7%),
+    0 2px 4px oklch(0.2 0.01 var(--h-neutral) / 3%);
+  --shadow-lg:
+    0 12px 24px oklch(0.2 0.01 var(--h-neutral) / 8%),
+    0 4px 8px oklch(0.2 0.01 var(--h-neutral) / 4%);
+  --shadow-xl:
+    0 24px 48px oklch(0.2 0.01 var(--h-neutral) / 10%),
+    0 8px 16px oklch(0.2 0.01 var(--h-neutral) / 5%);
+  --shadow-card:
+    0 1px 3px oklch(0.2 0.01 var(--h-neutral) / 5%), 0 1px 2px oklch(0.2 0.01 var(--h-neutral) / 3%);
+  --shadow-card-hover:
+    0 4px 16px oklch(0.2 0.01 var(--h-neutral) / 8%), 0 2px 6px oklch(0.58 0.17 var(--h-brand) / 5%);
 
   /* light surface tokens */
   --glass-bg: oklch(1 0 0 / 98%);
@@ -369,7 +378,7 @@
   /* three surface depths: base → sidebar/elevated → card (cards one step
      lighter than before so panels separate from the canvas without borders
      doing all the work) */
-  --background: oklch(0.07 0.008 var(--h-neutral));
+  --background: #111113;
   --foreground: oklch(0.99 0 0);
   --card: oklch(0.16 0.008 var(--h-neutral));
   --card-foreground: oklch(0.99 0 0);
@@ -438,7 +447,9 @@
   --shadow-lg: 0 12px 28px oklch(0 0 0 / 50%), 0 4px 10px oklch(0 0 0 / 30%);
   --shadow-xl: 0 24px 48px oklch(0 0 0 / 55%), 0 8px 20px oklch(0 0 0 / 35%);
   --shadow-card: 0 0 0 1px oklch(1 0 0 / 6%), 0 2px 4px oklch(0 0 0 / 30%);
-  --shadow-card-hover: 0 0 0 1px oklch(0.87 0.22 var(--h-brand) / 22%), 0 12px 32px oklch(0 0 0 / 45%), 0 0 24px oklch(0.87 0.22 var(--h-brand) / 8%);
+  --shadow-card-hover:
+    0 0 0 1px oklch(0.87 0.22 var(--h-brand) / 22%), 0 12px 32px oklch(0 0 0 / 45%),
+    0 0 24px oklch(0.87 0.22 var(--h-brand) / 8%);
 
   /* liquid glass dark tokens */
   --glass-bg: oklch(1 0 0 / 4%);
@@ -611,6 +622,10 @@
 }
 
 @layer utilities {
+  .animate-fade-up {
+    animation: fade-up var(--duration-slow) var(--ease-out) both;
+  }
+
   .animate-fade-in-up {
     animation: fade-in-up var(--duration-slow) var(--ease-out) both;
   }
@@ -646,14 +661,30 @@
   }
 
   /* Staggered animation delays */
-  .stagger-1 { animation-delay: 0ms; }
-  .stagger-2 { animation-delay: 50ms; }
-  .stagger-3 { animation-delay: 100ms; }
-  .stagger-4 { animation-delay: 150ms; }
-  .stagger-5 { animation-delay: 200ms; }
-  .stagger-6 { animation-delay: 250ms; }
-  .stagger-7 { animation-delay: 300ms; }
-  .stagger-8 { animation-delay: 350ms; }
+  .stagger-1 {
+    animation-delay: 0ms;
+  }
+  .stagger-2 {
+    animation-delay: 50ms;
+  }
+  .stagger-3 {
+    animation-delay: 100ms;
+  }
+  .stagger-4 {
+    animation-delay: 150ms;
+  }
+  .stagger-5 {
+    animation-delay: 200ms;
+  }
+  .stagger-6 {
+    animation-delay: 250ms;
+  }
+  .stagger-7 {
+    animation-delay: 300ms;
+  }
+  .stagger-8 {
+    animation-delay: 350ms;
+  }
 
   /* Reduced motion support */
   @media (prefers-reduced-motion: reduce) {
@@ -746,7 +777,6 @@
     line-height: 1.4;
     color: var(--color-muted-foreground);
   }
-
 }
 
 /* ── Auth pages — inherit global tokens (light + dark) ─────────────── */
@@ -924,30 +954,62 @@
 /* ── Marketing pages — light: clean; dark: neon green glow ───────── */
 .marketing-glow {
   background:
-    radial-gradient(ellipse 70% 50% at 50% -15%, oklch(0.58 0.17 var(--h-brand) / 4%) 0%, transparent 55%),
+    radial-gradient(
+      ellipse 70% 50% at 50% -15%,
+      oklch(0.58 0.17 var(--h-brand) / 4%) 0%,
+      transparent 55%
+    ),
     var(--background);
 }
 
 .dark .marketing-glow {
   background:
-    radial-gradient(ellipse 55% 45% at 12% -10%, oklch(0.79 0.17 var(--h-warm) / 7%) 0%, transparent 55%),
-    radial-gradient(ellipse 60% 45% at 50% -12%, oklch(0.87 0.22 var(--h-pink) / 8%) 0%, transparent 58%),
-    radial-gradient(ellipse 55% 45% at 88% -10%, oklch(0.6 0.12 var(--h-purple) / 7%) 0%, transparent 58%),
+    radial-gradient(
+      ellipse 55% 45% at 12% -10%,
+      oklch(0.79 0.17 var(--h-warm) / 7%) 0%,
+      transparent 55%
+    ),
+    radial-gradient(
+      ellipse 60% 45% at 50% -12%,
+      oklch(0.87 0.22 var(--h-pink) / 8%) 0%,
+      transparent 58%
+    ),
+    radial-gradient(
+      ellipse 55% 45% at 88% -10%,
+      oklch(0.6 0.12 var(--h-purple) / 7%) 0%,
+      transparent 58%
+    ),
     var(--background);
 }
 
 /* Dashboard canvas — light: flat grey; dark: green mesh */
 .dashboard-canvas {
   background:
-    radial-gradient(ellipse 80% 50% at 50% -20%, oklch(0.58 0.17 var(--h-brand) / 3%) 0%, transparent 50%),
+    radial-gradient(
+      ellipse 80% 50% at 50% -20%,
+      oklch(0.58 0.17 var(--h-brand) / 3%) 0%,
+      transparent 50%
+    ),
     var(--background);
 }
 
 .dark .dashboard-canvas {
   background:
-    radial-gradient(ellipse 55% 40% at 8% -5%, oklch(0.87 0.22 var(--h-pink) / 5%) 0%, transparent 48%),
-    radial-gradient(ellipse 60% 45% at 50% -5%, oklch(0.87 0.22 var(--h-brand) / 6%) 0%, transparent 50%),
-    radial-gradient(ellipse 40% 35% at 92% 8%, oklch(0.6 0.12 var(--h-purple) / 5%) 0%, transparent 45%),
+    radial-gradient(
+      ellipse 55% 40% at 8% -5%,
+      oklch(0.87 0.22 var(--h-pink) / 5%) 0%,
+      transparent 48%
+    ),
+    radial-gradient(
+      ellipse 60% 45% at 50% -5%,
+      oklch(0.87 0.22 var(--h-brand) / 6%) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      ellipse 40% 35% at 92% 8%,
+      oklch(0.6 0.12 var(--h-purple) / 5%) 0%,
+      transparent 45%
+    ),
     var(--background);
 }
 

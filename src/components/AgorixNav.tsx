@@ -1,9 +1,10 @@
 import { Link } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
+import { Menu, X } from "lucide-react";
 import { LOGO_ALT, LOGO_SRC } from "@/components/AppLogo";
 
 const T = {
-  bg: "#050505",
+  bg: "#111113",
   ink: "#080808",
   text: "#fff",
   nav: "rgba(255,255,255,0.72)",
@@ -52,7 +53,6 @@ const productDropdown = [{ label: "Restaurant IQ", href: "/restaurant-iq" }];
 const defaultLinks: NavItem[] = [
   { label: "Product", dropdown: productDropdown },
   { label: "Pricing", href: "/#contact" },
-  { label: "Resources", href: "/software" },
 ];
 
 type AgorixNavProps = {
@@ -67,17 +67,21 @@ export function AgorixNav({
   sticky = false,
 }: AgorixNavProps) {
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
-  const navRef = useRef<HTMLElement>(null);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const navRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (navRef.current && !navRef.current.contains(event.target as Node)) {
         setOpenDropdown(null);
+        setMobileOpen(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  const mobileLinks = links.flatMap((item) => ("dropdown" in item ? item.dropdown : [item]));
 
   return (
     <>
@@ -124,114 +128,168 @@ export function AgorixNav({
           background: rgba(255, 255, 255, 0.06);
           color: #fff;
         }
+        .agorix-nav__toggle {
+          display: none;
+        }
+        .agorix-nav__mobile-panel {
+          display: none;
+        }
         @media (max-width: 900px) {
           .agorix-nav__links {
             display: none !important;
           }
+          .agorix-nav__buttons {
+            display: none !important;
+          }
+          .agorix-nav__toggle {
+            display: inline-flex !important;
+          }
+          .agorix-nav__mobile-panel.open {
+            display: flex;
+          }
+        }
+        .agorix-nav__mobile-panel {
+          flex-direction: column;
+          gap: 4px;
+          padding: 8px clamp(20px, 3vw, 40px) 20px;
+          border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .agorix-nav__mobile-link {
+          padding: 0.85rem 0.25rem;
+          font-size: 0.95rem;
+          color: rgba(255, 255, 255, 0.72);
+          text-decoration: none;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        .agorix-nav__mobile-buttons {
+          display: flex;
+          gap: 10px;
+          margin-top: 14px;
+        }
+        .agorix-nav__mobile-buttons a {
+          flex: 1;
         }
       `}</style>
 
-      <header
-        ref={navRef}
-        className={insetClass}
-        style={{
-          position: sticky ? "sticky" : "relative",
-          top: sticky ? 0 : undefined,
-          zIndex: 50,
-          paddingTop: 28,
-          paddingBottom: 32,
-          display: "grid",
-          gridTemplateColumns: "1fr auto 1fr",
-          alignItems: "center",
-          gap: 24,
-          background: sticky ? T.bg : undefined,
-          borderBottom: sticky ? `1px solid ${T.border}` : undefined,
-        }}
-      >
-        <Link
-          to="/"
+      <div ref={navRef}>
+        <header
+          className={insetClass}
           style={{
-            display: "flex",
+            position: sticky ? "sticky" : "relative",
+            top: sticky ? 0 : undefined,
+            zIndex: 50,
+            paddingTop: 28,
+            paddingBottom: 32,
+            display: "grid",
+            gridTemplateColumns: "1fr auto 1fr",
             alignItems: "center",
-            gap: 10,
-            justifySelf: "start",
-            textDecoration: "none",
+            gap: 24,
+            background: sticky ? T.bg : undefined,
+            borderBottom: sticky ? `1px solid ${T.border}` : undefined,
           }}
         >
-          <img
-            src={LOGO_SRC}
-            alt={LOGO_ALT}
-            width={36}
-            height={36}
-            style={{ display: "block", flexShrink: 0, borderRadius: 10, objectFit: "cover" }}
-          />
-          <span
+          <Link
+            to="/"
             style={{
-              fontWeight: 700,
-              fontSize: 20,
-              letterSpacing: ".14em",
-              lineHeight: 1,
-              color: T.text,
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              justifySelf: "start",
+              textDecoration: "none",
             }}
           >
-            PLATEPILOT
-          </span>
-        </Link>
+            <img
+              src={LOGO_SRC}
+              alt={LOGO_ALT}
+              width={36}
+              height={36}
+              style={{ display: "block", flexShrink: 0, borderRadius: 10, objectFit: "cover" }}
+            />
+            <span
+              style={{
+                fontWeight: 700,
+                fontSize: 20,
+                letterSpacing: ".14em",
+                lineHeight: 1,
+                color: T.text,
+              }}
+            >
+              PLATEPILOT
+            </span>
+          </Link>
 
-        <nav
-          className="agorix-nav__links"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 28,
-            fontSize: 14.5,
-            color: T.nav,
-            justifySelf: "center",
-          }}
-        >
-          {links.map((item) => {
-            if ("dropdown" in item) {
-              return (
-                <div key={item.label} className="agorix-nav__item">
-                  <button
-                    type="button"
-                    onClick={() => setOpenDropdown(openDropdown === item.label ? null : item.label)}
+          <nav
+            className="agorix-nav__links"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 28,
+              fontSize: 14.5,
+              color: T.nav,
+              justifySelf: "center",
+            }}
+          >
+            {links.map((item) => {
+              if ("dropdown" in item) {
+                return (
+                  <div key={item.label} className="agorix-nav__item">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setOpenDropdown(openDropdown === item.label ? null : item.label)
+                      }
+                      style={{
+                        cursor: "pointer",
+                        lineHeight: 1,
+                        background: "none",
+                        border: "none",
+                        color: "inherit",
+                        font: "inherit",
+                        padding: 0,
+                      }}
+                    >
+                      {item.label}
+                    </button>
+                    {openDropdown === item.label && (
+                      <div className="agorix-nav__dropdown">
+                        {item.dropdown.map((dropItem) => (
+                          <Link
+                            key={dropItem.label}
+                            to={dropItem.href}
+                            className="agorix-nav__dropdown-item"
+                            onClick={() => setOpenDropdown(null)}
+                          >
+                            {dropItem.label}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              }
+
+              const isHash = item.href.startsWith("#");
+              if (isHash) {
+                return (
+                  <a
+                    key={item.label}
+                    href={item.href}
                     style={{
                       cursor: "pointer",
                       lineHeight: 1,
-                      background: "none",
-                      border: "none",
                       color: "inherit",
-                      font: "inherit",
-                      padding: 0,
+                      textDecoration: "none",
                     }}
                   >
                     {item.label}
-                  </button>
-                  {openDropdown === item.label && (
-                    <div className="agorix-nav__dropdown">
-                      {item.dropdown.map((dropItem) => (
-                        <Link
-                          key={dropItem.label}
-                          to={dropItem.href}
-                          className="agorix-nav__dropdown-item"
-                          onClick={() => setOpenDropdown(null)}
-                        >
-                          {dropItem.label}
-                        </Link>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              );
-            }
+                  </a>
+                );
+              }
 
-            const isHash = item.href.startsWith("#");
-            if (isHash) {
               return (
-                <a
+                <Link
                   key={item.label}
-                  href={item.href}
+                  to={item.href}
                   style={{
                     cursor: "pointer",
                     lineHeight: 1,
@@ -240,36 +298,82 @@ export function AgorixNav({
                   }}
                 >
                   {item.label}
-                </a>
+                </Link>
               );
-            }
+            })}
+          </nav>
 
-            return (
+          <div style={{ display: "flex", alignItems: "center", gap: 10, justifySelf: "end" }}>
+            <div
+              className="agorix-nav__buttons"
+              style={{ display: "flex", alignItems: "center", gap: 10 }}
+            >
+              <a href="/demo" style={btnOutlineSm}>
+                Get Demo
+              </a>
+              <a href="/login" style={btnSolidSm}>
+                login
+              </a>
+            </div>
+            <button
+              type="button"
+              className="agorix-nav__toggle"
+              onClick={() => setMobileOpen((v) => !v)}
+              aria-label={mobileOpen ? "Close menu" : "Open menu"}
+              aria-expanded={mobileOpen}
+              style={{
+                alignItems: "center",
+                justifyContent: "center",
+                width: 40,
+                height: 40,
+                borderRadius: 9999,
+                border: `1px solid ${T.borderStrong}`,
+                background: "transparent",
+                color: T.text,
+                cursor: "pointer",
+                padding: 0,
+              }}
+            >
+              {mobileOpen ? <X size={18} /> : <Menu size={18} />}
+            </button>
+          </div>
+        </header>
+
+        <div
+          className={`agorix-nav__mobile-panel${mobileOpen ? " open" : ""}`}
+          style={{ background: T.bg }}
+        >
+          {mobileLinks.map((item) =>
+            item.href.startsWith("#") ? (
+              <a
+                key={item.label}
+                href={item.href}
+                className="agorix-nav__mobile-link"
+                onClick={() => setMobileOpen(false)}
+              >
+                {item.label}
+              </a>
+            ) : (
               <Link
                 key={item.label}
                 to={item.href}
-                style={{
-                  cursor: "pointer",
-                  lineHeight: 1,
-                  color: "inherit",
-                  textDecoration: "none",
-                }}
+                className="agorix-nav__mobile-link"
+                onClick={() => setMobileOpen(false)}
               >
                 {item.label}
               </Link>
-            );
-          })}
-        </nav>
-
-        <div style={{ display: "flex", alignItems: "center", gap: 10, justifySelf: "end" }}>
-          <a href="/demo" style={btnOutlineSm}>
-            Get Demo
-          </a>
-          <a href="/login" style={btnSolidSm}>
-            login
-          </a>
+            ),
+          )}
+          <div className="agorix-nav__mobile-buttons">
+            <a href="/demo" style={btnOutlineSm} onClick={() => setMobileOpen(false)}>
+              Get Demo
+            </a>
+            <a href="/login" style={btnSolidSm} onClick={() => setMobileOpen(false)}>
+              login
+            </a>
+          </div>
         </div>
-      </header>
+      </div>
     </>
   );
 }

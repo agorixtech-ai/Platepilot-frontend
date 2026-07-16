@@ -1,4 +1,5 @@
 import { AppPage } from "@/components/ionic/AppPage";
+import { AgorixNav } from "@/components/AgorixNav";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, Calendar, Check, Loader2 } from "lucide-react";
@@ -57,42 +58,30 @@ function DemoPage() {
   };
 
   const inputClass =
-    "w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-white/30 outline-none focus:border-purple-400/50 focus:ring-1 focus:ring-purple-400/20 transition";
+    "w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-white/30 outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition";
 
   return (
     <div
-      className="min-h-screen"
+      className="dark min-h-screen"
       style={{
         background: "#111113",
         color: "#fff",
         fontFamily: "'Inter', system-ui, sans-serif",
       }}
     >
-      <header className="fixed top-0 w-full z-50 border-b border-white/10 bg-[#111113]/80 backdrop-blur-md">
-        <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-          <Link to="/" className="text-xl font-bold text-white">
-            λgorix
-          </Link>
-          <Link
-            to="/restaurant-iq"
-            className="text-sm text-white/60 hover:text-white transition-colors"
-          >
-            ← Back to RestaurantIQ
-          </Link>
-        </nav>
-      </header>
+      <AgorixNav sticky />
 
-      <main className="pt-24 pb-20 px-6">
+      <main className="pt-16 pb-20 px-6">
         <div className="mx-auto max-w-6xl">
           <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs font-semibold backdrop-blur mb-6">
-              <Calendar size={12} className="text-purple-400" />
-              <span className="bg-gradient-to-r from-purple-400 via-blue-400 to-teal-400 bg-clip-text text-transparent">
+            <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary-soft/60 px-4 py-1.5 text-xs font-semibold backdrop-blur mb-6">
+              <Calendar size={12} className="text-primary" />
+              <span className="bg-gradient-to-r from-teal-300 via-emerald-300 to-cyan-300 bg-clip-text text-transparent">
                 Book your personalized demo
               </span>
             </div>
             <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">
-              <span className="bg-gradient-to-r from-purple-400 via-blue-400 to-teal-400 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-teal-300 via-emerald-300 to-cyan-300 bg-clip-text text-transparent">
                 See RestaurantIQ in Action
               </span>
             </h1>
@@ -105,8 +94,8 @@ function DemoPage() {
           <div className="mx-auto max-w-2xl">
             {submitted ? (
               <div className="text-center py-20">
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 via-blue-500 to-teal-500 mb-6">
-                  <Check size={32} className="text-white" />
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary mb-6">
+                  <Check size={32} className="text-primary-foreground" />
                 </div>
                 <h2 className="text-2xl font-bold mb-2">You're on the list!</h2>
                 <p className="text-white/60">
@@ -219,12 +208,12 @@ function DemoPage() {
                   />
                 </div>
 
-                {error && <p className="text-red-400 text-sm text-center">{error}</p>}
+                {error && <p className="text-destructive text-sm text-center">{error}</p>}
 
                 <button
                   type="submit"
                   disabled={loading}
-                  className="group inline-flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-b from-white via-white/95 to-white/60 px-6 py-3.5 text-sm font-semibold text-black transition hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60 disabled:hover:scale-100"
+                  className="group inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground shadow-[0_12px_30px_-10px_rgba(20,184,166,0.35)] transition hover:bg-primary-dark disabled:opacity-60"
                 >
                   {loading ? (
                     <>
