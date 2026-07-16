@@ -16,7 +16,7 @@ import { Footer } from "@/components/restaurant-iq/Footer";
 function RestaurantIQ() {
   return (
     <div
-      className="min-h-screen restaurant-iq"
+      className="dark min-h-screen restaurant-iq"
       style={{ background: "#111113", color: "#fff", fontFamily: "'Inter', system-ui, sans-serif" }}
     >
       <AgorixNav
@@ -24,7 +24,6 @@ function RestaurantIQ() {
         links={[
           { label: "Product", dropdown: [{ label: "Restaurant IQ", href: "/restaurant-iq" }] },
           { label: "Pricing", href: "#pricing" },
-          { label: "Resources", href: "/software" },
         ]}
       />
       <main>

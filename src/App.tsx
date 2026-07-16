@@ -10,7 +10,6 @@ import IndexPage from "./pages/Index";
 import LoginPage from "./pages/Login";
 import SignupPage from "./pages/Signup";
 import DemoPage from "./pages/Demo";
-import SoftwarePage from "./pages/Software";
 import RestaurantIQPage from "./pages/RestaurantIQ";
 import DashboardPage from "./pages/Dashboard";
 import NotFoundPage from "./pages/NotFound";
@@ -79,7 +78,6 @@ export default function App() {
                 <Route exact path="/login" component={LoginPage} />
                 <Route exact path="/signup" component={SignupPage} />
                 <Route exact path="/demo" component={DemoPage} />
-                <Route exact path="/software" component={SoftwarePage} />
                 <Route exact path="/restaurant-iq" component={RestaurantIQPage} />
                 <Route path="/dashboard" component={DashboardPage} />
                 <Route component={NotFoundPage} />

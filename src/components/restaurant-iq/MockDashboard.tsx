@@ -68,7 +68,7 @@ export function MockDashboard() {
 
           {/* Main */}
           <div className="space-y-4 p-4">
-            <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
+            <div className="grid grid-cols-2 gap-2.5">
               {kpis.map((k) => (
                 <div key={k.label} className="rounded-xl border border-border bg-background p-3">
                   <div className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
