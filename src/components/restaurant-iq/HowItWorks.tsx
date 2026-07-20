@@ -36,7 +36,7 @@ export function HowItWorks() {
           <div className="relative grid gap-10 lg:grid-cols-3 lg:gap-8">
             {steps.map((s) => (
               <div key={s.n} className="relative flex flex-col items-center text-center">
-                <div className="grid h-20 w-20 place-items-center rounded-full bg-primary font-display text-2xl font-bold text-primary-foreground shadow-[0_15px_40px_-12px_rgba(20,184,166,0.3)] ring-8 ring-secondary/60">
+                <div className="grid h-20 w-20 place-items-center rounded-full bg-primary font-display text-2xl font-bold text-primary-foreground shadow-[0_15px_40px_-12px_rgba(7,59,42,0.35)] ring-8 ring-secondary/60">
                   {s.n}
                 </div>
                 <h3 className="mt-6 font-display text-xl font-bold text-foreground">{s.title}</h3>

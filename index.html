@@ -21,14 +21,11 @@
     <script>
       (function () {
         try {
-          var t = localStorage.getItem("ui-theme") || "dark";
-          var d =
-            t === "dark" ||
-            (t === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+          localStorage.setItem("ui-theme", "light");
           var c = document.documentElement.classList;
-          c.remove("light", "dark");
-          c.add(d ? "dark" : "light");
-          document.documentElement.style.colorScheme = d ? "dark" : "light";
+          c.remove("dark");
+          c.add("light");
+          document.documentElement.style.colorScheme = "light";
         } catch (e) {}
       })();
     </script>

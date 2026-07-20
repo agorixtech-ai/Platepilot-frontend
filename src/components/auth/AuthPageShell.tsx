@@ -20,17 +20,17 @@ export function AuthPageShell({
 }) {
   return (
     <div
-      className="auth-page agorix-dark dark min-h-screen w-full flex items-center justify-center p-4 md:p-8 relative overflow-hidden bg-background text-foreground"
+      className="auth-page min-h-screen w-full flex items-center justify-center p-4 md:p-8 relative overflow-hidden bg-background text-foreground"
       style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
     >
       <style>{AUTH_ANIMATIONS}</style>
 
-      <div className="absolute top-[8%] left-[8%] w-[480px] h-[480px] rounded-full bg-white/[0.02] blur-[140px] pointer-events-none" />
+      <div className="absolute top-[8%] left-[8%] w-[480px] h-[480px] rounded-full bg-primary/[0.06] blur-[140px] pointer-events-none" />
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
           background:
-            "radial-gradient(ellipse 70% 50% at 50% -10%, oklch(1 0 0 / 4%) 0%, transparent 55%)",
+            "radial-gradient(ellipse 70% 50% at 50% -10%, rgba(22,163,74,0.08) 0%, transparent 55%)",
         }}
       />
 
@@ -64,7 +64,7 @@ export function AuthVisualPanel({ children }: { children: ReactNode }) {
         className="absolute inset-0 opacity-[0.04]"
         style={{
           backgroundImage:
-            "linear-gradient(rgba(255,255,255,0.8) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.8) 1px, transparent 1px)",
+            "linear-gradient(rgba(21,32,25,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(21,32,25,0.08) 1px, transparent 1px)",
           backgroundSize: "32px 32px",
         }}
       />

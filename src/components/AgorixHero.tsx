@@ -3,32 +3,33 @@ import { AnimatePresence, motion } from "framer-motion";
 import { AgorixNav } from "@/components/AgorixNav";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-/** Matches landing page (`index.tsx`) palette — neon kitchen dark */
+/** Matches PlatePilot brand palette — light landing (soft green-white) */
 const T = {
-  bg: "#111113",
-  ink: "#000000",
-  text: "#fff",
-  soft: "rgba(255,255,255,0.75)",
-  muted: "rgba(255,255,255,0.45)",
-  faint: "rgba(255,255,255,0.38)",
-  faint2: "rgba(255,255,255,0.32)",
-  nav: "rgba(255,255,255,0.72)",
-  border: "rgba(255,255,255,0.08)",
-  borderMid: "rgba(255,255,255,0.12)",
-  borderStrong: "rgba(255,255,255,0.22)",
-  surface: "rgba(255,255,255,0.02)",
-  inset: "rgba(255,255,255,0.04)",
-  accent: "#00FF88",
-  accentSoft: "rgba(0,255,136,0.12)",
-  accentBorder: "rgba(0,255,136,0.28)",
-  accentGlow: "rgba(0,255,136,0.5)",
-  purple: "#00E676",
-  warn: "#FFA500",
-  lime: "#00FF88",
+  bg: "#F6FAF7",
+  ink: "#FFFFFF",
+  text: "#152019",
+  soft: "rgba(21,32,25,0.78)",
+  muted: "#66736B",
+  faint: "rgba(21,32,25,0.42)",
+  faint2: "rgba(21,32,25,0.35)",
+  nav: "#66736B",
+  border: "rgba(21,32,25,0.1)",
+  borderMid: "rgba(21,32,25,0.14)",
+  borderStrong: "rgba(21,32,25,0.2)",
+  surface: "#FFFFFF",
+  inset: "#E8F7ED",
+  accent: "#16A34A",
+  accentSoft: "rgba(22,163,74,0.12)",
+  accentBorder: "rgba(22,163,74,0.28)",
+  accentGlow: "rgba(22,163,74,0.4)",
+  purple: "#A3E635",
+  warn: "#F59E0B",
+  lime: "#A3E635",
   limeDark: "#0A1A10",
-  gradient: "linear-gradient(135deg, #00FF88 0%, #00E676 50%, #14B8A6 100%)",
-  gradientA: "linear-gradient(90deg, #00FF88 0%, #00E676 100%)",
-  gradientB: "linear-gradient(90deg, #00E676 0%, #14B8A6 100%)",
+  gradient: "linear-gradient(90deg, #073B2A 0%, #0F7A4C 50%, #22C55E 100%)",
+  gradientHover: "linear-gradient(90deg, #0A4A35 0%, #12965C 50%, #4ADE80 100%)",
+  gradientA: "linear-gradient(90deg, #0F7A4C 0%, #16A34A 100%)",
+  gradientB: "linear-gradient(90deg, #16A34A 0%, #22C55E 100%)",
 } as const;
 
 const gradientClip = (gradient: string) =>
@@ -85,16 +86,17 @@ const btnOutlineSm = {
   letterSpacing: "0.06em",
   height: 40,
   padding: "0 18px",
-  color: T.nav,
-  border: `1px solid ${T.borderStrong}`,
-  borderRadius: 9999,
-  background: "transparent",
+  color: T.accent,
+  border: `1px solid ${T.accent}`,
+  borderRadius: 12,
+  background: "#FFFFFF",
 };
 const btnSolidSm = {
   ...btnOutlineSm,
   color: T.ink,
-  border: `1px solid ${T.border}`,
-  background: "#fff",
+  border: "none",
+  background: T.accent,
+  boxShadow: "0 4px 12px rgba(22, 163, 74, 0.22)",
 };
 const btnOutlineLg = { ...btnOutlineSm, fontSize: 16, height: 48, padding: "0 24px" };
 const btnSolidLg = { ...btnSolidSm, fontSize: 16, height: 48, padding: "0 26px" };
@@ -318,7 +320,7 @@ function AnimatedDashboard({
             right: 0,
             top: LIST_H / 2 - ROW_H / 2,
             height: ROW_H,
-            background: `linear-gradient(90deg,${T.accentSoft},rgba(56,189,248,0.04))`,
+            background: `linear-gradient(90deg,${T.accentSoft},rgba(34,197,94,0.04))`,
             borderTop: `1px solid ${T.accentBorder}`,
             borderBottom: `1px solid ${T.accentBorder}`,
             pointerEvents: "none",
@@ -415,28 +417,28 @@ function AnimatedDashboard({
         <path
           d={`M${LIST_RIGHT - HALF},${CONNECT_Y - 22} C${LIST_RIGHT - HALF + 12},${CONNECT_Y - 22} ${LIST_RIGHT - HALF + 22},${CONNECT_Y} ${SPINE_X - HALF},${CONNECT_Y}`}
           fill="none"
-          stroke="rgba(56,189,248,0.22)"
+          stroke="rgba(34,197,94,0.22)"
           strokeWidth="1.3"
           strokeDasharray="3 5"
         />
         <path
           d={`M${LIST_RIGHT - HALF},${CONNECT_Y} L${SPINE_X - HALF},${CONNECT_Y}`}
           fill="none"
-          stroke="rgba(56,189,248,0.35)"
+          stroke="rgba(34,197,94,0.35)"
           strokeWidth="1.3"
           strokeDasharray="3 5"
         />
         <path
           d={`M${LIST_RIGHT - HALF},${CONNECT_Y + 22} C${LIST_RIGHT - HALF + 12},${CONNECT_Y + 22} ${LIST_RIGHT - HALF + 22},${CONNECT_Y} ${SPINE_X - HALF},${CONNECT_Y}`}
           fill="none"
-          stroke="rgba(56,189,248,0.22)"
+          stroke="rgba(34,197,94,0.22)"
           strokeWidth="1.3"
           strokeDasharray="3 5"
         />
         <path
           d={`M${SPINE_X - HALF},${DASH_TOP + 10} L${SPINE_X - HALF},${SPINE_BOTTOM}`}
           fill="none"
-          stroke="rgba(255,255,255,.1)"
+          stroke="rgba(21,32,25,.12)"
           strokeWidth="1.3"
           strokeDasharray="3 5"
         />
@@ -877,8 +879,8 @@ export function AgorixHero() {
         overflow: "hidden",
         fontFamily: "'Inter', system-ui, sans-serif",
         color: T.text,
-        background: `radial-gradient(900px 520px at 72% 28%, rgba(56,189,248,0.06), transparent 58%),
-                     radial-gradient(700px 400px at 18% 80%, rgba(167,139,250,0.04), transparent 55%),
+        background: `radial-gradient(900px 520px at 72% 28%, rgba(22,163,74,0.1), transparent 58%),
+                     radial-gradient(700px 400px at 18% 80%, rgba(163,230,53,0.07), transparent 55%),
                      ${T.bg}`,
         borderBottom: `1px solid ${T.border}`,
         ["--hero-pad" as string]: `clamp(20px, 3vw, ${LAYOUT.pad}px)`,
@@ -913,7 +915,7 @@ export function AgorixHero() {
         @keyframes ag-pop     { from{opacity:0;transform:translateY(10px) scale(.97)} to{opacity:1;transform:none} }
         @keyframes ag-fadein  { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
         @keyframes ag-float   { from{transform:translateY(0)} to{transform:translateY(-8px)} }
-        @keyframes ag-node    { 0%,100%{box-shadow:0 0 0 5px rgba(0,0,0,0),0 0 14px ${T.accentGlow}} 50%{box-shadow:0 0 0 9px rgba(56,189,248,.14),0 0 28px ${T.accentGlow}} }
+        @keyframes ag-node    { 0%,100%{box-shadow:0 0 0 5px rgba(0,0,0,0),0 0 14px ${T.accentGlow}} 50%{box-shadow:0 0 0 9px rgba(34,197,94,.14),0 0 28px ${T.accentGlow}} }
         @keyframes ag-scroll { from{transform:translate3d(0,0,0)} to{transform:translate3d(0,-${SCROLL_DISTANCE}px,0)} }
         @keyframes ag-shimmer { 0%{background-position:-200px 0} 100%{background-position:220px 0} }
         @keyframes ag-dots    { 0%,20%{opacity:.2} 50%{opacity:1} 80%,100%{opacity:.2} }
@@ -931,15 +933,15 @@ export function AgorixHero() {
           position: "absolute",
           inset: 0,
           backgroundImage:
-            "linear-gradient(rgba(255,255,255,.25) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.25) 1px,transparent 1px)",
+            "linear-gradient(rgba(21,32,25,.2) 1px,transparent 1px),linear-gradient(90deg,rgba(21,32,25,.2) 1px,transparent 1px)",
           backgroundSize: "60px 60px",
-          opacity: 0.012,
+          opacity: 0.045,
           pointerEvents: "none",
         }}
       />
 
       {/* ── NAV ── */}
-      <AgorixNav insetClass="agorix-hero__inset agorix-nav__inset" />
+      <AgorixNav insetClass="agorix-hero__inset agorix-nav__inset" variant="light" />
 
       {/* ── MOBILE: plain responsive copy, no scaled canvas, no decorative dashboard ── */}
       {isMobile && (
@@ -981,7 +983,17 @@ export function AgorixHero() {
               animation: "ag-up .7s .32s both",
             }}
           >
-            <a href="/login" style={{ ...btnSolidLg, flex: "1 1 auto" }}>
+            <a
+              href="/login"
+              style={{ ...btnSolidLg, flex: "1 1 auto" }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "#15803D";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = T.accent;
+                e.currentTarget.style.filter = "none";
+              }}
+            >
               Get Started
             </a>
             <a href="#features" style={{ ...btnOutlineLg, flex: "1 1 auto" }}>
@@ -1080,7 +1092,16 @@ export function AgorixHero() {
                   animation: "ag-up .7s .32s both",
                 }}
               >
-                <a href="/login" style={btnSolidLg}>
+                <a
+                  href="/login"
+                  style={btnSolidLg}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = "#15803D";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = T.accent;
+                  }}
+                >
                   Get Started
                 </a>
                 <a href="#features" style={btnOutlineLg}>

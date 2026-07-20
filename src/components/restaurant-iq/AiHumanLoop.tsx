@@ -43,7 +43,7 @@ const steps = [
 function LoopBackArrow() {
   return (
     <svg
-      className="mx-auto mt-8 h-8 w-32 text-white/15"
+      className="mx-auto mt-8 h-8 w-32 text-border"
       viewBox="0 0 128 32"
       fill="none"
       stroke="currentColor"
@@ -59,26 +59,26 @@ function LoopBackArrow() {
 
 export function AiHumanLoop() {
   return (
-    <section className="relative overflow-hidden bg-section-ai-loop py-24 sm:py-32">
-      <div className="pointer-events-none absolute inset-0 -z-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_0%,rgba(255,255,255,0.04),transparent_70%)]" />
+    <section className="relative overflow-hidden bg-background py-24 sm:py-32">
+      <div className="pointer-events-none absolute inset-0 -z-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_0%,rgba(22,163,74,0.06),transparent_70%)]" />
 
       <div className="mx-auto max-w-7xl px-5 lg:px-8">
         <div className="mx-auto max-w-3xl text-center">
-          <div className="inline-flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.03] px-4 py-1.5 text-xs font-medium uppercase tracking-widest text-white/40 backdrop-blur">
-            <span className="inline-flex h-1.5 w-1.5 animate-pulse rounded-full bg-teal-400" />
+          <div className="inline-flex items-center gap-2 rounded-full border border-border bg-secondary/60 px-4 py-1.5 text-xs font-medium uppercase tracking-widest text-muted-foreground backdrop-blur">
+            <span className="inline-flex h-1.5 w-1.5 animate-pulse rounded-full bg-primary" />
             AI + Human Loop
           </div>
-          <h2 className="mt-6 bg-gradient-to-b from-white via-white to-white/60 bg-clip-text text-4xl font-bold tracking-tight text-transparent sm:text-5xl">
+          <h2 className="mt-6 text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
             AI+Human loop decision making
           </h2>
-          <p className="mx-auto mt-4 max-w-xl leading-relaxed text-white/50">
+          <p className="mx-auto mt-4 max-w-xl leading-relaxed text-muted-foreground">
             The loop never closes without a human checkpoint. Every AI recommendation is
             inspectable, overrideable, and teaches the system to be better next time.
           </p>
         </div>
 
         <div className="relative mt-20">
-          <div className="absolute left-8 right-8 top-10 hidden border-t border-dashed border-white/[0.06] lg:block" />
+          <div className="absolute left-8 right-8 top-10 hidden border-t border-dashed border-border lg:block" />
 
           <div className="relative grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {steps.map((s) => {
@@ -88,13 +88,13 @@ export function AiHumanLoop() {
                   <div
                     className={`relative flex flex-col items-center text-center rounded-2xl p-8 transition-all duration-500 ${
                       s.hero
-                        ? "border-2 border-teal-500/30 bg-teal-500/[0.04] shadow-[0_0_60px_-20px_rgba(20,184,166,0.15)] hover:border-teal-400/50 hover:shadow-[0_0_80px_-20px_rgba(20,184,166,0.25)]"
-                        : "border border-white/[0.06] bg-white/[0.02] hover:border-white/[0.12] hover:bg-white/[0.04] hover:shadow-[0_0_40px_-15px_rgba(255,255,255,0.05)]"
+                        ? "border-2 border-primary/30 bg-primary/[0.04] shadow-[0_0_60px_-20px_rgba(34,197,94,0.15)] hover:border-primary/50 hover:shadow-[0_0_80px_-20px_rgba(34,197,94,0.25)]"
+                        : "border border-border bg-card hover:border-primary/20 hover:bg-secondary/40 hover:shadow-sm"
                     }`}
                   >
                     <div
                       className={`absolute left-4 top-4 text-[10px] font-mono font-semibold tracking-wider ${
-                        s.hero ? "text-teal-400/60" : "text-white/[0.15]"
+                        s.hero ? "text-primary/60" : "text-muted-foreground/40"
                       }`}
                     >
                       {s.label}/{steps.length}
@@ -103,32 +103,34 @@ export function AiHumanLoop() {
                     <div
                       className={`flex h-20 w-20 items-center justify-center rounded-full ring-1 backdrop-blur-sm transition-all duration-500 group-hover:scale-110 ${
                         s.hero
-                          ? "bg-teal-500/10 ring-teal-500/30 shadow-[0_0_30px_-8px_rgba(20,184,166,0.2)]"
-                          : "bg-white/[0.04] ring-white/[0.06] group-hover:bg-white/[0.06] group-hover:ring-white/[0.12]"
+                          ? "bg-primary/10 ring-primary/30 shadow-[0_0_30px_-8px_rgba(34,197,94,0.2)]"
+                          : "bg-secondary ring-border group-hover:bg-primary-soft group-hover:ring-primary/20"
                       }`}
                     >
                       <Icon
                         size={24}
                         className={
-                          s.hero ? "text-teal-300" : "text-white/60 group-hover:text-white/80"
+                          s.hero
+                            ? "text-primary"
+                            : "text-muted-foreground group-hover:text-foreground"
                         }
                       />
                     </div>
 
                     <h3
                       className={`mt-6 text-lg font-bold tracking-tight ${
-                        s.hero ? "text-white" : "text-white/90"
+                        s.hero ? "text-foreground" : "text-foreground/90"
                       }`}
                     >
                       {s.title}
                     </h3>
-                    <p className="mt-2.5 max-w-sm text-sm leading-relaxed text-white/50">
+                    <p className="mt-2.5 max-w-sm text-sm leading-relaxed text-muted-foreground">
                       {s.desc}
                     </p>
 
                     {s.hero && (
-                      <div className="mt-5 inline-flex items-center gap-1.5 rounded-full bg-teal-500/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-widest text-teal-300">
-                        <span className="inline-flex h-1.5 w-1.5 animate-ping rounded-full bg-teal-400" />
+                      <div className="mt-5 inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-widest text-primary">
+                        <span className="inline-flex h-1.5 w-1.5 animate-ping rounded-full bg-primary" />
                         Human in the loop
                       </div>
                     )}
@@ -144,9 +146,9 @@ export function AiHumanLoop() {
         </div>
 
         <div className="mt-6 flex justify-center">
-          <div className="inline-flex items-center gap-3 rounded-full border border-white/[0.06] bg-white/[0.02] px-5 py-2.5 text-sm text-white/40 backdrop-blur">
+          <div className="inline-flex items-center gap-3 rounded-full border border-border bg-card px-5 py-2.5 text-sm text-muted-foreground backdrop-blur">
             <svg
-              className="h-4 w-4 animate-[spin_8s_linear_infinite] text-teal-400/60"
+              className="h-4 w-4 animate-[spin_8s_linear_infinite] text-primary/60"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"

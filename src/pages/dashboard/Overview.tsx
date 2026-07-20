@@ -469,19 +469,22 @@ function OverviewPage() {
   return (
     <div className="space-y-5 animate-fade-in-up relative">
       {/* ── Page Header ─────────────────────────────────────────────────────── */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div
+        className="flex flex-col gap-3 rounded-xl p-5 text-white shadow-card sm:flex-row sm:items-center sm:justify-between"
+        style={{ background: "var(--gradient-brand)" }}
+      >
         <div>
           <div className="flex items-center gap-2.5">
-            <h2 className="text-xl font-extrabold tracking-tight text-foreground">Overview</h2>
+            <h2 className="text-xl font-extrabold tracking-tight">Overview</h2>
             <span className="relative flex h-2 w-2">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-75" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-success" />
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#A3E635] opacity-75" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-[#A3E635]" />
             </span>
-            <span className="text-[9px] font-bold uppercase tracking-widest text-success">
+            <span className="text-[9px] font-bold uppercase tracking-widest text-[#A3E635]">
               Live
             </span>
           </div>
-          <p className="text-[12px] text-muted-foreground mt-0.5">
+          <p className="mt-0.5 text-[12px] text-white/80">
             Key metrics and performance at a glance
           </p>
         </div>
@@ -493,7 +496,7 @@ function OverviewPage() {
             size="sm"
             onClick={refreshAll}
             disabled={isLiveFetching}
-            className="group/refresh h-9 gap-1.5 text-[12px]"
+            className="group/refresh h-9 gap-1.5 border-white/30 bg-white/10 text-[12px] text-white hover:bg-white/20 hover:text-white"
           >
             <RefreshCw
               className={`h-3.5 w-3.5 transition-transform ${isLiveFetching ? "animate-spin" : "group-hover/refresh:rotate-45"}`}
@@ -1316,7 +1319,7 @@ function OverviewPage() {
                     <div className="overflow-x-auto rounded-lg border border-border bg-secondary/10">
                       <table className="w-full text-[11px]">
                         <thead>
-                          <tr className="border-b border-border bg-secondary/40 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                          <tr className="border-b border-border bg-[var(--brand-canvas)] text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
                             <th className="p-2.5 text-left">Branch</th>
                             <th className="p-2.5 text-center">POS</th>
                             <th className="p-2.5 text-center">Tally</th>

@@ -80,7 +80,7 @@ function OtpInput({
           className={`min-w-0 flex-1 max-w-12 sm:max-w-14 h-12 sm:h-14 text-center text-lg sm:text-xl font-bold border rounded-2xl outline-none transition-all duration-200
             ${
               d
-                ? "bg-white/10 border-white/25 text-white shadow-sm"
+                ? "bg-primary-soft border-primary/30 text-foreground shadow-sm"
                 : "auth-input border text-foreground"
             }
             focus:border-primary/80 focus:ring-2 focus:ring-primary/20
@@ -257,12 +257,12 @@ function LoginPage() {
               <ShieldCheck className="w-3.5 h-3.5" />
               <span className="text-[11px] font-bold uppercase tracking-widest">Secure Login</span>
             </div>
-            <h2 className="text-3xl font-extrabold text-foreground tracking-tight leading-tight">
+            <h2 className="text-3xl font-extrabold text-white tracking-tight leading-tight">
               Every login is
               <br />
-              <span className="text-white/70">verified by email</span>
+              <span className="text-[#A3E635]">verified by email</span>
             </h2>
-            <p className="mt-4 text-sm text-muted-foreground leading-relaxed max-w-[300px]">
+            <p className="mt-4 text-sm text-white/80 leading-relaxed max-w-[300px]">
               Even if your password is compromised, your account stays safe with mandatory email OTP
               verification on every sign-in.
             </p>
@@ -286,7 +286,7 @@ function LoginPage() {
                 className={`absolute ${b.pos} flex items-center gap-1.5 px-2.5 py-1.5 rounded-full auth-badge-float shadow-lg`}
               >
                 <span className="text-xs">{b.icon}</span>
-                <span className="text-[10px] font-semibold text-muted-foreground whitespace-nowrap">
+                <span className="text-[10px] font-semibold text-[var(--brand-muted)] whitespace-nowrap">
                   {b.label}
                 </span>
               </div>
@@ -303,7 +303,7 @@ function LoginPage() {
                 <div className="w-6 h-6 rounded-full auth-list-dot flex items-center justify-center text-[10px] font-bold shrink-0">
                   {item.step}
                 </div>
-                <span className="text-[12px] text-muted-foreground font-medium">{item.text}</span>
+                <span className="text-[12px] text-white/85 font-medium">{item.text}</span>
               </div>
             ))}
           </div>

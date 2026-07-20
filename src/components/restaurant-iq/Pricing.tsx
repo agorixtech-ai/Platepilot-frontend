@@ -99,7 +99,7 @@ export function Pricing() {
                 href="#cta"
                 className={`mt-8 inline-flex items-center justify-center rounded-full px-5 py-3 text-sm font-semibold transition ${
                   t.highlight
-                    ? "bg-primary text-primary-foreground hover:bg-primary-dark"
+                    ? "bg-primary text-primary-foreground"
                     : "border border-border bg-background text-foreground hover:bg-secondary"
                 }`}
               >

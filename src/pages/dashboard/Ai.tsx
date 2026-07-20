@@ -57,28 +57,31 @@ function RouteComponent() {
 
   return (
     <div className="flex h-[calc(100vh-8rem)] flex-col">
-      <div className="mb-4 flex items-end justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Pilot AI</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Your intelligent restaurant assistant
-          </p>
+      <div
+        className="mb-4 overflow-hidden rounded-xl p-5 text-white shadow-card"
+        style={{ background: "var(--gradient-brand)" }}
+      >
+        <div className="flex items-end justify-between gap-3">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">Pilot AI</h1>
+            <p className="mt-1 text-sm text-white/80">Your intelligent restaurant assistant</p>
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={startNewChat}
+            disabled={isTyping}
+            className="gap-1.5 text-white/90 hover:bg-white/15 hover:text-white"
+          >
+            <RotateCcw className="h-3.5 w-3.5" />
+            New chat
+          </Button>
         </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={startNewChat}
-          disabled={isTyping}
-          className="gap-1.5 text-muted-foreground"
-        >
-          <RotateCcw className="h-3.5 w-3.5" />
-          New chat
-        </Button>
       </div>
 
       <div className="flex min-h-0 flex-1 gap-4">
-        <Card className="hidden w-64 shrink-0 flex-col overflow-hidden border-border/80 bg-card/50 backdrop-blur-xl md:flex">
-          <div className="border-b border-border/50 px-4 py-3 text-sm font-semibold text-foreground">
+        <Card className="hidden w-64 shrink-0 flex-col overflow-hidden border-border bg-white md:flex hover:translate-y-0 hover:shadow-card">
+          <div className="border-b border-border px-4 py-3 text-sm font-semibold text-foreground">
             Chat history
           </div>
           <ScrollArea className="flex-1">
@@ -117,7 +120,7 @@ function RouteComponent() {
           </ScrollArea>
         </Card>
 
-        <Card className="flex flex-1 flex-col overflow-hidden border-border/80 bg-card/50 backdrop-blur-xl">
+        <Card className="flex flex-1 flex-col overflow-hidden border-border bg-white hover:translate-y-0 hover:shadow-card">
           <ScrollArea className="flex-1 p-4" ref={scrollRef}>
             <div className="space-y-4">
               {messages.map((message) => (
@@ -140,7 +143,9 @@ function RouteComponent() {
                         ? "max-w-[90%]"
                         : "max-w-[70%]"
                     } ${
-                      message.role === "user" ? "bg-primary text-primary-foreground" : "bg-muted"
+                      message.role === "user"
+                        ? "bg-primary text-primary-foreground"
+                        : "border-l-4 border-l-primary bg-secondary"
                     }`}
                   >
                     {message.role === "assistant" ? (
@@ -176,11 +181,11 @@ function RouteComponent() {
                       <Bot className="h-4 w-4" />
                     </AvatarFallback>
                   </Avatar>
-                  <div className="max-w-[70%] rounded-2xl bg-muted px-4 py-3">
+                  <div className="max-w-[70%] rounded-2xl bg-secondary px-4 py-3">
                     <div className="flex gap-1">
-                      <div className="h-2 w-2 animate-bounce rounded-full bg-muted-foreground/50 [animation-delay:-0.3s]" />
-                      <div className="h-2 w-2 animate-bounce rounded-full bg-muted-foreground/50 [animation-delay:-0.15s]" />
-                      <div className="h-2 w-2 animate-bounce rounded-full bg-muted-foreground/50" />
+                      <div className="h-2 w-2 animate-bounce rounded-full bg-primary [animation-delay:-0.3s]" />
+                      <div className="h-2 w-2 animate-bounce rounded-full bg-primary [animation-delay:-0.15s]" />
+                      <div className="h-2 w-2 animate-bounce rounded-full bg-primary" />
                     </div>
                   </div>
                 </div>

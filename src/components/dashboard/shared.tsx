@@ -98,7 +98,7 @@ export const METRIC_CONFIG: Record<
     label: "Total Sales",
     tabLabel: "Sales",
     chartColor: "var(--color-primary)",
-    activeTab: "bg-primary text-primary-foreground",
+    activeTab: "bg-primary text-primary-foreground border-0",
   },
   orders: {
     label: "Orders",
@@ -116,7 +116,7 @@ export const METRIC_CONFIG: Record<
     label: "Gross Margin %",
     tabLabel: "Margin",
     chartColor: "var(--color-chart-3)",
-    activeTab: "bg-primary text-primary-foreground",
+    activeTab: "bg-primary text-primary-foreground border-0",
   },
 };
 

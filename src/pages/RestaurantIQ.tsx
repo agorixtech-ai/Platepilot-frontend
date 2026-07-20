@@ -16,11 +16,12 @@ import { Footer } from "@/components/restaurant-iq/Footer";
 function RestaurantIQ() {
   return (
     <div
-      className="dark min-h-screen restaurant-iq"
-      style={{ background: "#111113", color: "#fff", fontFamily: "'Inter', system-ui, sans-serif" }}
+      className="min-h-screen restaurant-iq bg-background text-foreground"
+      style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
     >
       <AgorixNav
         sticky
+        variant="light"
         links={[
           { label: "Product", dropdown: [{ label: "Restaurant IQ", href: "/restaurant-iq" }] },
           { label: "Pricing", href: "#pricing" },

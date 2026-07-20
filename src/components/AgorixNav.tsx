@@ -3,14 +3,37 @@ import { useEffect, useRef, useState } from "react";
 import { Menu, X } from "lucide-react";
 import { LOGO_ALT, LOGO_SRC } from "@/components/AppLogo";
 
-const T = {
-  bg: "#111113",
-  ink: "#080808",
-  text: "#fff",
-  nav: "rgba(255,255,255,0.72)",
-  border: "rgba(255,255,255,0.08)",
-  borderStrong: "rgba(255,255,255,0.22)",
-  accent: "#00FF88",
+const themes = {
+  light: {
+    bg: "#F6FAF7",
+    ink: "#FFFFFF",
+    text: "#152019",
+    nav: "#66736B",
+    border: "rgba(21,32,25,0.1)",
+    borderStrong: "rgba(21,32,25,0.2)",
+    dropdownBg: "#FFFFFF",
+    dropdownBorder: "#DDE7E1",
+    dropdownItem: "#152019",
+    dropdownHover: "#E8F7ED",
+    solidBg: "#16A34A",
+    solidHover: "#15803D",
+    solidColor: "#FFFFFF",
+  },
+  dark: {
+    bg: "#071A14",
+    ink: "#FFFFFF",
+    text: "#fff",
+    nav: "rgba(255,255,255,0.72)",
+    border: "rgba(255,255,255,0.08)",
+    borderStrong: "rgba(255,255,255,0.22)",
+    dropdownBg: "rgba(17, 17, 19, 0.96)",
+    dropdownBorder: "rgba(255, 255, 255, 0.12)",
+    dropdownItem: "rgba(255, 255, 255, 0.75)",
+    dropdownHover: "rgba(255, 255, 255, 0.06)",
+    solidBg: "#16A34A",
+    solidHover: "#15803D",
+    solidColor: "#FFFFFF",
+  },
 } as const;
 
 const btnBase = {
@@ -22,26 +45,6 @@ const btnBase = {
   textDecoration: "none",
   lineHeight: 1,
   whiteSpace: "nowrap" as const,
-};
-
-const btnOutlineSm = {
-  ...btnBase,
-  fontSize: 14,
-  fontWeight: 700,
-  letterSpacing: "0.06em",
-  height: 40,
-  padding: "0 18px",
-  color: T.nav,
-  border: `1px solid ${T.borderStrong}`,
-  borderRadius: 9999,
-  background: "transparent",
-};
-
-const btnSolidSm = {
-  ...btnOutlineSm,
-  color: T.ink,
-  border: `1px solid ${T.border}`,
-  background: "#fff",
 };
 
 type NavItem =
@@ -59,16 +62,41 @@ type AgorixNavProps = {
   links?: NavItem[];
   insetClass?: string;
   sticky?: boolean;
+  /** Landing uses light; RestaurantIQ/Demo stay dark. */
+  variant?: "light" | "dark";
 };
 
 export function AgorixNav({
   links = defaultLinks,
   insetClass = "agorix-nav__inset",
   sticky = false,
+  variant = "light",
 }: AgorixNavProps) {
+  const T = themes[variant];
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const navRef = useRef<HTMLDivElement>(null);
+
+  const btnOutlineSm = {
+    ...btnBase,
+    fontSize: 14,
+    fontWeight: 700,
+    letterSpacing: "0.06em",
+    height: 40,
+    padding: "0 18px",
+    color: "#16A34A",
+    border: "1px solid #16A34A",
+    borderRadius: 12,
+    background: "#FFFFFF",
+  };
+
+  const btnSolidSm = {
+    ...btnOutlineSm,
+    color: T.solidColor,
+    border: "none",
+    background: T.solidBg,
+    boxShadow: "0 4px 12px rgba(22, 163, 74, 0.22)",
+  };
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -108,25 +136,25 @@ export function AgorixNav({
           transform: translateX(-50%);
           min-width: 180px;
           padding: 0.4rem 0;
-          background: rgba(17, 17, 19, 0.96);
+          background: ${T.dropdownBg};
           backdrop-filter: blur(20px);
           -webkit-backdrop-filter: blur(20px);
-          border: 1px solid rgba(255, 255, 255, 0.12);
+          border: 1px solid ${T.dropdownBorder};
           border-radius: 12px;
-          box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+          box-shadow: 0 10px 40px rgba(7, 26, 20, 0.12);
           z-index: 70;
         }
         .agorix-nav__dropdown-item {
           display: block;
           padding: 0.65rem 1.1rem;
           font-size: 0.82rem;
-          color: rgba(255, 255, 255, 0.75);
+          color: ${T.dropdownItem};
           text-decoration: none;
           transition: background 0.15s ease, color 0.15s ease;
         }
         .agorix-nav__dropdown-item:hover {
-          background: rgba(255, 255, 255, 0.06);
-          color: #fff;
+          background: ${T.dropdownHover};
+          color: ${T.text};
         }
         .agorix-nav__toggle {
           display: none;
@@ -152,14 +180,14 @@ export function AgorixNav({
           flex-direction: column;
           gap: 4px;
           padding: 8px clamp(20px, 3vw, 40px) 20px;
-          border-top: 1px solid rgba(255, 255, 255, 0.08);
+          border-top: 1px solid ${T.border};
         }
         .agorix-nav__mobile-link {
           padding: 0.85rem 0.25rem;
           font-size: 0.95rem;
-          color: rgba(255, 255, 255, 0.72);
+          color: ${T.nav};
           text-decoration: none;
-          border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+          border-bottom: 1px solid ${T.border};
         }
         .agorix-nav__mobile-buttons {
           display: flex;
@@ -311,7 +339,14 @@ export function AgorixNav({
               <a href="/demo" style={btnOutlineSm}>
                 Get Demo
               </a>
-              <a href="/login" style={btnSolidSm}>
+              <a href="/login" style={btnSolidSm}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = T.solidHover;
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = T.solidBg;
+                }}
+              >
                 login
               </a>
             </div>
@@ -368,7 +403,14 @@ export function AgorixNav({
             <a href="/demo" style={btnOutlineSm} onClick={() => setMobileOpen(false)}>
               Get Demo
             </a>
-            <a href="/login" style={btnSolidSm} onClick={() => setMobileOpen(false)}>
+            <a href="/login" style={btnSolidSm} onClick={() => setMobileOpen(false)}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = T.solidHover;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = T.solidBg;
+              }}
+            >
               login
             </a>
           </div>
