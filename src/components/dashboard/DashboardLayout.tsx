@@ -44,7 +44,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { ThemeToggle } from "@/components/theme-toggle";
 import {
   getStoredUser,
   clearTokens,
@@ -119,44 +118,26 @@ function NavSection({
                   isActive={isActive}
                   tooltip={itemLabel}
                   className={cn(
-                    "group/nav h-10 rounded-xl text-[13px] font-medium text-sidebar-foreground/65",
-                    "transition-[background,box-shadow,transform,color] duration-200 ease-out",
-                    "hover:bg-sidebar-accent/70 hover:text-sidebar-foreground",
-                    "hover:translate-x-1 group-data-[collapsible=icon]:hover:translate-x-0",
-                    "active:scale-[0.98] group-data-[collapsible=icon]:active:scale-100",
+                    "group/nav h-10 rounded-xl text-[13px] font-medium text-sidebar-foreground",
+                    "transition-[background,color] duration-200 ease-out",
+                    "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
                     "group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:rounded-lg",
                     "data-[active=true]:bg-transparent data-[active=true]:text-inherit",
-                    isActive && [
-                      "bg-sidebar-accent/50 text-sidebar-foreground translate-x-1",
-                      "shadow-[inset_0_1px_0_0_oklch(1_0_0/8%)]",
-                      "hover:bg-sidebar-accent hover:shadow-[0_4px_24px_var(--sidebar-ring)]",
-                      "group-data-[collapsible=icon]:translate-x-0",
-                      "group-data-[collapsible=icon]:!bg-sidebar-primary group-data-[collapsible=icon]:text-sidebar-primary-foreground",
-                      "group-data-[collapsible=icon]:shadow-[0_0_14px_var(--sidebar-ring)]",
-                      "group-data-[collapsible=icon]:ring-2 group-data-[collapsible=icon]:ring-sidebar-primary/30",
-                      "group-data-[collapsible=icon]:hover:!bg-sidebar-primary group-data-[collapsible=icon]:hover:shadow-[0_0_18px_var(--sidebar-ring)]",
-                    ],
+                    isActive &&
+                      "bg-sidebar-primary text-sidebar-primary-foreground hover:bg-sidebar-primary hover:text-sidebar-primary-foreground",
                   )}
                 >
                   <Link
                     to={to}
                     className="flex items-center gap-2.5 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:gap-0"
                   >
-                    <span
-                      className={cn(
-                        "flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-all duration-200",
-                        "group-data-[collapsible=icon]:h-auto group-data-[collapsible=icon]:w-auto group-data-[collapsible=icon]:rounded-none group-data-[collapsible=icon]:bg-transparent group-data-[collapsible=icon]:shadow-none group-data-[collapsible=icon]:ring-0",
-                        isActive
-                          ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-[0_0_18px_var(--sidebar-ring)] ring-2 ring-sidebar-primary/30 group-data-[collapsible=icon]:bg-transparent group-data-[collapsible=icon]:text-inherit group-data-[collapsible=icon]:shadow-none group-data-[collapsible=icon]:ring-0"
-                          : "bg-transparent group-hover/nav:bg-sidebar-foreground/10 group-hover/nav:scale-110 group-hover/nav:ring-1 group-hover/nav:ring-sidebar-foreground/10 group-data-[collapsible=icon]:group-hover/nav:scale-100 group-data-[collapsible=icon]:group-hover/nav:ring-0 group-data-[collapsible=icon]:group-hover/nav:bg-transparent",
-                      )}
-                    >
-                      <Icon className="h-4 w-4 shrink-0 transition-transform duration-200 group-hover/nav:scale-105 group-data-[collapsible=icon]:group-hover/nav:scale-100" />
+                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg group-data-[collapsible=icon]:h-auto group-data-[collapsible=icon]:w-auto">
+                      <Icon className="h-4 w-4 shrink-0" />
                     </span>
                     <span
                       className={cn(
-                        "transition-colors duration-200 group-data-[collapsible=icon]:hidden",
-                        isActive && "font-semibold text-sidebar-primary",
+                        "group-data-[collapsible=icon]:hidden",
+                        isActive && "font-semibold",
                       )}
                     >
                       {itemLabel}
@@ -172,7 +153,7 @@ function NavSection({
                   <SidebarMenuBadge
                     className={cn(
                       "rounded-md bg-sidebar-border/60 text-[10px] font-semibold text-sidebar-foreground/60",
-                      isActive && "bg-sidebar-primary/15 text-sidebar-primary",
+                      isActive && "bg-white/20 text-sidebar-primary-foreground",
                     )}
                   >
                     {count}
@@ -288,10 +269,6 @@ export function DashboardLayout({ children }: { children?: ReactNode }) {
 
               {/* Actions row */}
               <div className="flex items-center gap-1 group-data-[collapsible=icon]:hidden">
-                <ThemeToggle
-                  buttonClassName="text-sidebar-foreground/55 hover:text-sidebar-foreground hover:bg-sidebar-accent"
-                  contentAlign="center"
-                />
                 <Button
                   variant="ghost"
                   size="sm"
@@ -333,7 +310,7 @@ function MainPanel({
 
   return (
     <SidebarInset className="flex flex-col overflow-hidden bg-background dashboard-canvas">
-      <header className="sticky top-0 z-[var(--z-sticky)] shrink-0 border-b border-border/60 bg-card/90 backdrop-blur-xl">
+      <header className="sticky top-0 z-[var(--z-sticky)] shrink-0 border-b border-border bg-white">
         <div className="dashboard-topbar-inner flex w-full items-center gap-3 px-4 sm:px-6 md:px-8">
           {(state === "collapsed" || isMobile) && (
             <SidebarTrigger className="h-9 w-9 shrink-0 rounded-xl text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground [&_svg]:size-4" />
@@ -360,7 +337,6 @@ function MainPanel({
               })}
             </div>
 
-            <ThemeToggle className="hidden sm:inline-flex" contentAlign="center" />
             <Button
               variant="ghost"
               size="sm"

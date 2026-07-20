@@ -79,7 +79,7 @@ const timelineData = [
 export function IntegrationsTimeline() {
   return (
     <div className="w-full">
-      <RadialOrbitalTimeline timelineData={timelineData} className="bg-[#111113]" />
+      <RadialOrbitalTimeline timelineData={timelineData} className="bg-background" />
     </div>
   );
 }

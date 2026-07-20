@@ -64,7 +64,7 @@ function OtpInput({
           className={`min-w-0 flex-1 max-w-12 sm:max-w-14 h-12 sm:h-14 text-center text-lg sm:text-xl font-bold border rounded-2xl outline-none transition-all duration-200
             ${
               d
-                ? "bg-white/10 border-white/25 text-white shadow-sm"
+                ? "bg-primary-soft border-primary/30 text-foreground shadow-sm"
                 : "auth-input border text-foreground"
             }
             focus:border-primary/80 focus:ring-2 focus:ring-primary/20
@@ -204,12 +204,12 @@ function SignupPage() {
                 Email Verified
               </span>
             </div>
-            <h2 className="text-3xl font-extrabold text-foreground tracking-tight leading-tight">
+            <h2 className="text-3xl font-extrabold text-white tracking-tight leading-tight">
               Your account,
               <br />
-              <span className="text-white/70">verified & secured</span>
+              <span className="text-[#A3E635]">verified & secured</span>
             </h2>
-            <p className="mt-4 text-sm text-muted-foreground leading-relaxed max-w-[300px]">
+            <p className="mt-4 text-sm text-white/80 leading-relaxed max-w-[300px]">
               We verify every new account through email OTP before activation — no bots, no fake
               accounts.
             </p>
@@ -232,7 +232,7 @@ function SignupPage() {
                 key={b.label}
                 className={`absolute ${b.pos} px-2.5 py-1.5 rounded-full auth-badge-float shadow-lg`}
               >
-                <span className="text-[10px] font-semibold text-muted-foreground whitespace-nowrap">
+                <span className="text-[10px] font-semibold text-[var(--brand-muted)] whitespace-nowrap">
                   {b.label}
                 </span>
               </div>
@@ -256,7 +256,7 @@ function SignupPage() {
                 >
                   {item.step}
                 </div>
-                <span className="text-[12px] font-medium text-muted-foreground">{item.text}</span>
+                <span className="text-[12px] font-medium text-white/85">{item.text}</span>
               </div>
             ))}
           </div>
@@ -402,7 +402,7 @@ function SignupPage() {
                 type="checkbox"
                 checked={agreeTerms}
                 onChange={(e) => setAgreeTerms(e.target.checked)}
-                className="rounded border-white/10 bg-secondary text-primary focus:ring-primary/20 w-4 h-4 cursor-pointer mt-0.5 shrink-0"
+                className="rounded border-border bg-secondary text-primary focus:ring-primary/20 w-4 h-4 cursor-pointer mt-0.5 shrink-0"
               />
               <span className="text-[12px] font-medium text-muted-foreground leading-relaxed">
                 I agree to the{" "}

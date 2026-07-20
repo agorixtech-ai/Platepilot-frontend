@@ -68,7 +68,7 @@ export function Sidebar() {
                   <SidebarMenuButton
                     asChild
                     tooltip={label}
-                    className="rounded-xl hover:bg-sidebar-accent text-sidebar-foreground/60 hover:text-sidebar-foreground"
+                    className="rounded-xl text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-primary data-[active=true]:text-sidebar-primary-foreground"
                   >
                     <Link to={href}>
                       <Icon className="h-4 w-4 shrink-0" />
@@ -90,7 +90,7 @@ export function Sidebar() {
           <Avatar className="h-8 w-8 shrink-0">
             <AvatarFallback
               suppressHydrationWarning
-              className="bg-gradient-to-tr from-primary to-success text-primary-foreground text-[11px] font-extrabold"
+              className="bg-primary text-primary-foreground text-[11px] font-extrabold"
             >
               {initials}
             </AvatarFallback>

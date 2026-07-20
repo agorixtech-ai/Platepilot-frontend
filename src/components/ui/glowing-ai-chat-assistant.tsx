@@ -68,9 +68,9 @@ export function FloatingAiAssistant() {
         }`}
         onClick={() => setIsChatOpen(!isChatOpen)}
         style={{
-          background: "linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%)",
+          background: "var(--gradient-brand)",
           boxShadow:
-            "0 0 20px color-mix(in oklab, var(--primary) 55%, transparent), 0 0 40px color-mix(in oklab, var(--primary) 35%, transparent), 0 0 60px color-mix(in oklab, var(--primary) 20%, transparent)",
+            "0 8px 24px rgba(7, 59, 42, 0.35), 0 0 40px rgba(34, 197, 94, 0.25)",
           border: "2px solid color-mix(in oklab, var(--primary-foreground) 20%, transparent)",
         }}
       >
@@ -89,18 +89,21 @@ export function FloatingAiAssistant() {
           className="absolute bottom-20 right-0 w-[min(420px,calc(100vw-3rem))] origin-bottom-right"
           style={{ animation: "popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards" }}
         >
-          <div className="relative flex flex-col overflow-hidden rounded-3xl border border-border bg-card/95 shadow-2xl backdrop-blur-3xl">
+          <div className="relative flex flex-col overflow-hidden rounded-3xl border border-border bg-white shadow-2xl">
             {/* Header */}
-            <div className="flex items-center justify-between border-b border-border/50 px-5 py-3">
+            <div
+              className="flex items-center justify-between px-5 py-3 text-white"
+              style={{ background: "var(--gradient-brand)" }}
+            >
               <div className="flex items-center gap-1.5">
-                <div className="h-2 w-2 animate-pulse rounded-full bg-emerald-500"></div>
-                <span className="text-xs font-medium text-muted-foreground">Pilot AI</span>
+                <div className="h-2 w-2 animate-pulse rounded-full bg-[#A3E635]"></div>
+                <span className="text-xs font-medium text-white/90">Pilot AI</span>
               </div>
               <div className="flex items-center gap-1">
                 <Link
                   to="/dashboard/ai"
                   aria-label="Open full chat"
-                  className="rounded-full p-1.5 text-muted-foreground transition-colors hover:bg-muted"
+                  className="rounded-full p-1.5 text-white/80 transition-colors hover:bg-white/15"
                   onClick={() => setIsChatOpen(false)}
                 >
                   <Expand className="h-4 w-4" />
@@ -108,7 +111,7 @@ export function FloatingAiAssistant() {
                 <button
                   aria-label="Close"
                   onClick={() => setIsChatOpen(false)}
-                  className="rounded-full p-1.5 text-muted-foreground transition-colors hover:bg-muted"
+                  className="rounded-full p-1.5 text-white/80 transition-colors hover:bg-white/15"
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -145,9 +148,9 @@ export function FloatingAiAssistant() {
                   <div className="flex justify-start">
                     <div className="rounded-2xl bg-muted px-3.5 py-2.5">
                       <div className="flex gap-1">
-                        <div className="h-2 w-2 animate-bounce rounded-full bg-muted-foreground/50 [animation-delay:-0.3s]" />
-                        <div className="h-2 w-2 animate-bounce rounded-full bg-muted-foreground/50 [animation-delay:-0.15s]" />
-                        <div className="h-2 w-2 animate-bounce rounded-full bg-muted-foreground/50" />
+                        <div className="h-2 w-2 animate-bounce rounded-full bg-primary [animation-delay:-0.3s]" />
+                        <div className="h-2 w-2 animate-bounce rounded-full bg-primary [animation-delay:-0.15s]" />
+                        <div className="h-2 w-2 animate-bounce rounded-full bg-primary" />
                       </div>
                     </div>
                   </div>
@@ -173,7 +176,7 @@ export function FloatingAiAssistant() {
                   aria-label="Send"
                   onClick={handleSend}
                   disabled={!message.trim() || isTyping}
-                  className="rounded-xl bg-primary p-2.5 text-primary-foreground shadow-lg transition-all duration-300 hover:scale-105 hover:bg-primary-dark active:scale-95 disabled:opacity-40 disabled:hover:scale-100"
+                  className="rounded-lg bg-primary p-2.5 text-primary-foreground shadow-lg transition-all duration-300 hover:scale-105 active:scale-95 disabled:opacity-40 disabled:hover:scale-100"
                 >
                   <Send className="h-4 w-4" />
                 </button>

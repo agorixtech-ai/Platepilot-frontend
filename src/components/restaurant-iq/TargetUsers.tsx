@@ -49,7 +49,7 @@ export function TargetUsers() {
               key={u.title}
               className="group rounded-2xl border border-border bg-card p-7 transition hover:-translate-y-1 hover:border-primary/40 hover:shadow-[0_24px_50px_-20px_rgba(2,6,23,0.18)]"
             >
-              <div className="grid h-12 w-12 place-items-center rounded-xl bg-primary text-primary-foreground shadow-[0_10px_25px_-10px_rgba(20,184,166,0.25)]">
+              <div className="grid h-12 w-12 place-items-center rounded-xl bg-primary text-primary-foreground shadow-[0_10px_25px_-10px_rgba(7,59,42,0.28)]">
                 <u.icon className="h-6 w-6" />
               </div>
               <h3 className="mt-5 font-display text-xl font-bold text-foreground">{u.title}</h3>

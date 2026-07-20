@@ -3,8 +3,7 @@ import { AgorixNav } from "@/components/AgorixNav";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, Calendar, Check, Loader2 } from "lucide-react";
-
-const GOOGLE_SCRIPT_URL = import.meta.env.VITE_GOOGLE_SCRIPT_URL;
+import { API_URL } from "@/lib/apiBase";
 
 function DemoPage() {
   const [submitted, setSubmitted] = useState(false);
@@ -31,9 +30,8 @@ function DemoPage() {
     setError("");
 
     try {
-      const res = await fetch(GOOGLE_SCRIPT_URL, {
+      const res = await fetch(`${API_URL}/demo-requests`, {
         method: "POST",
-        mode: "no-cors",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           firstName: form.firstName,
@@ -47,8 +45,11 @@ function DemoPage() {
         }),
       });
 
-      // no-cors returns opaque response, so we can't check res.ok
-      // If the fetch didn't throw, we treat it as success
+      if (!res.ok) {
+        const detail = await res.text();
+        throw new Error(detail || `HTTP ${res.status}`);
+      }
+
       setSubmitted(true);
     } catch {
       setError("Something went wrong. Please try again.");
@@ -58,34 +59,32 @@ function DemoPage() {
   };
 
   const inputClass =
-    "w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-white/30 outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition";
+    "w-full rounded-lg border border-border bg-card px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition";
 
   return (
     <div
-      className="dark min-h-screen"
+      className="min-h-screen bg-background text-foreground"
       style={{
-        background: "#111113",
-        color: "#fff",
         fontFamily: "'Inter', system-ui, sans-serif",
       }}
     >
-      <AgorixNav sticky />
+      <AgorixNav sticky variant="light" />
 
       <main className="pt-16 pb-20 px-6">
         <div className="mx-auto max-w-6xl">
           <div className="text-center mb-12">
             <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary-soft/60 px-4 py-1.5 text-xs font-semibold backdrop-blur mb-6">
               <Calendar size={12} className="text-primary" />
-              <span className="bg-gradient-to-r from-teal-300 via-emerald-300 to-cyan-300 bg-clip-text text-transparent">
+              <span className="text-brand-gradient">
                 Book your personalized demo
               </span>
             </div>
             <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">
-              <span className="bg-gradient-to-r from-teal-300 via-emerald-300 to-cyan-300 bg-clip-text text-transparent">
+              <span className="text-brand-gradient">
                 See RestaurantIQ in Action
               </span>
             </h1>
-            <p className="text-white/60 max-w-xl mx-auto">
+            <p className="text-muted-foreground max-w-xl mx-auto">
               Fill out the form below and we'll schedule a live walkthrough tailored to your
               restaurant's needs.
             </p>
@@ -98,12 +97,12 @@ function DemoPage() {
                   <Check size={32} className="text-primary-foreground" />
                 </div>
                 <h2 className="text-2xl font-bold mb-2">You're on the list!</h2>
-                <p className="text-white/60">
+                <p className="text-muted-foreground">
                   We'll reach out within 24 hours to schedule your demo.
                 </p>
                 <Link
                   to="/restaurant-iq"
-                  className="inline-flex items-center gap-2 mt-8 rounded-full bg-white/10 px-6 py-3 text-sm font-semibold text-white hover:bg-white/20 transition"
+                  className="inline-flex items-center gap-2 mt-8 rounded-full bg-secondary px-6 py-3 text-sm font-semibold text-foreground hover:bg-secondary transition"
                 >
                   Back to RestaurantIQ
                   <ArrowRight size={14} />
@@ -112,11 +111,11 @@ function DemoPage() {
             ) : (
               <form
                 onSubmit={handleSubmit}
-                className="space-y-6 rounded-2xl border border-white/10 bg-white/[0.02] p-8 md:p-10"
+                className="space-y-6 rounded-2xl border border-border bg-card p-8 md:p-10"
               >
                 <div className="grid gap-6 md:grid-cols-2">
                   <div>
-                    <label className="block text-sm font-medium text-white/80 mb-2">
+                    <label className="block text-sm font-medium text-foreground/80 mb-2">
                       First name
                     </label>
                     <input
@@ -129,7 +128,7 @@ function DemoPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-white/80 mb-2">
+                    <label className="block text-sm font-medium text-foreground/80 mb-2">
                       Last name
                     </label>
                     <input
@@ -144,7 +143,7 @@ function DemoPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-white/80 mb-2">Work email</label>
+                  <label className="block text-sm font-medium text-foreground/80 mb-2">Work email</label>
                   <input
                     type="email"
                     required
@@ -156,7 +155,7 @@ function DemoPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-white/80 mb-2">
+                  <label className="block text-sm font-medium text-foreground/80 mb-2">
                     Restaurant name
                   </label>
                   <input
@@ -170,7 +169,7 @@ function DemoPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-white/80 mb-2">
+                  <label className="block text-sm font-medium text-foreground/80 mb-2">
                     Phone number
                   </label>
                   <input
@@ -183,7 +182,7 @@ function DemoPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-white/80 mb-2">
+                  <label className="block text-sm font-medium text-foreground/80 mb-2">
                     Current POS / ERP system
                   </label>
                   <input
@@ -196,7 +195,7 @@ function DemoPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-white/80 mb-2">
+                  <label className="block text-sm font-medium text-foreground/80 mb-2">
                     Message (optional)
                   </label>
                   <textarea
@@ -213,7 +212,7 @@ function DemoPage() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="group inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground shadow-[0_12px_30px_-10px_rgba(20,184,166,0.35)] transition hover:bg-primary-dark disabled:opacity-60"
+                  className="group inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground transition hover:bg-primary-hover disabled:opacity-60"
                 >
                   {loading ? (
                     <>
@@ -228,7 +227,7 @@ function DemoPage() {
                   )}
                 </button>
 
-                <p className="text-center text-xs text-white/40">
+                <p className="text-center text-xs text-muted-foreground">
                   No credit card required · Free setup · We respect your privacy
                 </p>
               </form>

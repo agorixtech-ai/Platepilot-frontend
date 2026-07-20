@@ -44,7 +44,7 @@ export function Nav() {
         <div className="hidden md:block">
           <Link
             to="/login"
-            className="group inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-[0_8px_24px_-8px_rgba(20,184,166,0.25)] transition hover:bg-primary-dark"
+            className="group inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition hover:bg-primary-hover"
           >
             Get Early Access
             <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
@@ -74,7 +74,7 @@ export function Nav() {
             <Link
               to="/login"
               onClick={() => setOpen(false)}
-              className="mt-2 inline-flex items-center justify-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground"
+              className="mt-2 inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground"
             >
               Get Early Access <ArrowRight className="h-4 w-4" />
             </Link>

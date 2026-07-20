@@ -3,10 +3,10 @@ import { MockDashboard } from "./MockDashboard";
 
 export function Hero() {
   return (
-    <section className="relative overflow-hidden bg-section-hero pt-32 pb-20 lg:pt-40 lg:pb-28">
+    <section className="relative overflow-hidden bg-[var(--brand-canvas)] pt-32 pb-20 lg:pt-40 lg:pb-28">
       {/* Radial gradient bg */}
-      <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_80%_60%_at_50%_0%,oklch(0.85_0.12_175/0.25),transparent_70%)]" />
-      <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_50%_40%_at_80%_20%,oklch(0.75_0.10_165/0.15),transparent_60%)]" />
+      <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_80%_60%_at_50%_0%,rgba(34,197,94,0.18),transparent_70%)]" />
+      <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_50%_40%_at_80%_20%,rgba(163,230,53,0.1),transparent_60%)]" />
 
       <div className="mx-auto max-w-7xl px-5 lg:px-8">
         <div className="grid items-center gap-14 lg:grid-cols-[1.05fr_1fr]">
@@ -16,18 +16,18 @@ export function Hero() {
                 <span className="absolute inline-flex h-full w-full animate-pulse-dot rounded-full bg-primary" />
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
               </span>
-              <span className="bg-gradient-to-r from-teal-300 via-emerald-300 to-cyan-300 bg-clip-text text-transparent">
+              <span className="text-brand-gradient">
                 Now with AI-powered variance detection
               </span>
             </div>
 
             <h1 className="mt-6 font-display text-5xl font-bold leading-[1.05] tracking-tight text-foreground sm:text-6xl lg:text-7xl">
-              <span className="bg-gradient-to-r from-teal-300 via-emerald-300 to-cyan-300 bg-clip-text text-transparent">
+              <span className="text-brand-gradient">
                 The AI Brain for Your Restaurant
               </span>
             </h1>
 
-            <p className="mt-3 text-sm text-white/60">
+            <p className="mt-3 text-sm text-muted-foreground">
               Our software powers realtime AI‑driven analysis and decision
             </p>
 
@@ -39,7 +39,7 @@ export function Hero() {
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <a
                 href="/demo"
-                className="group inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground shadow-[0_12px_30px_-10px_rgba(20,184,166,0.35)] transition hover:bg-primary-dark"
+                className="group inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground transition hover:bg-primary-hover"
               >
                 Schedule a Demo
                 <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />

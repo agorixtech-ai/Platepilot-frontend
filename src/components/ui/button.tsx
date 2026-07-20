@@ -6,25 +6,27 @@ import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-medium ring-offset-background transition-all duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 active:scale-[0.98]",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-medium ring-offset-background transition-all duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 active:scale-[0.98]",
   {
     variants: {
       variant: {
-        default: "brand-gradient-interactive text-primary-foreground shadow-sm",
+        default: "bg-primary text-primary-foreground shadow-sm hover:bg-primary-hover",
         destructive:
           "bg-destructive text-destructive-foreground shadow-sm hover:bg-[var(--destructive-hover)]",
         outline:
-          "border border-input bg-background shadow-xs hover:bg-accent hover:text-accent-foreground hover:border-border",
+          "border border-primary bg-white text-primary shadow-xs hover:bg-secondary",
         secondary: "bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80",
-        ghost: "hover:bg-accent hover:text-accent-foreground",
-        link: "text-primary underline-offset-4 hover:underline hover:text-[var(--primary-hover)]",
+        ghost: "text-primary hover:bg-secondary hover:text-primary",
+        link: "text-primary underline-offset-4 hover:underline hover:text-primary-hover",
         success: "bg-success text-success-foreground shadow-sm hover:bg-[var(--success-hover)]",
+        /** Premium surfaces only — hero / CTA banners */
+        gradient: "brand-gradient-interactive text-white shadow-sm",
       },
       size: {
         default: "h-10 px-4 py-2",
         sm: "h-9 rounded-lg px-3 text-[13px]",
-        lg: "h-11 rounded-xl px-8 text-[15px]",
-        icon: "h-10 w-10 rounded-xl",
+        lg: "h-11 rounded-lg px-8 text-[15px]",
+        icon: "h-10 w-10 rounded-lg",
       },
     },
     defaultVariants: {

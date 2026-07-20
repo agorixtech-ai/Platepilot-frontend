@@ -10,8 +10,8 @@ const sidebar = [
 ];
 
 const kpis = [
-  { label: "Revenue", value: "$1,450", tone: "text-white", sub: "+12% vs yesterday" },
-  { label: "Food Cost %", value: "34.1%", tone: "text-white/80", sub: "Target 30%" },
+  { label: "Revenue", value: "$1,450", tone: "text-foreground", sub: "+12% vs yesterday" },
+  { label: "Food Cost %", value: "34.1%", tone: "text-foreground", sub: "Target 30%" },
   { label: "Gross Margin", value: "65.9%", tone: "text-foreground", sub: "Healthy" },
   { label: "Alerts", value: "2 Critical", tone: "text-destructive", sub: "Needs review" },
 ];
@@ -28,21 +28,21 @@ const bars = [
 
 const alerts = [
   { dot: "bg-destructive", text: "Cheese variance +30%" },
-  { dot: "bg-white/40", text: "Olive oil below par" },
-  { dot: "bg-white/30", text: "Friday event: prep now" },
+  { dot: "bg-muted-foreground/40", text: "Olive oil below par" },
+  { dot: "bg-muted-foreground/30", text: "Friday event: prep now" },
   { dot: "bg-primary", text: "WhatsApp report sent" },
 ];
 
 export function MockDashboard() {
   return (
     <div className="relative">
-      <div className="absolute -inset-6 -z-10 rounded-[2rem] bg-gradient-to-br from-white/10 via-transparent to-white/5 blur-2xl" />
-      <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-[0_30px_80px_-20px_rgba(2,6,23,0.25)]">
+      <div className="absolute -inset-6 -z-10 rounded-[2rem] bg-gradient-to-br from-primary/10 via-transparent to-primary/5 blur-2xl" />
+      <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-[0_30px_80px_-20px_rgba(7,26,20,0.12)]">
         {/* Top bar */}
         <div className="flex items-center gap-2 border-b border-border bg-secondary/60 px-4 py-3">
           <span className="h-3 w-3 rounded-full bg-destructive/80" />
-          <span className="h-3 w-3 rounded-full bg-white/30" />
-          <span className="h-3 w-3 rounded-full bg-white/50" />
+          <span className="h-3 w-3 rounded-full bg-warning/80" />
+          <span className="h-3 w-3 rounded-full bg-primary/70" />
           <span className="ml-3 text-xs font-medium text-muted-foreground">
             RestaurantIQ · Spice Garden Main
           </span>
@@ -85,10 +85,10 @@ export function MockDashboard() {
                 <div className="text-xs font-semibold">Revenue vs Food Cost</div>
                 <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
                   <span className="flex items-center gap-1">
-                    <span className="h-2 w-2 rounded-sm bg-white" /> Revenue
+                    <span className="h-2 w-2 rounded-sm bg-primary" /> Revenue
                   </span>
                   <span className="flex items-center gap-1">
-                    <span className="h-2 w-2 rounded-sm bg-white/50" /> Cost %
+                    <span className="h-2 w-2 rounded-sm bg-primary/40" /> Cost %
                   </span>
                 </div>
               </div>
@@ -96,8 +96,8 @@ export function MockDashboard() {
                 {bars.map((b) => (
                   <div key={b.d} className="flex flex-1 flex-col items-center gap-1">
                     <div className="flex h-24 w-full items-end justify-center gap-0.5">
-                      <div className="w-1/2 rounded-t bg-white/80" style={{ height: `${b.r}%` }} />
-                      <div className="w-1/2 rounded-t bg-white/40" style={{ height: `${b.c}%` }} />
+                      <div className="w-1/2 rounded-t bg-primary/80" style={{ height: `${b.r}%` }} />
+                      <div className="w-1/2 rounded-t bg-primary/35" style={{ height: `${b.c}%` }} />
                     </div>
                     <div className="text-[9px] text-muted-foreground">{b.d}</div>
                   </div>
