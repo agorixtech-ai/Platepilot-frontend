@@ -48,7 +48,7 @@ export function AppLogo({
               textClassName,
             )}
           >
-            PlatePilot
+            Plate Pielet
           </p>
           {subtitle && (
             <p className={cn("truncate text-[10px] leading-tight font-medium", subtitleClassName)}>
