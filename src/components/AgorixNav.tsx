@@ -242,7 +242,7 @@ export function AgorixNav({
                 color: T.text,
               }}
             >
-              PLATEPILOT
+              Plate Pielet
             </span>
           </Link>
 
