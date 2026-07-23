@@ -440,7 +440,6 @@ const ME_DISHES = [
     earns: "₹92",
     earnsPct: 80,
     tier: "Best Seller",
-    classic: "Star",
     act: "Customers love it and it earns well. Keep it front and center.",
     color: "#15803D",
     bg: "rgba(22,163,74,0.08)",
@@ -453,7 +452,6 @@ const ME_DISHES = [
     earns: "₹18",
     earnsPct: 22,
     tier: "Underpriced",
-    classic: "Plow Horse",
     act: "Everyone orders it, but it barely profits. Raise the price a little.",
     color: "#92400E",
     bg: "rgba(245,158,11,0.1)",
@@ -466,7 +464,6 @@ const ME_DISHES = [
     earns: "₹120",
     earnsPct: 95,
     tier: "Hidden Gem",
-    classic: "Puzzle",
     act: "Earns a lot, but few people order it. Recommend it more.",
     color: "#0F7A4C",
     bg: "#E8F7ED",
@@ -479,7 +476,6 @@ const ME_DISHES = [
     earns: "₹9",
     earnsPct: 8,
     tier: "Dead Weight",
-    classic: "Dog",
     act: "Rarely ordered and barely profits. Take it off the menu.",
     color: "#B91C1C",
     bg: "rgba(239,68,68,0.08)",
@@ -964,12 +960,6 @@ function Index() {
           font-weight: 800;
           letter-spacing: 0.1em;
           text-transform: uppercase;
-        }
-        .me-verdict-classic {
-          opacity: 0.65;
-          font-weight: 600;
-          letter-spacing: 0;
-          text-transform: none;
         }
         .me-verdict-act {
           font-size: 0.78rem;
@@ -1758,9 +1748,7 @@ function Index() {
                   <div className="me-verdict" style={{ background: d.bg, color: d.color }}>
                     <d.icon size={18} strokeWidth={2} />
                     <div>
-                      <div className="me-verdict-tier">
-                        {d.tier} <span className="me-verdict-classic">· "{d.classic}"</span>
-                      </div>
+                      <div className="me-verdict-tier">{d.tier}</div>
                       <div className="me-verdict-act">{d.act}</div>
                     </div>
                   </div>
