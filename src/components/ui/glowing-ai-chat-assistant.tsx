@@ -30,7 +30,11 @@ export function FloatingAiAssistant() {
     if (!isChatOpen) return;
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
-      if (chatRef.current && !chatRef.current.contains(target) && !target.closest(".floating-ai-button")) {
+      if (
+        chatRef.current &&
+        !chatRef.current.contains(target) &&
+        !target.closest(".floating-ai-button")
+      ) {
         setIsChatOpen(false);
       }
     };
@@ -69,8 +73,7 @@ export function FloatingAiAssistant() {
         onClick={() => setIsChatOpen(!isChatOpen)}
         style={{
           background: "var(--gradient-brand)",
-          boxShadow:
-            "0 8px 24px rgba(7, 59, 42, 0.35), 0 0 40px rgba(34, 197, 94, 0.25)",
+          boxShadow: "0 8px 24px rgba(7, 59, 42, 0.35), 0 0 40px rgba(34, 197, 94, 0.25)",
           border: "2px solid color-mix(in oklab, var(--primary-foreground) 20%, transparent)",
         }}
       >
@@ -129,9 +132,7 @@ export function FloatingAiAssistant() {
                     <div
                       className={`rounded-2xl px-3.5 py-2.5 ${
                         m.tableData && m.tableData.length > 0 ? "max-w-[95%]" : "max-w-[85%]"
-                      } ${
-                        m.role === "user" ? "bg-primary text-primary-foreground" : "bg-muted"
-                      }`}
+                      } ${m.role === "user" ? "bg-primary text-primary-foreground" : "bg-muted"}`}
                     >
                       {m.role === "assistant" ? (
                         <div className={MARKDOWN_CLASSES}>

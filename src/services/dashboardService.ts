@@ -268,9 +268,9 @@ export const dashboardService = {
     );
   },
 
-  getMenuEngineering() {
+  getMenuEngineering(branch?: string | null) {
     return apiFetch<{ currency: string; items: MenuEngineeringItem[] }>(
-      `/dashboard/menu-engineering`,
+      `/dashboard/menu-engineering${qs({ branch })}`,
     );
   },
 };

@@ -54,7 +54,11 @@ export function DateRangePicker() {
             {customLabel}
           </button>
         </PopoverTrigger>
-        <PopoverContent align="end" sideOffset={8} className="w-auto rounded-xl border-border bg-popover p-0">
+        <PopoverContent
+          align="end"
+          sideOffset={8}
+          className="w-auto rounded-xl border-border bg-popover p-0"
+        >
           <Calendar
             mode="range"
             numberOfMonths={1}

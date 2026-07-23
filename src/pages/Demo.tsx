@@ -75,14 +75,10 @@ function DemoPage() {
           <div className="text-center mb-12">
             <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary-soft/60 px-4 py-1.5 text-xs font-semibold backdrop-blur mb-6">
               <Calendar size={12} className="text-primary" />
-              <span className="text-brand-gradient">
-                Book your personalized demo
-              </span>
+              <span className="text-brand-gradient">Book your personalized demo</span>
             </div>
             <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">
-              <span className="text-brand-gradient">
-                See RestaurantIQ in Action
-              </span>
+              <span className="text-brand-gradient">See PlatePilot in Action</span>
             </h1>
             <p className="text-muted-foreground max-w-xl mx-auto">
               Fill out the form below and we'll schedule a live walkthrough tailored to your
@@ -101,10 +97,10 @@ function DemoPage() {
                   We'll reach out within 24 hours to schedule your demo.
                 </p>
                 <Link
-                  to="/restaurant-iq"
+                  to="/"
                   className="inline-flex items-center gap-2 mt-8 rounded-full bg-secondary px-6 py-3 text-sm font-semibold text-foreground hover:bg-secondary transition"
                 >
-                  Back to RestaurantIQ
+                  Back to Home
                   <ArrowRight size={14} />
                 </Link>
               </div>
@@ -143,7 +139,9 @@ function DemoPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-foreground/80 mb-2">Work email</label>
+                  <label className="block text-sm font-medium text-foreground/80 mb-2">
+                    Work email
+                  </label>
                   <input
                     type="email"
                     required
@@ -241,7 +239,7 @@ function DemoPage() {
 
 export default function DemoPageRoute() {
   return (
-    <AppPage title="Schedule a Demo — RestaurantIQ">
+    <AppPage title="Schedule a Demo — PlatePilot">
       <DemoPage />
     </AppPage>
   );

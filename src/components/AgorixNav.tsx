@@ -51,18 +51,13 @@ type NavItem =
   | { label: string; href: string }
   | { label: string; dropdown: { label: string; href: string }[] };
 
-const productDropdown = [{ label: "Restaurant IQ", href: "/restaurant-iq" }];
-
-const defaultLinks: NavItem[] = [
-  { label: "Product", dropdown: productDropdown },
-  { label: "Pricing", href: "/#contact" },
-];
+const defaultLinks: NavItem[] = [];
 
 type AgorixNavProps = {
   links?: NavItem[];
   insetClass?: string;
   sticky?: boolean;
-  /** Landing uses light; RestaurantIQ/Demo stay dark. */
+  /** Landing uses light; Demo stays dark. */
   variant?: "light" | "dark";
 };
 
@@ -209,7 +204,7 @@ export function AgorixNav({
             paddingTop: 28,
             paddingBottom: 32,
             display: "grid",
-            gridTemplateColumns: "1fr auto 1fr",
+            gridTemplateColumns: "minmax(0, 1fr) auto minmax(0, 1fr)",
             alignItems: "center",
             gap: 24,
             background: sticky ? T.bg : undefined,
@@ -339,7 +334,9 @@ export function AgorixNav({
               <a href="/demo" style={btnOutlineSm}>
                 Get Demo
               </a>
-              <a href="/login" style={btnSolidSm}
+              <a
+                href="/login"
+                style={btnSolidSm}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.background = T.solidHover;
                 }}
@@ -403,7 +400,10 @@ export function AgorixNav({
             <a href="/demo" style={btnOutlineSm} onClick={() => setMobileOpen(false)}>
               Get Demo
             </a>
-            <a href="/login" style={btnSolidSm} onClick={() => setMobileOpen(false)}
+            <a
+              href="/login"
+              style={btnSolidSm}
+              onClick={() => setMobileOpen(false)}
               onMouseEnter={(e) => {
                 e.currentTarget.style.background = T.solidHover;
               }}

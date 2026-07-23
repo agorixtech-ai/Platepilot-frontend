@@ -6,7 +6,7 @@
 
 ```ts
 export const API_ORIGIN; // backend origin, no /api (root routes like /health)
-export const API_URL;    // always ends with /api
+export const API_URL; // always ends with /api
 ```
 
 Derived from `VITE_API_URL` (accepts with/without `/api` suffix), default
@@ -54,11 +54,18 @@ Auth flow shape: `login()` only triggers the OTP email; tokens arrive from
 
 ```ts
 export interface User {
-  id: string; full_name: string; email: string;
-  provider: string; is_verified: boolean; created_at: string;
+  id: string;
+  full_name: string;
+  email: string;
+  provider: string;
+  is_verified: boolean;
+  created_at: string;
 }
 export interface AuthTokens {
-  access_token: string; refresh_token: string; token_type: string; user: User;
+  access_token: string;
+  refresh_token: string;
+  token_type: string;
+  user: User;
 }
 ```
 
@@ -108,36 +115,61 @@ Key response shapes (fields are snake_case — mirror the backend exactly):
 
 ```ts
 interface DashboardMetrics {
-  period: string; compare_label: string; currency: string;
-  total_sales: number;      total_sales_delta_pct: number | null;
-  orders: number;           orders_delta_pct: number | null;
-  food_cost_pct: number;    food_cost_pp_delta: number | null;
-  gross_margin_pct: number; gross_margin_pp_delta: number | null;
-  active_alerts: number; critical_alerts: number;
-  sync_status: string; sync_pct: number; last_sync: string | null;  // ← stale-data surface
-  range_start?: string; range_end?: string;
+  period: string;
+  compare_label: string;
+  currency: string;
+  total_sales: number;
+  total_sales_delta_pct: number | null;
+  orders: number;
+  orders_delta_pct: number | null;
+  food_cost_pct: number;
+  food_cost_pp_delta: number | null;
+  gross_margin_pct: number;
+  gross_margin_pp_delta: number | null;
+  active_alerts: number;
+  critical_alerts: number;
+  sync_status: string;
+  sync_pct: number;
+  last_sync: string | null; // ← stale-data surface
+  range_start?: string;
+  range_end?: string;
 }
 
 interface MetricsTrend {
-  period: string; labels: string[];
-  sales: number[]; orders: number[]; food_cost_pct: number[]; margin_pct: number[];
-  prev_sales: number[]; prev_orders: number[];        // previous-period compare series
-  prev_food_cost_pct: number[]; prev_margin_pct: number[];
-  current_label: string; previous_label: string; anchor_date: string | null;
+  period: string;
+  labels: string[];
+  sales: number[];
+  orders: number[];
+  food_cost_pct: number[];
+  margin_pct: number[];
+  prev_sales: number[];
+  prev_orders: number[]; // previous-period compare series
+  prev_food_cost_pct: number[];
+  prev_margin_pct: number[];
+  current_label: string;
+  previous_label: string;
+  anchor_date: string | null;
 }
 
 interface LocationSnapshot {
-  branch: string; revenue: number; orders: number; avg_order: number;
-  delta_pct: number | null;        // null = no prior data, render "—" not 0
+  branch: string;
+  revenue: number;
+  orders: number;
+  avg_order: number;
+  delta_pct: number | null; // null = no prior data, render "—" not 0
   vs_seven_day_pct: number;
-  sparkline: number[];             // last 14 days of revenue
+  sparkline: number[]; // last 14 days of revenue
   pending_issues: number;
 }
 
-interface ComparisonSeries { labels: string[]; series: { branch: string; values: number[] }[]; }
+interface ComparisonSeries {
+  labels: string[];
+  series: { branch: string; values: number[] }[];
+}
 ```
 
 Conventions these encode:
+
 - List payloads: `{ items: [...] }` plus `period`/`currency` when relevant.
 - "No previous data" is `null`, never `0` — render a neutral dash.
 - Deltas are computed by the backend (`*_delta_pct` = percent,
@@ -161,16 +193,16 @@ const { range } = useDateRange();
 const period = rangeToPeriod(range);
 
 const metricsQuery = useQuery({
-  queryKey: ["dashboard", "metrics", period, branch],   // filters IN the key
+  queryKey: ["dashboard", "metrics", period, branch], // filters IN the key
   queryFn: () => dashboardService.getMetrics(period, branch),
-  ...DASHBOARD_LIVE_QUERY,   // { refetchInterval: 60_000, staleTime: 30_000, refetchOnWindowFocus: true }
+  ...DASHBOARD_LIVE_QUERY, // { refetchInterval: 60_000, staleTime: 30_000, refetchOnWindowFocus: true }
 });
 ```
 
 - Key shape: `["dashboard", <endpoint>, period, branch]` — branch/period
   changes refetch automatically; custom ranges use `rangeKey(range)`.
 - Refresh-all: `queryClient.invalidateQueries({ queryKey: ["dashboard"] })`
-  + `toast.success("Dashboard refreshed")`.
+  - `toast.success("Dashboard refreshed")`.
 - Reusable hooks/keys for POS/Tally/auth live in `src/hooks/useApi.ts`
   (`KEYS`, `useHealth`, `useMe`, `useLogin`, …) — extend that file for new
   reusable hooks.

@@ -9,11 +9,15 @@ block. shadcn/ui components consume the same tokens.
 ```css
 /* styles.css */
 @theme inline {
-  --color-primary: var(--primary);     /* registers bg-primary, text-primary, … */
+  --color-primary: var(--primary); /* registers bg-primary, text-primary, … */
   /* … */
 }
-:root  { --primary: oklch(0.6 var(--c-brand) var(--h-brand)); /* light */ }
-.dark  { --primary: oklch(0.623 0.188 var(--h-brand));        /* dark  */ }
+:root {
+  --primary: oklch(0.6 var(--c-brand) var(--h-brand)); /* light */
+}
+.dark {
+  --primary: oklch(0.623 0.188 var(--h-brand)); /* dark  */
+}
 ```
 
 To add a semantic color: define it in `:root` **and** `.dark` (both,
@@ -32,22 +36,22 @@ always), then register `--color-<name>: var(--<name>)` in `@theme inline`.
 
 ## Token vocabulary (use utilities, never raw values)
 
-| Utility | Token | Use |
-|---|---|---|
-| `bg-background` / `text-foreground` | `--background/--foreground` | page canvas |
-| `bg-card` | `--card` | cards, panels |
-| `text-muted-foreground` | `--muted-foreground` | secondary text |
-| `border-border` | `--border` | all hairlines |
-| `bg-primary text-primary-foreground` | `--primary` | CTAs, active nav |
-| `text-success` / `bg-success-soft` | `--success…` | up / good deltas |
-| `text-destructive` | `--destructive` | down / bad deltas, alerts |
-| `text-warning` | `--warning` | caution (amber) |
-| `text-info` | `--info` | informational (blue) |
-| `bg-sidebar*` | `--sidebar-*` family | sidebar shell only |
-| rounded via `rounded-lg/xl/2xl…` | `--radius` scale | consistent corners |
+| Utility                              | Token                       | Use                       |
+| ------------------------------------ | --------------------------- | ------------------------- |
+| `bg-background` / `text-foreground`  | `--background/--foreground` | page canvas               |
+| `bg-card`                            | `--card`                    | cards, panels             |
+| `text-muted-foreground`              | `--muted-foreground`        | secondary text            |
+| `border-border`                      | `--border`                  | all hairlines             |
+| `bg-primary text-primary-foreground` | `--primary`                 | CTAs, active nav          |
+| `text-success` / `bg-success-soft`   | `--success…`                | up / good deltas          |
+| `text-destructive`                   | `--destructive`             | down / bad deltas, alerts |
+| `text-warning`                       | `--warning`                 | caution (amber)           |
+| `text-info`                          | `--info`                    | informational (blue)      |
+| `bg-sidebar*`                        | `--sidebar-*` family        | sidebar shell only        |
+| rounded via `rounded-lg/xl/2xl…`     | `--radius` scale            | consistent corners        |
 
 Semantic direction rule: green = up/good, red = down/alert, amber =
-warning, blue = info. For metrics where *down* is good (food cost), map
+warning, blue = info. For metrics where _down_ is good (food cost), map
 direction → tone with `deltaPct(v, "down")` — never hand-pick green/red.
 
 ## Chart colors
@@ -61,6 +65,7 @@ Five fixed branch-identity hues, validated for colorblind separation and
 ```
 
 Three synchronized copies exist — if you ever change one, change all:
+
 1. `--chart-1..5` in `styles.css`
 2. `LOCATION_COLORS` in `src/lib/locations.ts`
 3. `CHART_PALETTE` in `src/components/dashboard/shared.tsx`

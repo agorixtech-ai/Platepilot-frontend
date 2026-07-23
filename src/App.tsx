@@ -1,4 +1,11 @@
-import { Component, type ErrorInfo, type ReactNode } from "react";
+import {
+  Component,
+  lazy,
+  Suspense,
+  type ComponentType,
+  type ErrorInfo,
+  type ReactNode,
+} from "react";
 import { IonApp, IonRouterOutlet, setupIonicReact } from "@ionic/react";
 import { IonReactRouter } from "@ionic/react-router";
 import { Route } from "react-router-dom";
@@ -6,13 +13,15 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import { ThemeProvider } from "./components/theme-provider";
 import { reportLovableError } from "./lib/lovable-error-reporting";
-import IndexPage from "./pages/Index";
-import LoginPage from "./pages/Login";
-import SignupPage from "./pages/Signup";
-import DemoPage from "./pages/Demo";
-import RestaurantIQPage from "./pages/RestaurantIQ";
-import DashboardPage from "./pages/Dashboard";
-import NotFoundPage from "./pages/NotFound";
+
+// Route-level chunks keep marketing and dashboard-only dependencies out of the
+// initial download. Each screen is fetched only when its route is opened.
+const IndexPage = lazy(() => import("./pages/Index"));
+const LoginPage = lazy(() => import("./pages/Login"));
+const SignupPage = lazy(() => import("./pages/Signup"));
+const DemoPage = lazy(() => import("./pages/Demo"));
+const DashboardPage = lazy(() => import("./pages/Dashboard"));
+const NotFoundPage = lazy(() => import("./pages/NotFound"));
 
 /* mode: "md" keeps one consistent look across iOS/Android/desktop so the
    existing Tailwind design system renders identically everywhere.
@@ -22,6 +31,18 @@ import NotFoundPage from "./pages/NotFound";
 setupIonicReact({ mode: "md", animated: false });
 
 const queryClient = new QueryClient();
+
+function RouteFallback() {
+  return <div className="min-h-screen bg-background" aria-busy="true" />;
+}
+
+function LazyRoute({ component: Page }: { component: ComponentType }) {
+  return (
+    <Suspense fallback={<RouteFallback />}>
+      <Page />
+    </Suspense>
+  );
+}
 
 class RootErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
   state = { error: null as Error | null };
@@ -74,13 +95,12 @@ export default function App() {
           <IonApp>
             <IonReactRouter>
               <IonRouterOutlet id="main">
-                <Route exact path="/" component={IndexPage} />
-                <Route exact path="/login" component={LoginPage} />
-                <Route exact path="/signup" component={SignupPage} />
-                <Route exact path="/demo" component={DemoPage} />
-                <Route exact path="/restaurant-iq" component={RestaurantIQPage} />
-                <Route path="/dashboard" component={DashboardPage} />
-                <Route component={NotFoundPage} />
+                <Route exact path="/" render={() => <LazyRoute component={IndexPage} />} />
+                <Route exact path="/login" render={() => <LazyRoute component={LoginPage} />} />
+                <Route exact path="/signup" render={() => <LazyRoute component={SignupPage} />} />
+                <Route exact path="/demo" render={() => <LazyRoute component={DemoPage} />} />
+                <Route path="/dashboard" render={() => <LazyRoute component={DashboardPage} />} />
+                <Route render={() => <LazyRoute component={NotFoundPage} />} />
               </IonRouterOutlet>
             </IonReactRouter>
           </IonApp>
