@@ -31,14 +31,14 @@ This project uses **bun** as the package manager (see `bunfig.toml`). Use `bun` 
 
 The SPA entry is `index.html` → `src/main.tsx` → `src/App.tsx`. Routes are declared explicitly in `App.tsx`:
 
-| Page file                     | Route                                       |
-| ----------------------------- | ------------------------------------------- |
-| `src/pages/Index.tsx`         | `/` (landing page with `AgorixHero`)        |
-| `src/pages/Login.tsx`         | `/login`                                    |
-| `src/pages/Signup.tsx`        | `/signup`                                   |
-| `src/pages/Dashboard.tsx`     | `/dashboard/*` shell — inner `<Switch>`     |
-| `src/pages/dashboard/*.tsx`   | `/dashboard/<name>` leaf content            |
-| `src/pages/NotFound.tsx`      | fallback 404 (pathless route)               |
+| Page file                   | Route                                   |
+| --------------------------- | --------------------------------------- |
+| `src/pages/Index.tsx`       | `/` (landing page with `AgorixHero`)    |
+| `src/pages/Login.tsx`       | `/login`                                |
+| `src/pages/Signup.tsx`      | `/signup`                               |
+| `src/pages/Dashboard.tsx`   | `/dashboard/*` shell — inner `<Switch>` |
+| `src/pages/dashboard/*.tsx` | `/dashboard/<name>` leaf content        |
+| `src/pages/NotFound.tsx`    | fallback 404 (pathless route)           |
 
 Conventions:
 

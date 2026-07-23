@@ -209,8 +209,7 @@ function BranchesPage() {
 
   // Auto-generated insight callouts, worst news first
   const insights = useMemo(() => {
-    const list: { tone: "success" | "warning" | "destructive"; title: string; text: string }[] =
-      [];
+    const list: { tone: "success" | "warning" | "destructive"; title: string; text: string }[] = [];
     const laggards = rows.filter((r) => r.vs_seven_day_pct <= -12);
     const risers = rows.filter((r) => (r.delta_pct ?? 0) > 0 || r.vs_seven_day_pct >= 12);
     if (top && top.revenue > 0) {
@@ -285,9 +284,7 @@ function BranchesPage() {
         <Button
           variant="outline"
           size="sm"
-          onClick={() =>
-            queryClient.invalidateQueries({ queryKey: ["dashboard"] })
-          }
+          onClick={() => queryClient.invalidateQueries({ queryKey: ["dashboard"] })}
           disabled={summaryQuery.isFetching || snapshotsQuery.isFetching}
           className="text-[11px]"
         >
@@ -359,7 +356,9 @@ function BranchesPage() {
               value={String(totalIssues)}
               sub="incomplete orders to review"
               icon={AlertTriangle}
-              tone={totalIssues ? "bg-destructive/15 text-destructive" : "bg-success/15 text-success"}
+              tone={
+                totalIssues ? "bg-destructive/15 text-destructive" : "bg-success/15 text-success"
+              }
             />
           </div>
 
@@ -391,8 +390,7 @@ function BranchesPage() {
                 Branch leaderboard
               </CardTitle>
               <p className="mt-0.5 text-[10px] text-muted-foreground">
-                Ranked by revenue this {period} — click a branch to focus the whole dashboard on
-                it
+                Ranked by revenue this {period} — click a branch to focus the whole dashboard on it
               </p>
             </CardHeader>
             <CardContent className="px-0 pb-2 pt-0">
@@ -457,8 +455,7 @@ function BranchesPage() {
                               />
                             </div>
                             <span className="w-9 shrink-0 text-right text-[10px] tabular-nums text-muted-foreground">
-                              {totalRevenue ? ((row.revenue / totalRevenue) * 100).toFixed(0) : 0}
-                              %
+                              {totalRevenue ? ((row.revenue / totalRevenue) * 100).toFixed(0) : 0}%
                             </span>
                           </div>
                         </td>
@@ -567,10 +564,7 @@ function BranchesPage() {
                       key={r.name}
                       className="flex items-center gap-1.5 text-[10.5px] text-muted-foreground"
                     >
-                      <span
-                        className="h-2 w-2 rounded-full"
-                        style={{ backgroundColor: r.color }}
-                      />
+                      <span className="h-2 w-2 rounded-full" style={{ backgroundColor: r.color }} />
                       {r.name.replace(" Branch", "")}
                     </span>
                   ))}
@@ -676,8 +670,8 @@ function BranchesPage() {
 
           <p className="flex items-center gap-1.5 text-[10px] text-muted-foreground/70">
             <TrendingUp className="h-3 w-3" />
-            Revenue and orders from POS sales · margin from Tally purchases — "—" means the
-            period has too little data for a reliable ratio
+            Revenue and orders from POS sales · margin from Tally purchases — "—" means the period
+            has too little data for a reliable ratio
             <Scale className="ml-auto h-3 w-3" />
           </p>
         </>

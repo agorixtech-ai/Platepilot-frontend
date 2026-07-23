@@ -1,15 +1,16 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
+  AlertTriangle,
   ChevronRight,
+  Eye,
+  Lightbulb,
   RefreshCw,
   Search,
-  UtensilsCrossed,
-  Scale,
-  TrendingUp,
-  Crown,
+  Star,
   TriangleAlert,
-  Trash2,
+  UtensilsCrossed,
+  Wallet,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -21,237 +22,203 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { EmptyState } from "@/components/ui/empty-state";
 import { ItemAvatar } from "@/components/dashboard/ItemAvatar";
 import { fmtCurrency } from "@/components/dashboard/shared";
+import { useBranchFilter } from "@/contexts/BranchFilterContext";
 import { dashboardService, type MenuEngineeringItem } from "@/services/dashboardService";
 
-const QUADRANT_CONFIG = {
+const TIER = {
   star: {
-    label: "Star",
-    className: "bg-success/15 text-success border-success/30",
-    hint: "High margin · high sales",
+    label: "Keep & Promote",
+    short: "Stars",
+    icon: Star,
+    hint: "Sells well and makes strong profit.",
+    action: "Feature it and train staff to recommend it.",
+    className: "border-success/30 bg-success/10 text-success",
+    chip: "bg-success/10 text-success border-success/20",
   },
   plow_horse: {
-    label: "Plow Horse",
-    className: "bg-info/15 text-info border-info/30",
-    hint: "Popular but low margin",
+    label: "Optimize Price",
+    short: "Optimize",
+    icon: Wallet,
+    hint: "Popular, but profit per plate can improve.",
+    action: "Review price, portion size, or supplier cost.",
+    className: "border-info/30 bg-info/10 text-info",
+    chip: "bg-info/10 text-info border-info/20",
   },
   puzzle: {
-    label: "Puzzle",
-    className: "bg-warning/15 text-warning border-warning/30",
-    hint: "Profitable but slow-selling",
+    label: "Boost Visibility",
+    short: "Boost",
+    icon: Eye,
+    hint: "Profitable, but rarely ordered.",
+    action: "Promote it, add a photo, or pair in a combo.",
+    className: "border-warning/30 bg-warning/10 text-warning",
+    chip: "bg-warning/10 text-warning border-warning/20",
   },
   dog: {
-    label: "Dog",
-    className: "bg-destructive/15 text-destructive border-destructive/30",
-    hint: "Low margin · low sales",
+    label: "Reconsider",
+    short: "Reconsider",
+    icon: AlertTriangle,
+    hint: "Low sales and low profit.",
+    action: "Rework the recipe, change sourcing, or remove it.",
+    className: "border-destructive/30 bg-destructive/10 text-destructive",
+    chip: "bg-destructive/10 text-destructive border-destructive/20",
   },
 } as const;
 
-type Quadrant = keyof typeof QUADRANT_CONFIG;
+type Tier = keyof typeof TIER;
 
-function QuadrantBadge({ quadrant }: { quadrant: Quadrant }) {
-  const cfg = QUADRANT_CONFIG[quadrant];
+function TierBadge({ tier }: { tier: Tier }) {
+  const config = TIER[tier];
+  const Icon = config.icon;
   return (
     <Badge
       variant="outline"
-      className={cn("border px-1.5 py-0 text-[9px] font-bold uppercase", cfg.className)}
+      className={cn("gap-1 border px-2 py-0.5 text-[10px] font-semibold", config.className)}
     >
-      {cfg.label}
+      <Icon className="h-3 w-3" />
+      {config.label}
     </Badge>
   );
 }
 
-/** Recipe detail: per-portion ingredient quantities for the selected dish. */
-function RecipeDialog({
-  dish,
-  onClose,
-}: {
-  dish: MenuEngineeringItem | null;
-  onClose: () => void;
-}) {
+function recommendationCopy(item: MenuEngineeringItem) {
+  const raise = Math.max(1, Math.round(item.price * 0.08));
+  const monthlyGain = raise * item.sold_30d;
+  if (item.quadrant === "star") {
+    return "Keep the price steady. Feature this dish and upsell it.";
+  }
+  if (item.quadrant === "plow_horse") {
+    return `A ${fmtCurrency(raise)} price increase could add about ${fmtCurrency(monthlyGain)} over 30 days at current sales.`;
+  }
+  if (item.quadrant === "puzzle") {
+    return "Don't discount first. Make it easier to notice and pair it with a popular item.";
+  }
+  return "Review the recipe and supplier cost first; if neither improves, consider removing it.";
+}
+
+function DishDialog({ dish, onClose }: { dish: MenuEngineeringItem | null; onClose: () => void }) {
+  if (!dish) return null;
+  const config = TIER[dish.quadrant];
+
   return (
     <Dialog open={!!dish} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-md">
-        {dish && (
-          <>
-            <DialogHeader>
-              <div className="flex items-center gap-3">
-                <ItemAvatar name={dish.dish} size="sm" variant="photo" />
-                <div className="min-w-0">
-                  <DialogTitle className="text-[15px] font-bold text-foreground">
-                    {dish.dish}
-                  </DialogTitle>
-                  <p className="mt-0.5 text-[11px] text-muted-foreground">
-                    {dish.category} · {QUADRANT_CONFIG[dish.quadrant].hint}
-                  </p>
-                </div>
-                <div className="ml-auto shrink-0">
-                  <QuadrantBadge quadrant={dish.quadrant} />
-                </div>
-              </div>
-            </DialogHeader>
+      <DialogContent className="max-w-md gap-4">
+        <DialogHeader>
+          <div className="flex items-start gap-3">
+            <ItemAvatar name={dish.dish} size="sm" variant="photo" />
+            <div className="min-w-0 flex-1">
+              <DialogTitle className="text-base font-bold text-foreground">{dish.dish}</DialogTitle>
+              <p className="mt-0.5 text-xs text-muted-foreground">{dish.category}</p>
+            </div>
+            <TierBadge tier={dish.quadrant} />
+          </div>
+        </DialogHeader>
 
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-              {[
-                {
-                  label: "Menu price",
-                  value: fmtCurrency(dish.price),
-                  hint: "What the customer pays",
-                },
-                {
-                  label: "Portion cost",
-                  value: fmtCurrency(dish.cost),
-                  hint: "What one plate costs you to make",
-                },
-                {
-                  label: "Margin",
-                  value: `${dish.margin_pct.toFixed(1)}%`,
-                  hint: "Your profit on each plate",
-                },
-                {
-                  label: "Sold (30d)",
-                  value: dish.sold_30d.toLocaleString(),
-                  hint: "Plates sold in the last 30 days",
-                },
-                {
-                  label: "Wasted (30d)",
-                  value: `${dish.waste_qty_30d.toLocaleString(undefined, { maximumFractionDigits: 1 })} u`,
-                  tone: "text-destructive",
-                  hint: "Ingredients bought but not needed, counted as plates",
-                },
-                {
-                  label: "Waste cost",
-                  value: fmtCurrency(dish.waste_cost_30d),
-                  tone: "text-destructive",
-                  hint: "Money lost on that extra buying — 0 means nothing wasted",
-                },
-              ].map((kpi) => (
-                <div
-                  key={kpi.label}
-                  className="rounded-lg border border-border/40 bg-muted/30 px-3 py-2"
-                >
-                  <p className="text-[9px] font-semibold uppercase text-muted-foreground">
-                    {kpi.label}
-                  </p>
-                  <p
-                    className={cn(
-                      "text-[13px] font-bold tabular-nums",
-                      kpi.tone ?? "text-foreground",
-                    )}
-                  >
-                    {kpi.value}
-                  </p>
-                  <p className="mt-0.5 text-[8.5px] leading-snug text-muted-foreground">
-                    {kpi.hint}
-                  </p>
+        <div className="grid grid-cols-2 gap-2">
+          {[
+            ["Price", fmtCurrency(dish.price)],
+            ["Cost", fmtCurrency(dish.cost)],
+            ["Profit / plate", fmtCurrency(dish.gross_profit)],
+            ["Sold (30d)", dish.sold_30d.toLocaleString()],
+          ].map(([label, value]) => (
+            <div key={label} className="rounded-lg border border-border/50 bg-muted/30 px-3 py-2.5">
+              <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+                {label}
+              </p>
+              <p className="mt-0.5 text-sm font-bold tabular-nums text-foreground">{value}</p>
+            </div>
+          ))}
+        </div>
+
+        <div className="rounded-xl border border-primary/20 bg-primary/5 p-3.5">
+          <div className="flex items-start gap-2">
+            <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+            <div>
+              <p className="text-xs font-bold text-foreground">{config.label}</p>
+              <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                {recommendationCopy(dish)}
+              </p>
+              <p className="mt-2 text-[11px] font-semibold text-primary">Next: {config.action}</p>
+            </div>
+          </div>
+        </div>
+
+        {dish.ingredients.length > 0 && (
+          <div>
+            <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+              Recipe ({dish.ingredients.length})
+            </p>
+            <div className="max-h-48 divide-y divide-border/40 overflow-y-auto rounded-lg border border-border/50">
+              {dish.ingredients.map((ing) => (
+                <div key={ing.name} className="flex items-center gap-2 px-3 py-2">
+                  <span className="min-w-0 flex-1 truncate text-xs font-medium text-foreground">
+                    {ing.name}
+                  </span>
+                  <span className="shrink-0 text-xs tabular-nums text-muted-foreground">
+                    {ing.qty.toLocaleString()} {ing.unit}
+                  </span>
+                  <span className="w-14 shrink-0 text-right text-xs font-semibold tabular-nums text-foreground">
+                    {fmtCurrency(ing.cost_aed)}
+                  </span>
                 </div>
               ))}
             </div>
-
-            <div>
-              <p className="mb-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                Quantities required per portion
-              </p>
-              <div className="divide-y divide-border/30 rounded-lg border border-border/40">
-                {dish.ingredients.map((ing) => (
-                  <div key={ing.name} className="px-3 py-2">
-                    <div className="flex items-center gap-2">
-                      <span className="min-w-0 flex-1 truncate text-[11.5px] font-medium text-foreground">
-                        {ing.name}
-                      </span>
-                      <Badge
-                        variant="outline"
-                        className={cn(
-                          "border px-1 py-0 text-[8px] font-bold uppercase",
-                          ing.cost_source === "tally"
-                            ? "border-emerald-500/40 text-emerald-600 dark:text-emerald-400"
-                            : "border-border/60 text-muted-foreground",
-                        )}
-                      >
-                        {ing.cost_source === "tally" ? "live" : "est."}
-                      </Badge>
-                      <span className="shrink-0 text-[11.5px] font-bold tabular-nums text-foreground">
-                        {ing.qty.toLocaleString()} {ing.unit}
-                      </span>
-                      <span className="w-16 shrink-0 text-right text-[10.5px] tabular-nums text-muted-foreground">
-                        {fmtCurrency(ing.cost_aed)}
-                      </span>
-                    </div>
-                    {ing.cost_source === "tally" && (
-                      <p className="mt-0.5 text-[9.5px] tabular-nums text-muted-foreground">
-                        {ing.stockitem}: {ing.qty_in_stock_unit} {ing.stock_unit} ×{" "}
-                        {fmtCurrency(ing.cost_per_stock_unit ?? 0)}/{ing.stock_unit} (Tally purchase
-                        price)
-                      </p>
-                    )}
-                  </div>
-                ))}
-                <div className="flex items-center justify-between bg-muted/30 px-3 py-2">
-                  <span className="text-[11px] font-bold text-foreground">
-                    Total ingredient cost
-                  </span>
-                  <span className="text-[11.5px] font-black tabular-nums text-foreground">
-                    {fmtCurrency(dish.cost)}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between bg-muted/30 px-3 py-2">
-                  <span className="text-[11px] font-bold text-foreground">
-                    Food cost {dish.food_cost_pct.toFixed(1)}%
-                  </span>
-                  <span className="text-[11.5px] font-black tabular-nums text-emerald-600 dark:text-emerald-400">
-                    Gross profit {fmtCurrency(dish.gross_profit)} ({dish.margin_pct.toFixed(1)}
-                    %)
-                  </span>
-                </div>
-              </div>
-            </div>
-          </>
+          </div>
         )}
       </DialogContent>
     </Dialog>
   );
 }
 
-function MenuEngineeringPage() {
+export default function MenuEngineeringPage() {
   const [search, setSearch] = useState("");
-  const [quadrantFilter, setQuadrantFilter] = useState<Quadrant | null>(null);
+  const [filter, setFilter] = useState<Tier | null>(null);
   const [selected, setSelected] = useState<MenuEngineeringItem | null>(null);
+  const { branch } = useBranchFilter();
 
   const { data, isLoading, isError, refetch, isFetching } = useQuery({
-    queryKey: ["dashboard", "menu-engineering"],
-    queryFn: () => dashboardService.getMenuEngineering(),
+    queryKey: ["dashboard", "menu-engineering", branch],
+    queryFn: () => dashboardService.getMenuEngineering(branch),
   });
 
+  const all = useMemo(() => data?.items ?? [], [data?.items]);
+
+  const counts = useMemo(() => {
+    const next = { star: 0, plow_horse: 0, puzzle: 0, dog: 0 };
+    for (const item of all) next[item.quadrant] += 1;
+    return next;
+  }, [all]);
+
   const items = useMemo(() => {
-    const all = data?.items ?? [];
+    const q = search.trim().toLowerCase();
     return all
-      .filter((i) => {
-        if (quadrantFilter && i.quadrant !== quadrantFilter) return false;
-        if (search) {
-          const q = search.toLowerCase();
-          if (!i.dish.toLowerCase().includes(q) && !i.category.toLowerCase().includes(q))
-            return false;
-        }
-        return true;
+      .filter((item) => {
+        const matchesFilter = !filter || item.quadrant === filter;
+        const matchesSearch =
+          !q || item.dish.toLowerCase().includes(q) || item.category.toLowerCase().includes(q);
+        return matchesFilter && matchesSearch;
       })
       .sort((a, b) => b.sold_30d - a.sold_30d);
-  }, [data, search, quadrantFilter]);
+  }, [all, filter, search]);
 
-  const all = data?.items ?? [];
-  const avgMargin = all.length ? all.reduce((sum, i) => sum + i.margin_pct, 0) / all.length : 0;
-  const starCount = all.filter((i) => i.quadrant === "star").length;
-  const dogCount = all.filter((i) => i.quadrant === "dog").length;
+  const filters: { label: string; tier: Tier | null }[] = [
+    { label: "All", tier: null },
+    { label: "Keep & Promote", tier: "star" },
+    { label: "Optimize", tier: "plow_horse" },
+    { label: "Boost", tier: "puzzle" },
+    { label: "Reconsider", tier: "dog" },
+  ];
 
   return (
-    <div className="space-y-5">
-      {/* ── Header ─────────────────────────────────────────────────────── */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div className="mx-auto max-w-[1600px] space-y-5">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-[20px] font-bold tracking-tight text-foreground flex items-center gap-2">
+          <h1 className="flex items-center gap-2 text-xl font-bold tracking-tight text-foreground">
             <UtensilsCrossed className="h-5 w-5 text-primary" />
             Menu Engineering
           </h1>
-          <p className="mt-0.5 text-[12px] text-muted-foreground">
-            Dish profitability vs popularity — click a dish for the quantities its recipe requires
+          <p className="mt-1 text-sm text-muted-foreground">
+            What to keep, fix, promote, or drop — based on the last 30 days
+            {branch !== "all" ? ` · ${branch}` : ""}.
           </p>
         </div>
         <Button
@@ -259,220 +226,202 @@ function MenuEngineeringPage() {
           size="sm"
           onClick={() => refetch()}
           disabled={isFetching}
-          className="text-[11px]"
+          className="gap-1.5 self-start"
         >
           <RefreshCw className={cn("h-3.5 w-3.5", isFetching && "animate-spin")} />
+          Refresh
         </Button>
       </div>
 
-      {/* ── KPI Row ──────────────────────────────────────────────────── */}
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        {[
-          {
-            label: "DISHES ON MENU",
-            value: all.length ? String(all.length) : "…",
-            icon: UtensilsCrossed,
-            tone: "bg-primary/15 text-primary",
-          },
-          {
-            label: "AVG MARGIN",
-            value: all.length ? `${avgMargin.toFixed(1)}%` : "…",
-            icon: Scale,
-            tone: "bg-info/15 text-info",
-          },
-          {
-            label: "STARS",
-            value: all.length ? String(starCount) : "…",
-            icon: Crown,
-            tone: "bg-success/15 text-success",
-          },
-          {
-            label: "DOGS",
-            value: all.length ? String(dogCount) : "…",
-            icon: TriangleAlert,
-            tone: "bg-destructive/15 text-destructive",
-          },
-        ].map((kpi) => (
-          <Card key={kpi.label} className="border border-border/60 bg-card shadow-sm">
-            <CardContent className="flex items-center gap-3 p-4">
-              <div
-                className={cn(
-                  "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl",
-                  kpi.tone,
-                )}
-              >
-                <kpi.icon className="h-4 w-4" />
+      <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        {(Object.keys(TIER) as Tier[]).map((tier) => {
+          const config = TIER[tier];
+          const Icon = config.icon;
+          const active = filter === tier;
+          return (
+            <button
+              key={tier}
+              type="button"
+              onClick={() => setFilter(active ? null : tier)}
+              className={cn(
+                "rounded-xl border px-4 py-3 text-left transition-colors",
+                active ? config.chip : "border-border/60 bg-card hover:bg-muted/40",
+              )}
+            >
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-xs font-semibold text-muted-foreground">{config.short}</span>
+                <Icon className={cn("h-3.5 w-3.5", active ? undefined : "text-muted-foreground")} />
               </div>
-              <div className="min-w-0">
-                <p className="text-[9.5px] font-bold uppercase tracking-wider text-muted-foreground">
-                  {kpi.label}
-                </p>
-                <p className="text-[17px] font-black tabular-nums text-foreground">{kpi.value}</p>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+              <p className="mt-1.5 text-2xl font-bold tabular-nums text-foreground">
+                {counts[tier]}
+              </p>
+              <p className="mt-1 text-[11px] leading-snug text-muted-foreground">{config.hint}</p>
+            </button>
+          );
+        })}
+      </section>
 
-      {/* ── Dish list ────────────────────────────────────────────────── */}
-      <Card className="border border-border/60 bg-card shadow-sm">
-        <CardHeader className="border-b border-border/40 px-5 pb-3 pt-4">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+      <Card className="border-border/60 bg-card shadow-sm">
+        <CardHeader className="gap-3 border-b border-border/40 px-5 pb-3 pt-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <CardTitle className="text-[13px] font-bold text-foreground">Menu items</CardTitle>
-              <p className="mt-0.5 text-[10px] text-muted-foreground">
-                Sorted by 30-day sales · classification vs menu medians
+              <CardTitle className="text-sm font-bold text-foreground">Dishes</CardTitle>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                {items.length} of {all.length} shown · tap a row for the recommendation
               </p>
             </div>
-            <div className="flex flex-wrap items-center gap-1.5">
-              {(Object.keys(QUADRANT_CONFIG) as Quadrant[]).map((q) => (
-                <button
-                  key={q}
-                  onClick={() => setQuadrantFilter(quadrantFilter === q ? null : q)}
-                  aria-pressed={quadrantFilter === q}
-                  className={cn(
-                    "rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase transition-colors",
-                    quadrantFilter === q
-                      ? QUADRANT_CONFIG[q].className
-                      : "border-border/60 text-muted-foreground hover:text-foreground",
-                  )}
-                >
-                  {QUADRANT_CONFIG[q].label}
-                </button>
-              ))}
-              <div className="relative">
-                <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Search dishes…"
-                  className="h-8 w-44 pl-8 text-[11.5px]"
-                />
-              </div>
+            <div className="relative">
+              <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search dishes…"
+                className="h-8 w-full pl-8 text-xs sm:w-52"
+              />
             </div>
           </div>
+          <div className="flex flex-wrap gap-1.5">
+            {filters.map(({ label, tier }) => (
+              <button
+                key={label}
+                type="button"
+                onClick={() => setFilter(tier)}
+                className={cn(
+                  "rounded-full border px-3 py-1.5 text-[11px] font-semibold transition-colors",
+                  filter === tier
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-border/60 text-muted-foreground hover:text-foreground",
+                )}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
         </CardHeader>
+
         <CardContent className="px-0 pb-2 pt-0">
           {isLoading ? (
             <div className="space-y-2 px-5 py-4">
               {Array.from({ length: 8 }).map((_, i) => (
-                <div key={i} className="h-11 animate-pulse rounded bg-secondary" />
+                <div key={i} className="h-12 animate-pulse rounded-lg bg-secondary" />
               ))}
             </div>
           ) : isError ? (
             <EmptyState
               icon={TriangleAlert}
-              title="Couldn't load the menu"
-              description="Check that the backend is running, then retry"
+              title="Couldn't load your menu"
+              description="Check that the backend is running, then retry."
               action={{ label: "Retry", onClick: () => refetch() }}
             />
           ) : !items.length ? (
             <EmptyState
               icon={UtensilsCrossed}
-              title={all.length ? "No dishes match the current filters" : "No menu data yet"}
+              title={all.length ? "No dishes match this view" : "No menu data yet"}
               description={
                 all.length
-                  ? "Clear the search or quadrant filter to see the full menu"
-                  : "Dishes will appear here once recipes are synced"
+                  ? "Try another filter or search term."
+                  : "Dishes will appear here once POS sales are synced."
               }
             />
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[720px] text-left">
-                <thead>
-                  <tr className="border-b border-border/40 text-[9.5px] font-bold uppercase tracking-wider text-muted-foreground">
-                    <th className="px-5 py-2.5">Dish</th>
-                    <th className="px-3 py-2.5">Category</th>
-                    <th className="px-3 py-2.5 text-right" title="What the customer pays">
-                      Price
-                    </th>
-                    <th className="px-3 py-2.5 text-right" title="What one plate costs you to make">
-                      Cost
-                    </th>
-                    <th className="px-3 py-2.5 text-right" title="Your profit on each plate">
-                      Margin
-                    </th>
-                    <th className="px-3 py-2.5 text-right" title="Plates sold in the last 30 days">
-                      Sold (30d)
-                    </th>
-                    <th
-                      className="px-3 py-2.5 text-right"
-                      title="Ingredients bought but not needed, counted as plates, with the money lost"
-                    >
-                      Wasted (30d)
-                    </th>
-                    <th className="px-3 py-2.5">Class</th>
-                    <th className="px-3 py-2.5" />
-                  </tr>
-                </thead>
-                <tbody>
-                  {items.map((item) => (
-                    <tr
-                      key={item.id}
-                      onClick={() => setSelected(item)}
-                      className="cursor-pointer border-b border-border/20 transition-colors last:border-0 hover:bg-muted/40"
-                    >
-                      <td className="px-5 py-2.5">
-                        <div className="flex items-center gap-2.5">
-                          <ItemAvatar name={item.dish} size="sm" variant="photo" />
-                          <span className="text-[12px] font-semibold text-foreground">
-                            {item.dish}
+            <>
+              <div className="hidden overflow-x-auto md:block">
+                <table className="w-full min-w-[720px] text-left">
+                  <thead>
+                    <tr className="border-b border-border/40 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                      <th className="px-5 py-2.5">Dish</th>
+                      <th className="px-3 py-2.5">Category</th>
+                      <th className="px-3 py-2.5 text-right">Price</th>
+                      <th className="px-3 py-2.5 text-right">Sold (30d)</th>
+                      <th className="px-3 py-2.5">Action</th>
+                      <th className="px-3 py-2.5" />
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {items.map((item) => (
+                      <tr
+                        key={item.id}
+                        onClick={() => setSelected(item)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            setSelected(item);
+                          }
+                        }}
+                        role="button"
+                        tabIndex={0}
+                        className="cursor-pointer border-b border-border/20 transition-colors last:border-0 hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
+                      >
+                        <td className="px-5 py-3">
+                          <div className="flex items-center gap-2.5">
+                            <ItemAvatar name={item.dish} size="sm" variant="photo" />
+                            <span className="text-sm font-semibold text-foreground">
+                              {item.dish}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="px-3 py-3 text-xs text-muted-foreground">{item.category}</td>
+                        <td className="px-3 py-3 text-right text-sm font-semibold tabular-nums">
+                          {fmtCurrency(item.price)}
+                        </td>
+                        <td className="px-3 py-3 text-right text-sm tabular-nums">
+                          {item.sold_30d.toLocaleString()}
+                        </td>
+                        <td className="px-3 py-3">
+                          <TierBadge tier={item.quadrant} />
+                        </td>
+                        <td className="px-3 py-3">
+                          <ChevronRight className="ml-auto h-4 w-4 text-muted-foreground" />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="space-y-2 p-3 md:hidden">
+                {items.map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => setSelected(item)}
+                    className="w-full rounded-xl border border-border/60 p-3 text-left transition-colors hover:bg-muted/40"
+                  >
+                    <div className="flex items-start gap-2.5">
+                      <ItemAvatar name={item.dish} size="sm" variant="photo" />
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="min-w-0">
+                            <p className="truncate text-sm font-bold text-foreground">
+                              {item.dish}
+                            </p>
+                            <p className="mt-0.5 text-xs text-muted-foreground">{item.category}</p>
+                          </div>
+                          <TierBadge tier={item.quadrant} />
+                        </div>
+                        <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
+                          <span>
+                            <b className="block text-sm text-foreground">
+                              {fmtCurrency(item.price)}
+                            </b>
+                            Price
+                          </span>
+                          <span>
+                            <b className="block text-sm text-foreground">{item.sold_30d}</b>
+                            Sold
                           </span>
                         </div>
-                      </td>
-                      <td className="px-3 py-2.5 text-[11px] text-muted-foreground">
-                        {item.category}
-                      </td>
-                      <td className="px-3 py-2.5 text-right text-[11.5px] font-semibold tabular-nums text-foreground">
-                        {fmtCurrency(item.price)}
-                      </td>
-                      <td className="px-3 py-2.5 text-right text-[11.5px] tabular-nums text-muted-foreground">
-                        {fmtCurrency(item.cost)}
-                      </td>
-                      <td
-                        className={cn(
-                          "px-3 py-2.5 text-right text-[11.5px] font-bold tabular-nums",
-                          item.margin_pct >= 60 ? "text-success" : "text-foreground",
-                        )}
-                      >
-                        {item.margin_pct.toFixed(1)}%
-                      </td>
-                      <td className="px-3 py-2.5 text-right text-[11.5px] tabular-nums text-foreground">
-                        <span className="inline-flex items-center gap-1">
-                          <TrendingUp className="h-3 w-3 text-muted-foreground" />
-                          {item.sold_30d.toLocaleString()}
-                        </span>
-                      </td>
-                      <td className="px-3 py-2.5 text-right text-[11.5px] tabular-nums">
-                        <span className="inline-flex items-center gap-1 text-destructive">
-                          <Trash2 className="h-3 w-3" />
-                          {item.waste_qty_30d.toLocaleString(undefined, {
-                            maximumFractionDigits: 1,
-                          })}{" "}
-                          u
-                        </span>
-                        <span className="ml-1.5 text-[10px] text-muted-foreground">
-                          ({fmtCurrency(item.waste_cost_30d)})
-                        </span>
-                      </td>
-                      <td className="px-3 py-2.5">
-                        <QuadrantBadge quadrant={item.quadrant} />
-                      </td>
-                      <td className="px-3 py-2.5 text-right">
-                        <ChevronRight className="ml-auto h-3.5 w-3.5 text-muted-foreground" />
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </>
           )}
         </CardContent>
       </Card>
 
-      <RecipeDialog dish={selected} onClose={() => setSelected(null)} />
+      <DishDialog dish={selected} onClose={() => setSelected(null)} />
     </div>
   );
 }
-
-export default MenuEngineeringPage;

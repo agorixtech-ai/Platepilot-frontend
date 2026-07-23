@@ -64,8 +64,8 @@ and a nav item in the `*_ITEMS` arrays of
 import { Link, useHistory, useLocation } from "react-router-dom";
 
 const history = useHistory();
-history.push("/dashboard/pos");     // user-initiated navigation
-history.replace("/login");          // replace, e.g. after logout
+history.push("/dashboard/pos"); // user-initiated navigation
+history.replace("/login"); // replace, e.g. after logout
 const { pathname } = useLocation(); // active-state checks
 ```
 
@@ -82,22 +82,22 @@ the KPI card. Props observed in use:
 
 ```tsx
 <KpiCardWithSparkline
-  index={0}                          // stagger animation order
+  index={0} // stagger animation order
   label="Total Sales"
   value={fmtCurrency(m.total_sales, m.currency)}
-  icon={DollarSign}                  // lucide icon component
-  tone="primary"                     // Tone: primary|success|warning|destructive|info|neutral
-  delta={deltaPct(m.total_sales_delta_pct)}        // previous-period chip
-  sub={{ text: "vs last period", tone: "success", dot: true }}  // or footnote="…"
+  icon={DollarSign} // lucide icon component
+  tone="primary" // Tone: primary|success|warning|destructive|info|neutral
+  delta={deltaPct(m.total_sales_delta_pct)} // previous-period chip
+  sub={{ text: "vs last period", tone: "success", dot: true }} // or footnote="…"
   sparklineData={sparkFromYear(yearTrend?.sales)}
-  to="/dashboard/pos"                // optional: whole card becomes a Link
+  to="/dashboard/pos" // optional: whole card becomes a Link
 />
 ```
 
 Delta helpers (same file):
 
 - `deltaPct(value, goodDir)` → `{ value: "12.3%", direction, tone }`
-- `deltaPp(value, goodDir)` → percentage-*point* variant (`"1.4pp"`) for
+- `deltaPp(value, goodDir)` → percentage-_point_ variant (`"1.4pp"`) for
   food-cost/margin
 - `goodDir: "down"` when a decrease is good (food cost); default `"up"`.
 
@@ -109,10 +109,11 @@ Loading state for a KPI row: render skeleton cards while
 `PeriodChip` from `components/dashboard/shared.tsx`:
 
 ```tsx
-{(["today", "7d", "30d"] as const).map((k) => (
-  <PeriodChip key={k} label={k} active={range.kind === k}
-    onClick={() => setRange({ kind: k })} />
-))}
+{
+  (["today", "7d", "30d"] as const).map((k) => (
+    <PeriodChip key={k} label={k} active={range.kind === k} onClick={() => setRange({ kind: k })} />
+  ));
+}
 ```
 
 The date-range control users see is
@@ -137,11 +138,11 @@ All chart colors are CSS variables; all shared chart machinery lives in
 ```tsx
 <AreaTrend
   data={activeSeries.values}
-  compareData={activeSeries.compareValues}   // prev_* arrays from MetricsTrend
+  compareData={activeSeries.compareValues} // prev_* arrays from MetricsTrend
   labels={trendData?.labels ?? []}
   loading={trendQuery.isLoading}
   metricName={METRIC_CONFIG[activeMetric].label}
-  metricKey={activeMetric}                    // "sales" | "orders" | "food_cost" | "margin"
+  metricKey={activeMetric} // "sales" | "orders" | "food_cost" | "margin"
   period={trendPeriod}
   currentLabel={trendData?.current_label}
   previousLabel={trendData?.previous_label}
@@ -199,13 +200,21 @@ const PRIORITY_TONE = { high: "destructive", medium: "warning", low: "info" } as
 <Card className="border-border/40 bg-card">
   <CardContent className="p-4 space-y-3">
     <div className="flex items-start justify-between gap-2">
-      <div className={cn("flex h-9 w-9 items-center justify-center rounded-xl",
-        TONE_ICON_BG[PRIORITY_TONE[insight.priority]])}>
+      <div
+        className={cn(
+          "flex h-9 w-9 items-center justify-center rounded-xl",
+          TONE_ICON_BG[PRIORITY_TONE[insight.priority]],
+        )}
+      >
         <Sparkles className="h-4 w-4" />
       </div>
-      <Badge variant="outline"
-        className={cn("border-0 text-[10px] font-extrabold uppercase",
-          TONE_ICON_BG[PRIORITY_TONE[insight.priority]])}>
+      <Badge
+        variant="outline"
+        className={cn(
+          "border-0 text-[10px] font-extrabold uppercase",
+          TONE_ICON_BG[PRIORITY_TONE[insight.priority]],
+        )}
+      >
         {insight.priority}
       </Badge>
     </div>
@@ -213,7 +222,7 @@ const PRIORITY_TONE = { high: "destructive", medium: "warning", low: "info" } as
     <p className="text-xs text-muted-foreground">{insight.recommendation}</p>
     {/* supporting metrics: fmtCurrency / fmtPct, tabular-nums */}
   </CardContent>
-</Card>
+</Card>;
 ```
 
 Grid: `grid gap-3 sm:grid-cols-2 xl:grid-cols-3`. Fetch via a new typed

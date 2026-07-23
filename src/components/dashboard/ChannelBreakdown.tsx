@@ -56,10 +56,7 @@ export function ChannelBreakdown({ period }: { period: Period }) {
                     animationDuration={800}
                   >
                     {data.items.map((_, i) => (
-                      <Cell
-                        key={i}
-                        fill={CHART_PALETTE[i % CHART_PALETTE.length]}
-                      />
+                      <Cell key={i} fill={CHART_PALETTE[i % CHART_PALETTE.length]} />
                     ))}
                   </Pie>
                   <Legend

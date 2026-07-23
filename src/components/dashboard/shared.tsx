@@ -346,7 +346,10 @@ export function AreaTrend({
                 <div className="rounded-xl border border-border/60 bg-card/95 backdrop-blur-sm px-4 py-3 text-[11px] shadow-xl animate-in fade-in zoom-in duration-200">
                   <p className="font-bold text-foreground mb-2 text-[12px]">{d.label}</p>
                   <div className="flex items-center gap-2.5">
-                    <span className="h-2.5 w-2.5 rounded-full shadow-sm" style={{ backgroundColor: color }} />
+                    <span
+                      className="h-2.5 w-2.5 rounded-full shadow-sm"
+                      style={{ backgroundColor: color }}
+                    />
                     <span className="text-muted-foreground font-medium">{currentLabel}:</span>
                     <span className="font-bold text-foreground tabular-nums text-[13px]">
                       {formatValue(d.value)}

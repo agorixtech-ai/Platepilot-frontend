@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { AgorixNav } from "@/components/AgorixNav";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-/** Matches PlatePilot brand palette — light landing (soft green-white) */
-const T = {
+/** Matches PlatePilot brand palette — light landing (soft green-white).
+ *  Exported as the shared landing color theme (Index.tsx product tiles). */
+export const T = {
   bg: "#F6FAF7",
   ink: "#FFFFFF",
   text: "#152019",
@@ -888,7 +888,6 @@ export function AgorixHero() {
       }}
     >
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
         .agorix-hero__inset {
           max-width: ${LAYOUT.max}px;
           margin-inline: auto;
@@ -939,9 +938,6 @@ export function AgorixHero() {
           pointerEvents: "none",
         }}
       />
-
-      {/* ── NAV ── */}
-      <AgorixNav insetClass="agorix-hero__inset agorix-nav__inset" variant="light" />
 
       {/* ── MOBILE: plain responsive copy, no scaled canvas, no decorative dashboard ── */}
       {isMobile && (

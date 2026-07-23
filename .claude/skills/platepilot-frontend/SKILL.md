@@ -16,18 +16,18 @@ daily** by a backend cron — the UI must always be honest about data freshness.
 
 ## Stack (verified against package.json)
 
-| Concern | Choice |
-|---|---|
-| Framework | Ionic React 8 (`@ionic/react`, `@ionic/react-router`) SPA on Vite 7 — no SSR |
-| Routing | react-router **v5** (`<Link to>`, `useHistory()`, `useLocation()`, `<Redirect>`) |
-| Language | TypeScript (strict) |
-| Data fetching | TanStack Query 5 (`@tanstack/react-query`) |
-| Charts | **Recharts 2** — the only chart library; do not add another |
-| Styling | Tailwind CSS v4 (CSS `@theme` in `src/styles.css`, no config file) + shadcn/ui in `src/components/ui/` |
-| Icons | lucide-react |
-| Toasts | sonner (`toast.success(...)` / `toast.error(...)`) |
-| Forms | react-hook-form + zod |
-| Package manager | **bun** — never npm/npx/yarn |
+| Concern         | Choice                                                                                                 |
+| --------------- | ------------------------------------------------------------------------------------------------------ |
+| Framework       | Ionic React 8 (`@ionic/react`, `@ionic/react-router`) SPA on Vite 7 — no SSR                           |
+| Routing         | react-router **v5** (`<Link to>`, `useHistory()`, `useLocation()`, `<Redirect>`)                       |
+| Language        | TypeScript (strict)                                                                                    |
+| Data fetching   | TanStack Query 5 (`@tanstack/react-query`)                                                             |
+| Charts          | **Recharts 2** — the only chart library; do not add another                                            |
+| Styling         | Tailwind CSS v4 (CSS `@theme` in `src/styles.css`, no config file) + shadcn/ui in `src/components/ui/` |
+| Icons           | lucide-react                                                                                           |
+| Toasts          | sonner (`toast.success(...)` / `toast.error(...)`)                                                     |
+| Forms           | react-hook-form + zod                                                                                  |
+| Package manager | **bun** — never npm/npx/yarn                                                                           |
 
 ## Commands (run from `frontend/`)
 
@@ -94,7 +94,7 @@ transition — documented failure mode, don't reintroduce it).
 
 - **Branch switcher**: `useBranchFilter()` from
   `src/contexts/BranchFilterContext.tsx` → `{ branch, setBranch, branches,
-  locations, isLoadingBranches }`. `branch` is `"all"` or a branch-name
+locations, isLoadingBranches }`. `branch` is `"all"` or a branch-name
   string fetched from `GET /api/dashboard/branches`. Selection persists to
   localStorage key `platepilot_branch`. **This is the standard** — do not
   create new branch state, props-drill branch names, or use the legacy

@@ -442,98 +442,100 @@ function InventoryPage() {
               <div className="flex h-[280px] flex-col">
                 <div className="relative min-h-0 flex-1">
                   <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={statusPieData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={50}
-                      outerRadius={78}
-                      paddingAngle={4}
-                      dataKey="value"
-                      stroke="none"
-                    >
-                      {statusPieData.map((entry, i) => (
-                        <Cell key={i} fill={entry.fill} fillOpacity={0.85} />
-                      ))}
-                    </Pie>
-                    <Tooltip
-                      content={({ active, payload }) => {
-                        if (!active || !payload?.length) return null;
-                        const d = payload[0].payload;
-                        const pct =
-                          items.length > 0 ? ((d.value / items.length) * 100).toFixed(0) : "0";
-                        return (
-                          <div className="rounded-xl border border-border bg-popover px-3 py-2 text-[11px] shadow-xl">
-                            <p className="font-bold text-foreground">{d.name}</p>
-                            <p className="text-muted-foreground tabular-nums">
-                              {d.value} items ({pct}%)
-                            </p>
-                          </div>
-                        );
-                      }}
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
-                <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-                  <p className="text-[22px] font-bold tabular-nums text-foreground">{items.length}</p>
-                  <p className="text-[9px] font-medium text-muted-foreground">Total Items</p>
+                    <PieChart>
+                      <Pie
+                        data={statusPieData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={50}
+                        outerRadius={78}
+                        paddingAngle={4}
+                        dataKey="value"
+                        stroke="none"
+                      >
+                        {statusPieData.map((entry, i) => (
+                          <Cell key={i} fill={entry.fill} fillOpacity={0.85} />
+                        ))}
+                      </Pie>
+                      <Tooltip
+                        content={({ active, payload }) => {
+                          if (!active || !payload?.length) return null;
+                          const d = payload[0].payload;
+                          const pct =
+                            items.length > 0 ? ((d.value / items.length) * 100).toFixed(0) : "0";
+                          return (
+                            <div className="rounded-xl border border-border bg-popover px-3 py-2 text-[11px] shadow-xl">
+                              <p className="font-bold text-foreground">{d.name}</p>
+                              <p className="text-muted-foreground tabular-nums">
+                                {d.value} items ({pct}%)
+                              </p>
+                            </div>
+                          );
+                        }}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                  <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+                    <p className="text-[22px] font-bold tabular-nums text-foreground">
+                      {items.length}
+                    </p>
+                    <p className="text-[9px] font-medium text-muted-foreground">Total Items</p>
+                  </div>
                 </div>
-              </div>
 
-              {/* Legend with click-to-filter */}
-              <div className="mt-2 shrink-0 space-y-1.5">
-                {[
-                  {
-                    key: "ok" as const,
-                    label: "In Stock",
-                    count: okCount,
-                    color: "var(--color-success)",
-                  },
-                  {
-                    key: "low" as const,
-                    label: "Low Stock",
-                    count: lowCount,
-                    color: "var(--color-warning)",
-                  },
-                  {
-                    key: "critical" as const,
-                    label: "Critical",
-                    count: criticalCount,
-                    color: "var(--color-destructive)",
-                  },
-                ].map((s) => {
-                  const pct = items.length > 0 ? (s.count / items.length) * 100 : 0;
-                  return (
-                    <button
-                      key={s.key}
-                      onClick={() => setStatusFilter(statusFilter === s.key ? "" : s.key)}
-                      className={cn(
-                        "w-full flex items-center justify-between rounded-lg px-3 py-2 transition-all text-left",
-                        statusFilter === s.key
-                          ? "bg-muted/60 ring-1 ring-primary/20"
-                          : "hover:bg-muted/30",
-                      )}
-                    >
-                      <div className="flex items-center gap-2.5">
-                        <div
-                          className="h-3 w-3 rounded-full shrink-0"
-                          style={{ backgroundColor: s.color }}
-                        />
-                        <span className="text-[11px] font-medium text-foreground">{s.label}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-[11px] font-bold text-foreground tabular-nums">
-                          {s.count}
-                        </span>
-                        <span className="text-[10px] text-muted-foreground tabular-nums">
-                          ({pct.toFixed(0)}%)
-                        </span>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
+                {/* Legend with click-to-filter */}
+                <div className="mt-2 shrink-0 space-y-1.5">
+                  {[
+                    {
+                      key: "ok" as const,
+                      label: "In Stock",
+                      count: okCount,
+                      color: "var(--color-success)",
+                    },
+                    {
+                      key: "low" as const,
+                      label: "Low Stock",
+                      count: lowCount,
+                      color: "var(--color-warning)",
+                    },
+                    {
+                      key: "critical" as const,
+                      label: "Critical",
+                      count: criticalCount,
+                      color: "var(--color-destructive)",
+                    },
+                  ].map((s) => {
+                    const pct = items.length > 0 ? (s.count / items.length) * 100 : 0;
+                    return (
+                      <button
+                        key={s.key}
+                        onClick={() => setStatusFilter(statusFilter === s.key ? "" : s.key)}
+                        className={cn(
+                          "w-full flex items-center justify-between rounded-lg px-3 py-2 transition-all text-left",
+                          statusFilter === s.key
+                            ? "bg-muted/60 ring-1 ring-primary/20"
+                            : "hover:bg-muted/30",
+                        )}
+                      >
+                        <div className="flex items-center gap-2.5">
+                          <div
+                            className="h-3 w-3 rounded-full shrink-0"
+                            style={{ backgroundColor: s.color }}
+                          />
+                          <span className="text-[11px] font-medium text-foreground">{s.label}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[11px] font-bold text-foreground tabular-nums">
+                            {s.count}
+                          </span>
+                          <span className="text-[10px] text-muted-foreground tabular-nums">
+                            ({pct.toFixed(0)}%)
+                          </span>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -643,167 +645,67 @@ function InventoryPage() {
               </p>
             </div>
           ) : viewMode === "cards" ? (
-        /* ── Cards View ──────────────────────────────────────────────── */
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {filtered.map((item) => {
-            const cfg = STATUS_CONFIG[item.status];
-            const StatusIcon = cfg.icon;
-            const pct = maxStock > 0 ? Math.max(0, (item.current_stock / maxStock) * 100) : 0;
+            /* ── Cards View ──────────────────────────────────────────────── */
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {filtered.map((item) => {
+                const cfg = STATUS_CONFIG[item.status];
+                const StatusIcon = cfg.icon;
+                const pct = maxStock > 0 ? Math.max(0, (item.current_stock / maxStock) * 100) : 0;
 
-            return (
-              <Card
-                key={item.item}
-                className={cn(
-                  "border bg-card shadow-sm cursor-pointer transition-all hover:shadow-md hover:-translate-y-0.5 group",
-                  item.status === "critical"
-                    ? "border-destructive/30 hover:border-destructive/50"
-                    : item.status === "low"
-                      ? "border-warning/30 hover:border-warning/50"
-                      : "border-border/60 hover:border-primary/30",
-                  selectedItem?.item === item.item && "ring-1 ring-primary/30",
-                )}
-                onClick={() => setSelectedItem(item)}
-              >
-                <CardContent className="px-4 py-4">
-                  {/* Header */}
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex items-center gap-2 min-w-0 flex-1">
-                      <div
-                        className={cn(
-                          "flex h-8 w-8 items-center justify-center rounded-lg shrink-0",
-                          cfg.color.split(" ").slice(0, 1).join(" "),
-                        )}
-                      >
-                        <StatusIcon
-                          className={cn("h-4 w-4", cfg.color.split(" ").slice(1, 2).join(" "))}
-                        />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="text-[12px] font-bold text-foreground truncate">
-                          {item.item}
-                        </p>
-                        <Badge
-                          variant="outline"
-                          className={cn("text-[8px] font-bold px-1.5 py-0 mt-0.5", cfg.color)}
-                        >
-                          {cfg.label}
-                        </Badge>
-                      </div>
-                    </div>
-                    <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/30 group-hover:text-primary transition-colors shrink-0 mt-1" />
-                  </div>
-
-                  {/* Stock gauge + value */}
-                  <div className="flex items-center justify-between">
-                    <StockGauge value={item.current_stock} max={maxStock} status={item.status} />
-                    <div className="text-right">
-                      <p
-                        className={cn(
-                          "text-[24px] font-bold tabular-nums leading-tight",
-                          item.status === "critical"
-                            ? "text-destructive"
-                            : item.status === "low"
-                              ? "text-warning"
-                              : "text-foreground",
-                        )}
-                      >
-                        {item.current_stock <= 0
-                          ? "0"
-                          : item.current_stock.toLocaleString("en-US", {
-                              maximumFractionDigits: 1,
-                            })}
-                      </p>
-                      <p className="text-[10px] text-muted-foreground">units in stock</p>
-                    </div>
-                  </div>
-
-                  {/* Progress bar */}
-                  <div className="mt-3 flex items-center gap-2">
-                    <div className="flex-1 h-1.5 rounded-full bg-muted/40 overflow-hidden">
-                      <div
-                        className={cn("h-full rounded-full transition-all duration-700", cfg.bar)}
-                        style={{ width: `${Math.max(item.current_stock > 0 ? 3 : 0, pct)}%` }}
-                      />
-                    </div>
-                    <span className="text-[9px] font-bold text-muted-foreground tabular-nums">
-                      {pct.toFixed(0)}%
-                    </span>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-          ) : (
-            /* ── List View ───────────────────────────────────────────────── */
-            <div className="overflow-x-auto rounded-xl border border-border/40">
-              <table className="w-full text-[11.5px]">
-              <thead>
-                <tr className="border-b border-border/40 bg-muted/30">
-                  {["ITEM", "STATUS", "STOCK LEVEL", ""].map((h) => (
-                    <th
-                      key={h}
-                      className="px-4 py-2.5 text-left font-bold text-muted-foreground uppercase tracking-wider text-[10px]"
-                    >
-                      {h}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.map((item) => {
-                  const cfg = STATUS_CONFIG[item.status];
-                  const StatusIcon = cfg.icon;
-                  const pct = maxStock > 0 ? Math.max(0, (item.current_stock / maxStock) * 100) : 0;
-
-                  return (
-                    <tr
-                      key={item.item}
-                      className="border-b border-border/20 hover:bg-muted/20 transition-colors cursor-pointer"
-                      onClick={() => setSelectedItem(item)}
-                    >
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-2.5">
+                return (
+                  <Card
+                    key={item.item}
+                    className={cn(
+                      "border bg-card shadow-sm cursor-pointer transition-all hover:shadow-md hover:-translate-y-0.5 group",
+                      item.status === "critical"
+                        ? "border-destructive/30 hover:border-destructive/50"
+                        : item.status === "low"
+                          ? "border-warning/30 hover:border-warning/50"
+                          : "border-border/60 hover:border-primary/30",
+                      selectedItem?.item === item.item && "ring-1 ring-primary/30",
+                    )}
+                    onClick={() => setSelectedItem(item)}
+                  >
+                    <CardContent className="px-4 py-4">
+                      {/* Header */}
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center gap-2 min-w-0 flex-1">
                           <div
                             className={cn(
-                              "flex h-7 w-7 items-center justify-center rounded-lg shrink-0",
+                              "flex h-8 w-8 items-center justify-center rounded-lg shrink-0",
                               cfg.color.split(" ").slice(0, 1).join(" "),
                             )}
                           >
                             <StatusIcon
-                              className={cn(
-                                "h-3.5 w-3.5",
-                                cfg.color.split(" ").slice(1, 2).join(" "),
-                              )}
+                              className={cn("h-4 w-4", cfg.color.split(" ").slice(1, 2).join(" "))}
                             />
                           </div>
-                          <span className="text-[12px] font-semibold text-foreground">
-                            {item.item}
-                          </span>
+                          <div className="min-w-0 flex-1">
+                            <p className="text-[12px] font-bold text-foreground truncate">
+                              {item.item}
+                            </p>
+                            <Badge
+                              variant="outline"
+                              className={cn("text-[8px] font-bold px-1.5 py-0 mt-0.5", cfg.color)}
+                            >
+                              {cfg.label}
+                            </Badge>
+                          </div>
                         </div>
-                      </td>
-                      <td className="px-4 py-3">
-                        <Badge
-                          variant="outline"
-                          className={cn("text-[9px] font-bold px-1.5 py-0", cfg.color)}
-                        >
-                          {cfg.label}
-                        </Badge>
-                      </td>
-                      <td className="px-4 py-3 w-[40%]">
-                        <div className="flex items-center gap-3">
-                          <div className="flex-1 h-2 rounded-full bg-muted/40 overflow-hidden">
-                            <div
-                              className={cn(
-                                "h-full rounded-full transition-all duration-500",
-                                cfg.bar,
-                              )}
-                              style={{ width: `${Math.max(item.current_stock > 0 ? 3 : 0, pct)}%` }}
-                            />
-                          </div>
-                          <span
+                        <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/30 group-hover:text-primary transition-colors shrink-0 mt-1" />
+                      </div>
+
+                      {/* Stock gauge + value */}
+                      <div className="flex items-center justify-between">
+                        <StockGauge
+                          value={item.current_stock}
+                          max={maxStock}
+                          status={item.status}
+                        />
+                        <div className="text-right">
+                          <p
                             className={cn(
-                              "text-[14px] font-bold tabular-nums shrink-0 w-16 text-right",
+                              "text-[24px] font-bold tabular-nums leading-tight",
                               item.status === "critical"
                                 ? "text-destructive"
                                 : item.status === "low"
@@ -811,18 +713,128 @@ function InventoryPage() {
                                   : "text-foreground",
                             )}
                           >
-                            {item.current_stock <= 0 ? "0" : item.current_stock.toFixed(1)}
-                          </span>
+                            {item.current_stock <= 0
+                              ? "0"
+                              : item.current_stock.toLocaleString("en-US", {
+                                  maximumFractionDigits: 1,
+                                })}
+                          </p>
+                          <p className="text-[10px] text-muted-foreground">units in stock</p>
                         </div>
-                      </td>
-                      <td className="px-4 py-3">
-                        <Eye className="h-3.5 w-3.5 text-muted-foreground/40 hover:text-primary transition-colors" />
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                      </div>
+
+                      {/* Progress bar */}
+                      <div className="mt-3 flex items-center gap-2">
+                        <div className="flex-1 h-1.5 rounded-full bg-muted/40 overflow-hidden">
+                          <div
+                            className={cn(
+                              "h-full rounded-full transition-all duration-700",
+                              cfg.bar,
+                            )}
+                            style={{ width: `${Math.max(item.current_stock > 0 ? 3 : 0, pct)}%` }}
+                          />
+                        </div>
+                        <span className="text-[9px] font-bold text-muted-foreground tabular-nums">
+                          {pct.toFixed(0)}%
+                        </span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          ) : (
+            /* ── List View ───────────────────────────────────────────────── */
+            <div className="overflow-x-auto rounded-xl border border-border/40">
+              <table className="w-full text-[11.5px]">
+                <thead>
+                  <tr className="border-b border-border/40 bg-muted/30">
+                    {["ITEM", "STATUS", "STOCK LEVEL", ""].map((h) => (
+                      <th
+                        key={h}
+                        className="px-4 py-2.5 text-left font-bold text-muted-foreground uppercase tracking-wider text-[10px]"
+                      >
+                        {h}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {filtered.map((item) => {
+                    const cfg = STATUS_CONFIG[item.status];
+                    const StatusIcon = cfg.icon;
+                    const pct =
+                      maxStock > 0 ? Math.max(0, (item.current_stock / maxStock) * 100) : 0;
+
+                    return (
+                      <tr
+                        key={item.item}
+                        className="border-b border-border/20 hover:bg-muted/20 transition-colors cursor-pointer"
+                        onClick={() => setSelectedItem(item)}
+                      >
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-2.5">
+                            <div
+                              className={cn(
+                                "flex h-7 w-7 items-center justify-center rounded-lg shrink-0",
+                                cfg.color.split(" ").slice(0, 1).join(" "),
+                              )}
+                            >
+                              <StatusIcon
+                                className={cn(
+                                  "h-3.5 w-3.5",
+                                  cfg.color.split(" ").slice(1, 2).join(" "),
+                                )}
+                              />
+                            </div>
+                            <span className="text-[12px] font-semibold text-foreground">
+                              {item.item}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3">
+                          <Badge
+                            variant="outline"
+                            className={cn("text-[9px] font-bold px-1.5 py-0", cfg.color)}
+                          >
+                            {cfg.label}
+                          </Badge>
+                        </td>
+                        <td className="px-4 py-3 w-[40%]">
+                          <div className="flex items-center gap-3">
+                            <div className="flex-1 h-2 rounded-full bg-muted/40 overflow-hidden">
+                              <div
+                                className={cn(
+                                  "h-full rounded-full transition-all duration-500",
+                                  cfg.bar,
+                                )}
+                                style={{
+                                  width: `${Math.max(item.current_stock > 0 ? 3 : 0, pct)}%`,
+                                }}
+                              />
+                            </div>
+                            <span
+                              className={cn(
+                                "text-[14px] font-bold tabular-nums shrink-0 w-16 text-right",
+                                item.status === "critical"
+                                  ? "text-destructive"
+                                  : item.status === "low"
+                                    ? "text-warning"
+                                    : "text-foreground",
+                              )}
+                            >
+                              {item.current_stock <= 0 ? "0" : item.current_stock.toFixed(1)}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3">
+                          <Eye className="h-3.5 w-3.5 text-muted-foreground/40 hover:text-primary transition-colors" />
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
           )}
         </CardContent>
