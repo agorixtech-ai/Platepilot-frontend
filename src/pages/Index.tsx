@@ -1,5 +1,6 @@
 import { AppPage } from "@/components/ionic/AppPage";
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import Lenis from "lenis";
 import {
   BarChart3,
   Bell,
@@ -508,6 +509,41 @@ function useReveal(threshold = 0.18) {
 /* ─── Main page ──────────────────────────────────────────────────────────── */
 function Index() {
   const [activeTab, setActiveTab] = useState(0);
+  const mainRef = useRef<HTMLElement | null>(null);
+
+  /* Smooth, eased scrolling for this page only — scoped to the page's own
+     .app-page-scroll ancestor so Dashboard/Login keep native touch scroll.
+     Wheel input only (syncTouch: false): mobile keeps its fast native touch
+     feel, which AppPage.tsx already tunes for. Skipped under
+     prefers-reduced-motion, per the reduced-motion guard used elsewhere on
+     this page. */
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const content = mainRef.current;
+    const wrapper = content?.closest<HTMLElement>(".app-page-scroll");
+    if (!content || !wrapper) return;
+
+    const lenis = new Lenis({
+      wrapper,
+      content,
+      duration: 1.1,
+      smoothWheel: true,
+      syncTouch: false,
+      anchors: { offset: -110 },
+    });
+
+    let raf = 0;
+    const tick = (time: number) => {
+      lenis.raf(time);
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+
+    return () => {
+      cancelAnimationFrame(raf);
+      lenis.destroy();
+    };
+  }, []);
 
   const sec1 = useReveal();
   const sec2 = useReveal();
@@ -555,6 +591,7 @@ function Index() {
 
   return (
     <main
+      ref={mainRef}
       className="agorix-landing"
       style={{
         background: "#F6FAF7",
