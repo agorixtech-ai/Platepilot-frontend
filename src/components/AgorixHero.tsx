@@ -46,11 +46,10 @@ const cardShell = {
   background: T.surface,
 } as const;
 
-const LAYOUT = { max: 1305, pad: 40, stage: 1225, shift: 72 } as const;
+const LAYOUT = { max: 1280, pad: 40, stage: 1225 } as const;
 const STAGE_H = 640;
 const HALF = LAYOUT.stage / 2;
-const MOBILE_GUTTER = 16;
-const COPY_LEFT = 32;
+const COPY_LEFT = 0;
 const COPY_WIDTH = HALF - COPY_LEFT - 24;
 const ANIM_INSET = 14;
 const LIST_W = 162;
@@ -703,6 +702,7 @@ function AnimatedDashboard({
                   color: T.purple,
                   display: "flex",
                   alignItems: "center",
+
                   flexShrink: 0,
                 }}
               >
@@ -836,7 +836,7 @@ export function AgorixHero() {
       const mWrap = mobileWrapRef.current;
       const mStage = mobileStageRef.current;
       if (mWrap && mStage) {
-        const ratio = Math.min(1, (mWrap.clientWidth - MOBILE_GUTTER * 2) / HALF);
+        const ratio = Math.min(1, mWrap.clientWidth / HALF);
         mStage.style.transform = `scale(${ratio})`;
         mWrap.style.height = `${STAGE_H * ratio}px`;
       }
@@ -884,15 +884,13 @@ export function AgorixHero() {
                      ${T.bg}`,
         borderBottom: `1px solid ${T.border}`,
         ["--hero-pad" as string]: `clamp(20px, 3vw, ${LAYOUT.pad}px)`,
-        ["--hero-shift" as string]: `clamp(16px, 4vw, ${LAYOUT.shift}px)`,
       }}
     >
       <style>{`
         .agorix-hero__inset {
           max-width: ${LAYOUT.max}px;
           margin-inline: auto;
-          padding-inline: var(--hero-pad) var(--hero-pad);
-          padding-left: calc(var(--hero-pad) + var(--hero-shift));
+          padding-inline: var(--hero-pad);
         }
         .agorix-hero__stage {
           position: absolute; left: 0; top: 0;
@@ -1001,39 +999,38 @@ export function AgorixHero() {
 
       {/* ── MOBILE: animated dashboard mockup, scaled to fit width, below the copy ── */}
       {isMobile && (
-        <div
-          ref={mobileWrapRef}
-          className="agorix-hero__inset"
-          style={{ position: "relative", width: "100%", height: STAGE_H, paddingBottom: 40 }}
-        >
-          <div
-            ref={mobileStageRef}
-            style={{
-              position: "absolute",
-              left: MOBILE_GUTTER,
-              top: 0,
-              width: HALF,
-              height: STAGE_H,
-              transformOrigin: "top left",
-            }}
-          >
-            {/* Fade-in lives on this inner element, not the scaled one above —
-                a CSS animation's transform keyframes would otherwise clobber
-                the JS-driven scale() on every frame. */}
+        <div className="agorix-hero__inset" style={{ paddingBottom: 40 }}>
+          {/* Same unpadded measuring div as the desktop stage wrapper */}
+          <div ref={mobileWrapRef} style={{ position: "relative", width: "100%", height: STAGE_H }}>
             <div
+              ref={mobileStageRef}
               style={{
                 position: "absolute",
-                inset: 0,
-                animation: "ag-fadein 0.6s 0.2s ease-out both",
+                left: 0,
+                top: 0,
+                width: HALF,
+                height: STAGE_H,
+                transformOrigin: "top left",
               }}
             >
-              <AnimatedDashboard
-                card={card}
-                stats={stats}
-                cardIdx={cardIdx}
-                aiIdx={aiIdx}
-                onAiComplete={handleAiComplete}
-              />
+              {/* Fade-in lives on this inner element, not the scaled one above —
+                a CSS animation's transform keyframes would otherwise clobber
+                the JS-driven scale() on every frame. */}
+              <div
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  animation: "ag-fadein 0.6s 0.2s ease-out both",
+                }}
+              >
+                <AnimatedDashboard
+                  card={card}
+                  stats={stats}
+                  cardIdx={cardIdx}
+                  aiIdx={aiIdx}
+                  onAiComplete={handleAiComplete}
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -1041,83 +1038,84 @@ export function AgorixHero() {
 
       {/* ── STAGE WRAPPER (desktop/tablet only — fixed-pixel canvas scaled to fit) ── */}
       {!isMobile && (
-        <div
-          ref={wrapRef}
-          className="agorix-hero__inset"
-          style={{ position: "relative", width: "100%", height: STAGE_H }}
-        >
-          <div ref={stageRef} className="agorix-hero__stage">
-            {/* ── LEFT HALF: COPY ── */}
-            <section className="agorix-hero__copy">
-              <h1
-                style={{
-                  fontWeight: 800,
-                  fontSize: 52,
-                  lineHeight: 1.08,
-                  letterSpacing: "-.04em",
-                  margin: 0,
-                  color: T.text,
-                  animation: "ag-up .7s .1s both",
-                }}
-              >
-                Business Management That Turns
-                <br />
-                Your <span style={gradientClip(T.gradientA)}>Tally &amp; POS Data</span> into
-                <br />
-                <span style={gradientClip(T.gradientB)}>Intelligence</span>
-              </h1>
-              <p
-                style={{
-                  fontSize: 17,
-                  lineHeight: 1.75,
-                  color: T.muted,
-                  margin: "20px 0 0",
-                  maxWidth: 460,
-                  animation: "ag-up .7s .22s both",
-                }}
-              >
-                Agorix unifies your Tally books, POS sales, and inventory across every outlet and
-                connected tool — so you predict risk earlier, act faster, and grow margin.
-              </p>
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 14,
-                  marginTop: 32,
-                  animation: "ag-up .7s .32s both",
-                }}
-              >
-                <a
-                  href="/login"
-                  style={btnSolidLg}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = "#15803D";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = T.accent;
+        <div className="agorix-hero__inset">
+          {/* Unpadded measuring div: the abs-positioned stage anchors to it so
+              it starts at the inset's content edge (abs children ignore the
+              inset's padding), keeping the hero flush with the nav */}
+          <div ref={wrapRef} style={{ position: "relative", width: "100%", height: STAGE_H }}>
+            <div ref={stageRef} className="agorix-hero__stage">
+              {/* ── LEFT HALF: COPY ── */}
+              <section className="agorix-hero__copy">
+                <h1
+                  style={{
+                    fontWeight: 800,
+                    fontSize: 52,
+                    lineHeight: 1.08,
+                    letterSpacing: "-.04em",
+                    margin: 0,
+                    color: T.text,
+                    animation: "ag-up .7s .1s both",
                   }}
                 >
-                  Get Started
-                </a>
-                <a href="#features" style={btnOutlineLg}>
-                  Explore Features
-                </a>
-              </div>
-            </section>
+                  Business Management That Turns
+                  <br />
+                  Your <span style={gradientClip(T.gradientA)}>Tally &amp; POS Data</span> into
+                  <br />
+                  <span style={gradientClip(T.gradientB)}>Intelligence</span>
+                </h1>
+                <p
+                  style={{
+                    fontSize: 17,
+                    lineHeight: 1.75,
+                    color: T.muted,
+                    margin: "20px 0 0",
+                    maxWidth: 460,
+                    animation: "ag-up .7s .22s both",
+                  }}
+                >
+                  Agorix unifies your Tally books, POS sales, and inventory across every outlet and
+                  connected tool — so you predict risk earlier, act faster, and grow margin.
+                </p>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 14,
+                    marginTop: 32,
+                    animation: "ag-up .7s .32s both",
+                  }}
+                >
+                  <a
+                    href="/login"
+                    style={btnSolidLg}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = "#15803D";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = T.accent;
+                    }}
+                  >
+                    Get Started
+                  </a>
+                  <a href="#features" style={btnOutlineLg}>
+                    Explore Features
+                  </a>
+                </div>
+              </section>
 
-            {/* ── RIGHT HALF: ANIMATED DASHBOARD ── */}
-            <div
-              className="agorix-hero__anim"
-              style={{ animation: "ag-fadein 0.6s 0.2s ease-out both" }}
-            >
-              <AnimatedDashboard
-                card={card}
-                stats={stats}
-                cardIdx={cardIdx}
-                aiIdx={aiIdx}
-                onAiComplete={handleAiComplete}
-              />
+              {/* ── RIGHT HALF: ANIMATED DASHBOARD ── */}
+              <div
+                className="agorix-hero__anim"
+                style={{ animation: "ag-fadein 0.6s 0.2s ease-out both" }}
+              >
+                <AnimatedDashboard
+                  card={card}
+                  stats={stats}
+                  cardIdx={cardIdx}
+                  aiIdx={aiIdx}
+                  onAiComplete={handleAiComplete}
+                />
+              </div>
             </div>
           </div>
         </div>

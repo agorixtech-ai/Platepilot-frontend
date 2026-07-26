@@ -23,6 +23,7 @@ import InteractiveBentoGallery, {
   type BentoMediaItem,
 } from "@/components/blocks/interactive-bento-gallery";
 import { CrossPlatformSection } from "@/components/CrossPlatformSection";
+import { AgorixFooter } from "@/components/AgorixFooter";
 
 /* ─── Product-preview tiles ──────────────────────────────────────────────────
    Coded mini-mockups of the real dashboard modules (src/pages/dashboard/*):
@@ -590,14 +591,12 @@ function Index() {
   ];
 
   return (
-    <main
-      ref={mainRef}
+    <div
       className="agorix-landing"
       style={{
         background: "#F6FAF7",
         color: "#152019",
         fontFamily: "'Inter', system-ui, sans-serif",
-        overflowX: "clip",
       }}
     >
       <style>{`
@@ -1025,23 +1024,93 @@ function Index() {
         }
         .cta-actions { display: flex; gap: 1rem; flex-wrap: wrap; }
 
-        /* ── Footer ── */
-        .sw-footer {
-          border-top: 1px solid #DDE7E1;
-          padding: 2rem 2.5rem;
+        /* ── Footer: curtain-reveal — .pp-footer is fixed at the viewport
+           bottom for the whole page; .pp-footer-cover (the CTA band) stays
+           opaque and above it in normal flow, occluding it until the band
+           itself scrolls past. .pp-footer-spacer reserves that scroll
+           distance, sized to the footer's real height via ResizeObserver ── */
+        .pp-footer-cover {
+          position: relative;
+          z-index: 1;
+          background: #F6FAF7;
+        }
+        .pp-footer-spacer {
+          pointer-events: none;
+        }
+        .pp-footer {
+          position: fixed;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          z-index: 0;
+          background:
+            radial-gradient(700px 360px at 80% 0%, rgba(34,197,94,0.16), transparent 60%),
+            #0A1A10;
+          border-radius: 28px 28px 0 0;
+          overflow: hidden;
+        }
+        .pp-footer-inner {
+          max-width: 1280px;
+          margin: 0 auto;
+          padding: 4rem 2.5rem 2.5rem;
           display: flex;
-          align-items: center;
           justify-content: space-between;
+          gap: 3rem;
+          flex-wrap: wrap;
+        }
+        .pp-footer-brand { max-width: 300px; }
+        .pp-footer-logo {
+          display: inline-flex;
+          align-items: center;
+          gap: 10px;
+          font-size: 1.1rem;
+          font-weight: 700;
+          letter-spacing: 0.02em;
+          color: #F6FAF7;
+        }
+        .pp-footer-logo img { border-radius: 10px; object-fit: cover; }
+        .pp-footer-tagline {
+          margin-top: 1rem;
+          font-size: 0.85rem;
+          line-height: 1.7;
+          color: rgba(246,250,247,0.55);
+        }
+        .pp-footer-cols {
+          display: flex;
+          gap: 3.5rem;
+          flex-wrap: wrap;
+        }
+        .pp-footer-col { display: flex; flex-direction: column; gap: 0.85rem; min-width: 130px; }
+        .pp-footer-col-title {
+          font-size: 0.65rem;
+          font-weight: 700;
+          letter-spacing: 0.16em;
+          text-transform: uppercase;
+          color: rgba(246,250,247,0.4);
+          margin-bottom: 0.35rem;
+        }
+        .pp-footer-link {
+          font-size: 0.85rem;
+          color: rgba(246,250,247,0.72);
+          transition: color 0.2s;
+          width: fit-content;
+        }
+        .pp-footer-link:hover { color: #4ADE80; }
+        .pp-footer-bottom {
+          max-width: 1280px;
+          margin: 0 auto;
+          padding: 1.5rem 2.5rem 2rem;
+          border-top: 1px solid rgba(246,250,247,0.1);
           font-size: 0.68rem;
           font-weight: 600;
           letter-spacing: 0.1em;
-          color: #66736B;
-          flex-wrap: wrap;
-          gap: 1rem;
+          color: rgba(246,250,247,0.4);
         }
-        .sw-footer a { color: inherit; transition: color 0.2s; }
-        .sw-footer a:hover { color: #16A34A; }
-        .sw-footer-links { display: flex; gap: 2rem; }
+        @media (max-width: 640px) {
+          .pp-footer-inner { padding: 3rem 1.25rem 2rem; gap: 2.5rem; }
+          .pp-footer-bottom { padding: 1.25rem 1.25rem 1.5rem; }
+          .pp-footer-cols { gap: 2rem 2.5rem; }
+        }
 
         /* ── Sections padding and layout ── */
         .caps-section, .platforms-section, .loop-section {
@@ -1386,33 +1455,46 @@ function Index() {
         .sw-cards-grid {
           display: grid;
           grid-template-columns: repeat(4, 1fr);
-          gap: 0;
-          border: 1px solid #DDE7E1;
-          border-radius: 8px;
-          overflow: hidden;
+          gap: 1.25rem;
         }
         @media (max-width: 1100px) { .sw-cards-grid { grid-template-columns: repeat(2, 1fr); } }
         @media (max-width: 600px) { .sw-cards-grid { grid-template-columns: 1fr; } }
+        /* ── Bento tilt card: rotateX/rotateY follow the cursor (set inline
+           per mouse move in PlatformCard), CSS only eases the return-to-rest
+           on mouse-leave and lifts the shadow/accent line on hover ── */
         .sw-card {
-          padding: 3.5rem 2.25rem;
-          border-right: 1px solid #DDE7E1;
-          border-bottom: 1px solid #DDE7E1;
-          background: transparent;
-          transition: background 0.2s ease;
+          padding: 2.5rem 2rem;
+          background: #FFFFFF;
+          border: 1px solid #DDE7E1;
+          border-radius: 16px;
+          box-shadow: 0 2px 8px rgba(21,32,25,0.04);
           position: relative;
-        }
-        .sw-card:nth-child(4n) { border-right: none; }
-        .sw-card:nth-child(n+5) { border-bottom: none; }
-        @media (max-width: 1100px) {
-          .sw-card:nth-child(2n) { border-right: none; }
-          .sw-card:nth-child(3), .sw-card:nth-child(4) { border-bottom: none; }
+          transition: transform 0.15s ease-out, box-shadow 0.25s ease, border-color 0.25s ease;
+          transform-style: preserve-3d;
+          will-change: transform;
         }
         @media (max-width: 600px) {
-          .sw-card { border-right: none; padding: 2.25rem 1.5rem; }
-          .sw-card:nth-child(4) { border-bottom: none; }
+          .sw-card { padding: 2rem 1.5rem; }
         }
         .sw-card:hover {
-          background: #E8F7ED;
+          border-color: rgba(22,163,74,0.3);
+          box-shadow: 0 20px 45px rgba(21,32,25,0.12);
+        }
+        .sw-card-line {
+          position: absolute;
+          left: 1.5rem;
+          right: 1.5rem;
+          bottom: 0;
+          height: 3px;
+          border-radius: 3px 3px 0 0;
+          opacity: 0;
+          transform: scaleX(0.6);
+          transform-origin: left;
+          transition: opacity 0.25s ease, transform 0.25s ease;
+        }
+        .sw-card:hover .sw-card-line {
+          opacity: 1;
+          transform: scaleX(1);
         }
         .sw-card-number {
           font-size: 0.62rem;
@@ -1586,444 +1668,460 @@ function Index() {
 
       `}</style>
 
-      {/* ══════════════════════════════════════════════════════════════════ */}
-      {/* NAV (sticky — CTA stays reachable while scrolling) + HERO          */}
-      {/* ══════════════════════════════════════════════════════════════════ */}
-      <AgorixNav variant="light" sticky />
-      <AgorixHero />
+      {/* position: relative + z-index: 1 puts every section here in the same
+          stacking layer as .pp-footer-cover, so all of it — not just the
+          CTA band — occludes AgorixFooter's fixed footer until scrolled past.
+          Needs its own opaque background too: a transparent pixel lets the
+          lower-stacked fixed footer show through regardless of z-index. */}
+      <main
+        ref={mainRef}
+        style={{ overflowX: "clip", position: "relative", zIndex: 1, background: "#F6FAF7" }}
+      >
+        {/* ══════════════════════════════════════════════════════════════════ */}
+        {/* NAV (sticky — CTA stays reachable while scrolling) + HERO          */}
+        {/* ══════════════════════════════════════════════════════════════════ */}
+        <AgorixNav
+          variant="light"
+          sticky
+          links={[
+            { label: "Features", href: "#features" },
+            { label: "How It Works", href: "#how-it-works" },
+            { label: "Testimonials", href: "#testimonials" },
+            { label: "FAQ", href: "#faq" },
+          ]}
+        />
+        <AgorixHero />
 
-      {/* ══════════════════════════════════════════════════════════════════ */}
-      {/* INTRO BAND — "Our software powers…"                               */}
-      {/* ══════════════════════════════════════════════════════════════════ */}
-      <div id="software-section" />
-      <div className="sw-rule" />
-      <div className="sw-section">
-        <div
-          ref={sec1.ref}
-          className={`intro-band reveal${sec1.visible ? " show" : ""} flex flex-col gap-6`}
-        >
-          <div>
-            <div className="sw-eyebrow">Why PlatePilot</div>
-            <h2 className="intro-h2">
-              Restaurant intelligence powered by <span className="gradient-text-a">realtime</span>{" "}
-              <span className="gradient-text-b">AI&#8209;driven</span> analysis
-            </h2>
+        {/* ══════════════════════════════════════════════════════════════════ */}
+        {/* INTRO BAND — "Our software powers…"                               */}
+        {/* ══════════════════════════════════════════════════════════════════ */}
+        <div id="software-section" />
+        <div className="sw-rule" />
+        <div className="sw-section">
+          <div
+            ref={sec1.ref}
+            className={`intro-band reveal${sec1.visible ? " show" : ""} flex flex-col gap-6`}
+          >
+            <div>
+              <div className="sw-eyebrow">Why PlatePilot</div>
+              <h2 className="intro-h2">
+                Restaurant intelligence powered by <span className="gradient-text-a">realtime</span>{" "}
+                <span className="gradient-text-b">AI&#8209;driven</span> analysis
+              </h2>
+            </div>
+            <div>
+              <p className="intro-body">
+                PlatePilot connects your <strong>Tally books</strong>, <strong>POS sales</strong>,
+                and <strong>inventory</strong> into one intelligence layer — so every purchasing,
+                pricing, and prep decision is backed by live data instead of gut feel.
+              </p>
+            </div>
           </div>
-          <div>
-            <p className="intro-body">
-              PlatePilot connects your <strong>Tally books</strong>, <strong>POS sales</strong>, and{" "}
-              <strong>inventory</strong> into one intelligence layer — so every purchasing, pricing,
-              and prep decision is backed by live data instead of gut feel.
+        </div>
+
+        {/* ══════════════════════════════════════════════════════════════════ */}
+        {/* SOLUTION — feature cards                                           */}
+        {/* ══════════════════════════════════════════════════════════════════ */}
+        <div className="sw-rule" id="features" />
+        <div className="sw-section">
+          <div ref={sec3.ref} className={`platforms-section reveal${sec3.visible ? " show" : ""}`}>
+            <div className="sw-section-tag">↳ The Solution</div>
+            <h2 className="sw-section-h2">Stop guessing. Run your restaurant on data.</h2>
+            <p className="sw-section-body">
+              PlatePilot connects the systems you already use and turns them into one intelligence
+              layer for your entire operation.
+            </p>
+            <div className="sw-cards-grid">
+              <PlatformCard
+                number="01 "
+                tag="Inventory"
+                title="Smart Inventory Tracking"
+                description="Live stock counts built from your POS sales and purchase bills — with alerts before you run out or over-order."
+                cta="Explore Inventory"
+                href="#how-it-works"
+                accent="#22C55E"
+              />
+              <PlatformCard
+                number="02 "
+                tag="Waste AI"
+                title="Waste Detection"
+                description="Pilot AI flags spoilage, over-prep, and shrinkage patterns per outlet — before they hit your month-end P&L."
+                cta="Explore Waste AI"
+                href="#menu-engineering"
+                accent="#A3E635"
+              />
+              <PlatformCard
+                number="03 "
+                tag="Purchasing"
+                title="Purchase Optimization"
+                description="Market-price intelligence and demand forecasts tell you what to buy, how much, and when — so you stop overpaying vendors."
+                cta="Explore Purchasing"
+                href="#how-it-works"
+                accent="#16A34A"
+              />
+              <PlatformCard
+                number="04 "
+                tag="Accounting"
+                title="Tally & POS Sync"
+                description="Your books reconcile themselves — every sale, purchase, and voucher matched automatically between POS and Tally."
+                cta="Explore Integrations"
+                href="#how-it-works"
+                accent="#0F7A4C"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* ══════════════════════════════════════════════════════════════════ */}
+        {/* CAPABILITIES TABS                                                  */}
+        {/* ══════════════════════════════════════════════════════════════════ */}
+        <div className="sw-rule" />
+        <div className="sw-section">
+          <div ref={sec4.ref} className={`caps-section reveal${sec4.visible ? " show" : ""}`}>
+            <div className="sw-section-tag">↳ Features</div>
+            <h2 className="sw-section-h2">Everything you need to run a profitable kitchen.</h2>
+            <div className="sw-tabs-wrap">
+              <div className="sw-tabs-bar">
+                {tabs.map((t, i) => (
+                  <button
+                    key={t.label}
+                    className={`sw-tab-btn${activeTab === i ? " active" : ""}`}
+                    onClick={() => setActiveTab(i)}
+                  >
+                    {t.label}
+                  </button>
+                ))}
+              </div>
+              <div className="sw-tab-content">
+                <div className="sw-tab-left">
+                  <h3 className="sw-tab-heading">{tabs[activeTab].heading}</h3>
+                  <p className="sw-tab-body">{tabs[activeTab].body}</p>
+                </div>
+                <div className="sw-tab-right">
+                  <ul className="sw-tab-bullets">
+                    {tabs[activeTab].bullets.map((b, idx) => (
+                      <li key={idx}>{b}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ══════════════════════════════════════════════════════════════════ */}
+        {/* MENU ENGINEERING SPOTLIGHT                                         */}
+        {/* ══════════════════════════════════════════════════════════════════ */}
+        <div className="sw-rule" id="menu-engineering" />
+        <div className="sw-section">
+          <div
+            ref={sec10.ref}
+            className={`platforms-section reveal${sec10.visible ? " show" : ""}`}
+          >
+            <div className="sw-section-tag">↳ Menu Engineering</div>
+            <h2 className="sw-section-h2">Every dish gets a report card.</h2>
+            <p className="sw-section-body" style={{ marginBottom: 0 }}>
+              No spreadsheets, no consultants — PlatePilot grades your whole menu automatically,
+              from data it already tracks.
+            </p>
+            <div className="me-formula">
+              <div className="me-f-step">
+                <span className="me-f-ico">
+                  <BarChart3 size={20} strokeWidth={1.8} />
+                </span>
+                <div>
+                  <div className="me-f-title">How often it sells</div>
+                  <div className="me-f-sub">Counted from your POS bills</div>
+                </div>
+              </div>
+              <div className="me-f-op" aria-hidden="true">
+                <span>+</span>
+              </div>
+              <div className="me-f-step">
+                <span className="me-f-ico">
+                  <IndianRupee size={20} strokeWidth={1.8} />
+                </span>
+                <div>
+                  <div className="me-f-title">Profit per plate</div>
+                  <div className="me-f-sub">Selling price minus ingredient cost</div>
+                </div>
+              </div>
+              <div className="me-f-op" aria-hidden="true">
+                <span>=</span>
+              </div>
+              <div className="me-f-step">
+                <span className="me-f-ico">
+                  <ClipboardCheck size={20} strokeWidth={1.8} />
+                </span>
+                <div>
+                  <div className="me-f-title">A clear verdict</div>
+                  <div className="me-f-sub">Promote, re-price, push, or remove</div>
+                </div>
+              </div>
+            </div>
+            <div className="me-example-lbl">Example · Four dishes from one menu</div>
+            <div className="me-grid">
+              {ME_DISHES.map((d) => {
+                const sellColor = d.sellsPct >= 50 ? "#16A34A" : "#EF4444";
+                const earnColor = d.earnsPct >= 50 ? "#16A34A" : "#EF4444";
+                return (
+                  <div key={d.dish} className="me-card">
+                    <div className="me-dish-name">{d.dish}</div>
+                    <div className="me-stat">
+                      <div className="me-stat-top">
+                        <span>How often it sells</span>
+                        <span className="me-stat-val" style={{ color: sellColor }}>
+                          {d.sells}
+                        </span>
+                      </div>
+                      <div className="me-bar">
+                        <span style={{ width: `${d.sellsPct}%`, background: sellColor }} />
+                      </div>
+                    </div>
+                    <div className="me-stat">
+                      <div className="me-stat-top">
+                        <span>Profit per plate</span>
+                        <span className="me-stat-val" style={{ color: earnColor }}>
+                          {d.earns}
+                        </span>
+                      </div>
+                      <div className="me-bar">
+                        <span style={{ width: `${d.earnsPct}%`, background: earnColor }} />
+                      </div>
+                    </div>
+                    <div className="me-verdict" style={{ background: d.bg, color: d.color }}>
+                      <d.icon size={18} strokeWidth={2} />
+                      <div>
+                        <div className="me-verdict-tier">{d.tier}</div>
+                        <div className="me-verdict-act">{d.act}</div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <p className="me-note">
+              PlatePilot builds this report for every item on your menu, automatically — from the
+              POS sales and purchase costs it already tracks.
             </p>
           </div>
         </div>
-      </div>
 
-      {/* ══════════════════════════════════════════════════════════════════ */}
-      {/* SOLUTION — feature cards                                           */}
-      {/* ══════════════════════════════════════════════════════════════════ */}
-      <div className="sw-rule" id="features" />
-      <div className="sw-section">
-        <div ref={sec3.ref} className={`platforms-section reveal${sec3.visible ? " show" : ""}`}>
-          <div className="sw-section-tag">↳ The Solution</div>
-          <h2 className="sw-section-h2">Stop guessing. Run your restaurant on data.</h2>
-          <p className="sw-section-body">
-            PlatePilot connects the systems you already use and turns them into one intelligence
-            layer for your entire operation.
-          </p>
-          <div className="sw-cards-grid">
-            <PlatformCard
-              number="01 "
-              tag="Inventory"
-              title="Smart Inventory Tracking"
-              description="Live stock counts built from your POS sales and purchase bills — with alerts before you run out or over-order."
-              cta="Explore Inventory"
-              accent="#22C55E"
-            />
-            <PlatformCard
-              number="02 "
-              tag="Waste AI"
-              title="Waste Detection"
-              description="Pilot AI flags spoilage, over-prep, and shrinkage patterns per outlet — before they hit your month-end P&L."
-              cta="Explore Waste AI"
-              accent="#A3E635"
-            />
-            <PlatformCard
-              number="03 "
-              tag="Purchasing"
-              title="Purchase Optimization"
-              description="Market-price intelligence and demand forecasts tell you what to buy, how much, and when — so you stop overpaying vendors."
-              cta="Explore Purchasing"
-              accent="#16A34A"
-            />
-            <PlatformCard
-              number="04 "
-              tag="Accounting"
-              title="Tally & POS Sync"
-              description="Your books reconcile themselves — every sale, purchase, and voucher matched automatically between POS and Tally."
-              cta="Explore Integrations"
-              accent="#0F7A4C"
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* ══════════════════════════════════════════════════════════════════ */}
-      {/* CAPABILITIES TABS                                                  */}
-      {/* ══════════════════════════════════════════════════════════════════ */}
-      <div className="sw-rule" />
-      <div className="sw-section">
-        <div ref={sec4.ref} className={`caps-section reveal${sec4.visible ? " show" : ""}`}>
-          <div className="sw-section-tag">↳ Features</div>
-          <h2 className="sw-section-h2">Everything you need to run a profitable kitchen.</h2>
-          <div className="sw-tabs-wrap">
-            <div className="sw-tabs-bar">
-              {tabs.map((t, i) => (
-                <button
-                  key={t.label}
-                  className={`sw-tab-btn${activeTab === i ? " active" : ""}`}
-                  onClick={() => setActiveTab(i)}
-                >
-                  {t.label}
-                </button>
-              ))}
-            </div>
-            <div className="sw-tab-content">
-              <div className="sw-tab-left">
-                <h3 className="sw-tab-heading">{tabs[activeTab].heading}</h3>
-                <p className="sw-tab-body">{tabs[activeTab].body}</p>
-              </div>
-              <div className="sw-tab-right">
-                <ul className="sw-tab-bullets">
-                  {tabs[activeTab].bullets.map((b, idx) => (
-                    <li key={idx}>{b}</li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ══════════════════════════════════════════════════════════════════ */}
-      {/* MENU ENGINEERING SPOTLIGHT                                         */}
-      {/* ══════════════════════════════════════════════════════════════════ */}
-      <div className="sw-rule" id="menu-engineering" />
-      <div className="sw-section">
-        <div ref={sec10.ref} className={`platforms-section reveal${sec10.visible ? " show" : ""}`}>
-          <div className="sw-section-tag">↳ Menu Engineering</div>
-          <h2 className="sw-section-h2">Every dish gets a report card.</h2>
-          <p className="sw-section-body" style={{ marginBottom: 0 }}>
-            No spreadsheets, no consultants — PlatePilot grades your whole menu automatically, from
-            data it already tracks.
-          </p>
-          <div className="me-formula">
-            <div className="me-f-step">
-              <span className="me-f-ico">
-                <BarChart3 size={20} strokeWidth={1.8} />
-              </span>
+        {/* ══════════════════════════════════════════════════════════════════ */}
+        {/* HOW IT WORKS                                                       */}
+        {/* ══════════════════════════════════════════════════════════════════ */}
+        <div className="sw-rule" id="how-it-works" />
+        <div className="sw-section">
+          <div ref={sec5.ref} className={`loop-section reveal${sec5.visible ? " show" : ""}`}>
+            <div className="sw-section-tag">↳ How It Works</div>
+            <h2 className="sw-section-h2">Data in. Decisions out.</h2>
+            <p className="sw-section-body">
+              The whole product in one picture: your Tally books, POS bills, and stock movements
+              stream into Pilot AI — and come out the other side as live dashboards, risk alerts,
+              and purchase calls you can act on the same day.
+            </p>
+            <div className="pp-flow">
               <div>
-                <div className="me-f-title">How often it sells</div>
-                <div className="me-f-sub">Counted from your POS bills</div>
-              </div>
-            </div>
-            <div className="me-f-op" aria-hidden="true">
-              <span>+</span>
-            </div>
-            <div className="me-f-step">
-              <span className="me-f-ico">
-                <IndianRupee size={20} strokeWidth={1.8} />
-              </span>
-              <div>
-                <div className="me-f-title">Profit per plate</div>
-                <div className="me-f-sub">Selling price minus ingredient cost</div>
-              </div>
-            </div>
-            <div className="me-f-op" aria-hidden="true">
-              <span>=</span>
-            </div>
-            <div className="me-f-step">
-              <span className="me-f-ico">
-                <ClipboardCheck size={20} strokeWidth={1.8} />
-              </span>
-              <div>
-                <div className="me-f-title">A clear verdict</div>
-                <div className="me-f-sub">Promote, re-price, push, or remove</div>
-              </div>
-            </div>
-          </div>
-          <div className="me-example-lbl">Example · Four dishes from one menu</div>
-          <div className="me-grid">
-            {ME_DISHES.map((d) => {
-              const sellColor = d.sellsPct >= 50 ? "#16A34A" : "#EF4444";
-              const earnColor = d.earnsPct >= 50 ? "#16A34A" : "#EF4444";
-              return (
-                <div key={d.dish} className="me-card">
-                  <div className="me-dish-name">{d.dish}</div>
-                  <div className="me-stat">
-                    <div className="me-stat-top">
-                      <span>How often it sells</span>
-                      <span className="me-stat-val" style={{ color: sellColor }}>
-                        {d.sells}
-                      </span>
-                    </div>
-                    <div className="me-bar">
-                      <span style={{ width: `${d.sellsPct}%`, background: sellColor }} />
-                    </div>
-                  </div>
-                  <div className="me-stat">
-                    <div className="me-stat-top">
-                      <span>Profit per plate</span>
-                      <span className="me-stat-val" style={{ color: earnColor }}>
-                        {d.earns}
-                      </span>
-                    </div>
-                    <div className="me-bar">
-                      <span style={{ width: `${d.earnsPct}%`, background: earnColor }} />
-                    </div>
-                  </div>
-                  <div className="me-verdict" style={{ background: d.bg, color: d.color }}>
-                    <d.icon size={18} strokeWidth={2} />
+                <div className="pp-flow-lbl">1 · Connect</div>
+                <div className="pp-flow-col">
+                  <div className="pp-node">
+                    <FileText size={22} strokeWidth={1.7} />
                     <div>
-                      <div className="me-verdict-tier">{d.tier}</div>
-                      <div className="me-verdict-act">{d.act}</div>
+                      <div className="pp-node-title">Tally ERP</div>
+                      <div className="pp-node-sub">Vouchers, ledgers, GST</div>
+                    </div>
+                  </div>
+                  <div className="pp-node">
+                    <Receipt size={22} strokeWidth={1.7} />
+                    <div>
+                      <div className="pp-node-title">POS Billing</div>
+                      <div className="pp-node-sub">Every bill, as it prints</div>
+                    </div>
+                  </div>
+                  <div className="pp-node">
+                    <Package size={22} strokeWidth={1.7} />
+                    <div>
+                      <div className="pp-node-title">Inventory</div>
+                      <div className="pp-node-sub">Stock in, stock out</div>
                     </div>
                   </div>
                 </div>
-              );
-            })}
-          </div>
-          <p className="me-note">
-            PlatePilot builds this report for every item on your menu, automatically — from the POS
-            sales and purchase costs it already tracks.
-          </p>
-        </div>
-      </div>
-
-      {/* ══════════════════════════════════════════════════════════════════ */}
-      {/* HOW IT WORKS                                                       */}
-      {/* ══════════════════════════════════════════════════════════════════ */}
-      <div className="sw-rule" id="how-it-works" />
-      <div className="sw-section">
-        <div ref={sec5.ref} className={`loop-section reveal${sec5.visible ? " show" : ""}`}>
-          <div className="sw-section-tag">↳ How It Works</div>
-          <h2 className="sw-section-h2">Data in. Decisions out.</h2>
-          <p className="sw-section-body">
-            The whole product in one picture: your Tally books, POS bills, and stock movements
-            stream into Pilot AI — and come out the other side as live dashboards, risk alerts, and
-            purchase calls you can act on the same day.
-          </p>
-          <div className="pp-flow">
-            <div>
-              <div className="pp-flow-lbl">1 · Connect</div>
-              <div className="pp-flow-col">
-                <div className="pp-node">
-                  <FileText size={22} strokeWidth={1.7} />
-                  <div>
-                    <div className="pp-node-title">Tally ERP</div>
-                    <div className="pp-node-sub">Vouchers, ledgers, GST</div>
-                  </div>
+              </div>
+              <div className="pp-conn-cell" aria-hidden="true">
+                <svg viewBox="0 0 70 280">
+                  <path d="M4 40 C40 40 30 140 66 140" />
+                  <path d="M4 140 L66 140" />
+                  <path d="M4 240 C40 240 30 140 66 140" />
+                </svg>
+              </div>
+              <div>
+                <div className="pp-flow-lbl" style={{ textAlign: "center" }}>
+                  2 · Analyze
                 </div>
-                <div className="pp-node">
-                  <Receipt size={22} strokeWidth={1.7} />
-                  <div>
-                    <div className="pp-node-title">POS Billing</div>
-                    <div className="pp-node-sub">Every bill, as it prints</div>
-                  </div>
-                </div>
-                <div className="pp-node">
-                  <Package size={22} strokeWidth={1.7} />
-                  <div>
-                    <div className="pp-node-title">Inventory</div>
-                    <div className="pp-node-sub">Stock in, stock out</div>
+                <div className="pp-engine-cell">
+                  <div className="pp-engine">
+                    <Sparkles size={26} strokeWidth={1.7} />
+                    <div className="pp-engine-title">Pilot AI</div>
+                    <div className="pp-engine-sub">
+                      Scans every transaction for waste, variance, and margin risk
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-            <div className="pp-conn-cell" aria-hidden="true">
-              <svg viewBox="0 0 70 280">
-                <path d="M4 40 C40 40 30 140 66 140" />
-                <path d="M4 140 L66 140" />
-                <path d="M4 240 C40 240 30 140 66 140" />
-              </svg>
-            </div>
-            <div>
-              <div className="pp-flow-lbl" style={{ textAlign: "center" }}>
-                2 · Analyze
+              <div className="pp-conn-cell" aria-hidden="true">
+                <svg viewBox="0 0 70 280">
+                  <path d="M4 140 C40 140 30 40 66 40" />
+                  <path d="M4 140 L66 140" />
+                  <path d="M4 140 C40 140 30 240 66 240" />
+                </svg>
               </div>
-              <div className="pp-engine-cell">
-                <div className="pp-engine">
-                  <Sparkles size={26} strokeWidth={1.7} />
-                  <div className="pp-engine-title">Pilot AI</div>
-                  <div className="pp-engine-sub">
-                    Scans every transaction for waste, variance, and margin risk
+              <div>
+                <div className="pp-flow-lbl">3 · Act</div>
+                <div className="pp-flow-col">
+                  <div className="pp-node">
+                    <LayoutDashboard size={22} strokeWidth={1.7} />
+                    <div>
+                      <div className="pp-node-title">Live Dashboards</div>
+                      <div className="pp-node-sub">Sales & margin, per outlet</div>
+                    </div>
                   </div>
-                </div>
-              </div>
-            </div>
-            <div className="pp-conn-cell" aria-hidden="true">
-              <svg viewBox="0 0 70 280">
-                <path d="M4 140 C40 140 30 40 66 40" />
-                <path d="M4 140 L66 140" />
-                <path d="M4 140 C40 140 30 240 66 240" />
-              </svg>
-            </div>
-            <div>
-              <div className="pp-flow-lbl">3 · Act</div>
-              <div className="pp-flow-col">
-                <div className="pp-node">
-                  <LayoutDashboard size={22} strokeWidth={1.7} />
-                  <div>
-                    <div className="pp-node-title">Live Dashboards</div>
-                    <div className="pp-node-sub">Sales & margin, per outlet</div>
+                  <div className="pp-node">
+                    <Bell size={22} strokeWidth={1.7} />
+                    <div>
+                      <div className="pp-node-title">Risk Alerts</div>
+                      <div className="pp-node-sub">Waste, GST, reconciliation</div>
+                    </div>
                   </div>
-                </div>
-                <div className="pp-node">
-                  <Bell size={22} strokeWidth={1.7} />
-                  <div>
-                    <div className="pp-node-title">Risk Alerts</div>
-                    <div className="pp-node-sub">Waste, GST, reconciliation</div>
-                  </div>
-                </div>
-                <div className="pp-node">
-                  <ShoppingCart size={22} strokeWidth={1.7} />
-                  <div>
-                    <div className="pp-node-title">Purchase Calls</div>
-                    <div className="pp-node-sub">What to buy, and when</div>
+                  <div className="pp-node">
+                    <ShoppingCart size={22} strokeWidth={1.7} />
+                    <div>
+                      <div className="pp-node-title">Purchase Calls</div>
+                      <div className="pp-node-sub">What to buy, and when</div>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* ══════════════════════════════════════════════════════════════════ */}
-      {/* QUOTE                                                              */}
-      {/* ══════════════════════════════════════════════════════════════════ */}
-      <div className="sw-rule" id="testimonials" />
-      <div className="sw-section">
-        <div className="tm-section">
-          <div className="sw-section-tag">↳ Testimonials</div>
-          <h2 className="sw-section-h2">Restaurant owners run on PlatePilot.</h2>
-          <div className="tm-marquee">
-            <div className="tm-track">
-              {[...TESTIMONIALS, ...TESTIMONIALS].map((t, i) => (
-                <figure className="tm-card" key={i}>
-                  <blockquote className="tm-quote">"{t.quote}"</blockquote>
-                  <figcaption className="tm-attr">
-                    {t.name}
-                    <span>{t.place}</span>
-                  </figcaption>
-                </figure>
-              ))}
+        {/* ══════════════════════════════════════════════════════════════════ */}
+        {/* QUOTE                                                              */}
+        {/* ══════════════════════════════════════════════════════════════════ */}
+        <div className="sw-rule" id="testimonials" />
+        <div className="sw-section">
+          <div className="tm-section">
+            <div className="sw-section-tag">↳ Testimonials</div>
+            <h2 className="sw-section-h2">Restaurant owners run on PlatePilot.</h2>
+            <div className="tm-marquee">
+              <div className="tm-track">
+                {[...TESTIMONIALS, ...TESTIMONIALS].map((t, i) => (
+                  <figure className="tm-card" key={i}>
+                    <blockquote className="tm-quote">"{t.quote}"</blockquote>
+                    <figcaption className="tm-attr">
+                      {t.name}
+                      <span>{t.place}</span>
+                    </figcaption>
+                  </figure>
+                ))}
+              </div>
             </div>
-          </div>
-          <div className="tm-marquee">
-            <div className="tm-track tm-reverse">
-              {[...TM_ROW2, ...TM_ROW2].map((t, i) => (
-                <figure className="tm-card" key={i}>
-                  <blockquote className="tm-quote">"{t.quote}"</blockquote>
-                  <figcaption className="tm-attr">
-                    {t.name}
-                    <span>{t.place}</span>
-                  </figcaption>
-                </figure>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ══════════════════════════════════════════════════════════════════ */}
-      {/* INTERACTIVE BENTO GALLERY                                         */}
-      {/* ══════════════════════════════════════════════════════════════════ */}
-      <div className="sw-rule" id="gallery" />
-      <div className="sw-section">
-        <div ref={sec2.ref} className={`platforms-section reveal${sec2.visible ? " show" : ""}`}>
-          <div className="gallery-split">
-            <div className="gallery-split-copy">
-              <div className="sw-section-tag">↳ Product Preview</div>
-              <h2 className="sw-section-h2">
-                See PlatePilot in <span style={{ color: "#16A34A" }}>Action</span>
-              </h2>
-              <p className="sw-section-body">
-                Drag and explore the surfaces your team will use every day — live dashboards,
-                inventory alerts, and Pilot AI insights.
-              </p>
-            </div>
-            <div className="gallery-split-media">
-              <InteractiveBentoGallery mediaItems={GALLERY_MEDIA} showHeader={false} />
+            <div className="tm-marquee">
+              <div className="tm-track tm-reverse">
+                {[...TM_ROW2, ...TM_ROW2].map((t, i) => (
+                  <figure className="tm-card" key={i}>
+                    <blockquote className="tm-quote">"{t.quote}"</blockquote>
+                    <figcaption className="tm-attr">
+                      {t.name}
+                      <span>{t.place}</span>
+                    </figcaption>
+                  </figure>
+                ))}
+              </div>
             </div>
           </div>
         </div>
-      </div>
+
+        {/* ══════════════════════════════════════════════════════════════════ */}
+        {/* INTERACTIVE BENTO GALLERY                                         */}
+        {/* ══════════════════════════════════════════════════════════════════ */}
+        <div className="sw-rule" id="gallery" />
+        <div className="sw-section">
+          <div ref={sec2.ref} className={`platforms-section reveal${sec2.visible ? " show" : ""}`}>
+            <div className="gallery-split">
+              <div className="gallery-split-copy">
+                <div className="sw-section-tag">↳ Product Preview</div>
+                <h2 className="sw-section-h2">
+                  See PlatePilot in <span style={{ color: "#16A34A" }}>Action</span>
+                </h2>
+                <p className="sw-section-body">
+                  Drag and explore the surfaces your team will use every day — live dashboards,
+                  inventory alerts, and Pilot AI insights.
+                </p>
+              </div>
+              <div className="gallery-split-media">
+                <InteractiveBentoGallery mediaItems={GALLERY_MEDIA} showHeader={false} />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ══════════════════════════════════════════════════════════════════ */}
+        {/* CROSS-PLATFORM                                                     */}
+        {/* ══════════════════════════════════════════════════════════════════ */}
+        <div ref={sec6.ref} className={`reveal${sec6.visible ? " show" : ""}`}>
+          <CrossPlatformSection />
+        </div>
+
+        {/* ══════════════════════════════════════════════════════════════════ */}
+        {/* FAQ                                                                */}
+        {/* ══════════════════════════════════════════════════════════════════ */}
+        <div className="sw-rule" id="faq" />
+        <div className="sw-section">
+          <div className="platforms-section">
+            <div className="faq-split">
+              <div>
+                <div className="sw-section-tag">↳ FAQ</div>
+                <h2 className="sw-section-h2">Questions, answered.</h2>
+                <p className="sw-section-body" style={{ marginBottom: "1.75rem" }}>
+                  Everything owners usually ask before connecting their data.
+                </p>
+                <a href="/demo" className="btn-ghost">
+                  TALK TO US
+                </a>
+              </div>
+              <div className="faq-list">
+                {FAQS.map(([q, a]) => (
+                  <details className="faq-item" name="faq" key={q}>
+                    <summary>{q}</summary>
+                    <p className="faq-a">{a}</p>
+                  </details>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
 
       {/* ══════════════════════════════════════════════════════════════════ */}
-      {/* CROSS-PLATFORM                                                     */}
+      {/* CTA BAND + FOOTER — footer slides up from underneath the CTA band  */}
       {/* ══════════════════════════════════════════════════════════════════ */}
-      <div ref={sec6.ref} className={`reveal${sec6.visible ? " show" : ""}`}>
-        <CrossPlatformSection />
-      </div>
-
-      {/* ══════════════════════════════════════════════════════════════════ */}
-      {/* FAQ                                                                */}
-      {/* ══════════════════════════════════════════════════════════════════ */}
-      <div className="sw-rule" id="faq" />
-      <div className="sw-section">
-        <div className="platforms-section">
-          <div className="faq-split">
-            <div>
-              <div className="sw-section-tag">↳ FAQ</div>
-              <h2 className="sw-section-h2">Questions, answered.</h2>
-              <p className="sw-section-body" style={{ marginBottom: "1.75rem" }}>
-                Everything owners usually ask before connecting their data.
-              </p>
+      <AgorixFooter>
+        <div className="sw-section" id="contact">
+          <div className="cta-band">
+            <h2 className="cta-heading">Start optimizing your restaurant today.</h2>
+            <div className="cta-actions">
+              <a href="/signup" className="btn-white">
+                START FREE TRIAL
+              </a>
               <a href="/demo" className="btn-ghost">
-                TALK TO US
+                VIEW DEMO
               </a>
             </div>
-            <div className="faq-list">
-              {FAQS.map(([q, a]) => (
-                <details className="faq-item" key={q}>
-                  <summary>{q}</summary>
-                  <p className="faq-a">{a}</p>
-                </details>
-              ))}
-            </div>
           </div>
         </div>
-      </div>
-
-      {/* ══════════════════════════════════════════════════════════════════ */}
-      {/* CTA BAND                                                           */}
-      {/* ══════════════════════════════════════════════════════════════════ */}
-      <div className="sw-section" id="contact">
-        <div className="cta-band">
-          <h2 className="cta-heading">Start optimizing your restaurant today.</h2>
-          <div className="cta-actions">
-            <a href="/signup" className="btn-white">
-              START FREE TRIAL
-            </a>
-            <a href="/demo" className="btn-ghost">
-              VIEW DEMO
-            </a>
-          </div>
-        </div>
-      </div>
-
-      {/* ══════════════════════════════════════════════════════════════════ */}
-      {/* FOOTER                                                             */}
-      {/* ══════════════════════════════════════════════════════════════════ */}
-      <footer className="sw-footer">
-        <span>© 2026 PlatePilot. All rights reserved.</span>
-        <div className="sw-footer-links">
-          <a href="#privacy">Privacy</a>
-          <a href="#terms">Terms</a>
-          <a href="#security">Security</a>
-        </div>
-      </footer>
-    </main>
+      </AgorixFooter>
+    </div>
   );
 }
 
@@ -2033,6 +2131,7 @@ function PlatformCard({
   title,
   description,
   cta,
+  href,
   accent,
 }: {
   number?: string;
@@ -2040,17 +2139,38 @@ function PlatformCard({
   title: string;
   description: string;
   cta: string;
+  href: string;
   accent: string;
 }) {
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [tilt, setTilt] = useState({ rx: 0, ry: 0, scale: 1 });
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const el = cardRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const px = (e.clientX - rect.left) / rect.width - 0.5;
+    const py = (e.clientY - rect.top) / rect.height - 0.5;
+    setTilt({ rx: py * -8, ry: px * 8, scale: 1.03 });
+  };
+
   return (
-    <div className="sw-card group">
+    <div
+      ref={cardRef}
+      className="sw-card group"
+      onMouseMove={handleMouseMove}
+      onMouseLeave={() => setTilt({ rx: 0, ry: 0, scale: 1 })}
+      style={{
+        transform: `perspective(800px) rotateX(${tilt.rx}deg) rotateY(${tilt.ry}deg) scale(${tilt.scale})`,
+      }}
+    >
       {number && <div className="sw-card-number">{number}</div>}
       <div className="sw-card-tag" style={{ color: accent }}>
         ↳ {tag}
       </div>
       <h3 className="sw-card-title">{title}</h3>
       <p className="sw-card-desc">{description}</p>
-      <a href="#contact" className="sw-card-cta" style={{ color: accent }}>
+      <a href={href} className="sw-card-cta" style={{ color: accent }}>
         {cta} →
       </a>
       <div className="sw-card-line" style={{ background: accent }} />
