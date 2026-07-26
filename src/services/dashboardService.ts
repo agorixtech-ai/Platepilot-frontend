@@ -141,6 +141,18 @@ export interface WasteCompositionItem {
   pct: number;
 }
 
+/** Expected-vs-actual consumption totals for one stock unit (kg/l/pcs),
+    summed across every over-purchased ingredient in that unit — not capped
+    by the `items` list's `limit`. */
+export interface WasteUnitTotal {
+  unit: string;
+  needed_qty: number; // expected consumption
+  bought_qty: number; // actual consumption
+  variance_qty: number; // bought − needed
+  cost: number;
+  efficiency_pct: number; // needed / bought * 100
+}
+
 export interface WasteCompositionData {
   period: string;
   currency: string;
@@ -148,6 +160,7 @@ export interface WasteCompositionData {
   over_count: number; // ingredients purchased beyond recipe needs
   last_sync: string | null;
   items: WasteCompositionItem[];
+  totals: WasteUnitTotal[]; // sorted by cost desc
 }
 
 export interface RecipeIngredient {
