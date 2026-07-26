@@ -109,17 +109,12 @@ export function AgorixNav({
   return (
     <>
       <style>{`
+        /* Same container geometry as .sw-section / .agorix-hero__inset so the
+           logo and buttons line up with the hero copy and every section below */
         .agorix-nav__inset {
-          max-width: 1305px;
+          max-width: 1280px;
           margin-inline: auto;
           padding-inline: clamp(20px, 3vw, 40px);
-          padding-left: calc(clamp(20px, 3vw, 40px) + clamp(16px, 4vw, 72px));
-        }
-        .agorix-hero__inset.agorix-nav__inset {
-          max-width: 1305px;
-          margin-inline: auto;
-          padding-inline: var(--hero-pad, clamp(20px, 3vw, 40px));
-          padding-left: calc(var(--hero-pad, clamp(20px, 3vw, 40px)) + var(--hero-shift, clamp(16px, 4vw, 72px)));
         }
         .agorix-nav__item {
           position: relative;
