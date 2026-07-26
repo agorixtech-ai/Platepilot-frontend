@@ -86,9 +86,9 @@ function DemoPage() {
             </p>
           </div>
 
-          <div className="mx-auto max-w-2xl">
+          <div>
             {submitted ? (
-              <div className="text-center py-20">
+              <div className="mx-auto max-w-2xl text-center py-20">
                 <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary mb-6">
                   <Check size={32} className="text-primary-foreground" />
                 </div>
@@ -105,130 +105,210 @@ function DemoPage() {
                 </Link>
               </div>
             ) : (
-              <form
-                onSubmit={handleSubmit}
-                className="space-y-6 rounded-2xl border border-border bg-card p-8 md:p-10"
-              >
-                <div className="grid gap-6 md:grid-cols-2">
-                  <div>
-                    <label className="block text-sm font-medium text-foreground/80 mb-2">
-                      First name
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={form.firstName}
-                      onChange={update("firstName")}
-                      className={inputClass}
-                      placeholder="John"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-foreground/80 mb-2">
-                      Last name
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={form.lastName}
-                      onChange={update("lastName")}
-                      className={inputClass}
-                      placeholder="Doe"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-foreground/80 mb-2">
-                    Work email
-                  </label>
-                  <input
-                    type="email"
-                    required
-                    value={form.email}
-                    onChange={update("email")}
-                    className={inputClass}
-                    placeholder="john@restaurant.com"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-foreground/80 mb-2">
-                    Restaurant name
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={form.restaurant}
-                    onChange={update("restaurant")}
-                    className={inputClass}
-                    placeholder="Your Restaurant"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-foreground/80 mb-2">
-                    Phone number
-                  </label>
-                  <input
-                    type="tel"
-                    value={form.phone}
-                    onChange={update("phone")}
-                    className={inputClass}
-                    placeholder="+1 (555) 000-0000"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-foreground/80 mb-2">
-                    Current POS / ERP system
-                  </label>
-                  <input
-                    type="text"
-                    value={form.posSystem}
-                    onChange={update("posSystem")}
-                    className={inputClass}
-                    placeholder="e.g. Tally, Petpooja, Toast"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-foreground/80 mb-2">
-                    Message (optional)
-                  </label>
-                  <textarea
-                    rows={3}
-                    value={form.message}
-                    onChange={update("message")}
-                    className={`${inputClass} resize-none`}
-                    placeholder="Tell us what you'd like to see in the demo..."
-                  />
-                </div>
-
-                {error && <p className="text-destructive text-sm text-center">{error}</p>}
-
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="group inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground transition hover:bg-primary-hover disabled:opacity-60"
+              <div className="grid lg:grid-cols-2 gap-12 items-start">
+                {/* Form */}
+                <form
+                  onSubmit={handleSubmit}
+                  className="space-y-6 rounded-2xl border border-border bg-card p-8 md:p-10 lg:sticky lg:top-24"
                 >
-                  {loading ? (
-                    <>
-                      <Loader2 size={16} className="animate-spin" />
-                      Submitting...
-                    </>
-                  ) : (
-                    <>
-                      Schedule My Demo
-                      <ArrowRight size={16} className="transition group-hover:translate-x-0.5" />
-                    </>
-                  )}
-                </button>
+                  <div className="grid gap-6 md:grid-cols-2 md:col-span-full">
+                    <div>
+                      <label className="block text-sm font-medium text-foreground/80 mb-2">
+                        First name
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={form.firstName}
+                        onChange={update("firstName")}
+                        className={inputClass}
+                        placeholder="John"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-foreground/80 mb-2">
+                        Last name
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={form.lastName}
+                        onChange={update("lastName")}
+                        className={inputClass}
+                        placeholder="Doe"
+                      />
+                    </div>
+                  </div>
 
-                <p className="text-center text-xs text-muted-foreground">
-                  No credit card required · Free setup · We respect your privacy
-                </p>
-              </form>
+                  <div>
+                    <label className="block text-sm font-medium text-foreground/80 mb-2">
+                      Work email
+                    </label>
+                    <input
+                      type="email"
+                      required
+                      value={form.email}
+                      onChange={update("email")}
+                      className={inputClass}
+                      placeholder="john@restaurant.com"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-foreground/80 mb-2">
+                      Restaurant name
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={form.restaurant}
+                      onChange={update("restaurant")}
+                      className={inputClass}
+                      placeholder="Your Restaurant"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-foreground/80 mb-2">
+                      Phone number
+                    </label>
+                    <input
+                      type="tel"
+                      value={form.phone}
+                      onChange={update("phone")}
+                      className={inputClass}
+                      placeholder="+1 (555) 000-0000"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-foreground/80 mb-2">
+                      Current POS / ERP system
+                    </label>
+                    <input
+                      type="text"
+                      value={form.posSystem}
+                      onChange={update("posSystem")}
+                      className={inputClass}
+                      placeholder="e.g. Tally, Petpooja, Toast"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-foreground/80 mb-2">
+                      Message (optional)
+                    </label>
+                    <textarea
+                      rows={3}
+                      value={form.message}
+                      onChange={update("message")}
+                      className={`${inputClass} resize-none`}
+                      placeholder="Tell us what you'd like to see in the demo..."
+                    />
+                  </div>
+
+                  {error && <p className="text-destructive text-sm text-center">{error}</p>}
+
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="group inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground transition hover:bg-primary-hover disabled:opacity-60"
+                  >
+                    {loading ? (
+                      <>
+                        <Loader2 size={16} className="animate-spin" />
+                        Submitting...
+                      </>
+                    ) : (
+                      <>
+                        Schedule My Demo
+                        <ArrowRight size={16} className="transition group-hover:translate-x-0.5" />
+                      </>
+                    )}
+                  </button>
+
+                  <p className="text-center text-xs text-muted-foreground">
+                    No credit card required · Free setup · We respect your privacy
+                  </p>
+                </form>
+
+                {/* Benefits & Contact */}
+                <div className="space-y-8">
+                  {/* Benefits */}
+                  <div>
+                    <h3 className="text-lg font-semibold mb-6">With our platform you can</h3>
+                    <ul className="space-y-4">
+                      {[
+                        "Streamline your restaurant operations end-to-end",
+                        "Make data-driven decisions with real-time insights",
+                        "Reduce manual entry and save hours every week",
+                        "Scale efficiently while maintaining profitability",
+                      ].map((benefit, i) => (
+                        <li key={i} className="flex items-start gap-3">
+                          <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center mt-0.5">
+                            <Check size={16} className="text-primary" strokeWidth={3} />
+                          </div>
+                          <span className="text-sm text-foreground/80">{benefit}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {/* Contact Info */}
+                  <div>
+                    <h3 className="text-lg font-semibold mb-6">You can also reach us</h3>
+                    <div className="space-y-6">
+                      <div className="flex items-start gap-4">
+                        <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                          <span className="text-sm font-semibold text-primary">📧</span>
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-foreground">Email</p>
+                          <a
+                            href="mailto:demo@platepilotsystems.com"
+                            className="text-sm text-primary hover:underline"
+                          >
+                            demo@platepilotsystems.com
+                          </a>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-4">
+                        <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                          <span className="text-sm font-semibold text-primary">📞</span>
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-foreground">Phone</p>
+                          <a
+                            href="tel:+1234567890"
+                            className="text-sm text-primary hover:underline"
+                          >
+                            +1 (234) 567-890
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Locations */}
+                  <div>
+                    <h3 className="text-lg font-semibold mb-4">Our locations</h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="text-sm">
+                        <p className="font-medium text-foreground mb-1">India</p>
+                        <p className="text-foreground/70 text-xs leading-relaxed">
+                          Hyderabad, Telangana
+                        </p>
+                      </div>
+                      <div className="text-sm">
+                        <p className="font-medium text-foreground mb-1">Global</p>
+                        <p className="text-foreground/70 text-xs leading-relaxed">
+                          Remote team available worldwide
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             )}
           </div>
         </div>

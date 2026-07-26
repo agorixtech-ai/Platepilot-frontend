@@ -25,7 +25,7 @@ import { useCounterAnimation } from "@/hooks/useCounterAnimation";
 import { fmtCurrency } from "@/components/dashboard/shared";
 import type { Location } from "@/lib/locations";
 import { dashboardService, type LocationSnapshot } from "@/services/dashboardService";
-import { WasteComposition } from "@/components/dashboard/WasteComposition";
+import { MenuEngineeringSummary } from "@/components/dashboard/MenuEngineeringSummary";
 
 interface AttentionItem {
   branch: string;
@@ -420,7 +420,7 @@ export function AllLocationsOverview() {
 
       <div className="grid items-stretch gap-4 lg:grid-cols-2">
         <ComparisonChart locations={locations} />
-        <WasteComposition />
+        <MenuEngineeringSummary />
       </div>
     </div>
   );
