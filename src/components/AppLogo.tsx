@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
-export const LOGO_SRC = "/logo.jpeg";
+export const LOGO_SRC = "/logo.webp";
 export const LOGO_ALT = "PlatePilot";
 
 const iconSizes = {

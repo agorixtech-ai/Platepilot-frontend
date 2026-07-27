@@ -67,12 +67,20 @@ export function AgorixFooter({ children }: { children: ReactNode }) {
     const footer = footerRef.current;
     const spacer = spacerRef.current;
     if (!footer || !spacer) return;
+    // The footer is fixed to the viewport, but the page content lives inside
+    // .app-page-scroll — where a classic (Windows/Linux) scrollbar eats real
+    // layout width. Without the inset the footer runs the full viewport width
+    // and its right edge pokes out from under the opaque content column,
+    // showing a dark sliver beside the scrollbar.
+    const scroller = footer.closest<HTMLElement>(".app-page-scroll");
     const sync = () => {
       spacer.style.height = `${footer.offsetHeight}px`;
+      if (scroller) footer.style.right = `${scroller.offsetWidth - scroller.clientWidth}px`;
     };
     sync();
     const observer = new ResizeObserver(sync);
     observer.observe(footer);
+    if (scroller) observer.observe(scroller); // fires when the scrollbar appears/disappears
     return () => observer.disconnect();
   }, []);
 

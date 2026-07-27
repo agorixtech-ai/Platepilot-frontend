@@ -6,6 +6,11 @@ import ReactDOM from "react-dom/client";
 import "@ionic/react/css/core.css";
 import "@ionic/react/css/structure.css";
 
+/* Self-hosted Inter (variable, 100–900 in one subsetted woff2). Replaces the
+   render-blocking Google Fonts <link> that used to live in index.html — no
+   third-party DNS/TLS on first paint. */
+import "@fontsource-variable/inter";
+
 import "./styles.css";
 import App from "./App";
 
