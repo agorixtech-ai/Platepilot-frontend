@@ -65,7 +65,7 @@ function DemoPage() {
     <div
       className="min-h-screen bg-background text-foreground"
       style={{
-        fontFamily: "'Inter', system-ui, sans-serif",
+        fontFamily: "'Inter Variable', 'Inter', system-ui, sans-serif",
       }}
     >
       <AgorixNav sticky variant="light" />

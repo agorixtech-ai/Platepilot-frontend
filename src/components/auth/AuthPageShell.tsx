@@ -21,7 +21,7 @@ export function AuthPageShell({
   return (
     <div
       className="auth-page min-h-screen w-full flex items-center justify-center p-4 md:p-8 relative overflow-hidden bg-background text-foreground"
-      style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
+      style={{ fontFamily: "'Inter Variable', 'Inter', system-ui, sans-serif" }}
     >
       <style>{AUTH_ANIMATIONS}</style>
 

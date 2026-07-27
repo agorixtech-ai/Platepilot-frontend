@@ -1,6 +1,33 @@
 import { Link } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
-import { Menu, X } from "lucide-react";
+import {
+  ArrowRight,
+  BarChart3,
+  Bell,
+  BookOpen,
+  Boxes,
+  Building2,
+  Calculator,
+  ChefHat,
+  ChevronDown,
+  Coffee,
+  CreditCard,
+  FileSpreadsheet,
+  LayoutDashboard,
+  Menu,
+  PieChart,
+  Plug,
+  ShoppingCart,
+  Sparkles,
+  Store,
+  Table2,
+  TrendingUp,
+  Upload,
+  Users,
+  UtensilsCrossed,
+  X,
+  type LucideIcon,
+} from "lucide-react";
 import { LOGO_ALT, LOGO_SRC } from "@/components/AppLogo";
 
 const themes = {
@@ -15,6 +42,8 @@ const themes = {
     dropdownBorder: "#DDE7E1",
     dropdownItem: "#152019",
     dropdownHover: "#E8F7ED",
+    iconBg: "#E8F7ED",
+    iconColor: "#16A34A",
     solidBg: "#16A34A",
     solidHover: "#15803D",
     solidColor: "#FFFFFF",
@@ -30,6 +59,8 @@ const themes = {
     dropdownBorder: "rgba(255, 255, 255, 0.12)",
     dropdownItem: "rgba(255, 255, 255, 0.75)",
     dropdownHover: "rgba(255, 255, 255, 0.06)",
+    iconBg: "rgba(255, 255, 255, 0.08)",
+    iconColor: "#4ADE80",
     solidBg: "#16A34A",
     solidHover: "#15803D",
     solidColor: "#FFFFFF",
@@ -47,11 +78,81 @@ const btnBase = {
   whiteSpace: "nowrap" as const,
 };
 
-type NavItem =
-  | { label: string; href: string }
-  | { label: string; dropdown: { label: string; href: string }[] };
+type MegaLink = { label: string; href: string; icon: LucideIcon };
+type MegaColumn = { title: string; href: string; links: MegaLink[] };
+type NavItem = { label: string; href: string } | { label: string; mega: MegaColumn[] };
 
-const defaultLinks: NavItem[] = [];
+/* Marketing IA. The /product, /solutions, /integrations, /pricing, /resources
+   and /company routes don't exist yet — these links are the target structure
+   and 404 until those pages land. */
+const defaultLinks: NavItem[] = [
+  { label: "Home", href: "/" },
+  {
+    label: "Product",
+    mega: [
+      {
+        title: "Analytics",
+        href: "/product",
+        links: [
+          { label: "Dashboard", href: "/product/dashboard", icon: LayoutDashboard },
+          { label: "Sales Analytics", href: "/product/sales-analytics", icon: TrendingUp },
+          { label: "Branch Performance", href: "/product/branch-performance", icon: BarChart3 },
+          { label: "Alerts & Insights", href: "/product/alerts-insights", icon: Bell },
+          { label: "Data Upload", href: "/product/data-upload", icon: Upload },
+        ],
+      },
+      {
+        title: "Intelligence",
+        href: "/product",
+        links: [
+          {
+            label: "Inventory Intelligence",
+            href: "/product/inventory-intelligence",
+            icon: Boxes,
+          },
+          { label: "Food Cost Analysis", href: "/product/food-cost-analysis", icon: PieChart },
+          { label: "Menu Performance", href: "/product/menu-performance", icon: UtensilsCrossed },
+          {
+            label: "Purchase Suggestions",
+            href: "/product/purchase-suggestions",
+            icon: ShoppingCart,
+          },
+          { label: "PlatePilot AI", href: "/product/ai", icon: Sparkles },
+        ],
+      },
+      {
+        title: "Solutions",
+        href: "/solutions",
+        links: [
+          { label: "Multi-Branch Restaurants", href: "/solutions/multi-branch", icon: Building2 },
+          { label: "Independent Restaurants", href: "/solutions/independent", icon: Store },
+          { label: "Cafes", href: "/solutions/cafes", icon: Coffee },
+          { label: "Cloud Kitchens", href: "/solutions/cloud-kitchens", icon: ChefHat },
+          { label: "Restaurant Groups", href: "/solutions/restaurant-groups", icon: Users },
+        ],
+      },
+      {
+        title: "Integrations",
+        href: "/integrations",
+        links: [
+          { label: "POS Systems", href: "/integrations#pos-systems", icon: CreditCard },
+          { label: "Tally", href: "/integrations#tally", icon: BookOpen },
+          { label: "CSV Upload", href: "/integrations#csv-upload", icon: FileSpreadsheet },
+          { label: "Excel Upload", href: "/integrations#excel-upload", icon: Table2 },
+          {
+            label: "Accounting Systems",
+            href: "/integrations#accounting-systems",
+            icon: Calculator,
+          },
+          { label: "API Integrations", href: "/integrations#api-integrations", icon: Plug },
+        ],
+      },
+    ],
+  },
+  { label: "Pricing", href: "/pricing" },
+  { label: "Resources", href: "/resources" },
+  { label: "Company", href: "/company" },
+];
 
 type AgorixNavProps = {
   links?: NavItem[];
@@ -100,11 +201,40 @@ export function AgorixNav({
         setMobileOpen(false);
       }
     }
+    function handleEscape(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setOpenDropdown(null);
+        setMobileOpen(false);
+      }
+    }
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleEscape);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEscape);
+    };
   }, []);
 
-  const mobileLinks = links.flatMap((item) => ("dropdown" in item ? item.dropdown : [item]));
+  const mobileLink = (item: { label: string; href: string }) =>
+    item.href.startsWith("#") ? (
+      <a
+        key={item.label}
+        href={item.href}
+        className="agorix-nav__mobile-link"
+        onClick={() => setMobileOpen(false)}
+      >
+        {item.label}
+      </a>
+    ) : (
+      <Link
+        key={item.label}
+        to={item.href}
+        className="agorix-nav__mobile-link"
+        onClick={() => setMobileOpen(false)}
+      >
+        {item.label}
+      </Link>
+    );
 
   return (
     <>
@@ -116,35 +246,94 @@ export function AgorixNav({
           margin-inline: auto;
           padding-inline: clamp(20px, 3vw, 40px);
         }
+        /* The trigger stays position:static so the panel's containing block is
+           the header — that's what lets it span the full content column
+           instead of hanging off the trigger. */
         .agorix-nav__item {
-          position: relative;
+          position: static;
         }
-        .agorix-nav__dropdown {
+        .agorix-nav__trigger {
+          display: inline-flex;
+          align-items: center;
+          gap: 5px;
+          padding: 0;
+          background: none;
+          border: none;
+          color: inherit;
+          font: inherit;
+          line-height: 1;
+          cursor: pointer;
+        }
+        .agorix-nav__chevron {
+          transition: transform 0.2s ease;
+        }
+        .agorix-nav__trigger[aria-expanded="true"] .agorix-nav__chevron {
+          transform: rotate(180deg);
+        }
+        .agorix-nav__mega {
           position: absolute;
-          top: calc(100% + 10px);
-          left: 50%;
-          transform: translateX(-50%);
-          min-width: 180px;
-          padding: 0.4rem 0;
+          top: 100%;
+          left: clamp(20px, 3vw, 40px);
+          right: clamp(20px, 3vw, 40px);
+          display: grid;
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          padding: 6px;
           background: ${T.dropdownBg};
-          backdrop-filter: blur(20px);
-          -webkit-backdrop-filter: blur(20px);
           border: 1px solid ${T.dropdownBorder};
-          border-radius: 12px;
-          box-shadow: 0 10px 40px rgba(7, 26, 20, 0.12);
+          border-radius: 18px;
+          box-shadow: 0 24px 60px rgba(7, 26, 20, 0.14);
           z-index: 70;
         }
-        .agorix-nav__dropdown-item {
-          display: block;
-          padding: 0.65rem 1.1rem;
-          font-size: 0.82rem;
+        .agorix-nav__mega-col {
+          display: flex;
+          flex-direction: column;
+          padding: 26px 22px 30px;
+        }
+        .agorix-nav__mega-col + .agorix-nav__mega-col {
+          border-left: 1px solid ${T.dropdownBorder};
+        }
+        .agorix-nav__mega-title {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          margin-bottom: 16px;
+          font-size: 0.95rem;
+          font-weight: 600;
+          color: ${T.text};
+          text-decoration: none;
+        }
+        .agorix-nav__mega-title svg {
+          transition: transform 0.2s ease;
+        }
+        .agorix-nav__mega-title:hover svg {
+          transform: translateX(3px);
+        }
+        .agorix-nav__mega-link {
+          display: flex;
+          align-items: center;
+          gap: 11px;
+          padding: 7px 10px;
+          margin-inline: -10px;
+          border-radius: 10px;
+          font-size: 0.85rem;
+          line-height: 1.35;
           color: ${T.dropdownItem};
           text-decoration: none;
           transition: background 0.15s ease, color 0.15s ease;
         }
-        .agorix-nav__dropdown-item:hover {
+        .agorix-nav__mega-link:hover {
           background: ${T.dropdownHover};
           color: ${T.text};
+        }
+        .agorix-nav__mega-icon {
+          display: grid;
+          place-items: center;
+          flex-shrink: 0;
+          width: 30px;
+          height: 30px;
+          border-radius: 8px;
+          background: ${T.iconBg};
+          color: ${T.iconColor};
         }
         .agorix-nav__toggle {
           display: none;
@@ -152,7 +341,9 @@ export function AgorixNav({
         .agorix-nav__mobile-panel {
           display: none;
         }
-        @media (max-width: 900px) {
+        /* 1100px, not 900 — seven top-level items plus the logo and both
+           buttons stop fitting on one row well before the old breakpoint */
+        @media (max-width: 1100px) {
           .agorix-nav__links {
             display: none !important;
           }
@@ -171,6 +362,17 @@ export function AgorixNav({
           gap: 4px;
           padding: 8px clamp(20px, 3vw, 40px) 20px;
           border-top: 1px solid ${T.border};
+          max-height: calc(100vh - 120px);
+          overflow-y: auto;
+        }
+        .agorix-nav__mobile-group {
+          padding: 1.1rem 0.25rem 0.4rem;
+          font-size: 0.65rem;
+          font-weight: 700;
+          letter-spacing: 0.16em;
+          text-transform: uppercase;
+          color: ${T.nav};
+          opacity: 0.7;
         }
         .agorix-nav__mobile-link {
           padding: 0.85rem 0.25rem;
@@ -248,37 +450,46 @@ export function AgorixNav({
             }}
           >
             {links.map((item) => {
-              if ("dropdown" in item) {
+              if ("mega" in item) {
+                const open = openDropdown === item.label;
                 return (
                   <div key={item.label} className="agorix-nav__item">
                     <button
                       type="button"
-                      onClick={() =>
-                        setOpenDropdown(openDropdown === item.label ? null : item.label)
-                      }
-                      style={{
-                        cursor: "pointer",
-                        lineHeight: 1,
-                        background: "none",
-                        border: "none",
-                        color: "inherit",
-                        font: "inherit",
-                        padding: 0,
-                      }}
+                      className="agorix-nav__trigger"
+                      onClick={() => setOpenDropdown(open ? null : item.label)}
+                      aria-haspopup="true"
+                      aria-expanded={open}
                     >
                       {item.label}
+                      <ChevronDown className="agorix-nav__chevron" size={15} strokeWidth={2.2} />
                     </button>
-                    {openDropdown === item.label && (
-                      <div className="agorix-nav__dropdown">
-                        {item.dropdown.map((dropItem) => (
-                          <Link
-                            key={dropItem.label}
-                            to={dropItem.href}
-                            className="agorix-nav__dropdown-item"
-                            onClick={() => setOpenDropdown(null)}
-                          >
-                            {dropItem.label}
-                          </Link>
+                    {open && (
+                      <div className="agorix-nav__mega">
+                        {item.mega.map((col) => (
+                          <div key={col.title} className="agorix-nav__mega-col">
+                            <Link
+                              to={col.href}
+                              className="agorix-nav__mega-title"
+                              onClick={() => setOpenDropdown(null)}
+                            >
+                              {col.title}
+                              <ArrowRight size={15} strokeWidth={2.2} />
+                            </Link>
+                            {col.links.map(({ label, href, icon: Icon }) => (
+                              <Link
+                                key={label}
+                                to={href}
+                                className="agorix-nav__mega-link"
+                                onClick={() => setOpenDropdown(null)}
+                              >
+                                <span className="agorix-nav__mega-icon">
+                                  <Icon size={16} strokeWidth={2} />
+                                </span>
+                                {label}
+                              </Link>
+                            ))}
+                          </div>
                         ))}
                       </div>
                     )}
@@ -370,26 +581,15 @@ export function AgorixNav({
           className={`agorix-nav__mobile-panel${mobileOpen ? " open" : ""}`}
           style={{ background: T.bg }}
         >
-          {mobileLinks.map((item) =>
-            item.href.startsWith("#") ? (
-              <a
-                key={item.label}
-                href={item.href}
-                className="agorix-nav__mobile-link"
-                onClick={() => setMobileOpen(false)}
-              >
-                {item.label}
-              </a>
-            ) : (
-              <Link
-                key={item.label}
-                to={item.href}
-                className="agorix-nav__mobile-link"
-                onClick={() => setMobileOpen(false)}
-              >
-                {item.label}
-              </Link>
-            ),
+          {links.map((item) =>
+            "mega" in item
+              ? item.mega.map((col) => (
+                  <div key={col.title} style={{ display: "flex", flexDirection: "column" }}>
+                    <div className="agorix-nav__mobile-group">{col.title}</div>
+                    {col.links.map(mobileLink)}
+                  </div>
+                ))
+              : mobileLink(item),
           )}
           <div className="agorix-nav__mobile-buttons">
             <a href="/demo" style={btnOutlineSm} onClick={() => setMobileOpen(false)}>

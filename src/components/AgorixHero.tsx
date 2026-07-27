@@ -711,7 +711,7 @@ function AnimatedDashboard({
                 </svg>
               </span>
               <span style={{ fontSize: 13, fontWeight: 600, color: T.text, lineHeight: 1 }}>
-                Agorix AI · Analysis
+                PlatePilot AI · Analysis
               </span>
             </div>
             <span
@@ -877,7 +877,7 @@ export function AgorixHero() {
         position: "relative",
         width: "100%",
         overflow: "hidden",
-        fontFamily: "'Inter', system-ui, sans-serif",
+        fontFamily: "'Inter Variable', 'Inter', system-ui, sans-serif",
         color: T.text,
         background: `radial-gradient(900px 520px at 72% 28%, rgba(22,163,74,0.1), transparent 58%),
                      radial-gradient(700px 400px at 18% 80%, rgba(163,230,53,0.07), transparent 55%),
@@ -964,7 +964,7 @@ export function AgorixHero() {
               animation: "ag-up .7s .22s both",
             }}
           >
-            Agorix unifies your Tally books, POS sales, and inventory across every outlet and
+            PlatePilot unifies your Tally books, POS sales, and inventory across every outlet and
             connected tool — so you predict risk earlier, act faster, and grow margin.
           </p>
           <div
@@ -1073,8 +1073,8 @@ export function AgorixHero() {
                     animation: "ag-up .7s .22s both",
                   }}
                 >
-                  Agorix unifies your Tally books, POS sales, and inventory across every outlet and
-                  connected tool — so you predict risk earlier, act faster, and grow margin.
+                  PlatePilot unifies your Tally books, POS sales, and inventory across every outlet
+                  and connected tool — so you predict risk earlier, act faster, and grow margin.
                 </p>
                 <div
                   style={{

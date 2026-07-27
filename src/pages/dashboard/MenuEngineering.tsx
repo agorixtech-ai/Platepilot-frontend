@@ -21,7 +21,7 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ItemAvatar } from "@/components/dashboard/ItemAvatar";
-import { fmtCurrency } from "@/components/dashboard/shared";
+import { fmtCurrency, fmtPct } from "@/components/dashboard/shared";
 import { useBranchFilter } from "@/contexts/BranchFilterContext";
 import { dashboardService, type MenuEngineeringItem } from "@/services/dashboardService";
 
@@ -95,13 +95,61 @@ function recommendationCopy(item: MenuEngineeringItem) {
   return "Review the recipe and supplier cost first; if neither improves, consider removing it.";
 }
 
+/** Waste as a share of revenue: >8% is bleeding, >4% needs a look. */
+function wasteTone(pct: number): "danger" | "warn" | "ok" {
+  if (pct > 8) return "danger";
+  if (pct > 4) return "warn";
+  return "ok";
+}
+
+const WASTE_TEXT = {
+  danger: "text-destructive",
+  warn: "text-warning",
+  ok: "text-muted-foreground",
+} as const;
+
+function VarianceTile({
+  label,
+  hint,
+  value,
+  sub,
+  tone = "ok",
+}: {
+  label: string;
+  hint: string;
+  value: string;
+  sub: string;
+  tone?: "danger" | "warn" | "ok";
+}) {
+  return (
+    <div className="rounded-xl border border-border/60 bg-card px-4 py-3">
+      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+        {label}
+      </p>
+      <p
+        className={cn(
+          "mt-1 text-xl font-bold tabular-nums",
+          tone === "ok" ? "text-foreground" : WASTE_TEXT[tone],
+        )}
+      >
+        {value}
+      </p>
+      <p className="mt-0.5 text-xs font-medium tabular-nums text-muted-foreground">{sub}</p>
+      <p className="mt-1.5 text-[11px] leading-snug text-muted-foreground">{hint}</p>
+    </div>
+  );
+}
+
 function DishDialog({ dish, onClose }: { dish: MenuEngineeringItem | null; onClose: () => void }) {
   if (!dish) return null;
   const config = TIER[dish.quadrant];
 
   return (
     <Dialog open={!!dish} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-md gap-4">
+      {/* Capped + scrollable: the should-vs-actual block and a long recipe can
+          together outgrow a short viewport, which pushed the close button
+          off-screen. */}
+      <DialogContent className="max-h-[85vh] max-w-md gap-4 overflow-y-auto">
         <DialogHeader>
           <div className="flex items-start gap-3">
             <ItemAvatar name={dish.dish} size="sm" variant="photo" />
@@ -116,9 +164,11 @@ function DishDialog({ dish, onClose }: { dish: MenuEngineeringItem | null; onClo
         <div className="grid grid-cols-2 gap-2">
           {[
             ["Price", fmtCurrency(dish.price)],
-            ["Cost", fmtCurrency(dish.cost)],
+            ["Should cost / plate", fmtCurrency(dish.cost)],
             ["Profit / plate", fmtCurrency(dish.gross_profit)],
+            ["Food cost", fmtPct(dish.food_cost_pct)],
             ["Sold (30d)", dish.sold_30d.toLocaleString()],
+            ["Revenue (30d)", fmtCurrency(dish.revenue_30d)],
           ].map(([label, value]) => (
             <div key={label} className="rounded-lg border border-border/50 bg-muted/30 px-3 py-2.5">
               <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
@@ -127,6 +177,50 @@ function DishDialog({ dish, onClose }: { dish: MenuEngineeringItem | null; onClo
               <p className="mt-0.5 text-sm font-bold tabular-nums text-foreground">{value}</p>
             </div>
           ))}
+        </div>
+
+        {/* Theoretical vs actual for this dish over the trailing 30 days */}
+        <div className="rounded-xl border border-border/60 p-3.5">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+            Ingredients — should vs actual (30d)
+          </p>
+          <dl className="mt-2 space-y-1.5 text-xs">
+            <div className="flex justify-between gap-3">
+              <dt className="text-muted-foreground">
+                Should have cost ({dish.sold_30d.toLocaleString()} sold)
+              </dt>
+              <dd className="font-semibold tabular-nums text-foreground">
+                {fmtCurrency(dish.cost * dish.sold_30d)}
+              </dd>
+            </div>
+            <div className="flex justify-between gap-3">
+              <dt className="text-muted-foreground">Purchased beyond that (wastage)</dt>
+              <dd
+                className={cn(
+                  "font-semibold tabular-nums",
+                  dish.waste_cost_30d > 0
+                    ? WASTE_TEXT[wasteTone(dish.waste_pct)]
+                    : "text-foreground",
+                )}
+              >
+                {dish.waste_cost_30d > 0
+                  ? `${fmtCurrency(dish.waste_cost_30d)} · ${fmtPct(dish.waste_pct)}`
+                  : "None"}
+              </dd>
+            </div>
+            <div className="flex justify-between gap-3 border-t border-border/40 pt-1.5">
+              <dt className="font-medium text-foreground">Actual ingredient spend</dt>
+              <dd className="font-bold tabular-nums text-foreground">
+                {fmtCurrency(dish.cost * dish.sold_30d + dish.waste_cost_30d)}
+              </dd>
+            </div>
+          </dl>
+          {dish.waste_qty_30d > 0 && (
+            <p className="mt-2 text-[11px] leading-snug text-muted-foreground">
+              Equivalent to {dish.waste_qty_30d.toLocaleString()} portions of ingredients bought and
+              not sold.
+            </p>
+          )}
         </div>
 
         <div className="rounded-xl border border-primary/20 bg-primary/5 p-3.5">
@@ -147,11 +241,23 @@ function DishDialog({ dish, onClose }: { dish: MenuEngineeringItem | null; onClo
             <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
               Recipe ({dish.ingredients.length})
             </p>
-            <div className="max-h-48 divide-y divide-border/40 overflow-y-auto rounded-lg border border-border/50">
+            <div className="divide-y divide-border/40 rounded-lg border border-border/50">
               {dish.ingredients.map((ing) => (
                 <div key={ing.name} className="flex items-center gap-2 px-3 py-2">
                   <span className="min-w-0 flex-1 truncate text-xs font-medium text-foreground">
                     {ing.name}
+                  </span>
+                  {/* which price this line was costed at — a live Tally purchase
+                      price, or the seeded estimate when nothing matched */}
+                  <span
+                    className={cn(
+                      "shrink-0 rounded px-1.5 py-0.5 text-[10px] font-semibold",
+                      ing.cost_source === "tally"
+                        ? "bg-success/10 text-success"
+                        : "bg-muted text-muted-foreground",
+                    )}
+                  >
+                    {ing.cost_source === "tally" ? "Tally" : "est."}
                   </span>
                   <span className="shrink-0 text-xs tabular-nums text-muted-foreground">
                     {ing.qty.toLocaleString()} {ing.unit}
@@ -186,6 +292,29 @@ export default function MenuEngineeringPage() {
     const next = { star: 0, plow_horse: 0, puzzle: 0, dog: 0 };
     for (const item of all) next[item.quadrant] += 1;
     return next;
+  }, [all]);
+
+  /* Theoretical vs actual, menu-wide. should = recipe cost (priced from Tally
+     purchases) × units sold on POS; waste = what was purchased beyond that.
+     should + waste is therefore the ingredient spend the purchases imply. */
+  const totals = useMemo(() => {
+    let revenue = 0;
+    let should = 0;
+    let waste = 0;
+    for (const item of all) {
+      revenue += item.revenue_30d;
+      should += item.cost * item.sold_30d;
+      waste += item.waste_cost_30d;
+    }
+    return {
+      revenue,
+      should,
+      waste,
+      actual: should + waste,
+      shouldPct: revenue ? (should / revenue) * 100 : 0,
+      actualPct: revenue ? ((should + waste) / revenue) * 100 : 0,
+      wastePct: revenue ? (waste / revenue) * 100 : 0,
+    };
   }, [all]);
 
   const items = useMemo(() => {
@@ -232,6 +361,28 @@ export default function MenuEngineeringPage() {
           Refresh
         </Button>
       </div>
+
+      <section className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <VarianceTile
+          label="Should have cost"
+          hint="Recipes priced from Tally × units sold on POS"
+          value={fmtCurrency(totals.should)}
+          sub={`${fmtPct(totals.shouldPct)} of revenue`}
+        />
+        <VarianceTile
+          label="Actually purchased"
+          hint="What the Tally purchase vouchers add up to"
+          value={fmtCurrency(totals.actual)}
+          sub={`${fmtPct(totals.actualPct)} of revenue`}
+        />
+        <VarianceTile
+          label="Wastage"
+          hint="Purchased beyond what the dishes sold required"
+          value={fmtCurrency(totals.waste)}
+          sub={`${fmtPct(totals.wastePct)} of revenue`}
+          tone={wasteTone(totals.wastePct)}
+        />
+      </section>
 
       <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {(Object.keys(TIER) as Tier[]).map((tier) => {
@@ -326,13 +477,16 @@ export default function MenuEngineeringPage() {
           ) : (
             <>
               <div className="hidden overflow-x-auto md:block">
-                <table className="w-full min-w-[720px] text-left">
+                <table className="w-full min-w-[980px] text-left">
                   <thead>
                     <tr className="border-b border-border/40 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
                       <th className="px-5 py-2.5">Dish</th>
-                      <th className="px-3 py-2.5">Category</th>
                       <th className="px-3 py-2.5 text-right">Price</th>
+                      <th className="px-3 py-2.5 text-right">Should cost</th>
+                      <th className="px-3 py-2.5 text-right">Food cost</th>
                       <th className="px-3 py-2.5 text-right">Sold (30d)</th>
+                      <th className="px-3 py-2.5 text-right">Revenue (30d)</th>
+                      <th className="px-3 py-2.5 text-right">Wastage (30d)</th>
                       <th className="px-3 py-2.5">Action</th>
                       <th className="px-3 py-2.5" />
                     </tr>
@@ -355,17 +509,47 @@ export default function MenuEngineeringPage() {
                         <td className="px-5 py-3">
                           <div className="flex items-center gap-2.5">
                             <ItemAvatar name={item.dish} size="sm" variant="photo" />
-                            <span className="text-sm font-semibold text-foreground">
-                              {item.dish}
-                            </span>
+                            <div className="min-w-0">
+                              <span className="block truncate text-sm font-semibold text-foreground">
+                                {item.dish}
+                              </span>
+                              <span className="text-xs text-muted-foreground">{item.category}</span>
+                            </div>
                           </div>
                         </td>
-                        <td className="px-3 py-3 text-xs text-muted-foreground">{item.category}</td>
                         <td className="px-3 py-3 text-right text-sm font-semibold tabular-nums">
                           {fmtCurrency(item.price)}
                         </td>
+                        <td className="px-3 py-3 text-right text-sm tabular-nums text-muted-foreground">
+                          {fmtCurrency(item.cost)}
+                        </td>
+                        <td className="px-3 py-3 text-right text-sm tabular-nums">
+                          {fmtPct(item.food_cost_pct)}
+                        </td>
                         <td className="px-3 py-3 text-right text-sm tabular-nums">
                           {item.sold_30d.toLocaleString()}
+                        </td>
+                        <td className="px-3 py-3 text-right text-sm tabular-nums">
+                          {fmtCurrency(item.revenue_30d)}
+                        </td>
+                        <td className="px-3 py-3 text-right">
+                          {item.waste_cost_30d > 0 ? (
+                            <>
+                              <span
+                                className={cn(
+                                  "block text-sm font-semibold tabular-nums",
+                                  WASTE_TEXT[wasteTone(item.waste_pct)],
+                                )}
+                              >
+                                {fmtCurrency(item.waste_cost_30d)}
+                              </span>
+                              <span className="text-xs tabular-nums text-muted-foreground">
+                                {fmtPct(item.waste_pct)} of revenue
+                              </span>
+                            </>
+                          ) : (
+                            <span className="text-sm text-muted-foreground">—</span>
+                          )}
                         </td>
                         <td className="px-3 py-3">
                           <TierBadge tier={item.quadrant} />
@@ -407,8 +591,27 @@ export default function MenuEngineeringPage() {
                             Price
                           </span>
                           <span>
+                            <b className="block text-sm text-foreground">
+                              {fmtCurrency(item.cost)}
+                            </b>
+                            Should cost
+                          </span>
+                          <span>
                             <b className="block text-sm text-foreground">{item.sold_30d}</b>
-                            Sold
+                            Sold (30d)
+                          </span>
+                          <span>
+                            <b
+                              className={cn(
+                                "block text-sm",
+                                item.waste_cost_30d > 0
+                                  ? WASTE_TEXT[wasteTone(item.waste_pct)]
+                                  : "text-foreground",
+                              )}
+                            >
+                              {item.waste_cost_30d > 0 ? fmtCurrency(item.waste_cost_30d) : "—"}
+                            </b>
+                            Wastage (30d)
                           </span>
                         </div>
                       </div>

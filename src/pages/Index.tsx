@@ -41,7 +41,7 @@ function Tile({ label, children }: { label: string; children: ReactNode }) {
         gap: 7,
         padding: "10px 12px",
         background: `linear-gradient(180deg,${T.surface} 0%,${T.bg} 100%)`,
-        fontFamily: "'Inter', system-ui, sans-serif",
+        fontFamily: "'Inter Variable', 'Inter', system-ui, sans-serif",
         overflow: "hidden",
         textAlign: "left",
       }}
@@ -596,7 +596,7 @@ function Index() {
       style={{
         background: "#F6FAF7",
         color: "#152019",
-        fontFamily: "'Inter', system-ui, sans-serif",
+        fontFamily: "'Inter Variable', 'Inter', system-ui, sans-serif",
       }}
     >
       <style>{`
@@ -1680,16 +1680,7 @@ function Index() {
         {/* ══════════════════════════════════════════════════════════════════ */}
         {/* NAV (sticky — CTA stays reachable while scrolling) + HERO          */}
         {/* ══════════════════════════════════════════════════════════════════ */}
-        <AgorixNav
-          variant="light"
-          sticky
-          links={[
-            { label: "Features", href: "#features" },
-            { label: "How It Works", href: "#how-it-works" },
-            { label: "Testimonials", href: "#testimonials" },
-            { label: "FAQ", href: "#faq" },
-          ]}
-        />
+        <AgorixNav variant="light" sticky />
         <AgorixHero />
 
         {/* ══════════════════════════════════════════════════════════════════ */}
