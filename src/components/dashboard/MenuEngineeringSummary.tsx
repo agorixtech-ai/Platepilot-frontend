@@ -39,14 +39,14 @@ function median(nums: number[]): number {
   return sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
 }
 
-/** Classic menu-engineering quadrant: sold_30d (popularity) vs. gross_profit
+/** Classic menu-engineering quadrant: sold (popularity) vs. gross_profit
     (profitability), split at the menu's own medians. */
 export function MenuEngineeringSummary() {
   const { branch } = useBranchFilter();
 
   const query = useQuery({
     queryKey: ["dashboard", "menu-engineering", branch],
-    queryFn: () => dashboardService.getMenuEngineering(branch),
+    queryFn: () => dashboardService.getMenuEngineering("month", branch),
     ...DASHBOARD_LIVE_QUERY,
   });
 
@@ -59,7 +59,7 @@ export function MenuEngineeringSummary() {
     return next;
   }, [items]);
 
-  const medianSold = useMemo(() => median(items.map((i) => i.sold_30d)), [items]);
+  const medianSold = useMemo(() => median(items.map((i) => i.sold)), [items]);
   const medianProfit = useMemo(() => median(items.map((i) => i.gross_profit)), [items]);
 
   return (
@@ -170,7 +170,7 @@ export function MenuEngineeringSummary() {
                     />
                     <XAxis
                       type="number"
-                      dataKey="sold_30d"
+                      dataKey="sold"
                       name="Sold (30d)"
                       stroke="var(--color-muted-foreground)"
                       fontSize={9}
@@ -227,7 +227,7 @@ export function MenuEngineeringSummary() {
                           <div className="rounded-xl border border-border/60 bg-popover px-3 py-2 text-[11px] shadow-lg">
                             <p className="font-bold text-foreground">{row.dish}</p>
                             <p className="mt-0.5 tabular-nums text-muted-foreground">
-                              {row.sold_30d} sold ·{" "}
+                              {row.sold} sold ·{" "}
                               <span
                                 className={cn(
                                   "font-semibold",

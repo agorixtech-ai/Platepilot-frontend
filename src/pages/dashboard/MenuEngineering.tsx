@@ -23,7 +23,12 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { ItemAvatar } from "@/components/dashboard/ItemAvatar";
 import { fmtCurrency, fmtPct } from "@/components/dashboard/shared";
 import { useBranchFilter } from "@/contexts/BranchFilterContext";
-import { dashboardService, type MenuEngineeringItem } from "@/services/dashboardService";
+import {
+  dashboardService,
+  type MenuEngineeringItem,
+  type Period,
+} from "@/services/dashboardService";
+import { MenuWasteAnalysis } from "@/components/dashboard/MenuWasteAnalysis";
 
 const TIER = {
   star: {
@@ -82,7 +87,7 @@ function TierBadge({ tier }: { tier: Tier }) {
 
 function recommendationCopy(item: MenuEngineeringItem) {
   const raise = Math.max(1, Math.round(item.price * 0.08));
-  const monthlyGain = raise * item.sold_30d;
+  const monthlyGain = raise * item.sold;
   if (item.quadrant === "star") {
     return "Keep the price steady. Feature this dish and upsell it.";
   }
@@ -94,6 +99,15 @@ function recommendationCopy(item: MenuEngineeringItem) {
   }
   return "Review the recipe and supplier cost first; if neither improves, consider removing it.";
 }
+
+/** Window label for column headers and copy — the period is selectable now,
+    so "(30d)" can no longer be hardcoded. */
+const PERIOD_LABEL: Record<Period, string> = {
+  today: "today",
+  week: "7d",
+  month: "30d",
+  year: "1y",
+};
 
 /** Waste as a share of revenue: >8% is bleeding, >4% needs a look. */
 function wasteTone(pct: number): "danger" | "warn" | "ok" {
@@ -140,7 +154,15 @@ function VarianceTile({
   );
 }
 
-function DishDialog({ dish, onClose }: { dish: MenuEngineeringItem | null; onClose: () => void }) {
+function DishDialog({
+  dish,
+  win,
+  onClose,
+}: {
+  dish: MenuEngineeringItem | null;
+  win: string;
+  onClose: () => void;
+}) {
   if (!dish) return null;
   const config = TIER[dish.quadrant];
 
@@ -167,8 +189,8 @@ function DishDialog({ dish, onClose }: { dish: MenuEngineeringItem | null; onClo
             ["Should cost / plate", fmtCurrency(dish.cost)],
             ["Profit / plate", fmtCurrency(dish.gross_profit)],
             ["Food cost", fmtPct(dish.food_cost_pct)],
-            ["Sold (30d)", dish.sold_30d.toLocaleString()],
-            ["Revenue (30d)", fmtCurrency(dish.revenue_30d)],
+            [`Sold (${win})`, dish.sold.toLocaleString()],
+            [`Revenue (${win})`, fmtCurrency(dish.revenue)],
           ].map(([label, value]) => (
             <div key={label} className="rounded-lg border border-border/50 bg-muted/30 px-3 py-2.5">
               <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
@@ -179,18 +201,18 @@ function DishDialog({ dish, onClose }: { dish: MenuEngineeringItem | null; onClo
           ))}
         </div>
 
-        {/* Theoretical vs actual for this dish over the trailing 30 days */}
+        {/* Theoretical vs actual for this dish over the selected window */}
         <div className="rounded-xl border border-border/60 p-3.5">
           <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-            Ingredients — should vs actual (30d)
+            Ingredients — should vs actual ({win})
           </p>
           <dl className="mt-2 space-y-1.5 text-xs">
             <div className="flex justify-between gap-3">
               <dt className="text-muted-foreground">
-                Should have cost ({dish.sold_30d.toLocaleString()} sold)
+                Should have cost ({dish.sold.toLocaleString()} sold)
               </dt>
               <dd className="font-semibold tabular-nums text-foreground">
-                {fmtCurrency(dish.cost * dish.sold_30d)}
+                {fmtCurrency(dish.cost * dish.sold)}
               </dd>
             </div>
             <div className="flex justify-between gap-3">
@@ -198,27 +220,25 @@ function DishDialog({ dish, onClose }: { dish: MenuEngineeringItem | null; onClo
               <dd
                 className={cn(
                   "font-semibold tabular-nums",
-                  dish.waste_cost_30d > 0
-                    ? WASTE_TEXT[wasteTone(dish.waste_pct)]
-                    : "text-foreground",
+                  dish.waste_cost > 0 ? WASTE_TEXT[wasteTone(dish.waste_pct)] : "text-foreground",
                 )}
               >
-                {dish.waste_cost_30d > 0
-                  ? `${fmtCurrency(dish.waste_cost_30d)} · ${fmtPct(dish.waste_pct)}`
+                {dish.waste_cost > 0
+                  ? `${fmtCurrency(dish.waste_cost)} · ${fmtPct(dish.waste_pct)}`
                   : "None"}
               </dd>
             </div>
             <div className="flex justify-between gap-3 border-t border-border/40 pt-1.5">
               <dt className="font-medium text-foreground">Actual ingredient spend</dt>
               <dd className="font-bold tabular-nums text-foreground">
-                {fmtCurrency(dish.cost * dish.sold_30d + dish.waste_cost_30d)}
+                {fmtCurrency(dish.cost * dish.sold + dish.waste_cost)}
               </dd>
             </div>
           </dl>
-          {dish.waste_qty_30d > 0 && (
+          {dish.waste_qty > 0 && (
             <p className="mt-2 text-[11px] leading-snug text-muted-foreground">
-              Equivalent to {dish.waste_qty_30d.toLocaleString()} portions of ingredients bought and
-              not sold.
+              Equivalent to {dish.waste_qty.toLocaleString()} portions of ingredients bought and not
+              sold.
             </p>
           )}
         </div>
@@ -279,11 +299,12 @@ export default function MenuEngineeringPage() {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<Tier | null>(null);
   const [selected, setSelected] = useState<MenuEngineeringItem | null>(null);
+  const [period, setPeriod] = useState<Period>("month");
   const { branch } = useBranchFilter();
 
   const { data, isLoading, isError, refetch, isFetching } = useQuery({
-    queryKey: ["dashboard", "menu-engineering", branch],
-    queryFn: () => dashboardService.getMenuEngineering(branch),
+    queryKey: ["dashboard", "menu-engineering", period, branch],
+    queryFn: () => dashboardService.getMenuEngineering(period, branch),
   });
 
   const all = useMemo(() => data?.items ?? [], [data?.items]);
@@ -302,9 +323,9 @@ export default function MenuEngineeringPage() {
     let should = 0;
     let waste = 0;
     for (const item of all) {
-      revenue += item.revenue_30d;
-      should += item.cost * item.sold_30d;
-      waste += item.waste_cost_30d;
+      revenue += item.revenue;
+      should += item.cost * item.sold;
+      waste += item.waste_cost;
     }
     return {
       revenue,
@@ -326,7 +347,7 @@ export default function MenuEngineeringPage() {
           !q || item.dish.toLowerCase().includes(q) || item.category.toLowerCase().includes(q);
         return matchesFilter && matchesSearch;
       })
-      .sort((a, b) => b.sold_30d - a.sold_30d);
+      .sort((a, b) => b.sold - a.sold);
   }, [all, filter, search]);
 
   const filters: { label: string; tier: Tier | null }[] = [
@@ -346,7 +367,7 @@ export default function MenuEngineeringPage() {
             Menu Engineering
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            What to keep, fix, promote, or drop — based on the last 30 days
+            What to keep, fix, promote, or drop — based on the selected window
             {branch !== "all" ? ` · ${branch}` : ""}.
           </p>
         </div>
@@ -383,6 +404,13 @@ export default function MenuEngineeringPage() {
           tone={wasteTone(totals.wastePct)}
         />
       </section>
+
+      <MenuWasteAnalysis
+        items={all}
+        period={period}
+        onPeriodChange={setPeriod}
+        isLoading={isLoading}
+      />
 
       <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {(Object.keys(TIER) as Tier[]).map((tier) => {
@@ -484,9 +512,9 @@ export default function MenuEngineeringPage() {
                       <th className="px-3 py-2.5 text-right">Price</th>
                       <th className="px-3 py-2.5 text-right">Should cost</th>
                       <th className="px-3 py-2.5 text-right">Food cost</th>
-                      <th className="px-3 py-2.5 text-right">Sold (30d)</th>
-                      <th className="px-3 py-2.5 text-right">Revenue (30d)</th>
-                      <th className="px-3 py-2.5 text-right">Wastage (30d)</th>
+                      <th className="px-3 py-2.5 text-right">Sold ({PERIOD_LABEL[period]})</th>
+                      <th className="px-3 py-2.5 text-right">Revenue ({PERIOD_LABEL[period]})</th>
+                      <th className="px-3 py-2.5 text-right">Wastage ({PERIOD_LABEL[period]})</th>
                       <th className="px-3 py-2.5">Action</th>
                       <th className="px-3 py-2.5" />
                     </tr>
@@ -527,13 +555,13 @@ export default function MenuEngineeringPage() {
                           {fmtPct(item.food_cost_pct)}
                         </td>
                         <td className="px-3 py-3 text-right text-sm tabular-nums">
-                          {item.sold_30d.toLocaleString()}
+                          {item.sold.toLocaleString()}
                         </td>
                         <td className="px-3 py-3 text-right text-sm tabular-nums">
-                          {fmtCurrency(item.revenue_30d)}
+                          {fmtCurrency(item.revenue)}
                         </td>
                         <td className="px-3 py-3 text-right">
-                          {item.waste_cost_30d > 0 ? (
+                          {item.waste_cost > 0 ? (
                             <>
                               <span
                                 className={cn(
@@ -541,7 +569,7 @@ export default function MenuEngineeringPage() {
                                   WASTE_TEXT[wasteTone(item.waste_pct)],
                                 )}
                               >
-                                {fmtCurrency(item.waste_cost_30d)}
+                                {fmtCurrency(item.waste_cost)}
                               </span>
                               <span className="text-xs tabular-nums text-muted-foreground">
                                 {fmtPct(item.waste_pct)} of revenue
@@ -597,21 +625,21 @@ export default function MenuEngineeringPage() {
                             Should cost
                           </span>
                           <span>
-                            <b className="block text-sm text-foreground">{item.sold_30d}</b>
-                            Sold (30d)
+                            <b className="block text-sm text-foreground">{item.sold}</b>
+                            Sold ({PERIOD_LABEL[period]})
                           </span>
                           <span>
                             <b
                               className={cn(
                                 "block text-sm",
-                                item.waste_cost_30d > 0
+                                item.waste_cost > 0
                                   ? WASTE_TEXT[wasteTone(item.waste_pct)]
                                   : "text-foreground",
                               )}
                             >
-                              {item.waste_cost_30d > 0 ? fmtCurrency(item.waste_cost_30d) : "—"}
+                              {item.waste_cost > 0 ? fmtCurrency(item.waste_cost) : "—"}
                             </b>
-                            Wastage (30d)
+                            Wastage ({PERIOD_LABEL[period]})
                           </span>
                         </div>
                       </div>
@@ -624,7 +652,7 @@ export default function MenuEngineeringPage() {
         </CardContent>
       </Card>
 
-      <DishDialog dish={selected} onClose={() => setSelected(null)} />
+      <DishDialog dish={selected} win={PERIOD_LABEL[period]} onClose={() => setSelected(null)} />
     </div>
   );
 }

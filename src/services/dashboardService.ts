@@ -188,13 +188,13 @@ export interface MenuEngineeringItem {
   /** price − cost, AED */
   gross_profit: number;
   /** live: units sold in POS over the trailing 30 days */
-  sold_30d: number;
+  sold: number;
   /** live: POS revenue over the trailing 30 days */
-  revenue_30d: number;
+  revenue: number;
   /** portions-worth of ingredient variance (purchases vs. recipe usage) over 30 days */
-  waste_qty_30d: number;
+  waste_qty: number;
   /** allocated ingredient-variance cost (AED) over the trailing 30 days */
-  waste_cost_30d: number;
+  waste_cost: number;
   /** allocated waste cost as % of the dish's 30-day revenue */
   waste_pct: number;
   /** popularity × profitability quadrant vs menu medians */
@@ -281,9 +281,9 @@ export const dashboardService = {
     );
   },
 
-  getMenuEngineering(branch?: string | null) {
-    return apiFetch<{ currency: string; items: MenuEngineeringItem[] }>(
-      `/dashboard/menu-engineering${qs({ branch })}`,
+  getMenuEngineering(period: Period = "month", branch?: string | null) {
+    return apiFetch<{ period: string; currency: string; items: MenuEngineeringItem[] }>(
+      `/dashboard/menu-engineering${qs({ period, branch })}`,
     );
   },
 };
