@@ -20,6 +20,14 @@ const IndexPage = lazy(() => import("./pages/Index"));
 const LoginPage = lazy(() => import("./pages/Login"));
 const SignupPage = lazy(() => import("./pages/Signup"));
 const DemoPage = lazy(() => import("./pages/Demo"));
+const ProductPage = lazy(() => import("./pages/Product"));
+const ProductFeaturePage = lazy(() => import("./pages/ProductFeature"));
+const SolutionsPage = lazy(() => import("./pages/Solutions"));
+const SolutionSegmentPage = lazy(() => import("./pages/SolutionSegment"));
+const IntegrationsPage = lazy(() => import("./pages/Integrations"));
+const PricingPage = lazy(() => import("./pages/Pricing"));
+const ResourcesPage = lazy(() => import("./pages/Resources"));
+const CompanyPage = lazy(() => import("./pages/Company"));
 const DashboardPage = lazy(() => import("./pages/Dashboard"));
 const NotFoundPage = lazy(() => import("./pages/NotFound"));
 
@@ -99,6 +107,34 @@ export default function App() {
                 <Route exact path="/login" render={() => <LazyRoute component={LoginPage} />} />
                 <Route exact path="/signup" render={() => <LazyRoute component={SignupPage} />} />
                 <Route exact path="/demo" render={() => <LazyRoute component={DemoPage} />} />
+                <Route exact path="/product" render={() => <LazyRoute component={ProductPage} />} />
+                <Route
+                  exact
+                  path="/product/:slug"
+                  render={() => <LazyRoute component={ProductFeaturePage} />}
+                />
+                <Route
+                  exact
+                  path="/solutions"
+                  render={() => <LazyRoute component={SolutionsPage} />}
+                />
+                <Route
+                  exact
+                  path="/solutions/:slug"
+                  render={() => <LazyRoute component={SolutionSegmentPage} />}
+                />
+                <Route
+                  exact
+                  path="/integrations"
+                  render={() => <LazyRoute component={IntegrationsPage} />}
+                />
+                <Route exact path="/pricing" render={() => <LazyRoute component={PricingPage} />} />
+                <Route
+                  exact
+                  path="/resources"
+                  render={() => <LazyRoute component={ResourcesPage} />}
+                />
+                <Route exact path="/company" render={() => <LazyRoute component={CompanyPage} />} />
                 <Route path="/dashboard" render={() => <LazyRoute component={DashboardPage} />} />
                 <Route render={() => <LazyRoute component={NotFoundPage} />} />
               </IonRouterOutlet>

@@ -1,23 +1,22 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Link, useHistory, useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import {
-  LayoutDashboard,
-  ShoppingCart,
-  FileText,
-  Settings,
-  LogOut,
-  UserCircle,
-  Package,
-  Truck,
-  Building2,
-  Sparkles,
-  BarChart3,
-  Star,
-  BookOpenText,
-  UtensilsCrossed,
-  Tag,
-} from "lucide-react";
+import { LogOut } from "lucide-react";
+import LayoutDashboardIcon from "@/components/ui/icons/layout-dashboard-icon";
+import ShoppingCartIcon from "@/components/ui/icons/shopping-cart-icon";
+import FileDescriptionIcon from "@/components/ui/icons/file-description-icon";
+import StackIcon from "@/components/ui/icons/stack-icon";
+import BookIcon from "@/components/ui/icons/book-icon";
+import SoupIcon from "@/components/ui/icons/soup-icon";
+import TruckElectricIcon from "@/components/ui/icons/truck-electric-icon";
+import CurrencyDollarIcon from "@/components/ui/icons/currency-dollar-icon";
+import MapPinIcon from "@/components/ui/icons/map-pin-icon";
+import StarIcon from "@/components/ui/icons/star-icon";
+import BrandOpenaiIcon from "@/components/ui/icons/brand-openai-icon";
+import ChartBarIcon from "@/components/ui/icons/chart-bar-icon";
+import UserIcon from "@/components/ui/icons/user-icon";
+import GearIcon from "@/components/ui/icons/gear-icon";
+import type { AnimatedIconHandle } from "@/components/ui/icons/types";
 import { AppLogo } from "@/components/AppLogo";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -58,7 +57,7 @@ import { DateRangePicker } from "@/components/dashboard/DateRangePicker";
 import { FloatingAiAssistant } from "@/components/ui/glowing-ai-chat-assistant";
 
 export type NavItem = {
-  icon: React.ElementType;
+  icon: typeof LayoutDashboardIcon;
   label: string;
   to: string;
   count?: number;
@@ -66,29 +65,29 @@ export type NavItem = {
 };
 
 const MAIN_ITEMS: NavItem[] = [
-  { icon: LayoutDashboard, label: "Overview", to: "/dashboard" },
-  { icon: ShoppingCart, label: "POS Sales", to: "/dashboard/pos" },
-  { icon: FileText, label: "Tally / Accounting", to: "/dashboard/tally" },
+  { icon: LayoutDashboardIcon, label: "Overview", to: "/dashboard" },
+  { icon: ShoppingCartIcon, label: "POS Sales", to: "/dashboard/pos" },
+  { icon: FileDescriptionIcon, label: "Tally / Accounting", to: "/dashboard/tally" },
 ];
 
 const OPS_ITEMS: NavItem[] = [
-  { icon: Package, label: "Inventory", to: "/dashboard/inventory" },
-  { icon: BookOpenText, label: "Menu", to: "/dashboard/menu" },
-  { icon: UtensilsCrossed, label: "Menu Engineering", to: "/dashboard/menu-engineering" },
-  { icon: Truck, label: "Suppliers", to: "/dashboard/suppliers" },
-  { icon: Tag, label: "Market Prices", to: "/dashboard/market-prices" },
-  { icon: Building2, label: "Branches", to: "/dashboard/branches" },
-  { icon: Star, label: "Reviews", to: "/dashboard/reviews" },
+  { icon: StackIcon, label: "Inventory", to: "/dashboard/inventory" },
+  { icon: BookIcon, label: "Menu", to: "/dashboard/menu" },
+  { icon: SoupIcon, label: "Menu Engineering", to: "/dashboard/menu-engineering" },
+  { icon: TruckElectricIcon, label: "Suppliers", to: "/dashboard/suppliers" },
+  { icon: CurrencyDollarIcon, label: "Market Prices", to: "/dashboard/market-prices" },
+  { icon: MapPinIcon, label: "Branches", to: "/dashboard/branches" },
+  { icon: StarIcon, label: "Reviews", to: "/dashboard/reviews" },
 ];
 
 const AI_ITEMS: NavItem[] = [
-  { icon: Sparkles, label: "Pilot AI", to: "/dashboard/ai", badge: "AI" },
-  { icon: BarChart3, label: "Reports", to: "/dashboard/reports" },
+  { icon: BrandOpenaiIcon, label: "Pilot AI", to: "/dashboard/ai", badge: "AI" },
+  { icon: ChartBarIcon, label: "Reports", to: "/dashboard/reports" },
 ];
 
 const ADMIN_ITEMS: NavItem[] = [
-  { icon: UserCircle, label: "Profile", to: "/dashboard/profile" },
-  { icon: Settings, label: "Settings", to: "/dashboard/settings" },
+  { icon: UserIcon, label: "Profile", to: "/dashboard/profile" },
+  { icon: GearIcon, label: "Settings", to: "/dashboard/settings" },
 ];
 
 export const NAV_ITEMS = [...MAIN_ITEMS, ...OPS_ITEMS, ...AI_ITEMS, ...ADMIN_ITEMS];
@@ -109,62 +108,72 @@ function NavSection({
       </SidebarGroupLabel>
       <SidebarGroupContent>
         <SidebarMenu className="gap-0.5">
-          {items.map(({ icon: Icon, label: itemLabel, to, count, badge }) => {
-            const isActive = pathname === to || (to !== "/dashboard" && pathname.startsWith(to));
-            return (
-              <SidebarMenuItem key={to}>
-                <SidebarMenuButton
-                  asChild
-                  isActive={isActive}
-                  tooltip={itemLabel}
-                  className={cn(
-                    "group/nav h-10 rounded-xl text-[13px] font-medium text-sidebar-foreground",
-                    "transition-[background,color] duration-200 ease-out",
-                    "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                    "group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:rounded-lg",
-                    "data-[active=true]:bg-transparent data-[active=true]:text-inherit",
-                    isActive &&
-                      "bg-sidebar-primary text-sidebar-primary-foreground hover:bg-sidebar-primary hover:text-sidebar-primary-foreground",
-                  )}
-                >
-                  <Link
-                    to={to}
-                    className="flex items-center gap-2.5 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:gap-0"
-                  >
-                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg group-data-[collapsible=icon]:h-auto group-data-[collapsible=icon]:w-auto">
-                      <Icon className="h-4 w-4 shrink-0" />
-                    </span>
-                    <span
-                      className={cn(
-                        "group-data-[collapsible=icon]:hidden",
-                        isActive && "font-semibold",
-                      )}
-                    >
-                      {itemLabel}
-                    </span>
-                  </Link>
-                </SidebarMenuButton>
-                {badge && (
-                  <SidebarMenuBadge className="rounded bg-primary/15 px-1.5 text-[9px] font-bold tracking-wider text-primary">
-                    {badge}
-                  </SidebarMenuBadge>
-                )}
-                {count !== undefined && (
-                  <SidebarMenuBadge
-                    className={cn(
-                      "rounded-md bg-sidebar-border/60 text-[10px] font-semibold text-sidebar-foreground/60",
-                      isActive && "bg-white/20 text-sidebar-primary-foreground",
-                    )}
-                  >
-                    {count}
-                  </SidebarMenuBadge>
-                )}
-              </SidebarMenuItem>
-            );
+          {items.map((item) => {
+            // match on a segment boundary — a bare startsWith lit up both "Menu"
+            // and "Menu Engineering" on /dashboard/menu-engineering
+            const isActive =
+              pathname === item.to ||
+              (item.to !== "/dashboard" && pathname.startsWith(`${item.to}/`));
+            return <NavRow key={item.to} item={item} isActive={isActive} />;
           })}
         </SidebarMenu>
       </SidebarGroupContent>
     </SidebarGroup>
+  );
+}
+
+function NavRow({ item, isActive }: { item: NavItem; isActive: boolean }) {
+  const { icon: Icon, label: itemLabel, to, count, badge } = item;
+  // the icon is 16px inside a 40px row — drive its animation from the whole row
+  const iconRef = useRef<AnimatedIconHandle>(null);
+  return (
+    <SidebarMenuItem
+      onMouseEnter={() => iconRef.current?.startAnimation()}
+      onMouseLeave={() => iconRef.current?.stopAnimation()}
+    >
+      <SidebarMenuButton
+        asChild
+        isActive={isActive}
+        tooltip={itemLabel}
+        className={cn(
+          "group/nav h-10 rounded-xl text-[13px] font-medium text-sidebar-foreground",
+          "transition-[background,color] duration-200 ease-out",
+          "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+          "group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:rounded-lg",
+          // must stay a data-[active] variant — a plain bg-* class loses on
+          // specificity to the base data-[active=true]:bg-sidebar-accent
+          "data-[active=true]:bg-sidebar-primary data-[active=true]:text-sidebar-primary-foreground",
+          isActive && "hover:bg-sidebar-primary hover:text-sidebar-primary-foreground",
+        )}
+      >
+        <Link
+          to={to}
+          className="flex items-center gap-2.5 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:gap-0"
+        >
+          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg group-data-[collapsible=icon]:h-auto group-data-[collapsible=icon]:w-auto">
+            <Icon ref={iconRef} className="h-4 w-4 shrink-0" />
+          </span>
+          <span className={cn("group-data-[collapsible=icon]:hidden", isActive && "font-semibold")}>
+            {itemLabel}
+          </span>
+        </Link>
+      </SidebarMenuButton>
+      {badge && (
+        <SidebarMenuBadge className="rounded bg-primary/15 px-1.5 text-[9px] font-bold tracking-wider text-primary">
+          {badge}
+        </SidebarMenuBadge>
+      )}
+      {count !== undefined && (
+        <SidebarMenuBadge
+          className={cn(
+            "rounded-md bg-sidebar-border/60 text-[10px] font-semibold text-sidebar-foreground/60",
+            isActive && "bg-white/20 text-sidebar-primary-foreground",
+          )}
+        >
+          {count}
+        </SidebarMenuBadge>
+      )}
+    </SidebarMenuItem>
   );
 }
 

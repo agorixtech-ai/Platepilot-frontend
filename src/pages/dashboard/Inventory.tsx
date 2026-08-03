@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import {
   Package,
@@ -122,8 +123,10 @@ function StockGauge({
 
 function InventoryPage() {
   const { branch } = useBranchFilter();
-  const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
+  // deep links from the Overview alert feed: ?q=<item> / ?status=critical
+  const params = new URLSearchParams(useLocation().search);
+  const [search, setSearch] = useState(params.get("q") ?? "");
+  const [statusFilter, setStatusFilter] = useState(params.get("status") ?? "");
   const [sortAsc, setSortAsc] = useState(true);
   const [selectedItem, setSelectedItem] = useState<StockItem | null>(null);
   const [viewMode, setViewMode] = useState<"cards" | "list">("cards");

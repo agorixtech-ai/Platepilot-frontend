@@ -1,5 +1,6 @@
 import { AppPage } from "@/components/ionic/AppPage";
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { Link } from "react-router-dom";
 import Lenis from "lenis";
 import {
   BarChart3,
@@ -17,19 +18,19 @@ import {
   Tag,
   Trash2,
 } from "lucide-react";
-import { AgorixHero, T } from "@/components/AgorixHero";
-import { AgorixNav } from "@/components/AgorixNav";
+import { PlatePieletHero, T } from "@/components/PlatePieletHero";
+import { PlatePieletNav } from "@/components/PlatePieletNav";
 import InteractiveBentoGallery, {
   type BentoMediaItem,
 } from "@/components/blocks/interactive-bento-gallery";
 import { CrossPlatformSection } from "@/components/CrossPlatformSection";
-import { AgorixFooter } from "@/components/AgorixFooter";
+import { PlatePieletFooter } from "@/components/PlatePieletFooter";
 
 /* ─── Product-preview tiles ──────────────────────────────────────────────────
    Coded mini-mockups of the real dashboard modules (src/pages/dashboard/*):
    Overview, Pos, Tally, Inventory, Ai, MarketPrices, Reports — rendered as
    "ui" bento items instead of stock media. Inline styles only, colored via
-   the shared T palette exported from AgorixHero.tsx. */
+   the shared T palette exported from PlatePieletHero.tsx. */
 
 function Tile({ label, children }: { label: string; children: ReactNode }) {
   return (
@@ -376,7 +377,7 @@ const GALLERY_MEDIA: BentoMediaItem[] = [
 const TESTIMONIALS: { quote: string; name: string; place: string }[] = [
   {
     quote:
-      "PlatePilot found ₹40,000 a month we didn't know we were losing. It paid for itself in the first week.",
+      "PlatePielet found ₹40,000 a month we didn't know we were losing. It paid for itself in the first week.",
     name: "Priya R.",
     place: "3-outlet restaurant group · Chennai",
   },
@@ -413,7 +414,7 @@ const TM_ROW2 = [...TESTIMONIALS.slice(3), ...TESTIMONIALS.slice(0, 3)];
 const FAQS: [string, string][] = [
   [
     "Do I need new hardware?",
-    "No. PlatePilot connects to the Tally and POS systems you already run — there's nothing to install at the outlet.",
+    "No. PlatePielet connects to the Tally and POS systems you already run — there's nothing to install at the outlet.",
   ],
   [
     "How long does setup take?",
@@ -580,7 +581,7 @@ function Index() {
     {
       label: "TALLY + POS INTEGRATIONS",
       heading: "Works with the tools you already use",
-      body: "No migration project, no new hardware. PlatePilot connects to your existing Tally books and POS billing, keeps them in sync, and reconciles them against each other automatically.",
+      body: "No migration project, no new hardware. PlatePielet connects to your existing Tally books and POS billing, keeps them in sync, and reconciles them against each other automatically.",
       bullets: [
         "Two-way Tally ERP sync — vouchers, ledgers, GST",
         "Automatic POS sales import across outlets",
@@ -592,7 +593,7 @@ function Index() {
 
   return (
     <div
-      className="agorix-landing"
+      className="pp-landing"
       style={{
         background: "#F6FAF7",
         color: "#152019",
@@ -607,9 +608,9 @@ function Index() {
            Tailwind utilities, which this unlayered reset would override.
            :where() keeps the reset's specificity at (0,1,0) so page classes
            like .sw-section still override it by source order. */
-        .agorix-landing,
-        .agorix-landing *:where(:not(.ig-root, .ig-root *)) { box-sizing: border-box; margin: 0; padding: 0; }
-        .agorix-landing a { text-decoration: none; }
+        .pp-landing,
+        .pp-landing *:where(:not(.ig-root, .ig-root *)) { box-sizing: border-box; margin: 0; padding: 0; }
+        .pp-landing a { text-decoration: none; }
 
         /* ── Reveal animation ── */
         .reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.75s ease, transform 0.75s ease; }
@@ -1024,93 +1025,7 @@ function Index() {
         }
         .cta-actions { display: flex; gap: 1rem; flex-wrap: wrap; }
 
-        /* ── Footer: curtain-reveal — .pp-footer is fixed at the viewport
-           bottom for the whole page; .pp-footer-cover (the CTA band) stays
-           opaque and above it in normal flow, occluding it until the band
-           itself scrolls past. .pp-footer-spacer reserves that scroll
-           distance, sized to the footer's real height via ResizeObserver ── */
-        .pp-footer-cover {
-          position: relative;
-          z-index: 1;
-          background: #F6FAF7;
-        }
-        .pp-footer-spacer {
-          pointer-events: none;
-        }
-        .pp-footer {
-          position: fixed;
-          bottom: 0;
-          left: 0;
-          right: 0;
-          z-index: 0;
-          background:
-            radial-gradient(700px 360px at 80% 0%, rgba(34,197,94,0.16), transparent 60%),
-            #0A1A10;
-          border-radius: 28px 28px 0 0;
-          overflow: hidden;
-        }
-        .pp-footer-inner {
-          max-width: 1280px;
-          margin: 0 auto;
-          padding: 4rem 2.5rem 2.5rem;
-          display: flex;
-          justify-content: space-between;
-          gap: 3rem;
-          flex-wrap: wrap;
-        }
-        .pp-footer-brand { max-width: 300px; }
-        .pp-footer-logo {
-          display: inline-flex;
-          align-items: center;
-          gap: 10px;
-          font-size: 1.1rem;
-          font-weight: 700;
-          letter-spacing: 0.02em;
-          color: #F6FAF7;
-        }
-        .pp-footer-logo img { border-radius: 10px; object-fit: cover; }
-        .pp-footer-tagline {
-          margin-top: 1rem;
-          font-size: 0.85rem;
-          line-height: 1.7;
-          color: rgba(246,250,247,0.55);
-        }
-        .pp-footer-cols {
-          display: flex;
-          gap: 3.5rem;
-          flex-wrap: wrap;
-        }
-        .pp-footer-col { display: flex; flex-direction: column; gap: 0.85rem; min-width: 130px; }
-        .pp-footer-col-title {
-          font-size: 0.65rem;
-          font-weight: 700;
-          letter-spacing: 0.16em;
-          text-transform: uppercase;
-          color: rgba(246,250,247,0.4);
-          margin-bottom: 0.35rem;
-        }
-        .pp-footer-link {
-          font-size: 0.85rem;
-          color: rgba(246,250,247,0.72);
-          transition: color 0.2s;
-          width: fit-content;
-        }
-        .pp-footer-link:hover { color: #4ADE80; }
-        .pp-footer-bottom {
-          max-width: 1280px;
-          margin: 0 auto;
-          padding: 1.5rem 2.5rem 2rem;
-          border-top: 1px solid rgba(246,250,247,0.1);
-          font-size: 0.68rem;
-          font-weight: 600;
-          letter-spacing: 0.1em;
-          color: rgba(246,250,247,0.4);
-        }
-        @media (max-width: 640px) {
-          .pp-footer-inner { padding: 3rem 1.25rem 2rem; gap: 2.5rem; }
-          .pp-footer-bottom { padding: 1.25rem 1.25rem 1.5rem; }
-          .pp-footer-cols { gap: 2rem 2.5rem; }
-        }
+        /* Footer styles live in PlatePieletFooter (reveal + static modes). */
 
         /* ── Sections padding and layout ── */
         .caps-section, .platforms-section, .loop-section {
@@ -1143,74 +1058,74 @@ function Index() {
         }
 
         /* ── Split gallery section: half copy / half bento ── */
-        .agorix-landing .gallery-split {
+        .pp-landing .gallery-split {
           display: grid;
           grid-template-columns: 1fr 1fr;
           gap: 3rem;
           align-items: center;
           width: 100%;
         }
-        .agorix-landing .gallery-split-copy {
+        .pp-landing .gallery-split-copy {
           text-align: left;
           max-width: 480px;
         }
-        .agorix-landing .gallery-split-copy .sw-section-tag,
-        .agorix-landing .gallery-split-copy .sw-section-h2,
-        .agorix-landing .gallery-split-copy .sw-section-body {
+        .pp-landing .gallery-split-copy .sw-section-tag,
+        .pp-landing .gallery-split-copy .sw-section-h2,
+        .pp-landing .gallery-split-copy .sw-section-body {
           margin-left: 0 !important;
           margin-right: 0 !important;
           text-align: left;
         }
-        .agorix-landing .gallery-split-copy .sw-section-h2 {
+        .pp-landing .gallery-split-copy .sw-section-h2 {
           max-width: none;
         }
-        .agorix-landing .gallery-split-copy .sw-section-body {
+        .pp-landing .gallery-split-copy .sw-section-body {
           margin-bottom: 0 !important;
           max-width: none;
         }
-        .agorix-landing .gallery-split-media {
+        .pp-landing .gallery-split-media {
           width: 100%;
           min-width: 0;
         }
-        .agorix-landing .bento-gallery-grid {
+        .pp-landing .bento-gallery-grid {
           display: grid;
           width: 100%;
           grid-template-columns: repeat(3, minmax(0, 1fr));
           grid-auto-rows: 100px;
           gap: 10px;
         }
-        .agorix-landing .bento-span-1 { grid-column: span 1; }
-        .agorix-landing .bento-span-2 { grid-column: span 2; }
+        .pp-landing .bento-span-1 { grid-column: span 1; }
+        .pp-landing .bento-span-2 { grid-column: span 2; }
         @media (max-width: 900px) {
-          .agorix-landing .gallery-split {
+          .pp-landing .gallery-split {
             grid-template-columns: 1fr;
             gap: 2rem;
           }
-          .agorix-landing .gallery-split-copy {
+          .pp-landing .gallery-split-copy {
             max-width: none;
           }
-          .agorix-landing .bento-gallery-grid {
+          .pp-landing .bento-gallery-grid {
             grid-auto-rows: 110px;
             gap: 10px;
           }
         }
         @media (max-width: 640px) {
-          .agorix-landing .bento-gallery-grid {
+          .pp-landing .bento-gallery-grid {
             grid-template-columns: repeat(2, minmax(0, 1fr));
             grid-auto-rows: 96px;
             gap: 8px;
           }
-          .agorix-landing .bento-span-2 { grid-column: span 1; }
+          .pp-landing .bento-span-2 { grid-column: span 1; }
         }
         @media (min-width: 1100px) {
-          .agorix-landing .bento-gallery-grid {
+          .pp-landing .bento-gallery-grid {
             grid-auto-rows: 120px;
             gap: 12px;
           }
         }
 
         /* ── Cross-platform / Available Everywhere ── */
-        .agorix-landing .xp-section {
+        .pp-landing .xp-section {
           position: relative;
           isolation: isolate;
           padding: 5.5rem 2.5rem;
@@ -1221,7 +1136,7 @@ function Index() {
           border-bottom: 1px solid #DDE7E1;
           overflow: hidden;
         }
-        .agorix-landing .xp-inner {
+        .pp-landing .xp-inner {
           max-width: 1100px;
           margin: 0 auto !important;
           display: flex;
@@ -1229,7 +1144,7 @@ function Index() {
           align-items: center;
           text-align: center;
         }
-        .agorix-landing .xp-badge {
+        .pp-landing .xp-badge {
           display: inline-flex;
           align-items: center;
           gap: 0.45rem;
@@ -1244,7 +1159,7 @@ function Index() {
           letter-spacing: 0.04em;
           box-shadow: 0 1px 2px rgba(21, 32, 25, 0.04);
         }
-        .agorix-landing .xp-title {
+        .pp-landing .xp-title {
           font-size: clamp(2.1rem, 4.5vw, 3.4rem);
           font-weight: 800;
           letter-spacing: -0.045em;
@@ -1252,13 +1167,13 @@ function Index() {
           color: #152019;
           margin: 0 0 0.75rem !important;
         }
-        .agorix-landing .xp-sub {
+        .pp-landing .xp-sub {
           font-size: 1.05rem;
           color: #66736B;
           margin: 0 0 2.75rem !important;
           max-width: 420px;
         }
-        .agorix-landing .xp-devices {
+        .pp-landing .xp-devices {
           display: flex;
           align-items: flex-end;
           justify-content: center;
@@ -1267,13 +1182,13 @@ function Index() {
           margin: 0 0 2.5rem !important;
           padding: 0.5rem 0 0 !important;
         }
-        .agorix-landing .xp-device {
+        .pp-landing .xp-device {
           display: flex;
           flex-direction: column;
           align-items: center;
           flex: 0 0 auto;
         }
-        .agorix-landing .xp-bezel {
+        .pp-landing .xp-bezel {
           background: #1A2B20;
           border: 1px solid #2A3F32;
           border-radius: 10px;
@@ -1283,13 +1198,13 @@ function Index() {
             inset 0 1px 0 rgba(255, 255, 255, 0.06);
           overflow: hidden;
         }
-        .agorix-landing .xp-bezel-flat { border-radius: 14px; padding: 8px !important; }
-        .agorix-landing .xp-bezel-phone {
+        .pp-landing .xp-bezel-flat { border-radius: 14px; padding: 8px !important; }
+        .pp-landing .xp-bezel-phone {
           border-radius: 18px;
           padding: 10px 6px 8px !important;
           position: relative;
         }
-        .agorix-landing .xp-notch {
+        .pp-landing .xp-notch {
           position: absolute;
           top: 6px;
           left: 50%;
@@ -1300,7 +1215,7 @@ function Index() {
           background: #0F1A14;
           z-index: 2;
         }
-        .agorix-landing .xp-screen {
+        .pp-landing .xp-screen {
           background: #0F1A14;
           border-radius: 4px;
           padding: 8px !important;
@@ -1310,68 +1225,68 @@ function Index() {
           height: 100%;
           min-height: 0;
         }
-        .agorix-landing .xp-screen-bar {
+        .pp-landing .xp-screen-bar {
           height: 7px;
           border-radius: 3px;
           background: linear-gradient(90deg, #16A34A, #4ADE80);
           width: 100%;
           flex-shrink: 0;
         }
-        .agorix-landing .xp-screen-meta {
+        .pp-landing .xp-screen-meta {
           display: flex;
           gap: 4px;
         }
-        .agorix-landing .xp-screen-meta span {
+        .pp-landing .xp-screen-meta span {
           height: 4px;
           border-radius: 2px;
           background: rgba(74, 222, 128, 0.22);
           flex: 1;
         }
-        .agorix-landing .xp-chart {
+        .pp-landing .xp-chart {
           width: 100%;
           height: 42%;
           min-height: 28px;
           flex: 1;
         }
-        .agorix-landing .xp-screen-rows {
+        .pp-landing .xp-screen-rows {
           display: flex;
           flex-direction: column;
           gap: 3px;
         }
-        .agorix-landing .xp-screen-rows span {
+        .pp-landing .xp-screen-rows span {
           display: block;
           height: 3px;
           border-radius: 2px;
           background: rgba(74, 222, 128, 0.16);
         }
-        .agorix-landing .xp-screen-rows span:nth-child(2) { width: 78%; }
-        .agorix-landing .xp-screen-rows span:nth-child(3) { width: 54%; }
+        .pp-landing .xp-screen-rows span:nth-child(2) { width: 78%; }
+        .pp-landing .xp-screen-rows span:nth-child(3) { width: 54%; }
 
-        .agorix-landing .xp-monitor .xp-bezel { width: clamp(88px, 12vw, 130px); height: clamp(70px, 9vw, 98px); }
-        .agorix-landing .xp-stand {
+        .pp-landing .xp-monitor .xp-bezel { width: clamp(88px, 12vw, 130px); height: clamp(70px, 9vw, 98px); }
+        .pp-landing .xp-stand {
           width: 10px;
           height: 14px;
           background: #2A3F32;
           margin-top: 0 !important;
         }
-        .agorix-landing .xp-base {
+        .pp-landing .xp-base {
           width: 48px;
           height: 5px;
           border-radius: 3px;
           background: #2A3F32;
         }
-        .agorix-landing .xp-laptop .xp-bezel { width: clamp(130px, 18vw, 200px); height: clamp(82px, 11vw, 120px); border-radius: 8px 8px 2px 2px; }
-        .agorix-landing .xp-laptop-deck {
+        .pp-landing .xp-laptop .xp-bezel { width: clamp(130px, 18vw, 200px); height: clamp(82px, 11vw, 120px); border-radius: 8px 8px 2px 2px; }
+        .pp-landing .xp-laptop-deck {
           width: clamp(150px, 20vw, 230px);
           height: 8px;
           border-radius: 0 0 8px 8px;
           background: linear-gradient(180deg, #2A3F32, #1A2B20);
           box-shadow: 0 4px 10px rgba(21, 32, 25, 0.12);
         }
-        .agorix-landing .xp-tablet .xp-bezel { width: clamp(100px, 14vw, 150px); height: clamp(72px, 10vw, 105px); }
-        .agorix-landing .xp-phone .xp-bezel { width: clamp(42px, 6vw, 58px); height: clamp(84px, 12vw, 118px); }
+        .pp-landing .xp-tablet .xp-bezel { width: clamp(100px, 14vw, 150px); height: clamp(72px, 10vw, 105px); }
+        .pp-landing .xp-phone .xp-bezel { width: clamp(42px, 6vw, 58px); height: clamp(84px, 12vw, 118px); }
 
-        .agorix-landing .xp-pills {
+        .pp-landing .xp-pills {
           display: flex;
           flex-wrap: wrap;
           justify-content: center;
@@ -1381,7 +1296,7 @@ function Index() {
           padding: 0 !important;
           max-width: 820px;
         }
-        .agorix-landing .xp-pill {
+        .pp-landing .xp-pill {
           display: inline-flex;
           align-items: center;
           gap: 0.4rem;
@@ -1394,15 +1309,15 @@ function Index() {
           font-weight: 600;
           box-shadow: 0 1px 2px rgba(21, 32, 25, 0.04);
         }
-        .agorix-landing .xp-pill svg { color: #16A34A; flex-shrink: 0; }
+        .pp-landing .xp-pill svg { color: #16A34A; flex-shrink: 0; }
 
-        .agorix-landing .xp-stores {
+        .pp-landing .xp-stores {
           display: flex;
           flex-wrap: wrap;
           justify-content: center;
           gap: 0.75rem;
         }
-        .agorix-landing .xp-store-btn {
+        .pp-landing .xp-store-btn {
           display: inline-flex;
           align-items: center;
           gap: 0.65rem;
@@ -1415,42 +1330,42 @@ function Index() {
           transition: transform 0.2s, background 0.2s, border-color 0.2s;
           min-width: 168px;
         }
-        .agorix-landing .xp-store-btn:hover {
+        .pp-landing .xp-store-btn:hover {
           background: #1F3328;
           border-color: #16A34A;
           transform: translateY(-1px);
         }
-        .agorix-landing .xp-store-copy {
+        .pp-landing .xp-store-copy {
           display: flex;
           flex-direction: column;
           align-items: flex-start;
           line-height: 1.15;
           text-align: left;
         }
-        .agorix-landing .xp-store-copy small {
+        .pp-landing .xp-store-copy small {
           font-size: 0.62rem;
           font-weight: 500;
           opacity: 0.7;
         }
-        .agorix-landing .xp-store-copy strong {
+        .pp-landing .xp-store-copy strong {
           font-size: 0.95rem;
           font-weight: 700;
           letter-spacing: -0.02em;
         }
 
         @media (max-width: 700px) {
-          .agorix-landing .xp-section { padding: 4rem 1.25rem; }
-          .agorix-landing .xp-devices { gap: 0.5rem; }
-          .agorix-landing .xp-sub { margin-bottom: 2rem !important; }
+          .pp-landing .xp-section { padding: 4rem 1.25rem; }
+          .pp-landing .xp-devices { gap: 0.5rem; }
+          .pp-landing .xp-sub { margin-bottom: 2rem !important; }
           /* Below 700px the four-device row's clamp() floors (88+130+100+42px)
              no longer fit any phone viewport — fix the floors smaller here so
              the row stays inside .xp-section's padding instead of silently
              clipping under overflow:hidden. */
-          .agorix-landing .xp-monitor .xp-bezel { width: 52px; height: 42px; }
-          .agorix-landing .xp-laptop .xp-bezel { width: 86px; height: 54px; }
-          .agorix-landing .xp-laptop-deck { width: 92px; }
-          .agorix-landing .xp-tablet .xp-bezel { width: 64px; height: 46px; }
-          .agorix-landing .xp-phone .xp-bezel { width: 28px; height: 56px; }
+          .pp-landing .xp-monitor .xp-bezel { width: 52px; height: 42px; }
+          .pp-landing .xp-laptop .xp-bezel { width: 86px; height: 54px; }
+          .pp-landing .xp-laptop-deck { width: 92px; }
+          .pp-landing .xp-tablet .xp-bezel { width: 64px; height: 46px; }
+          .pp-landing .xp-phone .xp-bezel { width: 28px; height: 56px; }
         }
         .sw-cards-grid {
           display: grid;
@@ -1653,13 +1568,13 @@ function Index() {
 
         /* ── Smooth anchor scrolling + offset for the sticky nav ── */
         .app-page-scroll { scroll-behavior: smooth; }
-        .agorix-landing [id] { scroll-margin-top: 110px; }
+        .pp-landing [id] { scroll-margin-top: 110px; }
 
         /* ── Reduced motion: page-level guard (hero has its own) ── */
         @media (prefers-reduced-motion: reduce) {
-          .agorix-landing *,
-          .agorix-landing *::before,
-          .agorix-landing *::after {
+          .pp-landing *,
+          .pp-landing *::before,
+          .pp-landing *::after {
             animation-duration: 0.001s !important;
             animation-iteration-count: 1 !important;
             transition-duration: 0.001s !important;
@@ -1670,7 +1585,7 @@ function Index() {
 
       {/* position: relative + z-index: 1 puts every section here in the same
           stacking layer as .pp-footer-cover, so all of it — not just the
-          CTA band — occludes AgorixFooter's fixed footer until scrolled past.
+          CTA band — occludes PlatePieletFooter's fixed footer until scrolled past.
           Needs its own opaque background too: a transparent pixel lets the
           lower-stacked fixed footer show through regardless of z-index. */}
       <main
@@ -1680,8 +1595,8 @@ function Index() {
         {/* ══════════════════════════════════════════════════════════════════ */}
         {/* NAV (sticky — CTA stays reachable while scrolling) + HERO          */}
         {/* ══════════════════════════════════════════════════════════════════ */}
-        <AgorixNav variant="light" sticky />
-        <AgorixHero />
+        <PlatePieletNav variant="light" sticky />
+        <PlatePieletHero />
 
         {/* ══════════════════════════════════════════════════════════════════ */}
         {/* INTRO BAND — "Our software powers…"                               */}
@@ -1694,7 +1609,7 @@ function Index() {
             className={`intro-band reveal${sec1.visible ? " show" : ""} flex flex-col gap-6`}
           >
             <div>
-              <div className="sw-eyebrow">Why PlatePilot</div>
+              <div className="sw-eyebrow">Why PlatePielet</div>
               <h2 className="intro-h2">
                 Restaurant intelligence powered by <span className="gradient-text-a">realtime</span>{" "}
                 <span className="gradient-text-b">AI&#8209;driven</span> analysis
@@ -1702,199 +1617,11 @@ function Index() {
             </div>
             <div>
               <p className="intro-body">
-                PlatePilot connects your <strong>Tally books</strong>, <strong>POS sales</strong>,
+                PlatePielet connects your <strong>Tally books</strong>, <strong>POS sales</strong>,
                 and <strong>inventory</strong> into one intelligence layer — so every purchasing,
                 pricing, and prep decision is backed by live data instead of gut feel.
               </p>
             </div>
-          </div>
-        </div>
-
-        {/* ══════════════════════════════════════════════════════════════════ */}
-        {/* SOLUTION — feature cards                                           */}
-        {/* ══════════════════════════════════════════════════════════════════ */}
-        <div className="sw-rule" id="features" />
-        <div className="sw-section">
-          <div ref={sec3.ref} className={`platforms-section reveal${sec3.visible ? " show" : ""}`}>
-            <div className="sw-section-tag">↳ The Solution</div>
-            <h2 className="sw-section-h2">Stop guessing. Run your restaurant on data.</h2>
-            <p className="sw-section-body">
-              PlatePilot connects the systems you already use and turns them into one intelligence
-              layer for your entire operation.
-            </p>
-            <div className="sw-cards-grid">
-              <PlatformCard
-                number="01 "
-                tag="Inventory"
-                title="Smart Inventory Tracking"
-                description="Live stock counts built from your POS sales and purchase bills — with alerts before you run out or over-order."
-                cta="Explore Inventory"
-                href="#how-it-works"
-                accent="#22C55E"
-              />
-              <PlatformCard
-                number="02 "
-                tag="Waste AI"
-                title="Waste Detection"
-                description="Pilot AI flags spoilage, over-prep, and shrinkage patterns per outlet — before they hit your month-end P&L."
-                cta="Explore Waste AI"
-                href="#menu-engineering"
-                accent="#A3E635"
-              />
-              <PlatformCard
-                number="03 "
-                tag="Purchasing"
-                title="Purchase Optimization"
-                description="Market-price intelligence and demand forecasts tell you what to buy, how much, and when — so you stop overpaying vendors."
-                cta="Explore Purchasing"
-                href="#how-it-works"
-                accent="#16A34A"
-              />
-              <PlatformCard
-                number="04 "
-                tag="Accounting"
-                title="Tally & POS Sync"
-                description="Your books reconcile themselves — every sale, purchase, and voucher matched automatically between POS and Tally."
-                cta="Explore Integrations"
-                href="#how-it-works"
-                accent="#0F7A4C"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* ══════════════════════════════════════════════════════════════════ */}
-        {/* CAPABILITIES TABS                                                  */}
-        {/* ══════════════════════════════════════════════════════════════════ */}
-        <div className="sw-rule" />
-        <div className="sw-section">
-          <div ref={sec4.ref} className={`caps-section reveal${sec4.visible ? " show" : ""}`}>
-            <div className="sw-section-tag">↳ Features</div>
-            <h2 className="sw-section-h2">Everything you need to run a profitable kitchen.</h2>
-            <div className="sw-tabs-wrap">
-              <div className="sw-tabs-bar">
-                {tabs.map((t, i) => (
-                  <button
-                    key={t.label}
-                    className={`sw-tab-btn${activeTab === i ? " active" : ""}`}
-                    onClick={() => setActiveTab(i)}
-                  >
-                    {t.label}
-                  </button>
-                ))}
-              </div>
-              <div className="sw-tab-content">
-                <div className="sw-tab-left">
-                  <h3 className="sw-tab-heading">{tabs[activeTab].heading}</h3>
-                  <p className="sw-tab-body">{tabs[activeTab].body}</p>
-                </div>
-                <div className="sw-tab-right">
-                  <ul className="sw-tab-bullets">
-                    {tabs[activeTab].bullets.map((b, idx) => (
-                      <li key={idx}>{b}</li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* ══════════════════════════════════════════════════════════════════ */}
-        {/* MENU ENGINEERING SPOTLIGHT                                         */}
-        {/* ══════════════════════════════════════════════════════════════════ */}
-        <div className="sw-rule" id="menu-engineering" />
-        <div className="sw-section">
-          <div
-            ref={sec10.ref}
-            className={`platforms-section reveal${sec10.visible ? " show" : ""}`}
-          >
-            <div className="sw-section-tag">↳ Menu Engineering</div>
-            <h2 className="sw-section-h2">Every dish gets a report card.</h2>
-            <p className="sw-section-body" style={{ marginBottom: 0 }}>
-              No spreadsheets, no consultants — PlatePilot grades your whole menu automatically,
-              from data it already tracks.
-            </p>
-            <div className="me-formula">
-              <div className="me-f-step">
-                <span className="me-f-ico">
-                  <BarChart3 size={20} strokeWidth={1.8} />
-                </span>
-                <div>
-                  <div className="me-f-title">How often it sells</div>
-                  <div className="me-f-sub">Counted from your POS bills</div>
-                </div>
-              </div>
-              <div className="me-f-op" aria-hidden="true">
-                <span>+</span>
-              </div>
-              <div className="me-f-step">
-                <span className="me-f-ico">
-                  <IndianRupee size={20} strokeWidth={1.8} />
-                </span>
-                <div>
-                  <div className="me-f-title">Profit per plate</div>
-                  <div className="me-f-sub">Selling price minus ingredient cost</div>
-                </div>
-              </div>
-              <div className="me-f-op" aria-hidden="true">
-                <span>=</span>
-              </div>
-              <div className="me-f-step">
-                <span className="me-f-ico">
-                  <ClipboardCheck size={20} strokeWidth={1.8} />
-                </span>
-                <div>
-                  <div className="me-f-title">A clear verdict</div>
-                  <div className="me-f-sub">Promote, re-price, push, or remove</div>
-                </div>
-              </div>
-            </div>
-            <div className="me-example-lbl">Example · Four dishes from one menu</div>
-            <div className="me-grid">
-              {ME_DISHES.map((d) => {
-                const sellColor = d.sellsPct >= 50 ? "#16A34A" : "#EF4444";
-                const earnColor = d.earnsPct >= 50 ? "#16A34A" : "#EF4444";
-                return (
-                  <div key={d.dish} className="me-card">
-                    <div className="me-dish-name">{d.dish}</div>
-                    <div className="me-stat">
-                      <div className="me-stat-top">
-                        <span>How often it sells</span>
-                        <span className="me-stat-val" style={{ color: sellColor }}>
-                          {d.sells}
-                        </span>
-                      </div>
-                      <div className="me-bar">
-                        <span style={{ width: `${d.sellsPct}%`, background: sellColor }} />
-                      </div>
-                    </div>
-                    <div className="me-stat">
-                      <div className="me-stat-top">
-                        <span>Profit per plate</span>
-                        <span className="me-stat-val" style={{ color: earnColor }}>
-                          {d.earns}
-                        </span>
-                      </div>
-                      <div className="me-bar">
-                        <span style={{ width: `${d.earnsPct}%`, background: earnColor }} />
-                      </div>
-                    </div>
-                    <div className="me-verdict" style={{ background: d.bg, color: d.color }}>
-                      <d.icon size={18} strokeWidth={2} />
-                      <div>
-                        <div className="me-verdict-tier">{d.tier}</div>
-                        <div className="me-verdict-act">{d.act}</div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-            <p className="me-note">
-              PlatePilot builds this report for every item on your menu, automatically — from the
-              POS sales and purchase costs it already tracks.
-            </p>
           </div>
         </div>
 
@@ -1997,13 +1724,201 @@ function Index() {
         </div>
 
         {/* ══════════════════════════════════════════════════════════════════ */}
+        {/* SOLUTION — feature cards                                           */}
+        {/* ══════════════════════════════════════════════════════════════════ */}
+        <div className="sw-rule" id="features" />
+        <div className="sw-section">
+          <div ref={sec3.ref} className={`platforms-section reveal${sec3.visible ? " show" : ""}`}>
+            <div className="sw-section-tag">↳ The Solution</div>
+            <h2 className="sw-section-h2">Stop guessing. Run your restaurant on data.</h2>
+            <p className="sw-section-body">
+              PlatePielet connects the systems you already use and turns them into one intelligence
+              layer for your entire operation.
+            </p>
+            <div className="sw-cards-grid">
+              <PlatformCard
+                number="01 "
+                tag="Inventory"
+                title="Smart Inventory Tracking"
+                description="Live stock counts built from your POS sales and purchase bills — with alerts before you run out or over-order."
+                cta="Explore Inventory"
+                href="/product/inventory-intelligence"
+                accent="#22C55E"
+              />
+              <PlatformCard
+                number="02 "
+                tag="Waste AI"
+                title="Waste Detection"
+                description="Pilot AI flags spoilage, over-prep, and shrinkage patterns per outlet — before they hit your month-end P&L."
+                cta="Explore Waste AI"
+                href="#menu-engineering"
+                accent="#A3E635"
+              />
+              <PlatformCard
+                number="03 "
+                tag="Purchasing"
+                title="Purchase Optimization"
+                description="Market-price intelligence and demand forecasts tell you what to buy, how much, and when — so you stop overpaying vendors."
+                cta="Explore Purchasing"
+                href="/product/purchase-suggestions"
+                accent="#16A34A"
+              />
+              <PlatformCard
+                number="04 "
+                tag="Accounting"
+                title="Tally & POS Sync"
+                description="Your books reconcile themselves — every sale, purchase, and voucher matched automatically between POS and Tally."
+                cta="Explore Integrations"
+                href="/integrations"
+                accent="#0F7A4C"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* ══════════════════════════════════════════════════════════════════ */}
+        {/* CAPABILITIES TABS                                                  */}
+        {/* ══════════════════════════════════════════════════════════════════ */}
+        <div className="sw-rule" />
+        <div className="sw-section">
+          <div ref={sec4.ref} className={`caps-section reveal${sec4.visible ? " show" : ""}`}>
+            <div className="sw-section-tag">↳ Features</div>
+            <h2 className="sw-section-h2">Everything you need to run a profitable kitchen.</h2>
+            <div className="sw-tabs-wrap">
+              <div className="sw-tabs-bar">
+                {tabs.map((t, i) => (
+                  <button
+                    key={t.label}
+                    className={`sw-tab-btn${activeTab === i ? " active" : ""}`}
+                    onClick={() => setActiveTab(i)}
+                  >
+                    {t.label}
+                  </button>
+                ))}
+              </div>
+              <div className="sw-tab-content">
+                <div className="sw-tab-left">
+                  <h3 className="sw-tab-heading">{tabs[activeTab].heading}</h3>
+                  <p className="sw-tab-body">{tabs[activeTab].body}</p>
+                </div>
+                <div className="sw-tab-right">
+                  <ul className="sw-tab-bullets">
+                    {tabs[activeTab].bullets.map((b, idx) => (
+                      <li key={idx}>{b}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ══════════════════════════════════════════════════════════════════ */}
+        {/* MENU ENGINEERING SPOTLIGHT                                         */}
+        {/* ══════════════════════════════════════════════════════════════════ */}
+        <div className="sw-rule" id="menu-engineering" />
+        <div className="sw-section">
+          <div
+            ref={sec10.ref}
+            className={`platforms-section reveal${sec10.visible ? " show" : ""}`}
+          >
+            <div className="sw-section-tag">↳ Menu Engineering</div>
+            <h2 className="sw-section-h2">Every dish gets a report card.</h2>
+            <p className="sw-section-body" style={{ marginBottom: 0 }}>
+              No spreadsheets, no consultants — PlatePielet grades your whole menu automatically,
+              from data it already tracks.
+            </p>
+            <div className="me-formula">
+              <div className="me-f-step">
+                <span className="me-f-ico">
+                  <BarChart3 size={20} strokeWidth={1.8} />
+                </span>
+                <div>
+                  <div className="me-f-title">How often it sells</div>
+                  <div className="me-f-sub">Counted from your POS bills</div>
+                </div>
+              </div>
+              <div className="me-f-op" aria-hidden="true">
+                <span>+</span>
+              </div>
+              <div className="me-f-step">
+                <span className="me-f-ico">
+                  <IndianRupee size={20} strokeWidth={1.8} />
+                </span>
+                <div>
+                  <div className="me-f-title">Profit per plate</div>
+                  <div className="me-f-sub">Selling price minus ingredient cost</div>
+                </div>
+              </div>
+              <div className="me-f-op" aria-hidden="true">
+                <span>=</span>
+              </div>
+              <div className="me-f-step">
+                <span className="me-f-ico">
+                  <ClipboardCheck size={20} strokeWidth={1.8} />
+                </span>
+                <div>
+                  <div className="me-f-title">A clear verdict</div>
+                  <div className="me-f-sub">Promote, re-price, push, or remove</div>
+                </div>
+              </div>
+            </div>
+            <div className="me-example-lbl">Example · Four dishes from one menu</div>
+            <div className="me-grid">
+              {ME_DISHES.map((d) => {
+                const sellColor = d.sellsPct >= 50 ? "#16A34A" : "#EF4444";
+                const earnColor = d.earnsPct >= 50 ? "#16A34A" : "#EF4444";
+                return (
+                  <div key={d.dish} className="me-card">
+                    <div className="me-dish-name">{d.dish}</div>
+                    <div className="me-stat">
+                      <div className="me-stat-top">
+                        <span>How often it sells</span>
+                        <span className="me-stat-val" style={{ color: sellColor }}>
+                          {d.sells}
+                        </span>
+                      </div>
+                      <div className="me-bar">
+                        <span style={{ width: `${d.sellsPct}%`, background: sellColor }} />
+                      </div>
+                    </div>
+                    <div className="me-stat">
+                      <div className="me-stat-top">
+                        <span>Profit per plate</span>
+                        <span className="me-stat-val" style={{ color: earnColor }}>
+                          {d.earns}
+                        </span>
+                      </div>
+                      <div className="me-bar">
+                        <span style={{ width: `${d.earnsPct}%`, background: earnColor }} />
+                      </div>
+                    </div>
+                    <div className="me-verdict" style={{ background: d.bg, color: d.color }}>
+                      <d.icon size={18} strokeWidth={2} />
+                      <div>
+                        <div className="me-verdict-tier">{d.tier}</div>
+                        <div className="me-verdict-act">{d.act}</div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <p className="me-note">
+              PlatePielet builds this report for every item on your menu, automatically — from the
+              POS sales and purchase costs it already tracks.
+            </p>
+          </div>
+        </div>
+
+        {/* ══════════════════════════════════════════════════════════════════ */}
         {/* QUOTE                                                              */}
         {/* ══════════════════════════════════════════════════════════════════ */}
         <div className="sw-rule" id="testimonials" />
         <div className="sw-section">
           <div className="tm-section">
             <div className="sw-section-tag">↳ Testimonials</div>
-            <h2 className="sw-section-h2">Restaurant owners run on PlatePilot.</h2>
+            <h2 className="sw-section-h2">Restaurant owners run on PlatePielet.</h2>
             <div className="tm-marquee">
               <div className="tm-track">
                 {[...TESTIMONIALS, ...TESTIMONIALS].map((t, i) => (
@@ -2043,7 +1958,7 @@ function Index() {
               <div className="gallery-split-copy">
                 <div className="sw-section-tag">↳ Product Preview</div>
                 <h2 className="sw-section-h2">
-                  See PlatePilot in <span style={{ color: "#16A34A" }}>Action</span>
+                  See PlatePielet in <span style={{ color: "#16A34A" }}>Action</span>
                 </h2>
                 <p className="sw-section-body">
                   Drag and explore the surfaces your team will use every day — live dashboards,
@@ -2097,7 +2012,7 @@ function Index() {
       {/* ══════════════════════════════════════════════════════════════════ */}
       {/* CTA BAND + FOOTER — footer slides up from underneath the CTA band  */}
       {/* ══════════════════════════════════════════════════════════════════ */}
-      <AgorixFooter>
+      <PlatePieletFooter>
         <div className="sw-section" id="contact">
           <div className="cta-band">
             <h2 className="cta-heading">Start optimizing your restaurant today.</h2>
@@ -2111,7 +2026,7 @@ function Index() {
             </div>
           </div>
         </div>
-      </AgorixFooter>
+      </PlatePieletFooter>
     </div>
   );
 }
@@ -2161,9 +2076,17 @@ function PlatformCard({
       </div>
       <h3 className="sw-card-title">{title}</h3>
       <p className="sw-card-desc">{description}</p>
-      <a href={href} className="sw-card-cta" style={{ color: accent }}>
-        {cta} →
-      </a>
+      {/* in-page anchors stay native; routes go through the router or the SPA
+          does a full reload */}
+      {href.startsWith("#") ? (
+        <a href={href} className="sw-card-cta" style={{ color: accent }}>
+          {cta} →
+        </a>
+      ) : (
+        <Link to={href} className="sw-card-cta" style={{ color: accent }}>
+          {cta} →
+        </Link>
+      )}
       <div className="sw-card-line" style={{ background: accent }} />
     </div>
   );
@@ -2171,7 +2094,7 @@ function PlatformCard({
 
 export default function IndexRoute() {
   return (
-    <AppPage title="PlatePilot — AI-Powered Restaurant Intelligence">
+    <AppPage title="PlatePielet — AI-Powered Restaurant Intelligence">
       <Index />
     </AppPage>
   );

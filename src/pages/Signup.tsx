@@ -170,7 +170,7 @@ function SignupPage() {
     setIsLoading(true);
     verifyEmail(email, otp)
       .then(() => {
-        toast.success("Account verified! Welcome to Platepilot.");
+        toast.success("Account verified! Welcome to PlatePielet.");
         history.push("/dashboard");
       })
       .catch((err) => {
@@ -546,7 +546,7 @@ function SignupPage() {
 
 export default function SignupPageRoute() {
   return (
-    <AppPage title="Create Account — Platepilot">
+    <AppPage title="Create Account — PlatePielet">
       <SignupPage />
     </AppPage>
   );

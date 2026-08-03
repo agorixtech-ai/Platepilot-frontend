@@ -13,7 +13,7 @@ Configure these in your Vercel project settings under **Settings > Environment V
 ### Required Variables
 
 - `VITE_API_URL` - Your backend API URL (e.g., `https://your-backend.vercel.app/api`)
-- `VITE_APP_NAME` - Application name (e.g., `Agorix`)
+- `VITE_APP_NAME` - Application name (e.g., `PlatePielet`)
 - `VITE_APP_VERSION` - Application version (e.g., `1.0.0`)
 
 ### Optional Variables

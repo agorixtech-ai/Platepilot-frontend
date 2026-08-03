@@ -10,14 +10,14 @@ import {
   Percent,
   RefreshCw,
   TrendingUp,
+  TrendingDown,
   Package,
   ShoppingCart,
-  Sparkles,
   Activity,
   ChevronRight,
-  Bell,
   Check,
   Building2,
+  Wallet,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -57,10 +57,12 @@ import {
 } from "@/components/dashboard/shared";
 import { dashboardService } from "@/services/dashboardService";
 import { ChannelBreakdown } from "@/components/dashboard/ChannelBreakdown";
+import { InventoryAlertsCard } from "@/components/dashboard/InventoryAlertsCard";
 import { ItemAvatar } from "@/components/dashboard/ItemAvatar";
 import { useBranchFilter } from "@/contexts/BranchFilterContext";
 import { useDateRange, rangeToPeriod } from "@/contexts/DateRangeContext";
-import { AllLocationsOverview } from "@/components/dashboard/AllLocationsOverview";
+import { AllLocationsOverview, ComparisonChart } from "@/components/dashboard/AllLocationsOverview";
+import { DishActivityMatrix } from "@/components/dashboard/DishActivityMatrix";
 import { SingleLocationView } from "@/components/dashboard/SingleLocationView";
 import { useCounterAnimation } from "@/hooks/useCounterAnimation";
 
@@ -158,12 +160,13 @@ function KpiCardWithSparkline({
   const cardContent = (
     <Card
       className={cn(
-        "border-border/40 bg-card card-interactive cursor-pointer",
+        "h-full border-border/40 bg-card card-interactive cursor-pointer",
         `animate-fade-in-up stagger-${(index || 1) + 1}`,
       )}
     >
-      <CardContent className="p-4 space-y-3">
-        <div className="flex items-start justify-between gap-2">
+      <CardContent className="flex h-full flex-col gap-3 p-4">
+        {/* fixed-height header so cards without a delta chip still line up */}
+        <div className="flex h-9 items-start justify-between gap-2">
           <div className={cn("flex h-9 w-9 items-center justify-center rounded-xl", toneBgs[tone])}>
             <Icon className="h-4 w-4" />
           </div>
@@ -195,33 +198,36 @@ function KpiCardWithSparkline({
             {displayValue}
           </p>
         </div>
-        {sparklineData.length >= 2 && (
-          <svg
-            viewBox="0 0 100 24"
-            preserveAspectRatio="none"
-            className="h-5 w-full text-primary/60"
-          >
-            <polyline
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={2}
-              strokeLinejoin="round"
-              strokeLinecap="round"
-              vectorEffect="non-scaling-stroke"
-              points={sparklineData
-                .map((v, i) => {
-                  const min = Math.min(...sparklineData);
-                  const max = Math.max(...sparklineData);
-                  const x = (i / (sparklineData.length - 1)) * 100;
-                  const y = 21 - (max === min ? 0.5 : (v - min) / (max - min)) * 18;
-                  return `${x},${y}`;
-                })
-                .join(" ")}
-            />
-          </svg>
-        )}
+        {/* slot is always reserved — an empty sparkline must not shorten the card */}
+        <div className="h-5 w-full">
+          {sparklineData.length >= 2 && (
+            <svg
+              viewBox="0 0 100 24"
+              preserveAspectRatio="none"
+              className="h-5 w-full text-primary/60"
+            >
+              <polyline
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+                strokeLinejoin="round"
+                strokeLinecap="round"
+                vectorEffect="non-scaling-stroke"
+                points={sparklineData
+                  .map((v, i) => {
+                    const min = Math.min(...sparklineData);
+                    const max = Math.max(...sparklineData);
+                    const x = (i / (sparklineData.length - 1)) * 100;
+                    const y = 21 - (max === min ? 0.5 : (v - min) / (max - min)) * 18;
+                    return `${x},${y}`;
+                  })
+                  .join(" ")}
+              />
+            </svg>
+          )}
+        </div>
         {sub ? (
-          <div className="flex items-center gap-1.5 text-[10px] font-semibold">
+          <div className="mt-auto flex items-center gap-1.5 text-[10px] font-semibold">
             {sub.dot && (
               <span
                 className={`h-1.5 w-1.5 rounded-full animate-pulse ${
@@ -248,14 +254,20 @@ function KpiCardWithSparkline({
             </span>
           </div>
         ) : footnote ? (
-          <p className="text-[10px] text-muted-foreground">{footnote}</p>
+          <p className="mt-auto text-[10px] leading-snug text-muted-foreground">{footnote}</p>
         ) : null}
       </CardContent>
     </Card>
   );
 
   if (to) {
-    return <Link to={to as any}>{cardContent}</Link>;
+    // block h-full — without it the anchor collapses and the card stops
+    // stretching to the grid row height
+    return (
+      <Link to={to} className="block h-full">
+        {cardContent}
+      </Link>
+    );
   }
   return cardContent;
 }
@@ -266,7 +278,7 @@ function OverviewPage() {
   const [activeMetric, setActiveMetric] = useState<MetricKey>("sales");
   const [isReconOpen, setIsReconOpen] = useState(false);
   const queryClient = useQueryClient();
-  const { branch } = useBranchFilter();
+  const { branch, locations } = useBranchFilter();
   const { range } = useDateRange();
   const period = rangeToPeriod(range);
   const reducedMotion = useReducedMotion();
@@ -292,12 +304,6 @@ function OverviewPage() {
     ...DASHBOARD_LIVE_QUERY,
   });
 
-  const stockQuery = useQuery({
-    queryKey: ["dashboard", "stock-summary", branch],
-    queryFn: () => dashboardService.getStockSummary(branch),
-    ...DASHBOARD_LIVE_QUERY,
-  });
-
   const channelQuery = useQuery({
     queryKey: ["dashboard", "channels", period, branch],
     queryFn: () => dashboardService.getChannelBreakdown(period, branch),
@@ -310,9 +316,11 @@ function OverviewPage() {
     ...DASHBOARD_LIVE_QUERY,
   });
 
+  // limit 50 matches the Inventory page + InventoryAlertsCard — same query key,
+  // so a differing limit here would hand whichever mounted first to the others
   const stockItemsQuery = useQuery({
     queryKey: ["dashboard", "stock-items", branch],
-    queryFn: () => dashboardService.getStockItems(branch, 6),
+    queryFn: () => dashboardService.getStockItems(branch, 50),
     ...DASHBOARD_LIVE_QUERY,
   });
 
@@ -328,15 +336,15 @@ function OverviewPage() {
     ...DASHBOARD_LIVE_QUERY,
   });
 
+  const menuEngineeringQuery = useQuery({
+    queryKey: ["dashboard", "menu-engineering", period, branch],
+    queryFn: () => dashboardService.getMenuEngineering(period, branch),
+    ...DASHBOARD_LIVE_QUERY,
+  });
+
   const m = metricsQuery.data;
   const yearTrend = yearTrendQuery.data;
   const trendData = trendQuery.data;
-  const alertsCount = m?.active_alerts ?? 0;
-  const criticalCount = m?.critical_alerts ?? 0;
-  const stockAtRisk = Math.max(
-    0,
-    (stockQuery.data?.total_items ?? 0) - (stockQuery.data?.items_in_stock ?? 0),
-  );
 
   const isLiveFetching = metricsQuery.isFetching || trendQuery.isFetching;
   const hasCriticalError = metricsQuery.isError || trendQuery.isError;
@@ -375,14 +383,22 @@ function OverviewPage() {
     };
   })();
 
-  // Avg order value
-  const avgOrder = m && m.orders > 0 ? m.total_sales / m.orders : 0;
+  // Reconciliation values — from real API
+  const recon = reconciliationQuery.data;
+  const currency = recon?.currency ?? m?.currency ?? "AED";
+
+  // Waste % — same ingredient-variance-vs-revenue math as the Menu
+  // Engineering page's "Wastage" tile, over the waste-analysis period toggle
+  const wasteItems = menuEngineeringQuery.data?.items ?? [];
+  const wasteRevenue = wasteItems.reduce((sum, i) => sum + i.revenue, 0);
+  const wasteCost = wasteItems.reduce((sum, i) => sum + i.waste_cost, 0);
+  const wastePctValue = wasteRevenue > 0 ? (wasteCost / wasteRevenue) * 100 : 0;
 
   // KPI cards
   const kpis = m
     ? [
         {
-          label: "Total Sales",
+          label: "Revenue",
           value: fmtCurrency(m.total_sales, m.currency),
           icon: DollarSign,
           tone: "primary" as Tone,
@@ -404,14 +420,6 @@ function OverviewPage() {
           index: 1,
         },
         {
-          label: "Avg Order Value",
-          value: fmtCurrency(avgOrder, m.currency),
-          icon: Sparkles,
-          tone: "primary" as Tone,
-          footnote: `per order this ${period}`,
-          index: 2,
-        },
-        {
           label: "Food Cost %",
           value: fmtPct(m.food_cost_pct),
           icon: Percent,
@@ -420,51 +428,28 @@ function OverviewPage() {
           footnote: "vs prior period",
           sparklineData: sparkFromYear(yearTrend?.food_cost_pct),
           to: "/dashboard/tally",
+          index: 2,
+        },
+        {
+          label: "Waste %",
+          value: fmtPct(wastePctValue),
+          icon: TrendingDown,
+          tone: "destructive" as Tone,
+          footnote: `${period} · ingredient variance vs. revenue`,
+          to: "/dashboard/menu-engineering",
           index: 3,
         },
         {
-          label: "Gross Margin",
-          value: fmtPct(m.gross_margin_pct),
-          icon: TrendingUp,
+          label: "Profit",
+          value: fmtCurrency(recon?.gross_margin ?? 0, currency),
+          icon: Wallet,
           tone: "success" as Tone,
-          delta: deltaPp(m.gross_margin_pp_delta, "up"),
-          footnote: "vs prior period",
-          sparklineData: sparkFromYear(yearTrend?.margin_pct),
+          footnote: "gross margin, POS vs Tally",
           to: "/dashboard/reports",
           index: 4,
         },
-        {
-          label: "Active Alerts",
-          value: alertsCount.toLocaleString(),
-          icon: Bell,
-          tone: (alertsCount > 0 ? "destructive" : "success") as Tone,
-          sub: {
-            text: `+${criticalCount} vs yesterday`,
-            tone: criticalCount > 0 ? ("destructive" as Tone) : ("neutral" as Tone),
-            dot: true,
-          },
-          to: "/dashboard/inventory",
-          index: 5,
-        },
-        {
-          label: "Stock at Risk",
-          value: stockAtRisk.toLocaleString(),
-          icon: Package,
-          tone: "warning" as Tone,
-          sub: {
-            text: `${stockQuery.data?.items_in_stock ?? 0}/${stockQuery.data?.total_items ?? 0} in stock`,
-            tone: "info" as Tone,
-            dot: true,
-          },
-          to: "/dashboard/inventory",
-          index: 6,
-        },
       ]
     : [];
-
-  // Reconciliation values — from real API
-  const recon = reconciliationQuery.data;
-  const currency = recon?.currency ?? m?.currency ?? "AED";
 
   return (
     <div className="space-y-5 animate-fade-in-up relative">
@@ -532,10 +517,20 @@ function OverviewPage() {
         </motion.div>
       </AnimatePresence>
 
+      {/* ── Revenue by location | Dish Activity ──────────────────────────────── */}
+      <section className="grid gap-4 lg:grid-cols-2">
+        <ComparisonChart locations={locations} />
+        <DishActivityMatrix
+          items={wasteItems}
+          isLoading={menuEngineeringQuery.isLoading}
+          currency={menuEngineeringQuery.data?.currency}
+        />
+      </section>
+
       {/* ── KPI Row ─────────────────────────────────────────────────────────── */}
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7">
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
         {metricsQuery.isLoading || !m
-          ? Array.from({ length: 7 }).map((_, i) => (
+          ? Array.from({ length: 5 }).map((_, i) => (
               <Card key={i} className="border-border/40 bg-card animate-fade-in-up">
                 <CardContent className="p-4 space-y-3">
                   <div className="h-8 w-8 animate-pulse rounded-xl bg-secondary" />
@@ -548,10 +543,10 @@ function OverviewPage() {
           : kpis.map((k) => <KpiCardWithSparkline key={k.label} {...k} />)}
       </div>
 
-      {/* ── Performance Row ─────────────────────────────────────────────────── */}
-      <div className="grid gap-5 grid-cols-1">
-        {/* Performance Trends — original AreaTrend with metric selector */}
-        <Card className="flex flex-col border border-border/60 bg-card card-interactive shadow-sm animate-fade-in-up stagger-4">
+      {/* ── Performance Row: Sales Trend | Inventory Alerts ─────────────────── */}
+      <div className="grid gap-5 grid-cols-1 lg:grid-cols-3">
+        {/* Sales Trend — original AreaTrend with metric selector */}
+        <Card className="flex flex-col border border-border/60 bg-card card-interactive shadow-sm animate-fade-in-up stagger-4 lg:col-span-2">
           <CardHeader className="border-b border-border/40 px-5 pb-2 pt-4">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
@@ -620,12 +615,155 @@ function OverviewPage() {
             />
           </CardContent>
         </Card>
+
+        {/* Inventory Alerts — live critical/low stock feed from Tally stock levels */}
+        <InventoryAlertsCard className="animate-fade-in-up stagger-5" />
       </div>
 
+      {/* ── Selling / Stock / Reconciliation / Channel / Branch Row ─────────────── */}
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+        {/* Top Selling Items — real pos_sales aggregation */}
+        <Card className="flex flex-col h-full border border-border/60 bg-card shadow-sm">
+          <CardHeader className="border-b border-border/40 px-4 pb-2 pt-4">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-[12px] font-bold text-foreground">
+                Top Selling Items
+              </CardTitle>
+              <Badge
+                variant="outline"
+                className="border-info/30 bg-info-soft/30 text-[9px] font-bold text-info"
+              >
+                Live · POS
+              </Badge>
+            </div>
+          </CardHeader>
+          <CardContent className="px-4 pb-3 flex-1 flex flex-col">
+            {topItemsQuery.isLoading ? (
+              <div className="space-y-2.5">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <div key={i} className="h-8 animate-pulse rounded bg-secondary" />
+                ))}
+              </div>
+            ) : !topItemsQuery.data?.items.length ? (
+              <div className="flex flex-1 flex-col items-center justify-center gap-1.5 py-6 text-center">
+                <ShoppingCart className="h-5 w-5 text-muted-foreground/50" />
+                <p className="text-[11.5px] font-medium text-muted-foreground">No sales data yet</p>
+                <p className="text-[10px] text-muted-foreground/70">POS data will appear here</p>
+              </div>
+            ) : (
+              <div className="flex-1 space-y-1.5">
+                {topItemsQuery.data.items.map((item, idx) => (
+                  <div
+                    key={item.item}
+                    className="flex items-center gap-2.5 rounded-lg px-1 py-1.5 transition-colors hover:bg-secondary/40"
+                  >
+                    <span
+                      className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md text-[9px] font-black tabular-nums text-primary-foreground"
+                      style={{ backgroundColor: paletteColor(idx) }}
+                    >
+                      {idx + 1}
+                    </span>
+                    <ItemAvatar name={item.item} size="sm" />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="truncate text-[11px] font-semibold text-foreground">
+                          {item.item}
+                        </span>
+                        <span className="shrink-0 text-[10.5px] font-bold tabular-nums text-foreground">
+                          AED {(item.revenue / 1000).toFixed(1)}k
+                        </span>
+                      </div>
+                      <div className="mt-1 flex items-center gap-1.5">
+                        <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
+                          <div
+                            className="h-full rounded-full transition-all duration-500"
+                            style={{
+                              width: `${item.pct}%`,
+                              backgroundColor: paletteColor(idx),
+                            }}
+                          />
+                        </div>
+                        <span className="shrink-0 text-[10px] text-muted-foreground">
+                          {item.pct.toFixed(1)}%
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
+        {/* Low Stock — real tally_vouchers data */}
+        <Card className="flex flex-col h-full border border-border/60 bg-card card-interactive shadow-sm animate-fade-in-up stagger-8">
+          <CardHeader className="border-b border-border/40 px-4 pb-2 pt-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5">
+                <CardTitle className="text-[12px] font-bold text-foreground">Low Stock</CardTitle>
+              </div>
+              <Badge
+                variant="outline"
+                className="border-warning/30 bg-warning-soft/30 text-[9px] font-bold text-warning"
+              >
+                Live · Tally
+              </Badge>
+            </div>
+          </CardHeader>
+          <CardContent className="px-4 pb-3 flex-1 flex flex-col">
+            {stockItemsQuery.isLoading ? (
+              <div className="space-y-2">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <div key={i} className="h-6 animate-pulse rounded bg-secondary" />
+                ))}
+              </div>
+            ) : !stockItemsQuery.data?.items.length ? (
+              <EmptyState
+                icon={Package}
+                title="No stock data yet"
+                description="Sync your Tally inventory to see items at risk"
+              />
+            ) : (
+              <>
+                <div className="text-[10px] font-semibold text-muted-foreground grid grid-cols-2 pb-1 border-b border-border/40 mb-1">
+                  <span>Item</span>
+                  <span className="text-right">Qty</span>
+                </div>
+                <div className="flex-1 space-y-0">
+                  {stockItemsQuery.data.items.slice(0, 6).map((row) => (
+                    <div
+                      key={row.item}
+                      className="flex items-center gap-2 py-1.5 border-b border-border/20 last:border-0"
+                    >
+                      <ItemAvatar name={row.item} size="sm" variant="photo" />
+                      <span className="text-[10px] font-medium text-foreground truncate flex-1 min-w-0">
+                        {row.item}
+                      </span>
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <span
+                          className={`text-[10px] font-bold tabular-nums ${row.status === "critical" ? "text-destructive" : row.status === "low" ? "text-warning" : "text-foreground"}`}
+                        >
+                          {row.current_stock.toFixed(1)}
+                        </span>
+                        <span
+                          className={`h-2 w-2 rounded-full flex-shrink-0 ${row.status === "critical" ? "bg-destructive animate-pulse" : row.status === "low" ? "bg-warning" : "bg-success"}`}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-2 flex items-center justify-between border-t border-border/30 pt-2">
+                  <span className="text-[10px] text-warning font-bold">
+                    {stockItemsQuery.data.items.filter((r) => r.status !== "ok").length} items at
+                    risk
+                  </span>
+                  <span className="text-[10px] text-muted-foreground">sorted by stock level</span>
+                </div>
+              </>
+            )}
+          </CardContent>
+        </Card>
 
-      {/* ── Bottom Row ──────────────────────────────────────────────────────── */}
-      <div className="grid gap-4 grid-cols-1 md:grid-cols-2 xl:grid-cols-5">
         {/* POS vs Tally Reconciliation */}
         <Card
           className="flex flex-col h-full cursor-pointer border border-border/60 bg-card card-interactive shadow-sm animate-fade-in-up stagger-6"
@@ -786,77 +924,6 @@ function OverviewPage() {
           <ChannelBreakdown period={period} />
         </div>
 
-        {/* Stock at Risk — real tally_vouchers data */}
-        <Card className="flex flex-col h-full border border-border/60 bg-card card-interactive shadow-sm animate-fade-in-up stagger-8">
-          <CardHeader className="border-b border-border/40 px-4 pb-2 pt-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1.5">
-                <CardTitle className="text-[12px] font-bold text-foreground">
-                  Stock at Risk
-                </CardTitle>
-              </div>
-              <Badge
-                variant="outline"
-                className="border-warning/30 bg-warning-soft/30 text-[9px] font-bold text-warning"
-              >
-                Live · Tally
-              </Badge>
-            </div>
-          </CardHeader>
-          <CardContent className="px-4 pb-3 flex-1 flex flex-col">
-            {stockItemsQuery.isLoading ? (
-              <div className="space-y-2">
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <div key={i} className="h-6 animate-pulse rounded bg-secondary" />
-                ))}
-              </div>
-            ) : !stockItemsQuery.data?.items.length ? (
-              <EmptyState
-                icon={Package}
-                title="No stock data yet"
-                description="Sync your Tally inventory to see items at risk"
-              />
-            ) : (
-              <>
-                <div className="text-[10px] font-semibold text-muted-foreground grid grid-cols-2 pb-1 border-b border-border/40 mb-1">
-                  <span>Item</span>
-                  <span className="text-right">Qty</span>
-                </div>
-                <div className="flex-1 space-y-0">
-                  {stockItemsQuery.data.items.map((row) => (
-                    <div
-                      key={row.item}
-                      className="flex items-center gap-2 py-1.5 border-b border-border/20 last:border-0"
-                    >
-                      <ItemAvatar name={row.item} size="sm" variant="photo" />
-                      <span className="text-[10px] font-medium text-foreground truncate flex-1 min-w-0">
-                        {row.item}
-                      </span>
-                      <div className="flex items-center gap-1.5 shrink-0">
-                        <span
-                          className={`text-[10px] font-bold tabular-nums ${row.status === "critical" ? "text-destructive" : row.status === "low" ? "text-warning" : "text-foreground"}`}
-                        >
-                          {row.current_stock.toFixed(1)}
-                        </span>
-                        <span
-                          className={`h-2 w-2 rounded-full flex-shrink-0 ${row.status === "critical" ? "bg-destructive animate-pulse" : row.status === "low" ? "bg-warning" : "bg-success"}`}
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <div className="mt-2 flex items-center justify-between border-t border-border/30 pt-2">
-                  <span className="text-[10px] text-warning font-bold">
-                    {stockItemsQuery.data.items.filter((r) => r.status !== "ok").length} items at
-                    risk
-                  </span>
-                  <span className="text-[10px] text-muted-foreground">sorted by stock level</span>
-                </div>
-              </>
-            )}
-          </CardContent>
-        </Card>
-
         {/* Branch Comparison — real /api/dashboard/branch-summary */}
         <Card className="flex flex-col h-full border border-border/60 bg-card card-interactive shadow-sm animate-fade-in-up stagger-8">
           <CardHeader className="border-b border-border/40 px-4 pb-2 pt-4">
@@ -944,79 +1011,6 @@ function OverviewPage() {
                   View full comparison <ChevronRight className="h-3 w-3" />
                 </a>
               </>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Top Menu Items — real pos_sales aggregation */}
-        <Card className="flex flex-col h-full border border-border/60 bg-card shadow-sm">
-          <CardHeader className="border-b border-border/40 px-4 pb-2 pt-4">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-[12px] font-bold text-foreground">
-                Top Menu Items
-              </CardTitle>
-              <Badge
-                variant="outline"
-                className="border-info/30 bg-info-soft/30 text-[9px] font-bold text-info"
-              >
-                Live · POS
-              </Badge>
-            </div>
-          </CardHeader>
-          <CardContent className="px-4 pb-3 flex-1 flex flex-col">
-            {topItemsQuery.isLoading ? (
-              <div className="space-y-2.5">
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <div key={i} className="h-8 animate-pulse rounded bg-secondary" />
-                ))}
-              </div>
-            ) : !topItemsQuery.data?.items.length ? (
-              <div className="flex flex-1 flex-col items-center justify-center gap-1.5 py-6 text-center">
-                <ShoppingCart className="h-5 w-5 text-muted-foreground/50" />
-                <p className="text-[11.5px] font-medium text-muted-foreground">No sales data yet</p>
-                <p className="text-[10px] text-muted-foreground/70">POS data will appear here</p>
-              </div>
-            ) : (
-              <div className="flex-1 space-y-1.5">
-                {topItemsQuery.data.items.map((item, idx) => (
-                  <div
-                    key={item.item}
-                    className="flex items-center gap-2.5 rounded-lg px-1 py-1.5 transition-colors hover:bg-secondary/40"
-                  >
-                    <span
-                      className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md text-[9px] font-black tabular-nums text-primary-foreground"
-                      style={{ backgroundColor: paletteColor(idx) }}
-                    >
-                      {idx + 1}
-                    </span>
-                    <ItemAvatar name={item.item} size="sm" />
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="truncate text-[11px] font-semibold text-foreground">
-                          {item.item}
-                        </span>
-                        <span className="shrink-0 text-[10.5px] font-bold tabular-nums text-foreground">
-                          AED {(item.revenue / 1000).toFixed(1)}k
-                        </span>
-                      </div>
-                      <div className="mt-1 flex items-center gap-1.5">
-                        <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
-                          <div
-                            className="h-full rounded-full transition-all duration-500"
-                            style={{
-                              width: `${item.pct}%`,
-                              backgroundColor: paletteColor(idx),
-                            }}
-                          />
-                        </div>
-                        <span className="shrink-0 text-[10px] text-muted-foreground">
-                          {item.pct.toFixed(1)}%
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
             )}
           </CardContent>
         </Card>

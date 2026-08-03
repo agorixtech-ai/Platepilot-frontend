@@ -25,7 +25,6 @@ import { useCounterAnimation } from "@/hooks/useCounterAnimation";
 import { fmtCurrency } from "@/components/dashboard/shared";
 import type { Location } from "@/lib/locations";
 import { dashboardService, type LocationSnapshot } from "@/services/dashboardService";
-import { MenuEngineeringSummary } from "@/components/dashboard/MenuEngineeringSummary";
 
 interface AttentionItem {
   branch: string;
@@ -212,7 +211,7 @@ function NeedsAttentionStrip({
 
 // ── Comparison chart ─────────────────────────────────────────────────────────
 
-function ComparisonChart({ locations }: { locations: Location[] }) {
+export function ComparisonChart({ locations }: { locations: Location[] }) {
   const { range } = useDateRange();
   const branches = locations.map((l) => l.name);
   const [hidden, setHidden] = useState<Set<string>>(new Set());
@@ -393,7 +392,6 @@ export function AllLocationsOverview() {
             <div key={i} className="h-[132px] rounded-xl skeleton-shimmer" />
           ))}
         </div>
-        <div className="h-[360px] rounded-xl skeleton-shimmer" />
       </div>
     );
   }
@@ -418,10 +416,7 @@ export function AllLocationsOverview() {
         })}
       </div>
 
-      <div className="grid items-stretch gap-4 lg:grid-cols-2">
-        <ComparisonChart locations={locations} />
-        <MenuEngineeringSummary />
-      </div>
+      {/* ComparisonChart moved to Overview, paired half/half with Dish Activity */}
     </div>
   );
 }

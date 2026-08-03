@@ -1,5 +1,5 @@
 /**
- * PlatePilot — Demo form → Google Sheet
+ * PlatePielet — Demo form → Google Sheet
  *
  * WHERE ROWS APPEAR: Google Spreadsheet tabs (bottom), especially "Demo"
  * NOT in the Apps Script code editor.
