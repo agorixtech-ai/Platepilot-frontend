@@ -35,6 +35,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { tallyApi, type TallyVoucher } from "@/lib/api";
 import { useBranchFilter } from "@/contexts/BranchFilterContext";
+import { useDateRange, rangeToPeriod } from "@/contexts/DateRangeContext";
 import { dashboardService } from "@/services/dashboardService";
 import { DASHBOARD_LIVE_QUERY, paletteColor, fmtCurrency } from "@/components/dashboard/shared";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -93,6 +94,7 @@ function fmtTallyDate(v: unknown): string {
 
 function TallyPage() {
   const { branch } = useBranchFilter();
+  const period = rangeToPeriod(useDateRange().range);
   const [page, setPage] = useState(0);
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
@@ -112,9 +114,9 @@ function TallyPage() {
 
   // Fetch reconciliation data for richer KPIs
   const { data: reconData } = useQuery({
-    queryKey: ["dashboard", "reconciliation", "month", branch],
+    queryKey: ["dashboard", "reconciliation", period, branch],
     queryFn: () =>
-      dashboardService.getReconciliation("month", branch && branch !== "all" ? branch : undefined),
+      dashboardService.getReconciliation(period, branch && branch !== "all" ? branch : undefined),
     ...DASHBOARD_LIVE_QUERY,
   });
 

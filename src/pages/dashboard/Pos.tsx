@@ -35,6 +35,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { posSalesApi, type PosSale } from "@/lib/api";
 import { useBranchFilter } from "@/contexts/BranchFilterContext";
+import { useDateRange, rangeToPeriod } from "@/contexts/DateRangeContext";
 import { dashboardService } from "@/services/dashboardService";
 import { DASHBOARD_LIVE_QUERY, paletteColor, fmtCurrency } from "@/components/dashboard/shared";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -94,6 +95,7 @@ function fmtTime(v: unknown): string {
 
 function PosSalesPage() {
   const { branch } = useBranchFilter();
+  const period = rangeToPeriod(useDateRange().range);
   const [page, setPage] = useState(0);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
@@ -114,26 +116,23 @@ function PosSalesPage() {
 
   // Fetch aggregated data for charts
   const { data: channelData } = useQuery({
-    queryKey: ["dashboard", "channel-breakdown", "month", branch],
+    queryKey: ["dashboard", "channel-breakdown", period, branch],
     queryFn: () =>
-      dashboardService.getChannelBreakdown(
-        "month",
-        branch && branch !== "all" ? branch : undefined,
-      ),
+      dashboardService.getChannelBreakdown(period, branch && branch !== "all" ? branch : undefined),
     ...DASHBOARD_LIVE_QUERY,
   });
 
   const { data: topItemsData } = useQuery({
-    queryKey: ["dashboard", "top-items", "month", branch],
+    queryKey: ["dashboard", "top-items", period, branch],
     queryFn: () =>
-      dashboardService.getTopItems("month", branch && branch !== "all" ? branch : undefined, 5),
+      dashboardService.getTopItems(period, branch && branch !== "all" ? branch : undefined, 5),
     ...DASHBOARD_LIVE_QUERY,
   });
 
   // Fetch all-branches sales for location chart
   const { data: branchData } = useQuery({
-    queryKey: ["dashboard", "branch-summary", "month"],
-    queryFn: () => dashboardService.getBranchSummary("month"),
+    queryKey: ["dashboard", "branch-summary", period],
+    queryFn: () => dashboardService.getBranchSummary(period),
     ...DASHBOARD_LIVE_QUERY,
   });
 

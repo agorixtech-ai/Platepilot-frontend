@@ -576,7 +576,7 @@ function LoginPage() {
 
 export default function LoginPageRoute() {
   return (
-    <AppPage title="Sign In — Platepilot">
+    <AppPage title="Sign In — PlatePielet">
       <LoginPage />
     </AppPage>
   );

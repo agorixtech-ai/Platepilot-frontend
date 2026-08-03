@@ -1,5 +1,5 @@
 import { AppPage } from "@/components/ionic/AppPage";
-import { AgorixNav } from "@/components/AgorixNav";
+import { PlatePieletNav } from "@/components/PlatePieletNav";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, Calendar, Check, Loader2 } from "lucide-react";
@@ -68,7 +68,7 @@ function DemoPage() {
         fontFamily: "'Inter Variable', 'Inter', system-ui, sans-serif",
       }}
     >
-      <AgorixNav sticky variant="light" />
+      <PlatePieletNav sticky variant="light" />
 
       <main className="pt-16 pb-20 px-6">
         <div className="mx-auto max-w-6xl">
@@ -78,7 +78,7 @@ function DemoPage() {
               <span className="text-brand-gradient">Book your personalized demo</span>
             </div>
             <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">
-              <span className="text-brand-gradient">See PlatePilot in Action</span>
+              <span className="text-brand-gradient">See PlatePielet in Action</span>
             </h1>
             <p className="text-muted-foreground max-w-xl mx-auto">
               Fill out the form below and we'll schedule a live walkthrough tailored to your
@@ -319,7 +319,7 @@ function DemoPage() {
 
 export default function DemoPageRoute() {
   return (
-    <AppPage title="Schedule a Demo — PlatePilot">
+    <AppPage title="Schedule a Demo — PlatePielet">
       <DemoPage />
     </AppPage>
   );

@@ -3,7 +3,7 @@
  *
  * Colors are assigned by the location's index in the branch list and NEVER
  * re-cycled or re-ranked. Keep in sync with --chart-1..5 in styles.css
- * (PlatePilot green chart palette).
+ * (PlatePielet green chart palette).
  */
 
 export const LOCATION_COLORS = [

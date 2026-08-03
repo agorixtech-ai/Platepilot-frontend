@@ -1,7 +1,7 @@
 ---
-name: platepilot-frontend
+name: platepielet-frontend
 description: >
-  PlatePilot frontend conventions (Ionic React SPA + Vite + bun, multi-tenant
+  PlatePielet frontend conventions (Ionic React SPA + Vite + bun, multi-tenant
   restaurant BI SaaS). Use for ANY work under frontend/ — dashboard UI, KPI
   cards, the branch/location switcher, Recharts charts, Ionic pages or
   components, frontend auth flows, Pilot AI insight cards, theming or dark
@@ -9,7 +9,7 @@ description: >
   named. Read BEFORE writing, editing, or reviewing frontend code.
 ---
 
-# PlatePilot Frontend
+# PlatePielet Frontend
 
 Multi-tenant restaurant BI SaaS. Five restaurant branches, data synced **once
 daily** by a backend cron — the UI must always be honest about data freshness.
@@ -96,7 +96,7 @@ transition — documented failure mode, don't reintroduce it).
   `src/contexts/BranchFilterContext.tsx` → `{ branch, setBranch, branches,
 locations, isLoadingBranches }`. `branch` is `"all"` or a branch-name
   string fetched from `GET /api/dashboard/branches`. Selection persists to
-  localStorage key `platepilot_branch`. **This is the standard** — do not
+  localStorage key `platepielet_branch`. **This is the standard** — do not
   create new branch state, props-drill branch names, or use the legacy
   Zustand stores (`store/authStore.ts`, `store/tenantStore.ts` are only used
   by the deprecated `components/shared/` Sidebar/Header).
@@ -206,7 +206,7 @@ method that returns them (see `dashboardService.ts`), not in components.
   utilities and the `--color-*` tokens; hex/rgb literals and `style={{...}}`
   color values are forbidden in dashboard code (the only sanctioned
   exceptions: Recharts props that require a color string — pass
-  `var(--color-…)` — and the legacy fixed-pixel `AgorixHero` stage).
+  `var(--color-…)` — and the legacy fixed-pixel `PlatePieletHero` stage).
 - Never use npm/npx/yarn; never import TanStack Router APIs (removed);
   never add `IonPage` inside a dashboard leaf page; never compute
   period-over-period deltas client-side.

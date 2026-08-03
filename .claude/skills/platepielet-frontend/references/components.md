@@ -20,7 +20,7 @@ function ExamplePage() {
 
 export default function ExamplePageRoute() {
   return (
-    <AppPage title="Example — PlatePilot">
+    <AppPage title="Example — PlatePielet">
       <ExamplePage />
     </AppPage>
   );

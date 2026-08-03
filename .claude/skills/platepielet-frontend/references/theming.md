@@ -124,7 +124,7 @@ theme tokens — not with inline styles at the call site.
 ## Hard rules
 
 - No hex/rgb color literals in components — tokens only. (Grandfathered
-  exceptions: `AgorixHero`'s self-contained fixed-pixel stage.)
+  exceptions: `PlatePieletHero`'s self-contained fixed-pixel stage.)
 - No `style={{ color/background }}` where a Tailwind utility exists;
   `style` is acceptable only for dynamic chart geometry (heights) and
   `var(--color-…)` pass-through to Recharts.

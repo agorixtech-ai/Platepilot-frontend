@@ -82,9 +82,6 @@ type MegaLink = { label: string; href: string; icon: LucideIcon };
 type MegaColumn = { title: string; href: string; links: MegaLink[] };
 type NavItem = { label: string; href: string } | { label: string; mega: MegaColumn[] };
 
-/* Marketing IA. The /product, /solutions, /integrations, /pricing, /resources
-   and /company routes don't exist yet — these links are the target structure
-   and 404 until those pages land. */
 const defaultLinks: NavItem[] = [
   { label: "Home", href: "/" },
   {
@@ -117,11 +114,16 @@ const defaultLinks: NavItem[] = [
             href: "/product/purchase-suggestions",
             icon: ShoppingCart,
           },
-          { label: "PlatePilot AI", href: "/product/ai", icon: Sparkles },
+          { label: "PlatePielet AI", href: "/product/ai", icon: Sparkles },
         ],
       },
+    ],
+  },
+  {
+    label: "Solutions",
+    mega: [
       {
-        title: "Solutions",
+        title: "By business type",
         href: "/solutions",
         links: [
           { label: "Multi-Branch Restaurants", href: "/solutions/multi-branch", icon: Building2 },
@@ -131,8 +133,13 @@ const defaultLinks: NavItem[] = [
           { label: "Restaurant Groups", href: "/solutions/restaurant-groups", icon: Users },
         ],
       },
+    ],
+  },
+  {
+    label: "Integrations",
+    mega: [
       {
-        title: "Integrations",
+        title: "Connect your stack",
         href: "/integrations",
         links: [
           { label: "POS Systems", href: "/integrations#pos-systems", icon: CreditCard },
@@ -154,7 +161,7 @@ const defaultLinks: NavItem[] = [
   { label: "Company", href: "/company" },
 ];
 
-type AgorixNavProps = {
+type PlatePieletNavProps = {
   links?: NavItem[];
   insetClass?: string;
   sticky?: boolean;
@@ -162,12 +169,12 @@ type AgorixNavProps = {
   variant?: "light" | "dark";
 };
 
-export function AgorixNav({
+export function PlatePieletNav({
   links = defaultLinks,
-  insetClass = "agorix-nav__inset",
+  insetClass = "pp-nav__inset",
   sticky = false,
   variant = "light",
-}: AgorixNavProps) {
+}: PlatePieletNavProps) {
   const T = themes[variant];
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -220,7 +227,7 @@ export function AgorixNav({
       <a
         key={item.label}
         href={item.href}
-        className="agorix-nav__mobile-link"
+        className="pp-nav__mobile-link"
         onClick={() => setMobileOpen(false)}
       >
         {item.label}
@@ -229,7 +236,7 @@ export function AgorixNav({
       <Link
         key={item.label}
         to={item.href}
-        className="agorix-nav__mobile-link"
+        className="pp-nav__mobile-link"
         onClick={() => setMobileOpen(false)}
       >
         {item.label}
@@ -239,20 +246,27 @@ export function AgorixNav({
   return (
     <>
       <style>{`
-        /* Same container geometry as .sw-section / .agorix-hero__inset so the
-           logo and buttons line up with the hero copy and every section below */
-        .agorix-nav__inset {
+        /* Same container geometry as .sw-section / .pp-hero__inset so the
+           logo and buttons line up with the hero copy and every section below.
+           Must match .sw-section's own breakpoint exactly (2.5rem down to
+           1.25rem at 640px) — clamp(20px,3vw,40px) drifted from that between
+           640-1333px, pulling the nav's edges in from the rest of the page. */
+        .pp-nav__inset {
           max-width: 1280px;
           margin-inline: auto;
-          padding-inline: clamp(20px, 3vw, 40px);
+          padding-inline: 2.5rem;
         }
-        /* The trigger stays position:static so the panel's containing block is
-           the header — that's what lets it span the full content column
-           instead of hanging off the trigger. */
-        .agorix-nav__item {
-          position: static;
+        @media (max-width: 640px) {
+          .pp-nav__inset {
+            padding-inline: 1.25rem;
+          }
         }
-        .agorix-nav__trigger {
+        /* Panel is positioned relative to its trigger so single-column menus
+           (Solutions, Integrations) sit under the label, not the logo. */
+        .pp-nav__item {
+          position: relative;
+        }
+        .pp-nav__trigger {
           display: inline-flex;
           align-items: center;
           gap: 5px;
@@ -264,19 +278,18 @@ export function AgorixNav({
           line-height: 1;
           cursor: pointer;
         }
-        .agorix-nav__chevron {
+        .pp-nav__chevron {
           transition: transform 0.2s ease;
         }
-        .agorix-nav__trigger[aria-expanded="true"] .agorix-nav__chevron {
+        .pp-nav__trigger[aria-expanded="true"] .pp-nav__chevron {
           transform: rotate(180deg);
         }
-        .agorix-nav__mega {
+        .pp-nav__mega {
           position: absolute;
-          top: 100%;
-          left: clamp(20px, 3vw, 40px);
-          right: clamp(20px, 3vw, 40px);
+          top: calc(100% + 14px);
+          left: 50%;
+          transform: translateX(-50%);
           display: grid;
-          grid-template-columns: repeat(4, minmax(0, 1fr));
           padding: 6px;
           background: ${T.dropdownBg};
           border: 1px solid ${T.dropdownBorder};
@@ -284,15 +297,29 @@ export function AgorixNav({
           box-shadow: 0 24px 60px rgba(7, 26, 20, 0.14);
           z-index: 70;
         }
-        .agorix-nav__mega-col {
+        .pp-nav__mega--1 {
+          width: min(340px, calc(100vw - 40px));
+          grid-template-columns: minmax(0, 1fr);
+        }
+        .pp-nav__mega--2 {
+          width: min(640px, calc(100vw - 40px));
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        .pp-nav__mega--3 {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+        .pp-nav__mega--4 {
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+        }
+        .pp-nav__mega-col {
           display: flex;
           flex-direction: column;
           padding: 26px 22px 30px;
         }
-        .agorix-nav__mega-col + .agorix-nav__mega-col {
+        .pp-nav__mega-col + .pp-nav__mega-col {
           border-left: 1px solid ${T.dropdownBorder};
         }
-        .agorix-nav__mega-title {
+        .pp-nav__mega-title {
           display: inline-flex;
           align-items: center;
           gap: 8px;
@@ -302,13 +329,13 @@ export function AgorixNav({
           color: ${T.text};
           text-decoration: none;
         }
-        .agorix-nav__mega-title svg {
+        .pp-nav__mega-title svg {
           transition: transform 0.2s ease;
         }
-        .agorix-nav__mega-title:hover svg {
+        .pp-nav__mega-title:hover svg {
           transform: translateX(3px);
         }
-        .agorix-nav__mega-link {
+        .pp-nav__mega-link {
           display: flex;
           align-items: center;
           gap: 11px;
@@ -321,11 +348,11 @@ export function AgorixNav({
           text-decoration: none;
           transition: background 0.15s ease, color 0.15s ease;
         }
-        .agorix-nav__mega-link:hover {
+        .pp-nav__mega-link:hover {
           background: ${T.dropdownHover};
           color: ${T.text};
         }
-        .agorix-nav__mega-icon {
+        .pp-nav__mega-icon {
           display: grid;
           place-items: center;
           flex-shrink: 0;
@@ -335,37 +362,53 @@ export function AgorixNav({
           background: ${T.iconBg};
           color: ${T.iconColor};
         }
-        .agorix-nav__toggle {
+        .pp-nav__toggle {
           display: none;
         }
-        .agorix-nav__mobile-panel {
+        .pp-nav__mobile-panel {
           display: none;
         }
-        /* 1100px, not 900 — seven top-level items plus the logo and both
-           buttons stop fitting on one row well before the old breakpoint */
-        @media (max-width: 1100px) {
-          .agorix-nav__links {
+        /* 1240px: measured natural width of logo + 7-item nav + both buttons
+           is ~1190px at full padding — below that the grid's auto-sized
+           center column overflows the right column instead of wrapping,
+           overlapping "Company" under the buttons. 1100px left a dead zone. */
+        @media (max-width: 1240px) {
+          .pp-nav__links {
             display: none !important;
           }
-          .agorix-nav__buttons {
+          .pp-nav__buttons {
             display: none !important;
           }
-          .agorix-nav__toggle {
+          .pp-nav__toggle {
             display: inline-flex !important;
           }
-          .agorix-nav__mobile-panel.open {
+          .pp-nav__mobile-panel.open {
             display: flex;
           }
+          /* The desktop grid splits the two outer columns 50/50 regardless
+             of content — with the nav column hidden/empty, that squeezes
+             the logo into a track narrower than its text and it overflows
+             into the toggle button. auto/1fr/auto gives logo and toggle
+             their natural width and lets the empty middle column absorb
+             the rest. */
+          .pp-nav__inset {
+            grid-template-columns: auto 1fr auto !important;
+          }
         }
-        .agorix-nav__mobile-panel {
+        .pp-nav__mobile-panel {
           flex-direction: column;
           gap: 4px;
-          padding: 8px clamp(20px, 3vw, 40px) 20px;
+          padding: 8px 2.5rem 20px;
           border-top: 1px solid ${T.border};
           max-height: calc(100vh - 120px);
           overflow-y: auto;
         }
-        .agorix-nav__mobile-group {
+        @media (max-width: 640px) {
+          .pp-nav__mobile-panel {
+            padding-inline: 1.25rem;
+          }
+        }
+        .pp-nav__mobile-group {
           padding: 1.1rem 0.25rem 0.4rem;
           font-size: 0.65rem;
           font-weight: 700;
@@ -374,19 +417,19 @@ export function AgorixNav({
           color: ${T.nav};
           opacity: 0.7;
         }
-        .agorix-nav__mobile-link {
+        .pp-nav__mobile-link {
           padding: 0.85rem 0.25rem;
           font-size: 0.95rem;
           color: ${T.nav};
           text-decoration: none;
           border-bottom: 1px solid ${T.border};
         }
-        .agorix-nav__mobile-buttons {
+        .pp-nav__mobile-buttons {
           display: flex;
           gap: 10px;
           margin-top: 14px;
         }
-        .agorix-nav__mobile-buttons a {
+        .pp-nav__mobile-buttons a {
           flex: 1;
         }
       `}</style>
@@ -434,12 +477,12 @@ export function AgorixNav({
                 color: T.text,
               }}
             >
-              Plate Pielet
+              PlatePielet
             </span>
           </Link>
 
           <nav
-            className="agorix-nav__links"
+            className="pp-nav__links"
             style={{
               display: "flex",
               alignItems: "center",
@@ -453,24 +496,26 @@ export function AgorixNav({
               if ("mega" in item) {
                 const open = openDropdown === item.label;
                 return (
-                  <div key={item.label} className="agorix-nav__item">
+                  <div key={item.label} className="pp-nav__item">
                     <button
                       type="button"
-                      className="agorix-nav__trigger"
+                      className="pp-nav__trigger"
                       onClick={() => setOpenDropdown(open ? null : item.label)}
                       aria-haspopup="true"
                       aria-expanded={open}
                     >
                       {item.label}
-                      <ChevronDown className="agorix-nav__chevron" size={15} strokeWidth={2.2} />
+                      <ChevronDown className="pp-nav__chevron" size={15} strokeWidth={2.2} />
                     </button>
                     {open && (
-                      <div className="agorix-nav__mega">
+                      <div
+                        className={`pp-nav__mega pp-nav__mega--${Math.min(item.mega.length, 4)}`}
+                      >
                         {item.mega.map((col) => (
-                          <div key={col.title} className="agorix-nav__mega-col">
+                          <div key={col.title} className="pp-nav__mega-col">
                             <Link
                               to={col.href}
-                              className="agorix-nav__mega-title"
+                              className="pp-nav__mega-title"
                               onClick={() => setOpenDropdown(null)}
                             >
                               {col.title}
@@ -480,10 +525,10 @@ export function AgorixNav({
                               <Link
                                 key={label}
                                 to={href}
-                                className="agorix-nav__mega-link"
+                                className="pp-nav__mega-link"
                                 onClick={() => setOpenDropdown(null)}
                               >
-                                <span className="agorix-nav__mega-icon">
+                                <span className="pp-nav__mega-icon">
                                   <Icon size={16} strokeWidth={2} />
                                 </span>
                                 {label}
@@ -534,14 +579,14 @@ export function AgorixNav({
 
           <div style={{ display: "flex", alignItems: "center", gap: 10, justifySelf: "end" }}>
             <div
-              className="agorix-nav__buttons"
+              className="pp-nav__buttons"
               style={{ display: "flex", alignItems: "center", gap: 10 }}
             >
-              <a href="/demo" style={btnOutlineSm}>
-                Get Demo
-              </a>
-              <a
-                href="/login"
+              <Link to="/demo" style={btnOutlineSm}>
+                Book a Demo
+              </Link>
+              <Link
+                to="/login"
                 style={btnSolidSm}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.background = T.solidHover;
@@ -550,12 +595,12 @@ export function AgorixNav({
                   e.currentTarget.style.background = T.solidBg;
                 }}
               >
-                login
-              </a>
+                Log In
+              </Link>
             </div>
             <button
               type="button"
-              className="agorix-nav__toggle"
+              className="pp-nav__toggle"
               onClick={() => setMobileOpen((v) => !v)}
               aria-label={mobileOpen ? "Close menu" : "Open menu"}
               aria-expanded={mobileOpen}
@@ -578,25 +623,35 @@ export function AgorixNav({
         </header>
 
         <div
-          className={`agorix-nav__mobile-panel${mobileOpen ? " open" : ""}`}
+          className={`pp-nav__mobile-panel${mobileOpen ? " open" : ""}`}
           style={{ background: T.bg }}
         >
           {links.map((item) =>
             "mega" in item
               ? item.mega.map((col) => (
-                  <div key={col.title} style={{ display: "flex", flexDirection: "column" }}>
-                    <div className="agorix-nav__mobile-group">{col.title}</div>
+                  <div
+                    key={`${item.label}-${col.title}`}
+                    style={{ display: "flex", flexDirection: "column" }}
+                  >
+                    <Link
+                      to={col.href}
+                      className="pp-nav__mobile-group"
+                      onClick={() => setMobileOpen(false)}
+                      style={{ display: "block" }}
+                    >
+                      {item.label} · {col.title}
+                    </Link>
                     {col.links.map(mobileLink)}
                   </div>
                 ))
               : mobileLink(item),
           )}
-          <div className="agorix-nav__mobile-buttons">
-            <a href="/demo" style={btnOutlineSm} onClick={() => setMobileOpen(false)}>
-              Get Demo
-            </a>
-            <a
-              href="/login"
+          <div className="pp-nav__mobile-buttons">
+            <Link to="/demo" style={btnOutlineSm} onClick={() => setMobileOpen(false)}>
+              Book a Demo
+            </Link>
+            <Link
+              to="/login"
               style={btnSolidSm}
               onClick={() => setMobileOpen(false)}
               onMouseEnter={(e) => {
@@ -606,8 +661,8 @@ export function AgorixNav({
                 e.currentTarget.style.background = T.solidBg;
               }}
             >
-              login
-            </a>
+              Log In
+            </Link>
           </div>
         </div>
       </div>

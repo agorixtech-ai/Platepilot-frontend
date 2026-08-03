@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
 export const LOGO_SRC = "/logo.webp";
-export const LOGO_ALT = "PlatePilot";
+export const LOGO_ALT = "PlatePielet";
 
 const iconSizes = {
   sm: "h-8 w-8",
@@ -48,7 +48,7 @@ export function AppLogo({
               textClassName,
             )}
           >
-            Plate Pielet
+            PlatePielet
           </p>
           {subtitle && (
             <p className={cn("truncate text-[10px] leading-tight font-medium", subtitleClassName)}>

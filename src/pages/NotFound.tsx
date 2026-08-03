@@ -4,7 +4,7 @@ import { AppPage } from "@/components/ionic/AppPage";
 
 export default function NotFoundPage() {
   return (
-    <AppPage title="Page not found — PlatePilot">
+    <AppPage title="Page not found — PlatePielet">
       <div className="flex min-h-screen items-center justify-center bg-background px-4">
         <div className="max-w-md text-center">
           <h1 className="text-7xl font-bold text-foreground">404</h1>

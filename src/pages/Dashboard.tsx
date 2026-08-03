@@ -31,7 +31,7 @@ export default function DashboardPage() {
   if (!getStoredUser()) return <Redirect to="/login" />;
 
   return (
-    <AppPage title="Dashboard — PlatePilot" scroll={false}>
+    <AppPage title="Dashboard — PlatePielet" scroll={false}>
       <DashboardLayout>
         <Suspense fallback={<div className="min-h-full bg-background" aria-busy="true" />}>
           <Switch>

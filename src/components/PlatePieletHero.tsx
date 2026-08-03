@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-/** Matches PlatePilot brand palette — light landing (soft green-white).
+/** Matches PlatePielet brand palette — light landing (soft green-white).
  *  Exported as the shared landing color theme (Index.tsx product tiles). */
 export const T = {
   bg: "#F6FAF7",
@@ -711,7 +711,7 @@ function AnimatedDashboard({
                 </svg>
               </span>
               <span style={{ fontSize: 13, fontWeight: 600, color: T.text, lineHeight: 1 }}>
-                PlatePilot AI · Analysis
+                PlatePielet AI · Analysis
               </span>
             </div>
             <span
@@ -812,7 +812,7 @@ function AnimatedDashboard({
 }
 
 // ── Component ────────────────────────────────────────────────────────────────
-export function AgorixHero() {
+export function PlatePieletHero() {
   const wrapRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const mobileWrapRef = useRef<HTMLDivElement>(null);
@@ -872,7 +872,7 @@ export function AgorixHero() {
 
   return (
     <section
-      className="agorix-hero"
+      className="pp-hero"
       style={{
         position: "relative",
         width: "100%",
@@ -887,23 +887,23 @@ export function AgorixHero() {
       }}
     >
       <style>{`
-        .agorix-hero__inset {
+        .pp-hero__inset {
           max-width: ${LAYOUT.max}px;
           margin-inline: auto;
           padding-inline: var(--hero-pad);
         }
-        .agorix-hero__stage {
+        .pp-hero__stage {
           position: absolute; left: 0; top: 0;
           width: ${LAYOUT.stage}px; height: ${STAGE_H}px;
           transform-origin: top left;
         }
-        .agorix-hero__copy {
+        .pp-hero__copy {
           position: absolute;
           left: ${COPY_LEFT}px; top: 88px;
           width: ${COPY_WIDTH}px;
           max-width: calc(50% - ${COPY_LEFT + 12}px);
         }
-        .agorix-hero__anim {
+        .pp-hero__anim {
           position: absolute;
           left: 50%; top: 0; width: 50%; height: 100%;
         }
@@ -939,7 +939,7 @@ export function AgorixHero() {
 
       {/* ── MOBILE: plain responsive copy, no scaled canvas, no decorative dashboard ── */}
       {isMobile && (
-        <div className="agorix-hero__inset" style={{ paddingTop: 24, paddingBottom: 56 }}>
+        <div className="pp-hero__inset" style={{ paddingTop: 24, paddingBottom: 56 }}>
           <h1
             style={{
               fontWeight: 800,
@@ -964,7 +964,7 @@ export function AgorixHero() {
               animation: "ag-up .7s .22s both",
             }}
           >
-            PlatePilot unifies your Tally books, POS sales, and inventory across every outlet and
+            PlatePielet unifies your Tally books, POS sales, and inventory across every outlet and
             connected tool — so you predict risk earlier, act faster, and grow margin.
           </p>
           <div
@@ -999,7 +999,7 @@ export function AgorixHero() {
 
       {/* ── MOBILE: animated dashboard mockup, scaled to fit width, below the copy ── */}
       {isMobile && (
-        <div className="agorix-hero__inset" style={{ paddingBottom: 40 }}>
+        <div className="pp-hero__inset" style={{ paddingBottom: 40 }}>
           {/* Same unpadded measuring div as the desktop stage wrapper */}
           <div ref={mobileWrapRef} style={{ position: "relative", width: "100%", height: STAGE_H }}>
             <div
@@ -1038,14 +1038,14 @@ export function AgorixHero() {
 
       {/* ── STAGE WRAPPER (desktop/tablet only — fixed-pixel canvas scaled to fit) ── */}
       {!isMobile && (
-        <div className="agorix-hero__inset">
+        <div className="pp-hero__inset">
           {/* Unpadded measuring div: the abs-positioned stage anchors to it so
               it starts at the inset's content edge (abs children ignore the
               inset's padding), keeping the hero flush with the nav */}
           <div ref={wrapRef} style={{ position: "relative", width: "100%", height: STAGE_H }}>
-            <div ref={stageRef} className="agorix-hero__stage">
+            <div ref={stageRef} className="pp-hero__stage">
               {/* ── LEFT HALF: COPY ── */}
-              <section className="agorix-hero__copy">
+              <section className="pp-hero__copy">
                 <h1
                   style={{
                     fontWeight: 800,
@@ -1073,7 +1073,7 @@ export function AgorixHero() {
                     animation: "ag-up .7s .22s both",
                   }}
                 >
-                  PlatePilot unifies your Tally books, POS sales, and inventory across every outlet
+                  PlatePielet unifies your Tally books, POS sales, and inventory across every outlet
                   and connected tool — so you predict risk earlier, act faster, and grow margin.
                 </p>
                 <div
@@ -1105,7 +1105,7 @@ export function AgorixHero() {
 
               {/* ── RIGHT HALF: ANIMATED DASHBOARD ── */}
               <div
-                className="agorix-hero__anim"
+                className="pp-hero__anim"
                 style={{ animation: "ag-fadein 0.6s 0.2s ease-out both" }}
               >
                 <AnimatedDashboard
