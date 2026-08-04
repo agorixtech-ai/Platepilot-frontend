@@ -184,6 +184,50 @@ export function MarketingShell({
           border-radius: 50%;
           background: #16A34A;
         }
+        /* Not shipped yet — hollow dot so a planned item never reads as a live one. */
+        .mkt-bullets-planned li { color: #66736B; }
+        .mkt-bullets-planned li::before {
+          background: transparent;
+          border: 1.5px solid #9AA8A0;
+        }
+        /* Native <details> — no JS, works before hydration, keyboard accessible for free. */
+        .mkt-faq {
+          border: 1px solid #DDE7E1;
+          border-radius: 14px;
+          background: #fff;
+          overflow: hidden;
+        }
+        .mkt-faq + .mkt-faq { margin-top: 0.7rem; }
+        .mkt-faq summary {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 1rem;
+          padding: 1.05rem 1.2rem;
+          cursor: pointer;
+          font-size: 0.98rem;
+          font-weight: 700;
+          color: ${INK};
+          list-style: none;
+        }
+        .mkt-faq summary::-webkit-details-marker { display: none; }
+        .mkt-faq summary::after {
+          content: "+";
+          flex-shrink: 0;
+          font-size: 1.25rem;
+          font-weight: 600;
+          color: #16A34A;
+          transition: transform 0.2s ease;
+        }
+        .mkt-faq[open] summary::after { transform: rotate(45deg); }
+        .mkt-faq summary:hover { background: #F1F6F3; }
+        .mkt-faq-body {
+          padding: 0 1.2rem 1.15rem;
+          font-size: 0.93rem;
+          line-height: 1.6;
+          color: #66736B;
+          max-width: 44rem;
+        }
         .mkt-anchor {
           scroll-margin-top: 110px;
           padding: 2rem 0;
