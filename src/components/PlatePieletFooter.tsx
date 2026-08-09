@@ -113,7 +113,7 @@ export function PlatePieletFooter({ children, mode = "reveal" }: PlatePieletFoot
         .pp-footer-cover {
           position: relative;
           z-index: 1;
-          background: #F6FAF7;
+          background: #FFFFFF;
         }
         .pp-footer-spacer {
           pointer-events: none;
@@ -161,7 +161,7 @@ export function PlatePieletFooter({ children, mode = "reveal" }: PlatePieletFoot
           font-size: 1.1rem;
           font-weight: 700;
           letter-spacing: 0.02em;
-          color: #F6FAF7;
+          color: #FFFFFF;
           text-decoration: none;
         }
         .pp-footer-logo img { border-radius: 10px; object-fit: cover; }

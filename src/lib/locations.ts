@@ -10,7 +10,7 @@ export const LOCATION_COLORS = [
   "var(--color-chart-1)", // #16A34A
   "var(--color-chart-2)", // #22C55E
   "var(--color-chart-3)", // #0F7A4C
-  "var(--color-chart-4)", // #A3E635
+  "var(--color-chart-4)", // #D97706
   "var(--color-chart-5)", // #073B2A
 ] as const;
 

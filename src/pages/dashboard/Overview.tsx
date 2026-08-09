@@ -55,14 +55,14 @@ import {
   type Tone,
   type MetricKey,
 } from "@/components/dashboard/shared";
-import { dashboardService } from "@/services/dashboardService";
+import { dashboardService, type Period } from "@/services/dashboardService";
 import { ChannelBreakdown } from "@/components/dashboard/ChannelBreakdown";
 import { InventoryAlertsCard } from "@/components/dashboard/InventoryAlertsCard";
 import { ItemAvatar } from "@/components/dashboard/ItemAvatar";
 import { useBranchFilter } from "@/contexts/BranchFilterContext";
 import { useDateRange, rangeToPeriod } from "@/contexts/DateRangeContext";
 import { AllLocationsOverview, ComparisonChart } from "@/components/dashboard/AllLocationsOverview";
-import { DishActivityMatrix } from "@/components/dashboard/DishActivityMatrix";
+import { MenuWasteAnalysis } from "@/components/dashboard/MenuWasteAnalysis";
 import { SingleLocationView } from "@/components/dashboard/SingleLocationView";
 import { useCounterAnimation } from "@/hooks/useCounterAnimation";
 
@@ -279,9 +279,26 @@ function OverviewPage() {
   const [isReconOpen, setIsReconOpen] = useState(false);
   const queryClient = useQueryClient();
   const { branch, locations } = useBranchFilter();
-  const { range } = useDateRange();
+  const { range, setRange } = useDateRange();
   const period = rangeToPeriod(range);
   const reducedMotion = useReducedMotion();
+
+  const handlePeriodChange = (newPeriod: Period) => {
+    switch (newPeriod) {
+      case "today":
+        setRange({ kind: "today" });
+        break;
+      case "week":
+        setRange({ kind: "7d" });
+        break;
+      case "month":
+        setRange({ kind: "30d" });
+        break;
+      case "year":
+        setRange({ kind: "custom", from: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000), to: new Date() });
+        break;
+    }
+  };
 
   const metricsQuery = useQuery({
     queryKey: ["dashboard", "metrics", period, branch],
@@ -462,10 +479,10 @@ function OverviewPage() {
           <div className="flex items-center gap-2.5">
             <h2 className="text-xl font-extrabold tracking-tight">Overview</h2>
             <span className="relative flex h-2 w-2">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#A3E635] opacity-75" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-[#A3E635]" />
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#D97706] opacity-75" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-[#D97706]" />
             </span>
-            <span className="text-[9px] font-bold uppercase tracking-widest text-[#A3E635]">
+            <span className="text-[9px] font-bold uppercase tracking-widest text-[#D97706]">
               Live
             </span>
           </div>
@@ -520,10 +537,11 @@ function OverviewPage() {
       {/* ── Revenue by location | Dish Activity ──────────────────────────────── */}
       <section className="grid gap-4 lg:grid-cols-2">
         <ComparisonChart locations={locations} />
-        <DishActivityMatrix
+        <MenuWasteAnalysis
           items={wasteItems}
+          period={period}
+          onPeriodChange={handlePeriodChange}
           isLoading={menuEngineeringQuery.isLoading}
-          currency={menuEngineeringQuery.data?.currency}
         />
       </section>
 

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, Calendar, Check, Loader2 } from "lucide-react";
 import { API_URL } from "@/lib/apiBase";
+import { SALES_PHONE, SALES_PHONE_HREF } from "@/lib/contact";
 
 function DemoPage() {
   const [submitted, setSubmitted] = useState(false);
@@ -279,10 +280,10 @@ function DemoPage() {
                         <div>
                           <p className="text-sm font-medium text-foreground">Phone</p>
                           <a
-                            href="tel:+1234567890"
+                            href={SALES_PHONE_HREF}
                             className="text-sm text-primary hover:underline"
                           >
-                            +1 (234) 567-890
+                            {SALES_PHONE}
                           </a>
                         </div>
                       </div>

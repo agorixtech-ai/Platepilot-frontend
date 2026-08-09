@@ -99,7 +99,7 @@ export function FloatingAiAssistant() {
               style={{ background: "var(--gradient-brand)" }}
             >
               <div className="flex items-center gap-1.5">
-                <div className="h-2 w-2 animate-pulse rounded-full bg-[#A3E635]"></div>
+                <div className="h-2 w-2 animate-pulse rounded-full bg-[#D97706]"></div>
                 <span className="text-xs font-medium text-white/90">Pilot AI</span>
               </div>
               <div className="flex items-center gap-1">

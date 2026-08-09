@@ -15,6 +15,7 @@ import {
   FileSpreadsheet,
   LayoutDashboard,
   Menu,
+  Phone,
   PieChart,
   Plug,
   ShoppingCart,
@@ -29,10 +30,11 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { LOGO_ALT, LOGO_SRC } from "@/components/AppLogo";
+import { SALES_PHONE, SALES_PHONE_HREF } from "@/lib/contact";
 
 const themes = {
   light: {
-    bg: "#F6FAF7",
+    bg: "#FFFFFF",
     ink: "#FFFFFF",
     text: "#152019",
     nav: "#66736B",
@@ -43,9 +45,8 @@ const themes = {
     dropdownItem: "#152019",
     dropdownHover: "#E8F7ED",
     iconBg: "#E8F7ED",
-    iconColor: "#16A34A",
-    solidBg: "#16A34A",
-    solidHover: "#15803D",
+    iconColor: "#15803D",
+    gradientCTA: "linear-gradient(135deg, #073B2A 0%, #0F7A4C 55%, #15803D 100%)",
     solidColor: "#FFFFFF",
   },
   dark: {
@@ -61,8 +62,7 @@ const themes = {
     dropdownHover: "rgba(255, 255, 255, 0.06)",
     iconBg: "rgba(255, 255, 255, 0.08)",
     iconColor: "#4ADE80",
-    solidBg: "#16A34A",
-    solidHover: "#15803D",
+    gradientCTA: "linear-gradient(135deg, #073B2A 0%, #0F7A4C 55%, #15803D 100%)",
     solidColor: "#FFFFFF",
   },
 } as const;
@@ -187,7 +187,7 @@ export function PlatePieletNav({
     letterSpacing: "0.06em",
     height: 40,
     padding: "0 18px",
-    color: "#16A34A",
+    color: "#15803D",
     border: "1px solid #16A34A",
     borderRadius: 12,
     background: "#FFFFFF",
@@ -197,8 +197,26 @@ export function PlatePieletNav({
     ...btnOutlineSm,
     color: T.solidColor,
     border: "none",
-    background: T.solidBg,
-    boxShadow: "0 4px 12px rgba(22, 163, 74, 0.22)",
+    // background + boxShadow live in the .pp-btn-solid CSS class below so
+    // its :hover rule can override them (inline style beats CSS, hover
+    // included). `undefined` clears the "#FFFFFF" spread in from
+    // btnOutlineSm (React omits undefined style props entirely).
+    background: undefined,
+  };
+
+  const phoneLinkStyle = {
+    ...btnBase,
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 7,
+    height: 40,
+    padding: "0 10px",
+    fontSize: 14,
+    fontWeight: 700,
+    color: T.text,
+    background: "transparent",
+    border: "none",
+    whiteSpace: "nowrap" as const,
   };
 
   useEffect(() => {
@@ -255,6 +273,15 @@ export function PlatePieletNav({
           max-width: 1280px;
           margin-inline: auto;
           padding-inline: 2.5rem;
+        }
+        .pp-btn-solid {
+          background: ${T.gradientCTA};
+          box-shadow: 0 4px 14px rgba(15,122,76,0.28);
+          transition: box-shadow .2s ease, transform .15s ease;
+        }
+        .pp-btn-solid:hover {
+          box-shadow: 0 10px 26px rgba(15,122,76,0.38), inset 0 1px 0 rgba(255,255,255,0.18);
+          transform: translateY(-1px);
         }
         @media (max-width: 640px) {
           .pp-nav__inset {
@@ -582,20 +609,17 @@ export function PlatePieletNav({
               className="pp-nav__buttons"
               style={{ display: "flex", alignItems: "center", gap: 10 }}
             >
-              <Link to="/demo" style={btnOutlineSm}>
-                Book a Demo
-              </Link>
-              <Link
-                to="/login"
-                style={btnSolidSm}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = T.solidHover;
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = T.solidBg;
-                }}
-              >
+              {/* No phone number here on purpose: .pp-nav__inset is capped at
+                  1280px, so this row has 1200px to work with and already needs
+                  1072px. The 160px number overflowed the links column at every
+                  desktop width — a media query can't fix a fixed-width
+                  container. It lives in the hero CTA, the footer CTA band and
+                  the mobile panel instead. */}
+              <Link to="/login" style={btnOutlineSm}>
                 Log In
+              </Link>
+              <Link to="/demo" className="pp-btn-solid" style={btnSolidSm}>
+                Book a Demo
               </Link>
             </div>
             <button
@@ -647,21 +671,20 @@ export function PlatePieletNav({
               : mobileLink(item),
           )}
           <div className="pp-nav__mobile-buttons">
-            <Link to="/demo" style={btnOutlineSm} onClick={() => setMobileOpen(false)}>
-              Book a Demo
+            <a href={SALES_PHONE_HREF} style={phoneLinkStyle} onClick={() => setMobileOpen(false)}>
+              <Phone size={15} strokeWidth={2.2} />
+              {SALES_PHONE}
+            </a>
+            <Link to="/login" style={btnOutlineSm} onClick={() => setMobileOpen(false)}>
+              Log In
             </Link>
             <Link
-              to="/login"
+              to="/demo"
+              className="pp-btn-solid"
               style={btnSolidSm}
               onClick={() => setMobileOpen(false)}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = T.solidHover;
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = T.solidBg;
-              }}
             >
-              Log In
+              Book a Demo
             </Link>
           </div>
         </div>

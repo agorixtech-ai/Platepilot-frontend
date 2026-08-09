@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { SALES_PHONE, SALES_PHONE_HREF } from "@/lib/contact";
 
 /** Matches PlatePielet brand palette — light landing (soft green-white).
  *  Exported as the shared landing color theme (Index.tsx product tiles). */
 export const T = {
-  bg: "#F6FAF7",
+  bg: "#FFFFFF",
   ink: "#FFFFFF",
   text: "#152019",
   soft: "rgba(21,32,25,0.78)",
@@ -19,17 +20,32 @@ export const T = {
   surface: "#FFFFFF",
   inset: "#E8F7ED",
   accent: "#16A34A",
+  /* Button/badge fill under WHITE text. #16A34A is only 3.30:1 against white,
+     which fails AA for a label; #15803D is 5.02:1. Fills that carry no text
+     keep using `accent`. */
+  accentSolid: "#15803D",
   accentSoft: "rgba(22,163,74,0.12)",
   accentBorder: "rgba(22,163,74,0.28)",
   accentGlow: "rgba(22,163,74,0.4)",
-  purple: "#A3E635",
+  purple: "#D97706",
   warn: "#F59E0B",
-  lime: "#A3E635",
   limeDark: "#0A1A10",
   gradient: "linear-gradient(90deg, #073B2A 0%, #0F7A4C 50%, #22C55E 100%)",
   gradientHover: "linear-gradient(90deg, #0A4A35 0%, #12965C 50%, #4ADE80 100%)",
-  gradientA: "linear-gradient(90deg, #0F7A4C 0%, #16A34A 100%)",
-  gradientB: "linear-gradient(90deg, #16A34A 0%, #22C55E 100%)",
+  /* Endpoints stay >= 3:1 on white (the AA floor for large text). The old
+     gradientB ended on #22C55E at 2.28:1 — an H1 nobody with low vision could
+     read. Both ramps now run dark -> mid -> brand so they still read as two
+     distinct highlights. */
+  gradientA: "linear-gradient(90deg, #073B2A 0%, #0F7A4C 100%)",
+  gradientB: "linear-gradient(90deg, #0F7A4C 0%, #16A34A 100%)",
+  /* Premium gradient/glow additions — button fill, decorative mint accents,
+     hero glow, and card glass. Never reaches #16A34A/#22C55E under text
+     (see the accentSolid note above on AA contrast). */
+  gradientCTA: "linear-gradient(135deg, #073B2A 0%, #0F7A4C 55%, #15803D 100%)",
+  gradientMint: "linear-gradient(135deg, #16A34A 0%, #84CC16 55%, #ECFCCB 100%)",
+  glowHero:
+    "radial-gradient(closest-side, rgba(34,197,94,0.28) 0%, rgba(163,230,53,0.14) 45%, rgba(255,255,255,0) 72%)",
+  cardGlassBg: "rgba(255,255,255,0.86)",
 } as const;
 
 const gradientClip = (gradient: string) =>
@@ -42,8 +58,11 @@ const gradientClip = (gradient: string) =>
 
 const cardShell = {
   border: `1px solid ${T.border}`,
-  borderRadius: 8,
-  background: T.surface,
+  borderRadius: 14,
+  background: T.cardGlassBg,
+  backdropFilter: "blur(10px) saturate(160%)",
+  WebkitBackdropFilter: "blur(10px) saturate(160%)",
+  boxShadow: "0 2px 10px rgba(7,26,20,0.06)",
 } as const;
 
 const LAYOUT = { max: 1280, pad: 40, stage: 1225 } as const;
@@ -85,7 +104,7 @@ const btnOutlineSm = {
   letterSpacing: "0.06em",
   height: 40,
   padding: "0 18px",
-  color: T.accent,
+  color: T.accentSolid,
   border: `1px solid ${T.accent}`,
   borderRadius: 12,
   background: "#FFFFFF",
@@ -94,8 +113,12 @@ const btnSolidSm = {
   ...btnOutlineSm,
   color: T.ink,
   border: "none",
-  background: T.accent,
-  boxShadow: "0 4px 12px rgba(22, 163, 74, 0.22)",
+  // background + boxShadow live in the .pp-btn-solid CSS class (below) so
+  // its :hover rule can override them — inline style beats any CSS
+  // selector, hover included. `undefined` here clears the "#FFFFFF" spread
+  // in from btnOutlineSm (React omits undefined style props entirely), so
+  // the CSS class's background can actually take effect.
+  background: undefined,
 };
 const btnOutlineLg = { ...btnOutlineSm, fontSize: 16, height: 48, padding: "0 24px" };
 const btnSolidLg = { ...btnSolidSm, fontSize: 16, height: 48, padding: "0 26px" };
@@ -117,12 +140,12 @@ type AlertCard = {
 const ALERT_CARDS: AlertCard[] = [
   {
     score: "92",
-    risk: "Reconciliation Risk",
+    risk: "Food Cost Risk",
     date: "Tue, Sep 30",
-    title: "Payment",
+    title: "Food Cost",
     subtitle: "Anna Nagar Outlet",
-    message: "POS settlement unmatched in Tally — ₹84,200",
-    status: "Unreconciled",
+    message: "Food cost running 6.4% over target — ₹41,800 margin at risk",
+    status: "Over Budget",
     statusColor: T.warn,
     badgeBg: "#FF5757", // red — highest risk
     badgeFg: "#fff",
@@ -141,12 +164,12 @@ const ALERT_CARDS: AlertCard[] = [
   },
   {
     score: "88",
-    risk: "GST Risk",
+    risk: "Wastage Risk",
     date: "Tue, Sep 30",
-    title: "GST Filing",
+    title: "Wastage",
     subtitle: "Head Office",
-    message: "GSTR-1 mismatch — ₹2,10,000 in unlinked invoices",
-    status: "Filing Pending",
+    message: "Kitchen wastage trending +2.1% — ₹9,600 above weekly norm",
+    status: "Needs Review",
     statusColor: T.warn,
     badgeBg: "#FF9B3E", // amber — mid risk
     badgeFg: "#2D1200",
@@ -157,19 +180,19 @@ const ALERT_CARDS: AlertCard[] = [
 type CardStat = { label: string; value: number };
 const CARD_STATS: CardStat[][] = [
   [
-    { label: "Receivables", value: 14 },
-    { label: "Bills Today", value: 847 },
-    { label: "Alerts", value: 3 },
+    { label: "Food Cost %", value: 31 },
+    { label: "Purchase Orders", value: 14 },
+    { label: "Wastage Alerts", value: 3 },
   ],
   [
-    { label: "Receivables", value: 5 },
-    { label: "Bills Today", value: 212 },
-    { label: "Alerts", value: 7 },
+    { label: "Food Cost %", value: 28 },
+    { label: "Purchase Orders", value: 9 },
+    { label: "Wastage Alerts", value: 1 },
   ],
   [
-    { label: "Receivables", value: 22 },
-    { label: "Bills Today", value: 1200 },
-    { label: "Alerts", value: 3 },
+    { label: "Food Cost %", value: 34 },
+    { label: "Purchase Orders", value: 22 },
+    { label: "Wastage Alerts", value: 5 },
   ],
 ];
 
@@ -188,7 +211,7 @@ const BASE_ITEMS: { name: string; sub: string; icon: IconKey }[] = [
   { name: "Sale #POS-2249", sub: "Anna Nagar", icon: "pos" },
   { name: "Receipt #RCP-0344", sub: "Velachery", icon: "file" },
   { name: "Purchase #PO-1192", sub: "Head Office", icon: "tag" },
-  { name: "Ledger #LED-7701", sub: "GST Module", icon: "file" },
+  { name: "Ledger #LED-7701", sub: "VAT Module", icon: "file" },
   { name: "Bill #BILL-4432", sub: "Nungambakkam", icon: "pos" },
   { name: "Journal #JV-5521", sub: "Accounts", icon: "tag" },
   { name: "Transfer #TRF-9901", sub: "Bank Sync", icon: "zap" },
@@ -202,17 +225,17 @@ const SCROLL_DISTANCE = BASE_ITEMS.length * ROW_H;
 // ── AI ticker ────────────────────────────────────────────────────────────────
 // 5 continuous paragraphs — each streams as one flowing block of text
 const AI_LINE_SETS = [
-  "GST reconciliation gap detected at Anna Nagar outlet. ₹84,200 POS mismatch flagged in Tally books. Priority: High — immediate review recommended.",
-  "POS settlement unmatched across 2 outlets. Anna Nagar variance of ₹84,200 remains unresolved. Manual voucher reconciliation suggested.",
+  "Food cost trending 6.4% over target at Anna Nagar. Chicken and rice purchases up 12% week-on-week. Recommend renegotiating supplier rate before month-end.",
+  "Inventory shrinkage gap of ₹18,400 detected at Velachery. Three SKUs affected over the past 7 days. Stock count reconciliation suggested.",
   "Food cost variance +3.2% above weekly threshold. Velachery branch exceeding budget on 4 items. Adjust procurement to recover margin gap.",
-  "Inventory shrinkage alert: ₹18,400 gap at Velachery. Three SKUs affected over the past 7 days. Escalated to branch operations manager.",
-  "Accounts receivable overdue across 14 entries. Oldest outstanding for 47 days. Follow-up queue updated — action required today.",
+  "Wastage trending +2.1% this week — ₹9,600 above the norm. Prep portions on 3 dishes look oversized. Kitchen review recommended.",
+  "14 purchase orders pending approval across outlets. 2 vendors flagged for price increases this month. Review before next delivery cycle.",
 ];
 
 const SMALL_STATS = [
-  { val: "₹2.4L", label: "Sales Today", color: T.text, delay: "1.02s" },
+  { val: "₹8.6L", label: "Inventory Value", color: T.text, delay: "1.02s" },
   { val: "847", label: "Bills Today", color: T.text, delay: "1.07s" },
-  { val: "92%", label: "GST Filed", color: T.accent, delay: "1.12s" },
+  { val: "12", label: "AI Insights", color: T.accent, delay: "1.12s" },
 ];
 
 // ── Count-up component ───────────────────────────────────────────────────────
@@ -298,6 +321,22 @@ function AnimatedDashboard({
         animation: "ag-float 3.5s 0.9s ease-in-out infinite alternate",
       }}
     >
+      {/* Soft blurred glow behind the whole assembly — "green gradient
+          glow behind the dashboard" ask; blur(70px) makes exact bounds
+          forgiving. */}
+      <div
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          left: 40,
+          top: STAGE_H / 2 - 260,
+          width: 520,
+          height: 520,
+          background: T.glowHero,
+          filter: "blur(70px)",
+          pointerEvents: "none",
+        }}
+      />
       {/* ── SCROLLING SOURCE LIST ── */}
       <div
         style={{
@@ -444,6 +483,20 @@ function AnimatedDashboard({
       </svg>
 
       {/* ── CONNECTOR NODE (centered on spine) ── */}
+      {/* Thin mint-gradient ring behind the solid dot — a 2px sliver of
+          T.gradientMint peeks out around the smaller solid circle on top. */}
+      <div
+        style={{
+          position: "absolute",
+          left: SPINE_X - HALF - 10,
+          top: CONNECT_Y - 10,
+          width: 20,
+          height: 20,
+          borderRadius: "50%",
+          background: T.gradientMint,
+          zIndex: 3,
+        }}
+      />
       <div
         style={{
           position: "absolute",
@@ -488,10 +541,12 @@ function AnimatedDashboard({
               style={{
                 position: "absolute",
                 width: "100%",
-                borderRadius: 12,
-                background: "#FFFFFF",
-                border: "1px solid rgba(0,0,0,0.07)",
-                boxShadow: "0 4px 20px rgba(0,0,0,0.10)",
+                borderRadius: 16,
+                background: T.cardGlassBg,
+                backdropFilter: "blur(10px) saturate(160%)",
+                WebkitBackdropFilter: "blur(10px) saturate(160%)",
+                border: "1px solid rgba(0,0,0,0.06)",
+                boxShadow: "0 4px 20px rgba(7,26,20,0.08)",
                 padding: "14px 16px",
                 boxSizing: "border-box",
               }}
@@ -907,6 +962,15 @@ export function PlatePieletHero() {
           position: absolute;
           left: 50%; top: 0; width: 50%; height: 100%;
         }
+        .pp-btn-solid {
+          background: ${T.gradientCTA};
+          box-shadow: 0 4px 14px rgba(15,122,76,0.28);
+          transition: box-shadow .2s ease, transform .15s ease;
+        }
+        .pp-btn-solid:hover {
+          box-shadow: 0 10px 26px rgba(15,122,76,0.38), inset 0 1px 0 rgba(255,255,255,0.18);
+          transform: translateY(-1px);
+        }
 
         @keyframes ag-up      { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:none} }
         @keyframes ag-pop     { from{opacity:0;transform:translateY(10px) scale(.97)} to{opacity:1;transform:none} }
@@ -951,9 +1015,8 @@ export function PlatePieletHero() {
               animation: "ag-up .7s .1s both",
             }}
           >
-            Business Management That Turns Your{" "}
-            <span style={gradientClip(T.gradientA)}>Tally &amp; POS Data</span> into{" "}
-            <span style={gradientClip(T.gradientB)}>Intelligence</span>
+            Control <span style={gradientClip(T.gradientA)}>Food Cost</span>, Inventory, Procurement
+            &amp; <span style={gradientClip(T.gradientB)}>Wastage</span> — All in One Place.
           </h1>
           <p
             style={{
@@ -964,8 +1027,9 @@ export function PlatePieletHero() {
               animation: "ag-up .7s .22s both",
             }}
           >
-            PlatePielet unifies your Tally books, POS sales, and inventory across every outlet and
-            connected tool — so you predict risk earlier, act faster, and grow margin.
+            PlatePielet unifies your POS sales, purchases, and stock into one live view — so you
+            catch cost leakage before it eats your margin, with Pilot AI flagging what needs
+            attention today.
           </p>
           <div
             style={{
@@ -977,21 +1041,11 @@ export function PlatePieletHero() {
               animation: "ag-up .7s .32s both",
             }}
           >
-            <a
-              href="/login"
-              style={{ ...btnSolidLg, flex: "1 1 auto" }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = "#15803D";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = T.accent;
-                e.currentTarget.style.filter = "none";
-              }}
-            >
-              Get Started
+            <a href="/demo" className="pp-btn-solid" style={{ ...btnSolidLg, flex: "1 1 auto" }}>
+              Book a Demo
             </a>
-            <a href="#features" style={{ ...btnOutlineLg, flex: "1 1 auto" }}>
-              Explore Features
+            <a href={SALES_PHONE_HREF} style={{ ...btnOutlineLg, flex: "1 1 auto" }}>
+              Call {SALES_PHONE}
             </a>
           </div>
         </div>
@@ -1057,11 +1111,10 @@ export function PlatePieletHero() {
                     animation: "ag-up .7s .1s both",
                   }}
                 >
-                  Business Management That Turns
+                  Control <span style={gradientClip(T.gradientA)}>Food Cost</span>, Inventory,
                   <br />
-                  Your <span style={gradientClip(T.gradientA)}>Tally &amp; POS Data</span> into
-                  <br />
-                  <span style={gradientClip(T.gradientB)}>Intelligence</span>
+                  Procurement &amp; <span style={gradientClip(T.gradientB)}>Wastage</span>
+                  <br />— All in One Place.
                 </h1>
                 <p
                   style={{
@@ -1073,8 +1126,9 @@ export function PlatePieletHero() {
                     animation: "ag-up .7s .22s both",
                   }}
                 >
-                  PlatePielet unifies your Tally books, POS sales, and inventory across every outlet
-                  and connected tool — so you predict risk earlier, act faster, and grow margin.
+                  PlatePielet unifies your POS sales, purchases, and stock into one live view — so
+                  you catch cost leakage before it eats your margin, with Pilot AI flagging what
+                  needs attention today.
                 </p>
                 <div
                   style={{
@@ -1085,20 +1139,11 @@ export function PlatePieletHero() {
                     animation: "ag-up .7s .32s both",
                   }}
                 >
-                  <a
-                    href="/login"
-                    style={btnSolidLg}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = "#15803D";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = T.accent;
-                    }}
-                  >
-                    Get Started
+                  <a href="/demo" className="pp-btn-solid" style={btnSolidLg}>
+                    Book a Demo
                   </a>
-                  <a href="#features" style={btnOutlineLg}>
-                    Explore Features
+                  <a href={SALES_PHONE_HREF} style={btnOutlineLg}>
+                    Call {SALES_PHONE}
                   </a>
                 </div>
               </section>

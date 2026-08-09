@@ -1,30 +1,42 @@
 import { AppPage } from "@/components/ionic/AppPage";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import Lenis from "lenis";
 import {
+  ArrowRight,
+  ArrowUp,
   BarChart3,
   Bell,
+  ChevronRight,
   ClipboardCheck,
   FileText,
   IndianRupee,
   LayoutDashboard,
+  LayoutGrid,
   Megaphone,
   Package,
   Receipt,
+  Shield,
   ShoppingCart,
   Sparkles,
   Star,
   Tag,
+  Target,
   Trash2,
+  TrendingUp,
+  Zap,
 } from "lucide-react";
 import { PlatePieletHero, T } from "@/components/PlatePieletHero";
+import PlugConnectedIcon from "@/components/ui/icons/plug-connected-icon";
+import { MagicCard } from "@/components/ui/magic-card";
 import { PlatePieletNav } from "@/components/PlatePieletNav";
 import InteractiveBentoGallery, {
   type BentoMediaItem,
 } from "@/components/blocks/interactive-bento-gallery";
 import { CrossPlatformSection } from "@/components/CrossPlatformSection";
 import { PlatePieletFooter } from "@/components/PlatePieletFooter";
+import { Seo } from "@/components/Seo";
+import { SALES_PHONE, SALES_PHONE_HREF } from "@/lib/contact";
 
 /* ─── Product-preview tiles ──────────────────────────────────────────────────
    Coded mini-mockups of the real dashboard modules (src/pages/dashboard/*):
@@ -373,6 +385,39 @@ const GALLERY_MEDIA: BentoMediaItem[] = [
   },
 ];
 
+/* One string, two consumers: AppPage owns document.title, Seo owns og:title.
+   Keeping them in sync by hand is how they drift. */
+const PAGE_TITLE = "Restaurant Management Software for UAE Restaurants | PlatePielet";
+const PAGE_DESCRIPTION =
+  "PlatePielet unifies your Tally books, POS sales and inventory into one restaurant intelligence platform — live margin dashboards, waste alerts and AI purchase calls. Book a demo.";
+
+/* ─── Social proof: logo wall + outcome stats ────────────────────────────────
+ *
+ * ⚠️ PLACEHOLDER DATA. Both arrays below MUST be replaced with real customers
+ * and real measured figures before launch. qlub and Syrve lead with "3,000+
+ * restaurants" and "10,000+ / 50+ countries" — a logo wall directly under the
+ * hero is the single biggest trust signal this page is missing, but a fabricated
+ * one is worse than none.
+ *
+ * Logos render as text wordmarks deliberately: no image assets to source, and
+ * placeholder text can never be mistaken for a real brand's mark.
+ * ponytail: swap to <img> once real logo SVGs exist — same grid, same classes.
+ */
+const CUSTOMER_LOGOS = [
+  "Your Client 1",
+  "Your Client 2",
+  "Your Client 3",
+  "Your Client 4",
+  "Your Client 5",
+  "Your Client 6",
+];
+
+const OUTCOME_STATS: { value: string; label: string; sub: string }[] = [
+  { value: "AED 1,800", label: "Average monthly leakage found", sub: "per outlet, in month one" },
+  { value: "6 hrs", label: "Tally reconciliation time saved", sub: "every week, per finance lead" },
+  { value: "3 → 1", label: "Systems your team logs into", sub: "Tally, POS and stock, unified" },
+];
+
 /* ─── Testimonials & FAQ content ─────────────────────────────────────────── */
 const TESTIMONIALS: { quote: string; name: string; place: string }[] = [
   {
@@ -399,7 +444,7 @@ const TESTIMONIALS: { quote: string; name: string; place: string }[] = [
     place: "Urban Tandoor · Bengaluru",
   },
   {
-    quote: "The GST mismatch alert saved us from a filing penalty in our very first week.",
+    quote: "The VAT mismatch alert saved us from a filing penalty in our very first week.",
     name: "Deepa S.",
     place: "Biryani House · Chennai",
   },
@@ -434,7 +479,9 @@ const FAQS: [string, string][] = [
   ],
 ];
 
-/* ─── Menu-engineering report cards (mirrors dashboard/MenuEngineering) ──── */
+/* ─── Menu-engineering quadrant matrix (mirrors dashboard/MenuEngineering) ──
+   area: which corner of the 2×2 grid this dish's tier occupies —
+   tr = popular + profitable, br = popular only, tl = profitable only, bl = neither. */
 const ME_DISHES = [
   {
     dish: "Chicken Biryani",
@@ -443,10 +490,11 @@ const ME_DISHES = [
     earns: "₹92",
     earnsPct: 80,
     tier: "Best Seller",
-    act: "Customers love it and it earns well. Keep it front and center.",
+    act: "Sells well and earns well. Keep it front and center.",
     color: "#15803D",
     bg: "rgba(22,163,74,0.08)",
     icon: Star,
+    area: "tr",
   },
   {
     dish: "Butter Naan",
@@ -459,6 +507,7 @@ const ME_DISHES = [
     color: "#92400E",
     bg: "rgba(245,158,11,0.1)",
     icon: Tag,
+    area: "br",
   },
   {
     dish: "Mutton Sukka",
@@ -471,6 +520,7 @@ const ME_DISHES = [
     color: "#0F7A4C",
     bg: "#E8F7ED",
     icon: Megaphone,
+    area: "tl",
   },
   {
     dish: "Veg Cutlet",
@@ -483,6 +533,7 @@ const ME_DISHES = [
     color: "#B91C1C",
     bg: "rgba(239,68,68,0.08)",
     icon: Trash2,
+    area: "bl",
   },
 ];
 
@@ -564,7 +615,7 @@ function Index() {
         "Daily digest of anomalies worth your attention",
         'Ask questions in plain language — "why is food cost up in Velachery?"',
         "Predictive purchase suggestions before you run out",
-        "GST and reconciliation risks flagged before filing day",
+        "VAT and reconciliation risks flagged before filing day",
       ],
     },
     {
@@ -583,7 +634,7 @@ function Index() {
       heading: "Works with the tools you already use",
       body: "No migration project, no new hardware. PlatePielet connects to your existing Tally books and POS billing, keeps them in sync, and reconciles them against each other automatically.",
       bullets: [
-        "Two-way Tally ERP sync — vouchers, ledgers, GST",
+        "Two-way Tally ERP sync — vouchers, ledgers, VAT",
         "Automatic POS sales import across outlets",
         "CSV / Excel import for everything else",
         "POS-to-Tally reconciliation with mismatch alerts",
@@ -595,7 +646,7 @@ function Index() {
     <div
       className="pp-landing"
       style={{
-        background: "#F6FAF7",
+        background: "#FFFFFF",
         color: "#152019",
         fontFamily: "'Inter Variable', 'Inter', system-ui, sans-serif",
       }}
@@ -673,7 +724,7 @@ function Index() {
         }
         .intro-body strong { color: #152019; font-weight: 600; }
         .btn-white {
-          background: #16A34A;
+          background: ${T.gradientCTA};
           color: #FFFFFF !important;
           font-size: 0.68rem;
           font-weight: 700;
@@ -682,8 +733,8 @@ function Index() {
           border: none;
           border-radius: 12px;
           cursor: pointer;
-          box-shadow: 0 4px 12px rgba(22, 163, 74, 0.22);
-          transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+          box-shadow: 0 4px 14px rgba(15,122,76,0.28);
+          transition: box-shadow 0.2s, transform 0.15s;
           display: inline-flex;
           align-items: center;
           justify-content: center;
@@ -691,9 +742,8 @@ function Index() {
           line-height: 1;
         }
         .btn-white:hover {
-          background: #15803D;
+          box-shadow: 0 10px 26px rgba(15,122,76,0.38), inset 0 1px 0 rgba(255,255,255,0.18);
           transform: translateY(-1px);
-          box-shadow: 0 8px 18px rgba(22, 163, 74, 0.28);
         }
         .btn-ghost {
           background: transparent;
@@ -718,22 +768,66 @@ function Index() {
 
         .caps-section { padding: 6rem 0; }
 
+        /* ── How It Works: pill badges ── */
+        .hiw-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.4rem;
+          padding: 0.4rem 0.85rem;
+          border-radius: 999px;
+          border: 1px solid rgba(22,163,74,0.28);
+          background: #E8F7ED;
+          color: #15803D;
+          font-size: 0.68rem;
+          font-weight: 700;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+          margin-bottom: 1.5rem;
+        }
+        .hiw-badge svg { flex-shrink: 0; transition: transform 0.25s ease; }
+        .hiw-badge:hover svg { transform: scale(1.15) rotate(-8deg); }
+
         /* ── Concept flow: sources → Pilot AI → outcomes ── */
         .pp-flow {
+          position: relative;
           display: grid;
           grid-template-columns: 1fr 70px 250px 70px 1fr;
           align-items: start;
           margin-top: 2.5rem;
         }
-        .pp-flow-lbl {
+        .pp-flow::before {
+          content: '';
+          position: absolute;
+          inset: -30px 8%;
+          background: radial-gradient(ellipse 55% 65% at 50% 50%, rgba(34,197,94,0.16), transparent 72%);
+          filter: blur(24px);
+          z-index: 0;
+          pointer-events: none;
+        }
+        .pp-flow > * { position: relative; z-index: 1; }
+        .hiw-col-head { margin-bottom: 14px; }
+        .hiw-col-head.center { text-align: center; }
+        .hiw-col-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.35rem;
+          padding: 0.35rem 0.75rem;
+          border-radius: 999px;
+          border: 1px solid rgba(22,163,74,0.3);
+          background: #E8F7ED;
+          color: #15803D;
           font-size: 0.62rem;
           font-weight: 700;
-          letter-spacing: 0.2em;
+          letter-spacing: 0.1em;
           text-transform: uppercase;
+        }
+        .hiw-col-badge svg:not(.cursor-pointer) { transition: transform 0.25s ease; }
+        .hiw-col-badge:hover svg:not(.cursor-pointer) { transform: scale(1.15) rotate(-8deg); }
+        .hiw-col-sub {
+          display: block;
+          margin-top: 0.55rem;
+          font-size: 0.78rem;
           color: #66736B;
-          height: 16px;
-          line-height: 16px;
-          margin-bottom: 12px;
         }
         .pp-flow-col { display: flex; flex-direction: column; gap: 20px; height: 280px; }
         .pp-node {
@@ -742,27 +836,55 @@ function Index() {
           display: flex;
           align-items: center;
           gap: 12px;
-          padding: 0 16px;
+          padding: 0 14px;
           background: #FFFFFF;
-          border: 1px solid #DDE7E1;
-          border-radius: 12px;
-          box-shadow: 0 2px 8px rgba(21,32,25,0.04);
+          border: 1px solid #E3ECE6;
+          border-radius: 18px;
+          box-shadow: 0 2px 10px rgba(21,32,25,0.05);
         }
-        .pp-node > svg { color: #16A34A; flex-shrink: 0; }
+        .pp-node-icon {
+          width: 44px;
+          height: 44px;
+          border-radius: 12px;
+          background: #E8F7ED;
+          color: #15803D;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+          transition: transform 0.25s ease, background 0.25s ease, color 0.25s ease;
+        }
+        .pp-node-body { flex: 1; min-width: 0; }
         .pp-node-title { font-size: 0.85rem; font-weight: 700; color: #152019; line-height: 1.2; }
         .pp-node-sub { font-size: 0.72rem; color: #66736B; margin-top: 2px; }
-        .pp-conn-cell { margin-top: 28px; }
+        .pp-node-chevron {
+          width: 26px;
+          height: 26px;
+          border-radius: 999px;
+          background: #E8F7ED;
+          color: #15803D;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+          transition: transform 0.25s ease, background 0.25s ease, color 0.25s ease;
+        }
+        .pp-node:hover .pp-node-icon { transform: scale(1.1); background: #16A34A; color: #FFFFFF; }
+        .pp-node:hover .pp-node-chevron { transform: translateX(3px); background: #16A34A; color: #FFFFFF; }
+        .pp-conn-cell { margin-top: 0; }
+        .pp-conn-spacer { visibility: hidden; }
         .pp-conn-cell svg { display: block; width: 100%; height: 280px; }
         .pp-conn-cell path {
           fill: none;
           stroke: #16A34A;
-          stroke-opacity: 0.5;
-          stroke-width: 2.5;
+          stroke-opacity: 0.65;
+          stroke-width: 3;
           stroke-linecap: round;
-          stroke-dasharray: 1 12;
+          stroke-dasharray: 3 9;
           animation: pp-dash 1.1s linear infinite;
         }
         @keyframes pp-dash { to { stroke-dashoffset: -26; } }
+        .pp-conn-arrow { fill: #16A34A; fill-opacity: 0.6; }
         .pp-engine-cell {
           height: 280px;
           display: flex;
@@ -771,20 +893,28 @@ function Index() {
         }
         .pp-engine {
           background: #FFFFFF;
-          border: 1.5px solid #16A34A;
-          border-radius: 16px;
-          padding: 1.6rem 1.4rem;
+          border: 2px solid #16A34A;
+          border-radius: 22px;
+          padding: 2.2rem 1.6rem;
           text-align: center;
           max-width: 250px;
-          animation: pp-pulse 2.6s ease-in-out infinite;
         }
-        @keyframes pp-pulse {
-          0%, 100% { box-shadow: 0 0 0 0 rgba(22,163,74,0.22); }
-          50% { box-shadow: 0 0 0 14px rgba(22,163,74,0); }
+        .pp-engine-icon {
+          width: 68px;
+          height: 68px;
+          border-radius: 50%;
+          background: #E8F7ED;
+          color: #15803D;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin: 0 auto 0.85rem;
+          transition: transform 0.3s ease;
         }
-        .pp-engine > svg { color: #16A34A; }
-        .pp-engine-title { font-size: 1.05rem; font-weight: 800; color: #152019; margin-top: 8px; }
-        .pp-engine-sub { font-size: 0.72rem; color: #66736B; margin-top: 5px; line-height: 1.55; }
+        .pp-engine:hover .pp-engine-icon { transform: scale(1.12) rotate(8deg); }
+        .pp-engine-title { font-size: 1.05rem; font-weight: 800; color: #152019; }
+        .pp-engine-divider { width: 28px; height: 2px; background: #16A34A; margin: 0.6rem auto; }
+        .pp-engine-sub { font-size: 0.72rem; color: #66736B; line-height: 1.55; }
         @keyframes pp-vdash { to { background-position-y: 12px; } }
         @media (max-width: 900px) {
           .pp-flow { display: flex; flex-direction: column; align-items: stretch; }
@@ -797,9 +927,55 @@ function Index() {
             animation: pp-vdash 1.1s linear infinite;
           }
           .pp-conn-cell svg { display: none; }
+          .pp-conn-spacer { display: none; }
           .pp-engine-cell { height: auto; }
-          .pp-flow-lbl { height: auto; margin-bottom: 10px; text-align: center; }
+          .hiw-col-head { text-align: center; margin-bottom: 10px; }
           .pp-engine { max-width: none; width: 100%; }
+        }
+
+        /* ── How It Works: bottom stat bar ── */
+        .hiw-stats {
+          margin-top: 3rem;
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          background: #FFFFFF;
+          border: 1px solid #DDE7E1;
+          border-radius: 18px;
+          box-shadow: 0 2px 10px rgba(21,32,25,0.05);
+          overflow: hidden;
+        }
+        .hiw-stat {
+          display: flex;
+          align-items: flex-start;
+          gap: 0.85rem;
+          padding: 1.75rem 1.5rem;
+          border-right: 1px solid #E3ECE6;
+        }
+        .hiw-stat:last-child { border-right: none; }
+        .hiw-stat-icon {
+          width: 44px;
+          height: 44px;
+          border-radius: 12px;
+          background: #E8F7ED;
+          color: #15803D;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+          transition: transform 0.25s ease, background 0.25s ease, color 0.25s ease;
+        }
+        .hiw-stat:hover .hiw-stat-icon { transform: scale(1.1); background: #16A34A; color: #FFFFFF; }
+        .hiw-stat-title { font-size: 0.9rem; font-weight: 700; color: #152019; margin-bottom: 3px; }
+        .hiw-stat-sub { font-size: 0.78rem; color: #66736B; line-height: 1.5; }
+        @media (max-width: 900px) {
+          .hiw-stats { grid-template-columns: repeat(2, 1fr); }
+          .hiw-stat:nth-child(2) { border-right: none; }
+          .hiw-stat:nth-child(1), .hiw-stat:nth-child(2) { border-bottom: 1px solid #E3ECE6; }
+        }
+        @media (max-width: 560px) {
+          .hiw-stats { grid-template-columns: 1fr; }
+          .hiw-stat { border-right: none !important; border-bottom: 1px solid #E3ECE6; }
+          .hiw-stat:last-child { border-bottom: none; }
         }
 
         /* ── Testimonials marquee ── */
@@ -829,7 +1005,7 @@ function Index() {
         }
         @media (max-width: 600px) { .tm-card { width: 280px; } }
         .tm-quote { font-size: 0.9rem; color: #152019; line-height: 1.65; }
-        .tm-attr { margin-top: 1rem; font-size: 0.78rem; font-weight: 700; color: #16A34A; }
+        .tm-attr { margin-top: 1rem; font-size: 0.78rem; font-weight: 700; color: #15803D; }
         .tm-attr span { display: block; font-weight: 500; color: #66736B; margin-top: 2px; }
 
         /* ── FAQ (native details/summary) ── */
@@ -859,7 +1035,7 @@ function Index() {
           content: '+';
           font-size: 1.1rem;
           font-weight: 700;
-          color: #16A34A;
+          color: #15803D;
           flex-shrink: 0;
         }
         .faq-item[open] summary::after { content: '−'; }
@@ -892,12 +1068,14 @@ function Index() {
           height: 40px;
           border-radius: 10px;
           background: #E8F7ED;
-          color: #16A34A;
+          color: #15803D;
           display: flex;
           align-items: center;
           justify-content: center;
           flex-shrink: 0;
+          transition: transform 0.25s ease, background 0.25s ease, color 0.25s ease;
         }
+        .me-f-step:hover .me-f-ico { transform: scale(1.1); background: #16A34A; color: #FFFFFF; }
         .me-f-title { font-size: 0.9rem; font-weight: 700; color: #152019; line-height: 1.25; }
         .me-f-sub { font-size: 0.75rem; color: #66736B; margin-top: 2px; }
         .me-f-op {
@@ -911,7 +1089,7 @@ function Index() {
           width: 28px;
           height: 28px;
           border-radius: 50%;
-          background: #16A34A;
+          background: #15803D;
           color: #FFFFFF;
           font-weight: 800;
           font-size: 0.95rem;
@@ -932,81 +1110,212 @@ function Index() {
           color: #66736B;
           margin-bottom: 1.1rem;
         }
-        .me-grid {
-          display: grid;
-          grid-template-columns: repeat(4, 1fr);
-          gap: 1.25rem;
-        }
-        @media (max-width: 1100px) { .me-grid { grid-template-columns: repeat(2, 1fr); } }
-        @media (max-width: 600px) { .me-grid { grid-template-columns: 1fr; } }
-        .me-card {
+        .me-matrix-wrap {
           display: flex;
-          flex-direction: column;
-          background: #FFFFFF;
+          align-items: stretch;
+          gap: 0.9rem;
+        }
+        .me-axis-y {
+          writing-mode: vertical-rl;
+          transform: rotate(180deg);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 6px;
+          flex-shrink: 0;
+          font-size: 0.7rem;
+          font-weight: 700;
+          color: #66736B;
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
+        }
+        .me-axis-y svg { transform: rotate(180deg); }
+        .me-matrix-col { flex: 1; min-width: 0; }
+        .me-matrix {
+          position: relative;
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          grid-template-rows: 1fr 1fr;
+          grid-template-areas: "tl tr" "bl br";
+          gap: 3px;
+          background: #DDE7E1;
           border: 1px solid #DDE7E1;
-          border-radius: 14px;
-          padding: 1.4rem 1.4rem 0;
+          border-radius: 16px;
           overflow: hidden;
+          aspect-ratio: 16 / 8.5;
           box-shadow: 0 2px 8px rgba(21,32,25,0.04);
         }
-        .me-dish-name {
-          font-size: 1rem;
-          font-weight: 800;
-          color: #152019;
-          margin-bottom: 1.1rem;
-        }
-        .me-stat { margin-bottom: 0.9rem; }
-        .me-stat-top {
+        .me-quad {
           display: flex;
-          justify-content: space-between;
-          align-items: baseline;
-          gap: 8px;
-          font-size: 0.72rem;
-          color: #66736B;
-          margin-bottom: 5px;
-        }
-        .me-stat-val { font-weight: 700; }
-        .me-bar {
-          height: 6px;
-          border-radius: 9999px;
-          background: rgba(21,32,25,0.07);
-          overflow: hidden;
-        }
-        .me-bar > span {
-          display: block;
-          height: 100%;
-          border-radius: 9999px;
-          transform-origin: left;
-        }
-        @keyframes me-grow { from { transform: scaleX(0); } }
-        .reveal.show .me-bar > span { animation: me-grow 0.9s cubic-bezier(0.2, 0.7, 0.3, 1) both; }
-        .reveal.show .me-card:nth-child(2) .me-bar > span { animation-delay: 0.12s; }
-        .reveal.show .me-card:nth-child(3) .me-bar > span { animation-delay: 0.24s; }
-        .reveal.show .me-card:nth-child(4) .me-bar > span { animation-delay: 0.36s; }
-        .me-verdict {
-          margin: 1.1rem -1.4rem 0;
-          margin-top: auto;
-          padding: 0.9rem 1.4rem 1rem;
-          display: flex;
-          gap: 0.6rem;
+          flex-direction: column;
           align-items: flex-start;
+          gap: 3px;
+          padding: 1.1rem 1.25rem;
         }
-        .me-verdict svg { flex-shrink: 0; margin-top: 1px; }
-        .me-verdict-tier {
+        .me-quad-icon {
+          width: 26px;
+          height: 26px;
+          border-radius: 8px;
+          background: #FFFFFF;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin-bottom: 4px;
+        }
+        .me-quad-tier {
           font-size: 0.72rem;
           font-weight: 800;
-          letter-spacing: 0.1em;
+          letter-spacing: 0.08em;
           text-transform: uppercase;
         }
-        .me-verdict-act {
-          font-size: 0.78rem;
-          line-height: 1.5;
-          margin-top: 3px;
-          color: rgba(21,32,25,0.8);
+        .me-quad-desc {
+          font-size: 0.74rem;
+          line-height: 1.45;
+          color: rgba(21,32,25,0.68);
+          max-width: 15rem;
+        }
+        .me-dot {
+          position: absolute;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 6px;
+          z-index: 2;
+          transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+        .reveal .me-dot { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+        .reveal.show .me-dot { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        .me-dot-marker {
+          width: 12px;
+          height: 12px;
+          border-radius: 50%;
+          background: var(--dot-color);
+          border: 2.5px solid #FFFFFF;
+          box-shadow: 0 0 0 1px var(--dot-color), 0 4px 10px rgba(21,32,25,0.2);
+        }
+        .me-dot-label {
+          font-size: 0.68rem;
+          font-weight: 700;
+          color: #152019;
+          background: #FFFFFF;
+          border: 1px solid #DDE7E1;
+          border-radius: 999px;
+          padding: 3px 10px;
+          white-space: nowrap;
+          box-shadow: 0 2px 6px rgba(21,32,25,0.08);
+        }
+        .me-axis-x {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 6px;
+          margin-top: 0.9rem;
+          font-size: 0.7rem;
+          font-weight: 700;
+          color: #66736B;
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
+        }
+        @media (max-width: 700px) {
+          .me-axis-y { display: none; }
+          .me-matrix { aspect-ratio: 3 / 4; }
+          .me-quad-desc { display: none; }
+          .me-quad { padding: 0.75rem 0.85rem; }
         }
         .me-note { margin-top: 1.75rem; font-size: 0.85rem; color: #66736B; }
 
-        /* ── CTA Band ── */
+        /* Subtle blurred green glow behind a section — same mechanism as
+           .pp-flow::before / .xp-section, reused here for two more sections. */
+        .sw-glow-wrap { position: relative; isolation: isolate; }
+        .sw-glow-wrap::before {
+          content: '';
+          position: absolute;
+          inset: -40px 8%;
+          background: radial-gradient(ellipse 60% 60% at 50% 40%, rgba(34,197,94,0.14), transparent 72%);
+          filter: blur(24px);
+          z-index: 0;
+          pointer-events: none;
+        }
+        .sw-glow-wrap > * { position: relative; z-index: 1; }
+
+        /* Full-bleed alternating band. The page canvas is white now, so section
+           rhythm comes from a true-neutral surface + the forest CTA band, not
+           from the old green tint. Wraps .sw-section (which is width-capped and
+           therefore can't go edge to edge itself). */
+        .sw-band { background: var(--brand-surface); }
+        /* Cards inside a band need to stay white or they vanish into it. */
+        .sw-band .sw-card,
+        .sw-band .tm-card { background: #FFFFFF; }
+
+        /* ── Social proof: logo wall + outcome stats ──
+           Sits directly under the hero because that is where both reference
+           sites (qlub, Syrve) put theirs, and it is the first thing a UAE
+           operator scans for before reading a single feature. */
+        .proof-band {
+          padding: 3rem 0 3.5rem;
+          border-bottom: 1px solid #DDE7E1;
+        }
+        .proof-label {
+          text-align: center;
+          font-size: 0.72rem;
+          font-weight: 700;
+          letter-spacing: 0.16em;
+          text-transform: uppercase;
+          color: #66736B;
+          margin-bottom: 1.75rem;
+        }
+        .proof-logos {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+          align-items: center;
+          gap: 1.25rem 2rem;
+        }
+        .proof-logo {
+          text-align: center;
+          font-size: 1.05rem;
+          font-weight: 800;
+          letter-spacing: -0.02em;
+          color: #9AA8A0;
+          transition: color 0.2s ease;
+        }
+        .proof-logo:hover { color: #152019; }
+
+        .stats-band {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+          gap: 1rem;
+          padding: 3.5rem 0;
+        }
+        .stat-card {
+          padding: 1.75rem 1.5rem;
+          border: 1px solid #DDE7E1;
+          border-radius: 16px;
+          background: #FFFFFF;
+        }
+        /* Amber, not green: the one non-green accent, so the number reads as
+           data rather than as another brand element. */
+        .stat-value {
+          font-size: clamp(1.9rem, 3.5vw, 2.5rem);
+          font-weight: 800;
+          letter-spacing: -0.03em;
+          line-height: 1;
+          color: #B45309;
+        }
+        .stat-label {
+          margin-top: 0.6rem;
+          font-size: 0.95rem;
+          font-weight: 700;
+          color: #152019;
+        }
+        .stat-sub { margin-top: 0.2rem; font-size: 0.85rem; color: #66736B; }
+
+        /* ── CTA Band ──
+           Stays LIGHT on purpose. It renders inside .pp-footer-cover, the opaque
+           layer that occludes the fixed dark footer until you scroll past it —
+           the curtain reveal only reads if the cover contrasts with the #0A1A10
+           footer behind it. A dark band here also cut light notches at the
+           footer's 28px rounded top corners. The page's dark close is the
+           footer itself; a second forest band above it was redundant. */
         .cta-band {
           padding: 7rem 0;
           display: flex;
@@ -1131,7 +1440,7 @@ function Index() {
           padding: 5.5rem 2.5rem;
           background:
             radial-gradient(ellipse 70% 55% at 50% 42%, rgba(34, 197, 94, 0.14), transparent 70%),
-            linear-gradient(180deg, #EAF7EF 0%, #F6FAF7 55%, #F6FAF7 100%);
+            linear-gradient(180deg, #EAF7EF 0%, #FFFFFF 55%, #FFFFFF 100%);
           border-top: 1px solid #DDE7E1;
           border-bottom: 1px solid #DDE7E1;
           overflow: hidden;
@@ -1309,7 +1618,7 @@ function Index() {
           font-weight: 600;
           box-shadow: 0 1px 2px rgba(21, 32, 25, 0.04);
         }
-        .pp-landing .xp-pill svg { color: #16A34A; flex-shrink: 0; }
+        .pp-landing .xp-pill svg { color: #15803D; flex-shrink: 0; }
 
         .pp-landing .xp-stores {
           display: flex;
@@ -1325,7 +1634,7 @@ function Index() {
           border-radius: 12px;
           border: 1px solid #DDE7E1;
           background: #152019;
-          color: #F6FAF7 !important;
+          color: #FFFFFF !important;
           text-decoration: none;
           transition: transform 0.2s, background 0.2s, border-color 0.2s;
           min-width: 168px;
@@ -1449,7 +1758,7 @@ function Index() {
           gap: 0.35rem;
           transition: color 0.2s;
         }
-        .sw-card-cta:hover { color: #16A34A !important; }
+        .sw-card-cta:hover { color: #15803D !important; }
 
         /* ── Capabilities section (exact match to reference) ── */
         .sw-tabs-wrap {
@@ -1490,7 +1799,7 @@ function Index() {
           color: #152019;
         }
         .sw-tab-btn.active {
-          color: #16A34A;
+          color: #15803D;
           background: #E8F7ED;
         }
         .sw-tab-btn.active::after {
@@ -1500,7 +1809,7 @@ function Index() {
           left: 0;
           width: 100%;
           height: 2px;
-          background: linear-gradient(90deg, #22C55E, #A3E635);
+          background: linear-gradient(90deg, #0F7A4C, #16A34A);
         }
         .sw-tab-content {
           display: grid;
@@ -1590,13 +1899,41 @@ function Index() {
           lower-stacked fixed footer show through regardless of z-index. */}
       <main
         ref={mainRef}
-        style={{ overflowX: "clip", position: "relative", zIndex: 1, background: "#F6FAF7" }}
+        style={{ overflowX: "clip", position: "relative", zIndex: 1, background: "#FFFFFF" }}
       >
         {/* ══════════════════════════════════════════════════════════════════ */}
         {/* NAV (sticky — CTA stays reachable while scrolling) + HERO          */}
         {/* ══════════════════════════════════════════════════════════════════ */}
+        {/* H1 and title both lead with "restaurant" — the SEO audit flagged its
+            absence as the second-biggest problem after the canonical. */}
+        <Seo title={PAGE_TITLE} description={PAGE_DESCRIPTION} />
         <PlatePieletNav variant="light" sticky />
         <PlatePieletHero />
+
+        {/* ══════════════════════════════════════════════════════════════════ */}
+        {/* SOCIAL PROOF — logo wall + outcome stats, immediately after hero   */}
+        {/* ══════════════════════════════════════════════════════════════════ */}
+        <div className="sw-section">
+          <div className="proof-band">
+            <div className="proof-label">Trusted by restaurant groups across the UAE and India</div>
+            <div className="proof-logos">
+              {CUSTOMER_LOGOS.map((name) => (
+                <div className="proof-logo" key={name}>
+                  {name}
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="stats-band">
+            {OUTCOME_STATS.map((s) => (
+              <div className="stat-card" key={s.label}>
+                <div className="stat-value">{s.value}</div>
+                <div className="stat-label">{s.label}</div>
+                <div className="stat-sub">{s.sub}</div>
+              </div>
+            ))}
+          </div>
+        </div>
 
         {/* ══════════════════════════════════════════════════════════════════ */}
         {/* INTRO BAND — "Our software powers…"                               */}
@@ -1629,92 +1966,191 @@ function Index() {
         {/* HOW IT WORKS                                                       */}
         {/* ══════════════════════════════════════════════════════════════════ */}
         <div className="sw-rule" id="how-it-works" />
-        <div className="sw-section">
-          <div ref={sec5.ref} className={`loop-section reveal${sec5.visible ? " show" : ""}`}>
-            <div className="sw-section-tag">↳ How It Works</div>
-            <h2 className="sw-section-h2">Data in. Decisions out.</h2>
-            <p className="sw-section-body">
-              The whole product in one picture: your Tally books, POS bills, and stock movements
-              stream into Pilot AI — and come out the other side as live dashboards, risk alerts,
-              and purchase calls you can act on the same day.
-            </p>
-            <div className="pp-flow">
-              <div>
-                <div className="pp-flow-lbl">1 · Connect</div>
-                <div className="pp-flow-col">
-                  <div className="pp-node">
-                    <FileText size={22} strokeWidth={1.7} />
-                    <div>
-                      <div className="pp-node-title">Tally ERP</div>
-                      <div className="pp-node-sub">Vouchers, ledgers, GST</div>
+        <div className="sw-band">
+          <div className="sw-section">
+            <div ref={sec5.ref} className={`loop-section reveal${sec5.visible ? " show" : ""}`}>
+              <div className="hiw-badge">
+                <LayoutGrid size={13} strokeWidth={2.2} />
+                How It Works
+              </div>
+              <h2 className="sw-section-h2">
+                Data in. <span style={{ color: "#15803D" }}>Decisions</span> out.
+              </h2>
+              <p className="sw-section-body">
+                The whole product in one picture: your Tally books, POS bills, and stock movements
+                stream into Pilot AI — and come out the other side as live dashboards, risk alerts,
+                and purchase calls you can act on the same day.
+              </p>
+              <div className="pp-flow">
+                <div>
+                  <div className="hiw-col-head">
+                    <span className="hiw-col-badge">
+                      <PlugConnectedIcon size={14} strokeWidth={2.2} /> 1. CONNECT
+                    </span>
+                    <span className="hiw-col-sub">Your data sources</span>
+                  </div>
+                  <div className="pp-flow-col">
+                    <div className="pp-node">
+                      <div className="pp-node-icon">
+                        <FileText size={20} strokeWidth={1.8} />
+                      </div>
+                      <div className="pp-node-body">
+                        <div className="pp-node-title">Tally ERP</div>
+                        <div className="pp-node-sub">Vouchers, ledgers, VAT</div>
+                      </div>
+                      <div className="pp-node-chevron">
+                        <ChevronRight size={14} strokeWidth={2.4} />
+                      </div>
+                    </div>
+                    <div className="pp-node">
+                      <div className="pp-node-icon">
+                        <Receipt size={20} strokeWidth={1.8} />
+                      </div>
+                      <div className="pp-node-body">
+                        <div className="pp-node-title">POS Billing</div>
+                        <div className="pp-node-sub">Every bill, as it prints</div>
+                      </div>
+                      <div className="pp-node-chevron">
+                        <ChevronRight size={14} strokeWidth={2.4} />
+                      </div>
+                    </div>
+                    <div className="pp-node">
+                      <div className="pp-node-icon">
+                        <Package size={20} strokeWidth={1.8} />
+                      </div>
+                      <div className="pp-node-body">
+                        <div className="pp-node-title">Inventory</div>
+                        <div className="pp-node-sub">Stock in, stock out</div>
+                      </div>
+                      <div className="pp-node-chevron">
+                        <ChevronRight size={14} strokeWidth={2.4} />
+                      </div>
                     </div>
                   </div>
-                  <div className="pp-node">
-                    <Receipt size={22} strokeWidth={1.7} />
-                    <div>
-                      <div className="pp-node-title">POS Billing</div>
-                      <div className="pp-node-sub">Every bill, as it prints</div>
+                </div>
+                <div className="pp-conn-cell" aria-hidden="true">
+                  <div className="hiw-col-head pp-conn-spacer">
+                    <span className="hiw-col-badge">spacer</span>
+                    <span className="hiw-col-sub">spacer</span>
+                  </div>
+                  <svg viewBox="0 0 70 280">
+                    <path d="M4 40 C40 40 30 140 60 140" />
+                    <path d="M4 140 L60 140" />
+                    <path d="M4 240 C40 240 30 140 60 140" />
+                    <polygon className="pp-conn-arrow" points="60,133 60,147 70,140" />
+                  </svg>
+                </div>
+                <div>
+                  <div className="hiw-col-head center">
+                    <span className="hiw-col-badge">2. ANALYZE</span>
+                    <span className="hiw-col-sub">AI engine</span>
+                  </div>
+                  <div className="pp-engine-cell">
+                    <div className="pp-engine">
+                      <div className="pp-engine-icon">
+                        <Sparkles size={26} strokeWidth={1.7} />
+                      </div>
+                      <div className="pp-engine-title">Pilot AI</div>
+                      <div className="pp-engine-divider" />
+                      <div className="pp-engine-sub">
+                        Scans every transaction for waste, variance, and margin risk
+                      </div>
                     </div>
                   </div>
-                  <div className="pp-node">
-                    <Package size={22} strokeWidth={1.7} />
-                    <div>
-                      <div className="pp-node-title">Inventory</div>
-                      <div className="pp-node-sub">Stock in, stock out</div>
+                </div>
+                <div className="pp-conn-cell" aria-hidden="true">
+                  <div className="hiw-col-head pp-conn-spacer">
+                    <span className="hiw-col-badge">spacer</span>
+                    <span className="hiw-col-sub">spacer</span>
+                  </div>
+                  <svg viewBox="0 0 70 280">
+                    <polygon className="pp-conn-arrow" points="0,133 0,147 10,140" />
+                    <path d="M10 140 C40 140 30 40 66 40" />
+                    <path d="M10 140 L66 140" />
+                    <path d="M10 140 C40 140 30 240 66 240" />
+                  </svg>
+                </div>
+                <div>
+                  <div className="hiw-col-head">
+                    <span className="hiw-col-badge">3. ACT</span>
+                    <span className="hiw-col-sub">Insights & actions</span>
+                  </div>
+                  <div className="pp-flow-col">
+                    <div className="pp-node">
+                      <div className="pp-node-icon">
+                        <LayoutDashboard size={20} strokeWidth={1.8} />
+                      </div>
+                      <div className="pp-node-body">
+                        <div className="pp-node-title">Live Dashboards</div>
+                        <div className="pp-node-sub">Sales & margin, per outlet</div>
+                      </div>
+                      <div className="pp-node-chevron">
+                        <ChevronRight size={14} strokeWidth={2.4} />
+                      </div>
+                    </div>
+                    <div className="pp-node">
+                      <div className="pp-node-icon">
+                        <Bell size={20} strokeWidth={1.8} />
+                      </div>
+                      <div className="pp-node-body">
+                        <div className="pp-node-title">Risk Alerts</div>
+                        <div className="pp-node-sub">Waste, VAT, reconciliation</div>
+                      </div>
+                      <div className="pp-node-chevron">
+                        <ChevronRight size={14} strokeWidth={2.4} />
+                      </div>
+                    </div>
+                    <div className="pp-node">
+                      <div className="pp-node-icon">
+                        <ShoppingCart size={20} strokeWidth={1.8} />
+                      </div>
+                      <div className="pp-node-body">
+                        <div className="pp-node-title">Purchase Calls</div>
+                        <div className="pp-node-sub">What to buy, and when</div>
+                      </div>
+                      <div className="pp-node-chevron">
+                        <ChevronRight size={14} strokeWidth={2.4} />
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-              <div className="pp-conn-cell" aria-hidden="true">
-                <svg viewBox="0 0 70 280">
-                  <path d="M4 40 C40 40 30 140 66 140" />
-                  <path d="M4 140 L66 140" />
-                  <path d="M4 240 C40 240 30 140 66 140" />
-                </svg>
-              </div>
-              <div>
-                <div className="pp-flow-lbl" style={{ textAlign: "center" }}>
-                  2 · Analyze
-                </div>
-                <div className="pp-engine-cell">
-                  <div className="pp-engine">
-                    <Sparkles size={26} strokeWidth={1.7} />
-                    <div className="pp-engine-title">Pilot AI</div>
-                    <div className="pp-engine-sub">
-                      Scans every transaction for waste, variance, and margin risk
-                    </div>
+              <div className="hiw-stats">
+                <div className="hiw-stat">
+                  <div className="hiw-stat-icon">
+                    <Zap size={20} strokeWidth={1.8} />
+                  </div>
+                  <div>
+                    <div className="hiw-stat-title">Real-time insights</div>
+                    <div className="hiw-stat-sub">Always up-to-date data across all sources</div>
                   </div>
                 </div>
-              </div>
-              <div className="pp-conn-cell" aria-hidden="true">
-                <svg viewBox="0 0 70 280">
-                  <path d="M4 140 C40 140 30 40 66 40" />
-                  <path d="M4 140 L66 140" />
-                  <path d="M4 140 C40 140 30 240 66 240" />
-                </svg>
-              </div>
-              <div>
-                <div className="pp-flow-lbl">3 · Act</div>
-                <div className="pp-flow-col">
-                  <div className="pp-node">
-                    <LayoutDashboard size={22} strokeWidth={1.7} />
-                    <div>
-                      <div className="pp-node-title">Live Dashboards</div>
-                      <div className="pp-node-sub">Sales & margin, per outlet</div>
-                    </div>
+                <div className="hiw-stat">
+                  <div className="hiw-stat-icon">
+                    <Shield size={20} strokeWidth={1.8} />
                   </div>
-                  <div className="pp-node">
-                    <Bell size={22} strokeWidth={1.7} />
-                    <div>
-                      <div className="pp-node-title">Risk Alerts</div>
-                      <div className="pp-node-sub">Waste, GST, reconciliation</div>
-                    </div>
+                  <div>
+                    <div className="hiw-stat-title">Reduce risk</div>
+                    <div className="hiw-stat-sub">Catch issues early and protect your margins</div>
                   </div>
-                  <div className="pp-node">
-                    <ShoppingCart size={22} strokeWidth={1.7} />
-                    <div>
-                      <div className="pp-node-title">Purchase Calls</div>
-                      <div className="pp-node-sub">What to buy, and when</div>
+                </div>
+                <div className="hiw-stat">
+                  <div className="hiw-stat-icon">
+                    <Target size={20} strokeWidth={1.8} />
+                  </div>
+                  <div>
+                    <div className="hiw-stat-title">Smarter decisions</div>
+                    <div className="hiw-stat-sub">AI-powered recommendations you can act on</div>
+                  </div>
+                </div>
+                <div className="hiw-stat">
+                  <div className="hiw-stat-icon">
+                    <TrendingUp size={20} strokeWidth={1.8} />
+                  </div>
+                  <div>
+                    <div className="hiw-stat-title">Grow profitability</div>
+                    <div className="hiw-stat-sub">
+                      Optimize operations and increase your bottom line
                     </div>
                   </div>
                 </div>
@@ -1752,7 +2188,7 @@ function Index() {
                 description="Pilot AI flags spoilage, over-prep, and shrinkage patterns per outlet — before they hit your month-end P&L."
                 cta="Explore Waste AI"
                 href="#menu-engineering"
-                accent="#A3E635"
+                accent="#D97706"
               />
               <PlatformCard
                 number="03 "
@@ -1817,16 +2253,16 @@ function Index() {
         {/* MENU ENGINEERING SPOTLIGHT                                         */}
         {/* ══════════════════════════════════════════════════════════════════ */}
         <div className="sw-rule" id="menu-engineering" />
-        <div className="sw-section">
+        <div className="sw-section sw-glow-wrap">
           <div
             ref={sec10.ref}
             className={`platforms-section reveal${sec10.visible ? " show" : ""}`}
           >
             <div className="sw-section-tag">↳ Menu Engineering</div>
-            <h2 className="sw-section-h2">Every dish gets a report card.</h2>
+            <h2 className="sw-section-h2">Every dish lands in one of four quadrants.</h2>
             <p className="sw-section-body" style={{ marginBottom: 0 }}>
-              No spreadsheets, no consultants — PlatePielet grades your whole menu automatically,
-              from data it already tracks.
+              Plot how often a dish sells against how much it earns, and your menu sorts itself — no
+              spreadsheets, no consultants, just data PlatePielet already tracks.
             </p>
             <div className="me-formula">
               <div className="me-f-step">
@@ -1864,49 +2300,74 @@ function Index() {
               </div>
             </div>
             <div className="me-example-lbl">Example · Four dishes from one menu</div>
-            <div className="me-grid">
-              {ME_DISHES.map((d) => {
-                const sellColor = d.sellsPct >= 50 ? "#16A34A" : "#EF4444";
-                const earnColor = d.earnsPct >= 50 ? "#16A34A" : "#EF4444";
-                return (
-                  <div key={d.dish} className="me-card">
-                    <div className="me-dish-name">{d.dish}</div>
-                    <div className="me-stat">
-                      <div className="me-stat-top">
-                        <span>How often it sells</span>
-                        <span className="me-stat-val" style={{ color: sellColor }}>
-                          {d.sells}
-                        </span>
-                      </div>
-                      <div className="me-bar">
-                        <span style={{ width: `${d.sellsPct}%`, background: sellColor }} />
-                      </div>
+            <div className="me-matrix-wrap">
+              <div className="me-axis-y" aria-hidden="true">
+                <ArrowUp size={12} strokeWidth={2.5} />
+                Profit per plate
+              </div>
+              <div className="me-matrix-col">
+                <div className="me-matrix">
+                  {ME_DISHES.map((d) => (
+                    <div
+                      key={`${d.dish}-quad`}
+                      style={
+                        {
+                          gridArea: d.area,
+                          "--color-background": d.bg,
+                          "--color-border": "#DDE7E1",
+                        } as CSSProperties
+                      }
+                    >
+                      {/* Magic UI MagicCard — same mouse-tracking spotlight-border used on
+                          the marketing pages (pages.tsx), tinted per quadrant so the glow
+                          reinforces the tier's color instead of flattening it to one green. */}
+                      <MagicCard
+                        className="h-full w-full"
+                        gradientColor={d.color}
+                        gradientFrom={d.color}
+                        gradientTo={d.bg}
+                        gradientOpacity={0.14}
+                        gradientSize={220}
+                      >
+                        <div className="me-quad">
+                          <span className="me-quad-icon" style={{ color: d.color }}>
+                            <d.icon size={15} strokeWidth={2.2} />
+                          </span>
+                          <span className="me-quad-tier" style={{ color: d.color }}>
+                            {d.tier}
+                          </span>
+                          <span className="me-quad-desc">{d.act}</span>
+                        </div>
+                      </MagicCard>
                     </div>
-                    <div className="me-stat">
-                      <div className="me-stat-top">
-                        <span>Profit per plate</span>
-                        <span className="me-stat-val" style={{ color: earnColor }}>
-                          {d.earns}
-                        </span>
-                      </div>
-                      <div className="me-bar">
-                        <span style={{ width: `${d.earnsPct}%`, background: earnColor }} />
-                      </div>
+                  ))}
+                  {ME_DISHES.map((d) => (
+                    <div
+                      key={`${d.dish}-dot`}
+                      className="me-dot"
+                      style={
+                        {
+                          left: `${8 + d.sellsPct * 0.84}%`,
+                          top: `${100 - (8 + d.earnsPct * 0.84)}%`,
+                          "--dot-color": d.color,
+                        } as CSSProperties
+                      }
+                      title={`${d.dish} — ${d.sells} sales, ${d.earns} profit / plate`}
+                    >
+                      <span className="me-dot-marker" />
+                      <span className="me-dot-label">{d.dish}</span>
                     </div>
-                    <div className="me-verdict" style={{ background: d.bg, color: d.color }}>
-                      <d.icon size={18} strokeWidth={2} />
-                      <div>
-                        <div className="me-verdict-tier">{d.tier}</div>
-                        <div className="me-verdict-act">{d.act}</div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div className="me-axis-x" aria-hidden="true">
+              How often it sells
+              <ArrowRight size={12} strokeWidth={2.5} />
             </div>
             <p className="me-note">
-              PlatePielet builds this report for every item on your menu, automatically — from the
-              POS sales and purchase costs it already tracks.
+              PlatePielet plots your whole menu like this, automatically — from the POS sales and
+              purchase costs it already tracks.
             </p>
           </div>
         </div>
@@ -1915,34 +2376,36 @@ function Index() {
         {/* QUOTE                                                              */}
         {/* ══════════════════════════════════════════════════════════════════ */}
         <div className="sw-rule" id="testimonials" />
-        <div className="sw-section">
-          <div className="tm-section">
-            <div className="sw-section-tag">↳ Testimonials</div>
-            <h2 className="sw-section-h2">Restaurant owners run on PlatePielet.</h2>
-            <div className="tm-marquee">
-              <div className="tm-track">
-                {[...TESTIMONIALS, ...TESTIMONIALS].map((t, i) => (
-                  <figure className="tm-card" key={i}>
-                    <blockquote className="tm-quote">"{t.quote}"</blockquote>
-                    <figcaption className="tm-attr">
-                      {t.name}
-                      <span>{t.place}</span>
-                    </figcaption>
-                  </figure>
-                ))}
+        <div className="sw-band">
+          <div className="sw-section">
+            <div className="tm-section">
+              <div className="sw-section-tag">↳ Testimonials</div>
+              <h2 className="sw-section-h2">Restaurant owners run on PlatePielet.</h2>
+              <div className="tm-marquee">
+                <div className="tm-track">
+                  {[...TESTIMONIALS, ...TESTIMONIALS].map((t, i) => (
+                    <figure className="tm-card" key={i}>
+                      <blockquote className="tm-quote">"{t.quote}"</blockquote>
+                      <figcaption className="tm-attr">
+                        {t.name}
+                        <span>{t.place}</span>
+                      </figcaption>
+                    </figure>
+                  ))}
+                </div>
               </div>
-            </div>
-            <div className="tm-marquee">
-              <div className="tm-track tm-reverse">
-                {[...TM_ROW2, ...TM_ROW2].map((t, i) => (
-                  <figure className="tm-card" key={i}>
-                    <blockquote className="tm-quote">"{t.quote}"</blockquote>
-                    <figcaption className="tm-attr">
-                      {t.name}
-                      <span>{t.place}</span>
-                    </figcaption>
-                  </figure>
-                ))}
+              <div className="tm-marquee">
+                <div className="tm-track tm-reverse">
+                  {[...TM_ROW2, ...TM_ROW2].map((t, i) => (
+                    <figure className="tm-card" key={i}>
+                      <blockquote className="tm-quote">"{t.quote}"</blockquote>
+                      <figcaption className="tm-attr">
+                        {t.name}
+                        <span>{t.place}</span>
+                      </figcaption>
+                    </figure>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
@@ -1952,13 +2415,13 @@ function Index() {
         {/* INTERACTIVE BENTO GALLERY                                         */}
         {/* ══════════════════════════════════════════════════════════════════ */}
         <div className="sw-rule" id="gallery" />
-        <div className="sw-section">
+        <div className="sw-section sw-glow-wrap">
           <div ref={sec2.ref} className={`platforms-section reveal${sec2.visible ? " show" : ""}`}>
             <div className="gallery-split">
               <div className="gallery-split-copy">
                 <div className="sw-section-tag">↳ Product Preview</div>
                 <h2 className="sw-section-h2">
-                  See PlatePielet in <span style={{ color: "#16A34A" }}>Action</span>
+                  See PlatePielet in <span style={{ color: "#15803D" }}>Action</span>
                 </h2>
                 <p className="sw-section-body">
                   Drag and explore the surfaces your team will use every day — live dashboards,
@@ -2017,11 +2480,11 @@ function Index() {
           <div className="cta-band">
             <h2 className="cta-heading">Start optimizing your restaurant today.</h2>
             <div className="cta-actions">
-              <a href="/signup" className="btn-white">
-                START FREE TRIAL
+              <a href="/demo" className="btn-white">
+                BOOK A DEMO
               </a>
-              <a href="/demo" className="btn-ghost">
-                VIEW DEMO
+              <a href={SALES_PHONE_HREF} className="btn-ghost">
+                CALL {SALES_PHONE}
               </a>
             </div>
           </div>
@@ -2094,7 +2557,7 @@ function PlatformCard({
 
 export default function IndexRoute() {
   return (
-    <AppPage title="PlatePielet — AI-Powered Restaurant Intelligence">
+    <AppPage title={PAGE_TITLE}>
       <Index />
     </AppPage>
   );

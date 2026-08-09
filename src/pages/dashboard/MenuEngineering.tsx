@@ -410,6 +410,7 @@ export default function MenuEngineeringPage() {
         period={period}
         onPeriodChange={setPeriod}
         isLoading={isLoading}
+        onInvestigate={(dish) => setSelected(all.find((i) => i.dish === dish) ?? null)}
       />
 
       <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">

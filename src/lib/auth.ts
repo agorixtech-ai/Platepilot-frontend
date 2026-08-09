@@ -8,7 +8,19 @@ export interface User {
   email: string;
   provider: string;
   is_verified: boolean;
+  is_admin: boolean;
+  role_id: string | null;
+  role_name: string | null;
+  /** page keys this user may open — every page for admins */
+  pages: string[];
   created_at: string;
+}
+
+/** Does the stored user have access to a dashboard page key? */
+export function canOpenPage(page: string, user = getStoredUser()): boolean {
+  if (!user) return false;
+  if (user.is_admin) return true;
+  return (user.pages ?? []).includes(page);
 }
 
 export interface AuthTokens {
@@ -81,18 +93,14 @@ async function handleResponse<T>(res: Response): Promise<T> {
 }
 
 // ── Auth API ─────────────────────────────────────────────
-export async function register(full_name: string, email: string, password: string) {
+export async function register(
+  full_name: string,
+  email: string,
+  password: string,
+): Promise<AuthTokens> {
   const res = await apiFetch("/register", {
     method: "POST",
     body: JSON.stringify({ full_name, email, password }),
-  });
-  return handleResponse<{ message: string; detail: string }>(res);
-}
-
-export async function verifyEmail(email: string, otp: string): Promise<AuthTokens> {
-  const res = await apiFetch("/verify-email", {
-    method: "POST",
-    body: JSON.stringify({ email, otp }),
   });
   const data = await handleResponse<AuthTokens>(res);
   saveTokens(data);
@@ -108,15 +116,25 @@ export async function testLogin(): Promise<AuthTokens> {
   return data;
 }
 
-export async function login(
-  email: string,
-  password: string,
-): Promise<{ message: string; detail: string }> {
+export async function login(email: string, password: string): Promise<AuthTokens> {
   const res = await apiFetch("/login", {
     method: "POST",
     body: JSON.stringify({ email, password }),
   });
-  return handleResponse<{ message: string; detail: string }>(res);
+  const data = await handleResponse<AuthTokens>(res);
+  saveTokens(data);
+  return data;
+}
+
+/* ══ OTP FLOW DISABLED — matches the commented-out backend routes ══
+export async function verifyEmail(email: string, otp: string): Promise<AuthTokens> {
+  const res = await apiFetch("/verify-email", {
+    method: "POST",
+    body: JSON.stringify({ email, otp }),
+  });
+  const data = await handleResponse<AuthTokens>(res);
+  saveTokens(data);
+  return data;
 }
 
 export async function sendOtp(email: string, purpose: "login" | "verify" = "login") {
@@ -140,6 +158,7 @@ export async function verifyOtp(
   saveTokens(data);
   return data;
 }
+*/
 
 export async function logout(): Promise<void> {
   await apiFetch("/logout", { method: "POST" });
@@ -199,6 +218,79 @@ export async function changePassword(
   await handleResponse<{ message: string; detail: string }>(res);
 }
 
+/* ══ GOOGLE OAUTH DISABLED — backend /api/auth/google is commented out ══
 export function getGoogleOAuthUrl(): string {
   return `${API_BASE}/google`;
+}
+*/
+
+// ── Admin API (403 unless the user is an admin) ──────────
+export interface AdminUser {
+  id: string;
+  full_name: string;
+  email: string;
+  provider: string;
+  is_verified: boolean;
+  is_admin: boolean;
+  role_id: string | null;
+  role_name: string | null;
+  created_at: string;
+}
+
+export interface Role {
+  id: string;
+  name: string;
+  pages: string[];
+  user_count: number;
+  created_at: string;
+}
+
+export interface PageInfo {
+  key: string;
+  label: string;
+  group: string;
+}
+
+async function adminFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
+  const res = await fetch(`${API_URL}/admin${path}`, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${getAccessToken()}`,
+      ...(options.headers as Record<string, string>),
+    },
+  });
+  return handleResponse<T>(res);
+}
+
+export async function listUsers(): Promise<AdminUser[]> {
+  return (await adminFetch<{ items: AdminUser[] }>("/users")).items;
+}
+
+/** Partial update — send only the fields that change. */
+export async function updateUser(
+  userId: string,
+  patch: { is_admin?: boolean; role_id?: string | null },
+): Promise<void> {
+  await adminFetch(`/users/${userId}`, { method: "PATCH", body: JSON.stringify(patch) });
+}
+
+export async function listPages(): Promise<PageInfo[]> {
+  return (await adminFetch<{ items: PageInfo[] }>("/pages")).items;
+}
+
+export async function listRoles(): Promise<Role[]> {
+  return (await adminFetch<{ items: Role[] }>("/roles")).items;
+}
+
+export async function createRole(name: string, pages: string[]): Promise<void> {
+  await adminFetch("/roles", { method: "POST", body: JSON.stringify({ name, pages }) });
+}
+
+export async function updateRole(id: string, name: string, pages: string[]): Promise<void> {
+  await adminFetch(`/roles/${id}`, { method: "PATCH", body: JSON.stringify({ name, pages }) });
+}
+
+export async function deleteRole(id: string): Promise<void> {
+  await adminFetch(`/roles/${id}`, { method: "DELETE" });
 }

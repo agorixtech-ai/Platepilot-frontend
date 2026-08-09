@@ -36,6 +36,7 @@ The SPA entry is `index.html` → `src/main.tsx` → `src/App.tsx`. Routes are d
 | `src/pages/Index.tsx`       | `/` (landing page with `PlatePieletHero`) |
 | `src/pages/Login.tsx`       | `/login`                                  |
 | `src/pages/Signup.tsx`      | `/signup`                                 |
+| `src/pages/Admin.tsx`       | `/admin` (admin-only console)             |
 | `src/pages/Dashboard.tsx`   | `/dashboard/*` shell — inner `<Switch>`   |
 | `src/pages/dashboard/*.tsx` | `/dashboard/<name>` leaf content          |
 | `src/pages/NotFound.tsx`    | fallback 404 (pathless route)             |
@@ -60,6 +61,8 @@ Conventions:
 - Auth API base: `http://localhost:8000/api/auth`
 - JWTs stored in `localStorage` (`access_token`, `refresh_token`, `user`)
 - `getStoredUser()` / `getAccessToken()` are the source of truth for client-side auth state
+- Login/signup are single-step email + password → JWT. OTP and Google OAuth helpers are commented out in `src/lib/auth.ts` (backend routes are commented out too)
+- Admins (`user.is_admin`) are redirected to `/admin` after login; `src/pages/Admin.tsx` guards itself with `getStoredUser()` and the backend enforces it via `require_admin`
 - Auto-refresh: on 401, `refreshAccessToken()` is called once, then retried
 - The pre-paint dark/light theme init script is inline in `index.html` (keep in sync with `STORAGE_KEY` in `src/components/theme-provider.tsx`)
 

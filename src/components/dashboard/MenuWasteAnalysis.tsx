@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import {
   CartesianGrid,
   LabelList,
@@ -11,14 +11,7 @@ import {
   YAxis,
   ZAxis,
 } from "recharts";
-import {
-  AlertTriangle,
-  CheckCircle2,
-  ClipboardList,
-  Rocket,
-  Star,
-  TrendingDown,
-} from "lucide-react";
+import { AlertTriangle, Rocket, Star, TrendingDown } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -75,18 +68,9 @@ const PERIODS: { label: string; value: Period }[] = [
 
 const LABEL_LIMIT = 6;
 
-/* Chart geometry is pinned rather than left to Recharts' defaults so the
-   caption overlay can sit exactly on the plot rectangle:
-   plot left = margin.left + Y_AXIS_W, plot bottom = X_AXIS_H. */
 const CHART_MARGIN = { top: 8, right: 24, bottom: 0, left: 4 };
 const Y_AXIS_W = 56;
 const X_AXIS_H = 44;
-const PLOT_INSET = {
-  top: CHART_MARGIN.top,
-  right: CHART_MARGIN.right,
-  bottom: X_AXIS_H,
-  left: CHART_MARGIN.left + Y_AXIS_W,
-};
 
 type Point = {
   dish: string;
@@ -96,6 +80,7 @@ type Point = {
   expected: number;
   variance: number;
   wastePct: number;
+  wasteCost: number;
   zone: Zone;
 };
 
@@ -118,6 +103,7 @@ function buildPoints(items: MenuEngineeringItem[]): Point[] {
         sold: i.sold,
         expected,
         variance,
+        wasteCost: i.waste_cost,
         issued,
         wastePct: issued > 0 ? (variance / issued) * 100 : 0,
         zone: "low_activity" as Zone,
@@ -178,35 +164,49 @@ function WasteTooltip({ point }: { point: Point }) {
   );
 }
 
-/** Captions sit in the outer corner of their own quadrant — pushed to the
-    chart's edges so they stay clear of the dots, which cluster mid-plot. */
-function ZoneCaption({
+/** Static legend chip (one per zone) — sits outside the plot rather than
+    floating in its quadrant's corner, so it never fights a data point or
+    label for space when the card renders narrow. */
+function ZoneLegendChip({
   zone,
-  corner,
+  active,
+  dimmed,
+  onHover,
 }: {
   zone: Zone;
-  corner: `${"top" | "bottom"}-${"left" | "right"}`;
+  active: boolean;
+  dimmed: boolean;
+  onHover: (zone: Zone | null) => void;
 }) {
   const config = ZONE[zone];
   const Icon = config.icon;
-  const right = corner.endsWith("right");
-  const bottom = corner.startsWith("bottom");
   return (
-    <div
+    <button
+      type="button"
+      title={config.blurb}
+      onMouseEnter={() => onHover(zone)}
+      onMouseLeave={() => onHover(null)}
+      onFocus={() => onHover(zone)}
+      onBlur={() => onHover(null)}
       className={cn(
-        "pointer-events-none flex w-[13.5rem] max-w-full items-start gap-2",
-        right ? "flex-row-reverse justify-self-end text-right" : "justify-self-start",
-        bottom ? "self-end" : "self-start",
+        "flex cursor-default items-center gap-1.5 rounded-full p-1 pr-2.5 transition-all duration-200",
+        active ? "bg-card shadow-sm ring-1 ring-border" : "",
+        dimmed ? "opacity-40" : "opacity-100",
       )}
     >
-      <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-card ring-1 ring-border">
-        <Icon className={cn("h-4 w-4", config.text)} />
+      <span
+        className={cn(
+          "grid h-5 w-5 shrink-0 place-items-center rounded-full bg-card ring-1 transition-all duration-200",
+          active ? "scale-110 ring-current" : "ring-border",
+          config.text,
+        )}
+      >
+        <Icon className="h-3 w-3" />
       </span>
-      <div>
-        <p className={cn("text-xs font-extrabold tracking-wide", config.text)}>{config.label}</p>
-        <p className="mt-0.5 text-[11px] leading-snug text-muted-foreground">{config.blurb}</p>
-      </div>
-    </div>
+      <p className={cn("whitespace-nowrap text-[10px] font-extrabold tracking-wide", config.text)}>
+        {config.label}
+      </p>
+    </button>
   );
 }
 
@@ -215,11 +215,14 @@ export function MenuWasteAnalysis({
   period,
   onPeriodChange,
   isLoading,
+  onInvestigate,
 }: {
   items: MenuEngineeringItem[];
   period: Period;
   onPeriodChange: (p: Period) => void;
   isLoading?: boolean;
+  /** Opens the page's existing DishDialog — the investigation surface. */
+  onInvestigate?: (dish: string) => void;
 }) {
   const points = useMemo(() => buildPoints(items), [items]);
   const medSold = useMemo(() => median(points.map((p) => p.sold)), [points]);
@@ -227,11 +230,10 @@ export function MenuWasteAnalysis({
   const maxSold = useMemo(() => Math.max(1, ...points.map((p) => p.sold)) * 1.15, [points]);
   const maxIssued = useMemo(() => Math.max(1, ...points.map((p) => p.issued)) * 1.15, [points]);
 
-  const alerts = useMemo(
-    () => [...points].sort((a, b) => b.wastePct - a.wastePct).slice(0, 6),
-    [points],
-  );
-  const worst = alerts[0];
+  const [hovered, setHovered] = useState<Zone | null>(null);
+
+  const washOpacity = (zone: Zone) =>
+    hovered === zone ? 0.18 : hovered ? 0.025 : zone === "low_activity" ? 0.06 : 0.07;
 
   const byZone = useMemo(() => {
     const next: Record<Zone, Point[]> = {
@@ -245,9 +247,9 @@ export function MenuWasteAnalysis({
   }, [points]);
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-3 pb-3">
-        <CardTitle className="text-base font-bold">
+    <Card className="flex h-full flex-col border border-border/60 bg-card shadow-sm">
+      <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-3 border-b border-border/40 px-5 pb-3 pt-4">
+        <CardTitle className="text-[13px] font-bold text-foreground">
           Menu Waste Analysis: Stock Issued vs. Menu Sales
         </CardTitle>
         <div className="flex items-center gap-1 rounded-full border border-border/60 p-0.5">
@@ -262,7 +264,20 @@ export function MenuWasteAnalysis({
         </div>
       </CardHeader>
 
-      <CardContent>
+      <CardContent className="px-5 pb-5 pt-3">
+        {!isLoading && points.length > 0 && (
+          <div className="mb-3 flex flex-wrap gap-x-1 gap-y-1.5">
+            {(Object.keys(ZONE) as Zone[]).map((zone) => (
+              <ZoneLegendChip
+                key={zone}
+                zone={zone}
+                active={hovered === zone}
+                dimmed={!!hovered && hovered !== zone}
+                onHover={setHovered}
+              />
+            ))}
+          </div>
+        )}
         {isLoading ? (
           <div className="h-[26rem] animate-pulse rounded-xl bg-secondary" />
         ) : !points.length ? (
@@ -272,7 +287,7 @@ export function MenuWasteAnalysis({
             description="Stock-issued vs. sales appears once POS sales are synced for the window."
           />
         ) : (
-          <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_16rem]">
+          <div>
             {/* Quadrant plot */}
             <div className="relative h-[26rem]">
               <ResponsiveContainer width="100%" height="100%">
@@ -285,7 +300,7 @@ export function MenuWasteAnalysis({
                     y1={medIssued}
                     y2={maxIssued}
                     fill={ZONE.waste_risk.fill}
-                    fillOpacity={0.07}
+                    fillOpacity={washOpacity("waste_risk")}
                   />
                   <ReferenceArea
                     x1={medSold}
@@ -293,7 +308,7 @@ export function MenuWasteAnalysis({
                     y1={medIssued}
                     y2={maxIssued}
                     fill={ZONE.high_usage.fill}
-                    fillOpacity={0.07}
+                    fillOpacity={washOpacity("high_usage")}
                   />
                   <ReferenceArea
                     x1={0}
@@ -301,7 +316,7 @@ export function MenuWasteAnalysis({
                     y1={0}
                     y2={medIssued}
                     fill={ZONE.low_activity.fill}
-                    fillOpacity={0.06}
+                    fillOpacity={washOpacity("low_activity")}
                   />
                   <ReferenceArea
                     x1={medSold}
@@ -309,7 +324,7 @@ export function MenuWasteAnalysis({
                     y1={0}
                     y2={medIssued}
                     fill={ZONE.efficient.fill}
-                    fillOpacity={0.07}
+                    fillOpacity={washOpacity("efficient")}
                   />
                   {/* sqrt scale: one runaway dish (hundreds of wasted portions
                       against double-digit sales) flattens every other point to
@@ -366,8 +381,14 @@ export function MenuWasteAnalysis({
                       key={zone}
                       data={byZone[zone]}
                       fill={ZONE[zone].dot}
+                      fillOpacity={hovered && hovered !== zone ? 0.2 : 1}
                       shape="circle"
                       isAnimationActive={false}
+                      cursor={onInvestigate ? "pointer" : undefined}
+                      onClick={(node: unknown) => {
+                        const dish = (node as { dish?: string } | undefined)?.dish;
+                        if (dish) onInvestigate?.(dish);
+                      }}
                     >
                       <LabelList
                         dataKey="label"
@@ -379,68 +400,6 @@ export function MenuWasteAnalysis({
                   ))}
                 </ScatterChart>
               </ResponsiveContainer>
-
-              {/* Quadrant captions sit above the plot, out of the pointer's way */}
-              <div
-                className="pointer-events-none absolute grid grid-cols-2 grid-rows-2 gap-2 p-2.5"
-                style={{
-                  top: PLOT_INSET.top,
-                  right: PLOT_INSET.right,
-                  bottom: PLOT_INSET.bottom,
-                  left: PLOT_INSET.left,
-                }}
-              >
-                <ZoneCaption zone="waste_risk" corner="top-left" />
-                <ZoneCaption zone="high_usage" corner="top-right" />
-                <ZoneCaption zone="low_activity" corner="bottom-left" />
-                <ZoneCaption zone="efficient" corner="bottom-right" />
-              </div>
-            </div>
-
-            {/* Alerts + recommendation rail */}
-            <div className="space-y-3">
-              <div className="rounded-xl border border-border/60 p-3">
-                <p className="text-xs font-bold text-foreground">Waste Alerts</p>
-                <ul className="mt-2 space-y-2">
-                  {alerts.map((p) => {
-                    const high = p.wastePct >= 10;
-                    return (
-                      <li key={p.dish} className="flex items-center gap-2 text-xs">
-                        {high ? (
-                          <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-destructive" />
-                        ) : (
-                          <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-success" />
-                        )}
-                        <span className="min-w-0 flex-1 truncate text-foreground">{p.dish}</span>
-                        <span
-                          className={cn(
-                            "shrink-0 font-bold tabular-nums",
-                            high ? "text-destructive" : "text-success",
-                          )}
-                        >
-                          +{fmtPct(p.wastePct)}
-                        </span>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </div>
-
-              {worst && worst.variance > 0 && (
-                <div className="rounded-xl border border-info/25 bg-info/5 p-3">
-                  <div className="flex items-start gap-2">
-                    <ClipboardList className="mt-0.5 h-4 w-4 shrink-0 text-info" />
-                    <div>
-                      <p className="text-xs font-bold text-foreground">Waste Risk Detected</p>
-                      <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
-                        {worst.dish} was issued {worst.issued.toFixed(1)} portions against{" "}
-                        {worst.expected.toFixed(1)} sold — {fmtPct(worst.wastePct)} over. Review
-                        prep quantity and portion control.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         )}

@@ -278,7 +278,7 @@ export default function RadialOrbitalTimeline({
                         </div>
                         <div className="w-full h-1 bg-secondary rounded-full overflow-hidden">
                           <div
-                            className="h-full bg-gradient-to-r from-[#16A34A] to-[#A3E635]"
+                            className="h-full bg-gradient-to-r from-[#16A34A] to-[#D97706]"
                             style={{ width: `${item.energy}%` }}
                           ></div>
                         </div>

@@ -522,7 +522,7 @@ export const PRODUCT_FEATURES: FeatureCard[] = [
     bullets: [
       "Natural-language questions on your data",
       "Daily anomaly digests",
-      "GST and reconciliation risk flags",
+      "VAT and reconciliation risk flags",
     ],
   },
 ];

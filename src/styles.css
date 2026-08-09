@@ -24,19 +24,29 @@
  * ═══════════════════════════════════════════════════════════════════════
  *
  * Core brand (authoritative hex from brand sheet):
- *   Primary green   #16A34A  → actions, links, key brand elements
- *   Deep Forest     #071A14  → backgrounds, sidebars, strong surfaces
- *   Soft Green-White#F6FAF7  → subtle backgrounds, elevated surfaces
- *   White           #FFFFFF  → cards, surfaces, content backgrounds
- *   Pale Green      #E8F7ED  → section backgrounds, soft highlights
- *   Soft Grey-Green #DDE7E1  → borders, dividers, muted backgrounds
+ *   Primary green   #16A34A  → button/badge FILLS only — see contrast note
+ *   Green (text)    #15803D  → any green text, link, or icon (5.02:1 on white)
+ *   Deep Forest     #071A14  → full-bleed bands, sidebars, footer, CTA band
+ *   White           #FFFFFF  → page canvas AND cards (cards separate by border)
+ *   Neutral Surface #F6F7F8  → alternating section bands (true neutral, no tint)
+ *   Pale Green      #E8F7ED  → chips, icon tiles, hover tints — NOT full sections
+ *   Soft Grey-Green #DDE7E1  → borders, dividers
  *   Charcoal        #152019  → headings, strong text
  *   Muted Grey      #66736B  → body text, icons, secondary text
- *   Fresh Lime      #A3E635  → highlights, badges, small accents only
+ *   Amber           #D97706  → the one non-green accent: data highlights, badges
+ *
+ * Contrast (measured, WCAG AA needs 4.5:1 for text):
+ *   #16A34A on white = 3.30  ✗  fill-only, never text, never a button label bg
+ *   #15803D on white = 5.02  ✓  the green you use for words
+ *   #166534 on white = 7.13  ✓  body links / small text
+ * The old lime #A3E635 was 1.51:1 and is gone — amber #D97706 replaced it so the
+ * palette has a second hue and green stops competing with itself.
+ *
+ * Page is WHITE, not green-tinted. Green is the accent, not the wallpaper.
+ * Rhythm comes from forest full-bleed bands, not from tinted backgrounds.
  *
  * Hero gradient (premium surfaces only): 90deg #073B2A → #0F7A4C → #22C55E
- * Primary actions: solid #16A34A (not the gradient)
- * Charts: #16A34A · #22C55E · #0F7A4C · #A3E635 · #073B2A
+ * Charts: #16A34A · #22C55E · #0F7A4C · #D97706 · #073B2A
  * Semantic: success=#16A34A, error=#DC2626, warning=#F59E0B, info=#2563EB
  */
 
@@ -105,11 +115,14 @@
   --color-primary-soft: var(--primary-soft);
   --color-primary-dark: var(--primary-dark);
   --color-accent-warm: var(--accent-warm);
-  --color-accent-lime: var(--accent-warm);
+  --color-accent-amber: var(--accent-warm);
   --color-accent-pink: var(--accent-pink);
   --color-accent-purple: var(--accent-purple);
   --color-brand-forest: var(--brand-forest);
   --color-brand-canvas: var(--brand-canvas);
+  --color-brand-surface: var(--brand-surface);
+  --color-brand-amber: var(--brand-amber);
+  --color-primary-text: var(--brand-primary-text);
   --color-brand-pale: var(--brand-pale);
   --color-brand-charcoal: var(--brand-charcoal);
   --color-destructive: var(--destructive);
@@ -198,36 +211,44 @@
   --animate-marquee-vertical: marquee-vertical var(--duration) linear infinite;
   --animate-shiny-text: shiny-text 8s infinite;
   @keyframes marquee {
-  from {
-    transform: translateX(0);
+    from {
+      transform: translateX(0);
     }
-  to {
-    transform: translateX(calc(-100% - var(--gap)));
+    to {
+      transform: translateX(calc(-100% - var(--gap)));
     }
   }
   @keyframes marquee-vertical {
-  from {
-    transform: translateY(0);
+    from {
+      transform: translateY(0);
     }
-  to {
-    transform: translateY(calc(-100% - var(--gap)));
+    to {
+      transform: translateY(calc(-100% - var(--gap)));
     }
   }
   @keyframes shiny-text {
-  0%, 90%, 100% {
-    background-position: calc(-100% - var(--shiny-width)) 0;
+    0%,
+    90%,
+    100% {
+      background-position: calc(-100% - var(--shiny-width)) 0;
     }
-  30%, 60% {
-    background-position: calc(100% + var(--shiny-width)) 0;
+    30%,
+    60% {
+      background-position: calc(100% + var(--shiny-width)) 0;
     }
   }
-  --animate-orbit: orbit calc(var(--duration)*1s) linear infinite
-;
+  --animate-orbit: orbit calc(var(--duration) * 1s) linear infinite;
   @keyframes orbit {
-  0% {
-    transform: rotate(calc(var(--angle) * 1deg)) translateY(calc(var(--radius) * 1px)) rotate(calc(var(--angle) * -1deg));}
-  100% {
-    transform: rotate(calc(var(--angle) * 1deg + 360deg)) translateY(calc(var(--radius) * 1px)) rotate(calc((var(--angle) * -1deg) - 360deg));}}}
+    0% {
+      transform: rotate(calc(var(--angle) * 1deg)) translateY(calc(var(--radius) * 1px))
+        rotate(calc(var(--angle) * -1deg));
+    }
+    100% {
+      transform: rotate(calc(var(--angle) * 1deg + 360deg)) translateY(calc(var(--radius) * 1px))
+        rotate(calc((var(--angle) * -1deg) - 360deg));
+    }
+  }
+}
 
 /* ── Light theme — Restaurant OS (light canvas + dark sidebar) ──────── */
 :root {
@@ -237,7 +258,7 @@
    * ═══════════════════════════════════════════════════════════════════
    *
    * Light theme identity (PlatePielet brand palette): soft green-white
-   * #F6FAF7 canvas, white cards, brand green #16A34A actions, pale green
+   * #FFFFFF canvas, white cards, brand green #16A34A actions, pale green
    * #E8F7ED highlights, grey-green #DDE7E1 borders, charcoal #152019 text,
    * and a persistent deep-forest sidebar (#071A14).
    *
@@ -282,12 +303,17 @@
   --brand-forest: #071a14;
   --brand-forest-mid: #073b2a;
   --brand-forest-rich: #0f7a4c;
-  --brand-canvas: #f6faf7;
+  --brand-canvas: #ffffff;
+  /* True neutral, no green tint — alternating section bands sit on this so the
+     page reads white-with-accents instead of green-on-green. */
+  --brand-surface: #f6f7f8;
   --brand-pale: #e8f7ed;
   --brand-border: #dde7e1;
   --brand-charcoal: #152019;
   --brand-muted: #66736b;
-  --brand-lime: #a3e635;
+  --brand-amber: #d97706;
+  /* Green for text/links/icons. #16a34a is 3.3:1 on white and fails AA. */
+  --brand-primary-text: #15803d;
   --brand-row-hover: #f8fcf9;
 
   /* Global surfaces */
@@ -308,7 +334,7 @@
   --accent-foreground: var(--brand-charcoal);
 
   /* Hero / premium gradient — 135deg, not for primary buttons */
-  --accent-warm: var(--brand-lime);
+  --accent-warm: var(--brand-amber);
   --accent-pink: var(--brand-primary-bright);
   --accent-purple: var(--brand-forest-rich);
   --gradient-brand: linear-gradient(90deg, #073b2a 0%, #0f7a4c 50%, #22c55e 100%);
@@ -393,7 +419,7 @@
   --chart-1: #16a34a;
   --chart-2: #22c55e;
   --chart-3: #0f7a4c;
-  --chart-4: #a3e635;
+  --chart-4: #d97706;
   --chart-5: #073b2a;
 
   /* sidebar — deep forest (#071A14) */
@@ -427,8 +453,13 @@
   --border: oklch(1 0 0 / 8%);
   --input: oklch(1 0 0 / 10%);
 
-  /* fresh lime #A3E635 — highlights, badges, small accents only */
-  --accent-warm: var(--brand-lime);
+  /* On dark, green text must go LIGHTER not darker, and the neutral alt-surface
+     becomes a lift off the forest base rather than a tint below white. */
+  --brand-surface: oklch(1 0 0 / 4%);
+  --brand-primary-text: #4ade80;
+
+  /* amber #D97706 — the one non-green accent: highlights, badges, data */
+  --accent-warm: var(--brand-amber);
   --accent-pink: var(--brand-primary-bright);
   --accent-purple: var(--brand-forest-rich);
   --gradient-brand: linear-gradient(90deg, #073b2a 0%, #0f7a4c 50%, #22c55e 100%);
@@ -439,7 +470,7 @@
     color-mix(in srgb, #0f7a4c 12%, transparent) 50%,
     color-mix(in srgb, #22c55e 10%, transparent) 100%
   );
-  --gradient-brand-text: linear-gradient(90deg, #a3e635 0%, #22c55e 50%, #4ade80 100%);
+  --gradient-brand-text: linear-gradient(90deg, #d97706 0%, #22c55e 50%, #4ade80 100%);
 
   /* brand green — primary actions */
   --primary: #16a34a;
@@ -538,7 +569,7 @@
   --chart-1: #16a34a;
   --chart-2: #22c55e;
   --chart-3: #0f7a4c;
-  --chart-4: #a3e635;
+  --chart-4: #d97706;
   --chart-5: #073b2a;
 
   /* sidebar — darker forest shell, one step below the canvas */
@@ -942,7 +973,7 @@
 .auth-page .auth-btn-secondary {
   background: #ffffff;
   border: 1px solid #16a34a;
-  color: #16a34a;
+  color: #15803d;
   border-radius: 12px;
 }
 
@@ -1257,16 +1288,19 @@
   animation: bg-shimmer 9s ease-in-out infinite;
 }
 
-/* Gradient text — brand lime → primary green */
+/* Gradient text — matches the hero H1 ramps (PlatePieletHero `T.gradientA/B`).
+   Both stay a green ramp: amber is the data accent, and running it into green
+   mid-word read as a rendering bug. Endpoints are >= 3:1 on white so a headline
+   set in these is still legible (--brand-primary-bright at 2.28:1 was not). */
 .gradient-text-a {
-  background: linear-gradient(90deg, var(--brand-lime) 0%, var(--brand-primary-bright) 100%);
+  background: linear-gradient(90deg, var(--brand-forest-mid) 0%, var(--brand-forest-rich) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .gradient-text-b {
-  background: linear-gradient(90deg, var(--brand-primary-bright) 0%, var(--brand-primary) 100%);
+  background: linear-gradient(90deg, var(--brand-forest-rich) 0%, var(--brand-primary) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;

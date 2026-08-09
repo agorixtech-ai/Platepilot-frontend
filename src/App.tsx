@@ -29,6 +29,7 @@ const PricingPage = lazy(() => import("./pages/Pricing"));
 const ResourcesPage = lazy(() => import("./pages/Resources"));
 const CompanyPage = lazy(() => import("./pages/Company"));
 const DashboardPage = lazy(() => import("./pages/Dashboard"));
+const AdminPage = lazy(() => import("./pages/Admin"));
 const NotFoundPage = lazy(() => import("./pages/NotFound"));
 
 /* mode: "md" keeps one consistent look across iOS/Android/desktop so the
@@ -136,6 +137,7 @@ export default function App() {
                 />
                 <Route exact path="/company" render={() => <LazyRoute component={CompanyPage} />} />
                 <Route path="/dashboard" render={() => <LazyRoute component={DashboardPage} />} />
+                <Route path="/admin" render={() => <LazyRoute component={AdminPage} />} />
                 <Route render={() => <LazyRoute component={NotFoundPage} />} />
               </IonRouterOutlet>
             </IonReactRouter>

@@ -2,16 +2,23 @@ import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { PlatePieletNav } from "@/components/PlatePieletNav";
 import { PlatePieletFooter } from "@/components/PlatePieletFooter";
+import { Seo } from "@/components/Seo";
+import { T } from "@/components/PlatePieletHero";
 
-const PAGE_BG = "#F6FAF7";
+const PAGE_BG = "#FFFFFF";
 const INK = "#152019";
 
 export function MarketingShell({
   children,
   ctaHeading = "See PlatePielet on your own numbers.",
+  seoTitle,
+  seoDescription,
 }: {
   children: ReactNode;
   ctaHeading?: string;
+  /** Optional — canonical is fixed for every route either way. */
+  seoTitle?: string;
+  seoDescription?: string;
 }) {
   return (
     <div
@@ -23,6 +30,7 @@ export function MarketingShell({
         minHeight: "100%",
       }}
     >
+      <Seo title={seoTitle} description={seoDescription} />
       <style>{`
         .marketing-shell a { text-decoration: none; }
         .mkt-wrap {
@@ -40,7 +48,7 @@ export function MarketingShell({
           font-weight: 700;
           letter-spacing: 0.16em;
           text-transform: uppercase;
-          color: #16A34A;
+          color: #15803D;
           margin-bottom: 0.85rem;
         }
         .mkt-h1 {
@@ -71,14 +79,18 @@ export function MarketingShell({
           height: 44px;
           padding: 0 1.35rem;
           border-radius: 12px;
-          background: #16A34A;
+          background: ${T.gradientCTA};
           color: #fff;
           font-size: 0.8rem;
           font-weight: 700;
           letter-spacing: 0.06em;
-          box-shadow: 0 4px 12px rgba(22,163,74,0.22);
+          box-shadow: 0 4px 14px rgba(15,122,76,0.28);
+          transition: box-shadow .2s ease, transform .15s ease;
         }
-        .mkt-btn-primary:hover { background: #15803D; }
+        .mkt-btn-primary:hover {
+          box-shadow: 0 10px 26px rgba(15,122,76,0.38), inset 0 1px 0 rgba(255,255,255,0.18);
+          transform: translateY(-1px);
+        }
         .mkt-btn-ghost {
           display: inline-flex;
           align-items: center;
@@ -87,7 +99,7 @@ export function MarketingShell({
           padding: 0 1.35rem;
           border-radius: 12px;
           border: 1px solid #16A34A;
-          color: #16A34A;
+          color: #15803D;
           background: #fff;
           font-size: 0.8rem;
           font-weight: 700;
@@ -143,7 +155,7 @@ export function MarketingShell({
           height: 36px;
           border-radius: 10px;
           background: #E8F7ED;
-          color: #16A34A;
+          color: #15803D;
         }
         .mkt-card-title {
           font-size: 1rem;
@@ -160,7 +172,7 @@ export function MarketingShell({
           padding-top: 0.5rem;
           font-size: 0.8rem;
           font-weight: 700;
-          color: #16A34A;
+          color: #15803D;
         }
         .mkt-bullets {
           margin-top: 1.25rem;
@@ -216,7 +228,7 @@ export function MarketingShell({
           flex-shrink: 0;
           font-size: 1.25rem;
           font-weight: 600;
-          color: #16A34A;
+          color: #15803D;
           transition: transform 0.2s ease;
         }
         .mkt-faq[open] summary::after { transform: rotate(45deg); }
@@ -250,7 +262,7 @@ export function MarketingShell({
           border-color: #16A34A;
           box-shadow: 0 12px 32px rgba(22,163,74,0.12);
         }
-        .mkt-price-name { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #16A34A; }
+        .mkt-price-name { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #15803D; }
         .mkt-price-amt { font-size: 2rem; font-weight: 800; letter-spacing: -0.03em; margin: 0.5rem 0 0.25rem; }
         .mkt-price-amt span { font-size: 0.95rem; font-weight: 600; color: #66736B; }
         .mkt-price-desc { font-size: 0.9rem; color: #66736B; line-height: 1.5; margin-bottom: 1.25rem; }
@@ -286,7 +298,10 @@ export function MarketingShell({
                   height: 44,
                   padding: "0 1.4rem",
                   borderRadius: 12,
-                  background: "#fff",
+                  background: "rgba(255,255,255,0.92)",
+                  backdropFilter: "blur(8px) saturate(160%)",
+                  WebkitBackdropFilter: "blur(8px) saturate(160%)",
+                  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.4), 0 4px 14px rgba(0,0,0,0.12)",
                   color: "#15803D",
                   fontSize: "0.8rem",
                   fontWeight: 700,

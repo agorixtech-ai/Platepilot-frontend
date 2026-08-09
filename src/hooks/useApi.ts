@@ -9,7 +9,7 @@ import {
   type TallyParams,
   type AgentHistoryMessage,
 } from "../lib/api";
-import { login, register, logout, getMe, sendOtp, verifyOtp, verifyEmail } from "../lib/auth";
+import { login, register, logout, getMe } from "../lib/auth";
 
 // ── Query Keys ────────────────────────────────────────────
 export const KEYS = {
@@ -69,41 +69,6 @@ export function useLogout() {
     mutationFn: logout,
     onSuccess: () => {
       qc.clear();
-    },
-  });
-}
-
-export function useSendOtp() {
-  return useMutation({
-    mutationFn: ({ email, purpose }: { email: string; purpose: "login" | "verify" }) =>
-      sendOtp(email, purpose),
-  });
-}
-
-export function useVerifyOtp() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: ({
-      email,
-      otp,
-      purpose,
-    }: {
-      email: string;
-      otp: string;
-      purpose: "login" | "verify";
-    }) => verifyOtp(email, otp, purpose),
-    onSuccess: (data) => {
-      qc.setQueryData(KEYS.me, data.user);
-    },
-  });
-}
-
-export function useVerifyEmail() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: ({ email, otp }: { email: string; otp: string }) => verifyEmail(email, otp),
-    onSuccess: (data) => {
-      qc.setQueryData(KEYS.me, data.user);
     },
   });
 }

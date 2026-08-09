@@ -253,7 +253,15 @@ export function DashboardLayout({ children }: { children?: ReactNode }) {
               <SidebarSeparator className="mx-3 my-1 bg-sidebar-border/60" />
               <NavSection items={AI_ITEMS} label="Intelligence" pathname={pathname} />
               <SidebarSeparator className="mx-3 my-1 bg-sidebar-border/60" />
-              <NavSection items={ADMIN_ITEMS} label="Administration" pathname={pathname} />
+              <NavSection
+                items={
+                  user?.is_admin
+                    ? [...ADMIN_ITEMS, { icon: StackIcon, label: "Admin Console", to: "/admin" }]
+                    : ADMIN_ITEMS
+                }
+                label="Administration"
+                pathname={pathname}
+              />
             </SidebarContent>
 
             {/* Footer — Tenant + User */}

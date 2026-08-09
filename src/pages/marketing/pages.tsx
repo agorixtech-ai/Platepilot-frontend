@@ -397,7 +397,7 @@ function PreviewBody({ preview }: { preview: FeaturePreview }) {
                           padding: "0.1rem 0.5rem",
                           borderRadius: 999,
                           border: "1px solid #16A34A",
-                          color: "#16A34A",
+                          color: "#15803D",
                           fontSize: "0.65rem",
                           fontWeight: 700,
                           letterSpacing: "0.06em",
@@ -963,7 +963,7 @@ export function ResourcesPage() {
                         paddingTop: "0.6rem",
                         fontSize: "0.8rem",
                         fontWeight: 700,
-                        color: "#16A34A",
+                        color: "#15803D",
                       }}
                     >
                       {cta} →
