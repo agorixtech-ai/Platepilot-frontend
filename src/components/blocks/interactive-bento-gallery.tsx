@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { AnimatePresence, motion, type PanInfo } from "framer-motion";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -150,7 +151,10 @@ function GalleryModal({
 
   if (!isOpen) return null;
 
-  return (
+  // Portalled to <body>: the gallery sits inside `.sw-glow-wrap`, which sets
+  // `isolation: isolate`, so an in-place `fixed … z-50` overlay stays trapped in
+  // that stacking context and later sections paint over it.
+  return createPortal(
     <>
       <motion.div
         initial={{ opacity: 0 }}
@@ -285,7 +289,8 @@ function GalleryModal({
           </div>
         </motion.div>
       </motion.div>
-    </>
+    </>,
+    document.body,
   );
 }
 

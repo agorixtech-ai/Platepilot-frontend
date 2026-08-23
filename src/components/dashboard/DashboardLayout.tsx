@@ -45,10 +45,12 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import {
   getStoredUser,
+  canOpenPage,
   clearTokens,
   logout as apiLogout,
   getMe,
   updateStoredUser,
+  type User,
 } from "@/lib/auth";
 import { BranchFilterProvider } from "@/contexts/BranchFilterContext";
 import { DateRangeProvider } from "@/contexts/DateRangeContext";
@@ -91,6 +93,20 @@ const ADMIN_ITEMS: NavItem[] = [
 ];
 
 export const NAV_ITEMS = [...MAIN_ITEMS, ...OPS_ITEMS, ...AI_ITEMS, ...ADMIN_ITEMS];
+
+/** "/dashboard" → "overview", "/dashboard/pos" → "pos" — matches backend PAGES. */
+export function pageKeyOf(to: string): string {
+  return to === "/dashboard" ? "overview" : to.replace("/dashboard/", "");
+}
+
+/* Profile is never gated (everyone may see their own), and /admin is already
+   guarded by is_admin — everything else needs the page in the user's role. */
+function allowedItems(items: NavItem[], user: User | null): NavItem[] {
+  return items.filter((item) => {
+    if (item.to === "/dashboard/profile" || item.to === "/admin") return true;
+    return canOpenPage(pageKeyOf(item.to), user);
+  });
+}
 
 function NavSection({
   items,
@@ -219,7 +235,7 @@ export function DashboardLayout({ children }: { children?: ReactNode }) {
     .toUpperCase()
     .slice(0, 2);
 
-  const role = (user as any)?.role ?? "Owner";
+  const role = user?.is_admin ? "Administrator" : (user?.role_name ?? "No role");
 
   return (
     <BranchFilterProvider>
@@ -245,23 +261,29 @@ export function DashboardLayout({ children }: { children?: ReactNode }) {
               </div>
             </SidebarHeader>
 
-            {/* Navigation */}
+            {/* Navigation — only the pages this user's role allows */}
             <SidebarContent className="py-2 overflow-x-hidden">
-              <NavSection items={MAIN_ITEMS} label="Main" pathname={pathname} />
-              <SidebarSeparator className="mx-3 my-1 bg-sidebar-border/60" />
-              <NavSection items={OPS_ITEMS} label="Operations" pathname={pathname} />
-              <SidebarSeparator className="mx-3 my-1 bg-sidebar-border/60" />
-              <NavSection items={AI_ITEMS} label="Intelligence" pathname={pathname} />
-              <SidebarSeparator className="mx-3 my-1 bg-sidebar-border/60" />
-              <NavSection
-                items={
-                  user?.is_admin
-                    ? [...ADMIN_ITEMS, { icon: StackIcon, label: "Admin Console", to: "/admin" }]
-                    : ADMIN_ITEMS
-                }
-                label="Administration"
-                pathname={pathname}
-              />
+              {[
+                { label: "Main", items: allowedItems(MAIN_ITEMS, user) },
+                { label: "Operations", items: allowedItems(OPS_ITEMS, user) },
+                { label: "Intelligence", items: allowedItems(AI_ITEMS, user) },
+                {
+                  label: "Administration",
+                  items: allowedItems(
+                    user?.is_admin
+                      ? [...ADMIN_ITEMS, { icon: StackIcon, label: "Admin Console", to: "/admin" }]
+                      : ADMIN_ITEMS,
+                    user,
+                  ),
+                },
+              ]
+                .filter((section) => section.items.length > 0)
+                .map((section, i) => (
+                  <div key={section.label}>
+                    {i > 0 && <SidebarSeparator className="mx-3 my-1 bg-sidebar-border/60" />}
+                    <NavSection items={section.items} label={section.label} pathname={pathname} />
+                  </div>
+                ))}
             </SidebarContent>
 
             {/* Footer — Tenant + User */}

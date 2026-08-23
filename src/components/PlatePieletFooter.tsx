@@ -212,10 +212,7 @@ export function PlatePieletFooter({ children, mode = "reveal" }: PlatePieletFoot
 
       {children != null ? <div className="pp-footer-cover">{children}</div> : null}
       {reveal ? <div ref={spacerRef} className="pp-footer-spacer" aria-hidden="true" /> : null}
-      <footer
-        ref={footerRef}
-        className={`pp-footer pp-footer--${reveal ? "reveal" : "static"}`}
-      >
+      <footer ref={footerRef} className={`pp-footer pp-footer--${reveal ? "reveal" : "static"}`}>
         <div className="pp-footer-inner">
           <div className="pp-footer-brand">
             <Link to="/" className="pp-footer-logo">

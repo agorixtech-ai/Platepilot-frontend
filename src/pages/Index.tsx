@@ -1,13 +1,23 @@
 import { AppPage } from "@/components/ionic/AppPage";
-import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
-import { Link } from "react-router-dom";
+// Self-hosted, landing-only: imported here (not main.tsx) so the dashboard's
+// route chunk never downloads it — mirrors main.tsx's Inter setup.
+import "@fontsource-variable/plus-jakarta-sans";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type FormEvent,
+  type ReactNode,
+} from "react";
+import { Link, useHistory } from "react-router-dom";
 import Lenis from "lenis";
 import {
   ArrowRight,
   ArrowUp,
+  ArrowUpRight,
   BarChart3,
   Bell,
-  ChevronRight,
   ClipboardCheck,
   FileText,
   IndianRupee,
@@ -27,7 +37,6 @@ import {
   Zap,
 } from "lucide-react";
 import { PlatePieletHero, T } from "@/components/PlatePieletHero";
-import PlugConnectedIcon from "@/components/ui/icons/plug-connected-icon";
 import { MagicCard } from "@/components/ui/magic-card";
 import { PlatePieletNav } from "@/components/PlatePieletNav";
 import InteractiveBentoGallery, {
@@ -54,7 +63,7 @@ function Tile({ label, children }: { label: string; children: ReactNode }) {
         gap: 7,
         padding: "10px 12px",
         background: `linear-gradient(180deg,${T.surface} 0%,${T.bg} 100%)`,
-        fontFamily: "'Inter Variable', 'Inter', system-ui, sans-serif",
+        fontFamily: "'Plus Jakarta Sans Variable', 'Plus Jakarta Sans', system-ui, sans-serif",
         overflow: "hidden",
         textAlign: "left",
       }}
@@ -412,49 +421,101 @@ const CUSTOMER_LOGOS = [
   "Your Client 6",
 ];
 
-const OUTCOME_STATS: { value: string; label: string; sub: string }[] = [
-  { value: "AED 1,800", label: "Average monthly leakage found", sub: "per outlet, in month one" },
-  { value: "6 hrs", label: "Tally reconciliation time saved", sub: "every week, per finance lead" },
-  { value: "3 → 1", label: "Systems your team logs into", sub: "Tally, POS and stock, unified" },
+/* Outcome cards: same placeholder figures as before, restyled as clickable
+   photo-style tiles. `photo` is a dummy image (loremflickr, keyworded to each
+   card's topic) — swap for real photography before launch; `gradient` stays
+   as a translucent brand-color tint blended over it (see .outcome-card's
+   background-blend-mode).
+   Third slot is a CTA card instead of a third stat, matching the reference
+   3-card widget (2 highlight cards + 1 email-capture card). */
+type OutcomeCard = {
+  pill: string;
+  href: string;
+  gradient: string;
+  photo: string;
+  value: string;
+  caption: string;
+};
+
+const OUTCOME_CARDS: OutcomeCard[] = [
+  {
+    pill: "Food Cost",
+    href: "/product/food-cost-analysis",
+    gradient: "linear-gradient(160deg, #14532D 0%, #15803D 55%, #0A2E1E 100%)",
+    photo: "https://loremflickr.com/800/900/restaurant,inventory",
+    value: "AED 1,800/mo",
+    caption: "Average leakage found per outlet, in month one",
+  },
+  {
+    pill: "Tally + POS",
+    href: "/integrations",
+    gradient: "linear-gradient(160deg, #166534 0%, #16A34A 55%, #0F3D29 100%)",
+    photo: "https://loremflickr.com/800/900/restaurant,pos",
+    value: "6 hrs saved",
+    caption: "Every week, per finance lead, on reconciliation",
+  },
 ];
 
-/* ─── Testimonials & FAQ content ─────────────────────────────────────────── */
-const TESTIMONIALS: { quote: string; name: string; place: string }[] = [
-  {
-    quote:
-      "PlatePielet found ₹40,000 a month we didn't know we were losing. It paid for itself in the first week.",
-    name: "Priya R.",
-    place: "3-outlet restaurant group · Chennai",
-  },
-  {
-    quote:
-      "Tally reconciliation used to eat my Sundays. Now it's finished before I open the laptop.",
-    name: "Suresh M.",
-    place: "Madras Meals Co. · Chennai",
-  },
-  {
-    quote:
-      "Food cost dropped 3% in the first month. The waste alerts alone are worth the subscription.",
-    name: "Kavitha N.",
-    place: "GreenLeaf Kitchens · Coimbatore",
-  },
-  {
-    quote: "I check one dashboard instead of calling five managers every morning.",
-    name: "Arjun V.",
-    place: "Urban Tandoor · Bengaluru",
-  },
-  {
-    quote: "The VAT mismatch alert saved us from a filing penalty in our very first week.",
-    name: "Deepa S.",
-    place: "Biryani House · Chennai",
-  },
-  {
-    quote: "Pilot AI answers in seconds what my accountant needed days to pull together.",
-    name: "Rahul K.",
-    place: "Cafe Azzure · Chennai",
-  },
-];
-const TM_ROW2 = [...TESTIMONIALS.slice(3), ...TESTIMONIALS.slice(0, 3)];
+const OUTCOME_CTA_CARD = {
+  pill: "Book a Demo",
+  gradient: "linear-gradient(165deg, #0A2A1D 0%, #0F3D29 55%, #073B2A 100%)",
+  photo: "https://loremflickr.com/800/900/restaurant,team",
+  heading: "Start recovering margin today",
+};
+
+/* ─── Testimonials & FAQ content ─────────────────────────────────────────────
+ * ⚠️ PLACEHOLDER DATA — quotes, names, and outlets are fabricated, same as
+ * CUSTOMER_LOGOS/OUTCOME_CARDS above. `avatar` is a dummy portrait
+ * (loremflickr placeholder) for the scrolling testimonial cards — replace
+ * everything here with real customers/photos before launch. */
+const TESTIMONIALS: { quote: string; name: string; place: string; role: string; avatar: string }[] =
+  [
+    {
+      quote:
+        "PlatePielet found ₹40,000 a month we didn't know we were losing. It paid for itself in the first week.",
+      name: "Priya R.",
+      place: "3-outlet restaurant group · Chennai",
+      role: "Owner",
+      avatar: "https://loremflickr.com/200/200/portrait,woman",
+    },
+    {
+      quote:
+        "Tally reconciliation used to eat my Sundays. Now it's finished before I open the laptop.",
+      name: "Suresh M.",
+      place: "Madras Meals Co. · Chennai",
+      role: "Finance Lead",
+      avatar: "https://loremflickr.com/200/200/portrait,man",
+    },
+    {
+      quote:
+        "Food cost dropped 3% in the first month. The waste alerts alone are worth the subscription.",
+      name: "Kavitha N.",
+      place: "GreenLeaf Kitchens · Coimbatore",
+      role: "Owner",
+      avatar: "https://loremflickr.com/200/200/portrait,woman,chef",
+    },
+    {
+      quote: "I check one dashboard instead of calling five managers every morning.",
+      name: "Arjun V.",
+      place: "Urban Tandoor · Bengaluru",
+      role: "Owner",
+      avatar: "https://loremflickr.com/200/200/portrait,man,chef",
+    },
+    {
+      quote: "The VAT mismatch alert saved us from a filing penalty in our very first week.",
+      name: "Deepa S.",
+      place: "Biryani House · Chennai",
+      role: "Finance Lead",
+      avatar: "https://loremflickr.com/200/200/portrait,woman,indian",
+    },
+    {
+      quote: "Pilot AI answers in seconds what my accountant needed days to pull together.",
+      name: "Rahul K.",
+      place: "Cafe Azzure · Chennai",
+      role: "Owner",
+      avatar: "https://loremflickr.com/200/200/portrait,man,indian",
+    },
+  ];
 
 const FAQS: [string, string][] = [
   [
@@ -559,10 +620,220 @@ function useReveal(threshold = 0.18) {
   return { ref, visible };
 }
 
+/* ─── How It Works: hub-and-spoke stage ──────────────────────────────────────
+   Centred copy over a flanked diagram: source tiles → Pilot AI hub → output
+   tiles, with a dashboard mock on the left and an outlet console on the right.
+   Only the connector wires are SVG; everything else is real DOM so the mocks
+   keep crisp text and shadows. */
+
+/** Rounded orthogonal elbow: (x1,y1) → vertical bus at `bx` → (x2,y2). */
+function elbow(x1: number, y1: number, bx: number, x2: number, y2: number, r = 14) {
+  if (y1 === y2) return `M${x1} ${y1} H${x2}`;
+  const s = y2 > y1 ? 1 : -1;
+  return `M${x1} ${y1} H${bx - r} Q${bx} ${y1} ${bx} ${y1 + s * r} V${y2 - s * r} Q${bx} ${y2} ${bx + r} ${y2} H${x2}`;
+}
+
+/** Tile-column centres for a 58px tile with a 22px gap (see .hiw-tiles). */
+const HIW_CY = [29, 109, 189];
+
+const HIW_IN = [
+  { Icon: FileText, tint: "#E8F7ED", color: "#15803D", label: "Tally ERP" },
+  { Icon: Receipt, tint: "#EAF1FE", color: "#2563EB", label: "POS billing" },
+  { Icon: Package, tint: "#FDF1E3", color: "#C2760B", label: "Inventory" },
+];
+
+const HIW_OUT = [
+  { Icon: LayoutDashboard, tint: "#EEEDFD", color: "#5B4BD6", label: "Dashboards" },
+  { Icon: Bell, tint: "#FDECEF", color: "#DC2657", label: "Risk alerts" },
+  { Icon: ShoppingCart, tint: "#E8F7ED", color: "#15803D", label: "Purchase calls" },
+];
+
+const HIW_STATS: [typeof IndianRupee, string, string][] = [
+  [IndianRupee, "Sales today", "₹2,18,300"],
+  [Receipt, "Bills", "611"],
+  [Target, "Food cost", "28.4%"],
+  [Package, "Items tracked", "980"],
+  [Bell, "Open alerts", "12"],
+];
+
+const HIW_OUTLETS: [string, string][] = [
+  ["Anna Nagar", "Margin 31% · healthy"],
+  ["Velachery", "Margin 24% · watch"],
+  ["T. Nagar", "Margin 28% · healthy"],
+];
+
+function HiwWire({ side }: { side: "in" | "out" }) {
+  return (
+    <svg className="hiw-wire" viewBox="0 0 54 218" aria-hidden="true">
+      {HIW_CY.map((cy) => (
+        <path key={cy} d={side === "in" ? elbow(0, cy, 27, 54, 109) : elbow(0, 109, 27, 54, cy)} />
+      ))}
+    </svg>
+  );
+}
+
+function HowItWorksFlow() {
+  return (
+    <div className="hiw-stage">
+      <div className="hiw-stage-head">
+        <div className="hiw-badge">
+          <LayoutGrid size={13} strokeWidth={2.2} />
+          How It Works
+        </div>
+        <h2 className="hiw-h2">
+          Data in. <span style={{ color: "#15803D" }}>Decisions</span> out.
+        </h2>
+        <p className="hiw-lede">
+          Your Tally books, POS bills, and stock movements stream into Pilot AI — and come out the
+          other side as live dashboards, risk alerts, and purchase calls you can act on the same
+          day.
+        </p>
+        <Link to="/demo" className="hiw-cta">
+          See it on your data <ArrowRight size={15} strokeWidth={2.4} />
+        </Link>
+      </div>
+
+      {/* floating accent tiles, matching the corners of the stage */}
+      {[
+        { Icon: FileText, tint: "#E8F7ED", color: "#15803D", style: { top: "6%", left: "9%" } },
+        { Icon: Bell, tint: "#FDECEF", color: "#DC2657", style: { top: "9%", right: "10%" } },
+        {
+          Icon: BarChart3,
+          tint: "#EAF1FE",
+          color: "#2563EB",
+          style: { top: "27%", left: "3.5%" },
+        },
+        {
+          Icon: ShoppingCart,
+          tint: "#EEEDFD",
+          color: "#5B4BD6",
+          style: { top: "30%", right: "4%" },
+        },
+      ].map(({ Icon, tint, color, style }, i) => (
+        <div key={i} className="hiw-tile hiw-tile-float" style={style as CSSProperties}>
+          <span style={{ background: tint, color }}>
+            <Icon size={19} strokeWidth={1.9} />
+          </span>
+        </div>
+      ))}
+
+      <div className="hiw-stage-grid">
+        {/* ── left: dashboard mock + stat list ── */}
+        <div className="hiw-panel">
+          <div className="hiw-browser">
+            <div className="hiw-browser-bar">
+              <span />
+              <span />
+              <span />
+            </div>
+            <div className="hiw-browser-body">
+              <div className="hiw-sk" style={{ width: "62%" }} />
+              <div className="hiw-sk" style={{ width: "44%" }} />
+              <svg className="hiw-spark" viewBox="0 0 120 44" preserveAspectRatio="none">
+                <path
+                  d="M0 34 L15 28 L30 31 L45 20 L60 24 L75 12 L90 16 L105 6 L120 9"
+                  fill="none"
+                  stroke="#16A34A"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              <div className="hiw-sk" style={{ width: "78%" }} />
+              <div className="hiw-sk" style={{ width: "52%" }} />
+            </div>
+          </div>
+          <div className="hiw-statlist">
+            {HIW_STATS.map(([Icon, label, value], i) => (
+              <div key={label} className={`hiw-statrow${i === 2 ? " hl" : ""}`}>
+                <span className="hiw-statrow-ico">
+                  <Icon size={13} strokeWidth={2} />
+                </span>
+                <div>
+                  <b>{label}</b>
+                  <em>{value}</em>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* ── centre: tiles → hub → tiles ── */}
+        <div className="hiw-core">
+          <div className="hiw-tiles">
+            {HIW_IN.map(({ Icon, tint, color, label }) => (
+              <div key={label} className="hiw-tile" title={label}>
+                <span style={{ background: tint, color }}>
+                  <Icon size={19} strokeWidth={1.9} />
+                </span>
+              </div>
+            ))}
+          </div>
+          <HiwWire side="in" />
+          <div className="hiw-hub">Pilot AI</div>
+          <HiwWire side="out" />
+          <div className="hiw-tiles">
+            {HIW_OUT.map(({ Icon, tint, color, label }) => (
+              <div key={label} className="hiw-tile" title={label}>
+                <span style={{ background: tint, color }}>
+                  <Icon size={19} strokeWidth={1.9} />
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* ── right: tool rail + outlet console ── */}
+        <div className="hiw-panel">
+          <div className="hiw-rail">
+            <span className="on">
+              <LayoutDashboard size={16} strokeWidth={1.9} />
+            </span>
+            <span>
+              <Sparkles size={16} strokeWidth={1.9} />
+            </span>
+            <span>
+              <Shield size={16} strokeWidth={1.9} />
+            </span>
+            <span>
+              <Trash2 size={16} strokeWidth={1.9} />
+            </span>
+          </div>
+          <div className="hiw-console">
+            {HIW_OUTLETS.map(([name, meta]) => (
+              <div key={name} className="hiw-userrow">
+                <span className="hiw-avatar">
+                  <Star size={12} strokeWidth={2} />
+                </span>
+                <div>
+                  <b>{name}</b>
+                  <span>{meta}</span>
+                </div>
+              </div>
+            ))}
+            <div className="hiw-enter">Open dashboard</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ─── Main page ──────────────────────────────────────────────────────────── */
 function Index() {
-  const [activeTab, setActiveTab] = useState(0);
   const mainRef = useRef<HTMLElement | null>(null);
+  const lenisRef = useRef<Lenis | null>(null);
+  const [showTop, setShowTop] = useState(false);
+  const [ctaEmail, setCtaEmail] = useState("");
+  const history = useHistory();
+
+  // Outcome-card CTA hands the typed email to /demo (via router state) rather
+  // than submitting anywhere itself — there's no standalone capture endpoint,
+  // and DemoPage already owns the real form + POST /api/demo-requests.
+  const handleOutcomeCtaSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    history.push("/demo", { email: ctaEmail });
+  };
 
   /* Smooth, eased scrolling for this page only — scoped to the page's own
      .app-page-scroll ancestor so Dashboard/Login keep native touch scroll.
@@ -584,6 +855,7 @@ function Index() {
       syncTouch: false,
       anchors: { offset: -110 },
     });
+    lenisRef.current = lenis;
 
     let raf = 0;
     const tick = (time: number) => {
@@ -595,8 +867,29 @@ function Index() {
     return () => {
       cancelAnimationFrame(raf);
       lenis.destroy();
+      lenisRef.current = null;
     };
   }, []);
+
+  // Back-to-top visibility — separate from the Lenis effect above since it
+  // must track scroll position even when Lenis is skipped (reduced motion).
+  useEffect(() => {
+    const wrapper = mainRef.current?.closest<HTMLElement>(".app-page-scroll");
+    if (!wrapper) return;
+    const onScroll = () => setShowTop(wrapper.scrollTop > 800);
+    onScroll();
+    wrapper.addEventListener("scroll", onScroll, { passive: true });
+    return () => wrapper.removeEventListener("scroll", onScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    if (lenisRef.current) {
+      lenisRef.current.scrollTo(0, { duration: 1 });
+      return;
+    }
+    const wrapper = mainRef.current?.closest<HTMLElement>(".app-page-scroll");
+    wrapper?.scrollTo({ top: 0, behavior: "auto" });
+  };
 
   const sec1 = useReveal();
   const sec2 = useReveal();
@@ -606,49 +899,13 @@ function Index() {
   const sec6 = useReveal();
   const sec10 = useReveal();
 
-  const tabs = [
-    {
-      label: "PILOT AI INSIGHTS",
-      heading: "Your smartest back-office hire",
-      body: "Pilot AI reads every bill, voucher, and stock movement across your outlets — then tells you, in plain language, where money is leaking and what to do about it. No reports to build, no analyst to hire.",
-      bullets: [
-        "Daily digest of anomalies worth your attention",
-        'Ask questions in plain language — "why is food cost up in Velachery?"',
-        "Predictive purchase suggestions before you run out",
-        "VAT and reconciliation risks flagged before filing day",
-      ],
-    },
-    {
-      label: "REALTIME DASHBOARDS",
-      heading: "Every outlet's numbers, live",
-      body: "Sales, food cost, stock, and receivables update as they happen — not at month-end. Drill from the group view down to a single outlet, item, or invoice in two taps.",
-      bullets: [
-        "Live sales, bills, and margin KPIs per outlet",
-        "Stock levels with low-inventory and variance alerts",
-        "Wastage trends tracked week over week",
-        "Mobile-first — check the numbers from anywhere",
-      ],
-    },
-    {
-      label: "TALLY + POS INTEGRATIONS",
-      heading: "Works with the tools you already use",
-      body: "No migration project, no new hardware. PlatePielet connects to your existing Tally books and POS billing, keeps them in sync, and reconciles them against each other automatically.",
-      bullets: [
-        "Two-way Tally ERP sync — vouchers, ledgers, VAT",
-        "Automatic POS sales import across outlets",
-        "CSV / Excel import for everything else",
-        "POS-to-Tally reconciliation with mismatch alerts",
-      ],
-    },
-  ];
-
   return (
     <div
       className="pp-landing"
       style={{
         background: "#FFFFFF",
         color: "#152019",
-        fontFamily: "'Inter Variable', 'Inter', system-ui, sans-serif",
+        fontFamily: "'Plus Jakarta Sans Variable', 'Plus Jakarta Sans', system-ui, sans-serif",
       }}
     >
       <style>{`
@@ -679,6 +936,40 @@ function Index() {
         .sw-rule {
           height: 1px;
           background: #DDE7E1;
+        }
+
+        /* ── Back-to-top ── */
+        .pp-back-to-top {
+          position: fixed;
+          right: 1.5rem;
+          bottom: 1.5rem;
+          z-index: 40;
+          width: 44px;
+          height: 44px;
+          border-radius: 9999px;
+          border: none;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: ${T.gradientCTA};
+          color: #FFFFFF;
+          cursor: pointer;
+          box-shadow: 0 4px 14px rgba(15,122,76,0.3);
+          opacity: 0;
+          transform: translateY(12px);
+          pointer-events: none;
+          transition: opacity 0.25s ease, transform 0.25s ease, box-shadow 0.2s ease;
+        }
+        .pp-back-to-top.show {
+          opacity: 1;
+          transform: none;
+          pointer-events: auto;
+        }
+        .pp-back-to-top:hover {
+          box-shadow: 0 10px 26px rgba(15,122,76,0.4);
+        }
+        @media (max-width: 640px) {
+          .pp-back-to-top { right: 1rem; bottom: 1rem; width: 40px; height: 40px; }
         }
 
         /* ── Eyebrow label ── */
@@ -787,150 +1078,210 @@ function Index() {
         .hiw-badge svg { flex-shrink: 0; transition: transform 0.25s ease; }
         .hiw-badge:hover svg { transform: scale(1.15) rotate(-8deg); }
 
-        /* ── Concept flow: sources → Pilot AI → outcomes ── */
-        .pp-flow {
+        /* ── How It Works stage: centred copy over sources → Pilot AI → outputs ── */
+        .hiw-stage {
           position: relative;
-          display: grid;
-          grid-template-columns: 1fr 70px 250px 70px 1fr;
-          align-items: start;
-          margin-top: 2.5rem;
+          margin-top: 1rem;
+          padding: 3.5rem 2.5rem 3rem;
+          border-radius: 30px;
+          background: #F3F6F4;
+          border: 1px solid #E4EBE6;
+          overflow: hidden;
         }
-        .pp-flow::before {
+        /* dashed guide grid — pure background, no extra markup */
+        .hiw-stage::before {
           content: '';
           position: absolute;
-          inset: -30px 8%;
-          background: radial-gradient(ellipse 55% 65% at 50% 50%, rgba(34,197,94,0.16), transparent 72%);
-          filter: blur(24px);
-          z-index: 0;
+          inset: 0;
           pointer-events: none;
+          background:
+            repeating-linear-gradient(180deg, #DCE5DF 0 6px, transparent 6px 14px) 17% 0/1px 100% no-repeat,
+            repeating-linear-gradient(180deg, #DCE5DF 0 6px, transparent 6px 14px) 83% 0/1px 100% no-repeat,
+            repeating-linear-gradient(90deg, #DCE5DF 0 6px, transparent 6px 14px) 0 24%/100% 1px no-repeat,
+            repeating-linear-gradient(90deg, #DCE5DF 0 6px, transparent 6px 14px) 0 82%/100% 1px no-repeat;
         }
-        .pp-flow > * { position: relative; z-index: 1; }
-        .hiw-col-head { margin-bottom: 14px; }
-        .hiw-col-head.center { text-align: center; }
-        .hiw-col-badge {
+        .hiw-stage > * { position: relative; z-index: 1; }
+
+        .hiw-stage-head { max-width: 640px; margin: 0 auto 3.5rem; text-align: center; }
+        .hiw-stage-head .hiw-badge { margin-bottom: 1.25rem; }
+        .hiw-h2 {
+          font-size: clamp(2rem, 3.6vw, 3.1rem);
+          font-weight: 800;
+          letter-spacing: -0.04em;
+          line-height: 1.1;
+          margin-bottom: 1rem;
+        }
+        .hiw-lede { font-size: 0.9rem; color: #66736B; line-height: 1.75; }
+        .hiw-cta {
           display: inline-flex;
           align-items: center;
-          gap: 0.35rem;
-          padding: 0.35rem 0.75rem;
+          gap: 0.6rem;
+          margin-top: 1.75rem;
+          padding: 0.85rem 1.6rem;
           border-radius: 999px;
-          border: 1px solid rgba(22,163,74,0.3);
-          background: #E8F7ED;
-          color: #15803D;
-          font-size: 0.62rem;
+          background: #12211A;
+          color: #FFFFFF !important;
+          font-size: 0.85rem;
           font-weight: 700;
-          letter-spacing: 0.1em;
-          text-transform: uppercase;
+          box-shadow: 0 14px 30px -14px rgba(18,33,26,0.7);
+          transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
-        .hiw-col-badge svg:not(.cursor-pointer) { transition: transform 0.25s ease; }
-        .hiw-col-badge:hover svg:not(.cursor-pointer) { transform: scale(1.15) rotate(-8deg); }
-        .hiw-col-sub {
-          display: block;
-          margin-top: 0.55rem;
-          font-size: 0.78rem;
-          color: #66736B;
-        }
-        .pp-flow-col { display: flex; flex-direction: column; gap: 20px; height: 280px; }
-        .pp-node {
-          height: 80px;
-          box-sizing: border-box;
-          display: flex;
+        .hiw-cta:hover { transform: translateY(-2px); box-shadow: 0 18px 36px -14px rgba(18,33,26,0.8); }
+        .hiw-cta svg { transition: transform 0.2s ease; }
+        .hiw-cta:hover svg { transform: translateX(3px); }
+
+        .hiw-stage-grid {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+          gap: 1.5rem;
           align-items: center;
-          gap: 12px;
-          padding: 0 14px;
+        }
+
+        /* icon tiles */
+        .hiw-tile {
+          width: 58px;
+          height: 58px;
+          border-radius: 17px;
           background: #FFFFFF;
-          border: 1px solid #E3ECE6;
-          border-radius: 18px;
-          box-shadow: 0 2px 10px rgba(21,32,25,0.05);
+          display: grid;
+          place-items: center;
+          box-shadow: 0 8px 20px -10px rgba(21,32,25,0.35), 0 1px 2px rgba(21,32,25,0.06);
+          transition: transform 0.25s ease;
         }
-        .pp-node-icon {
-          width: 44px;
-          height: 44px;
+        .hiw-tile:hover { transform: translateY(-3px); }
+        .hiw-tile > span {
+          width: 38px;
+          height: 38px;
           border-radius: 12px;
-          background: #E8F7ED;
-          color: #15803D;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          flex-shrink: 0;
-          transition: transform 0.25s ease, background 0.25s ease, color 0.25s ease;
+          display: grid;
+          place-items: center;
         }
-        .pp-node-body { flex: 1; min-width: 0; }
-        .pp-node-title { font-size: 0.85rem; font-weight: 700; color: #152019; line-height: 1.2; }
-        .pp-node-sub { font-size: 0.72rem; color: #66736B; margin-top: 2px; }
-        .pp-node-chevron {
+        .hiw-tile-float { position: absolute; z-index: 0; }
+        @media (max-width: 1080px) { .hiw-tile-float { display: none; } }
+
+        /* centre column: tiles → wire → hub → wire → tiles */
+        .hiw-core {
+          display: grid;
+          grid-template-columns: 58px 54px auto 54px 58px;
+          align-items: center;
+        }
+        .hiw-tiles { display: flex; flex-direction: column; gap: 22px; }
+        .hiw-wire { display: block; width: 54px; height: 218px; }
+        .hiw-wire path { fill: none; stroke: #C6D5CC; stroke-width: 1.5; }
+        .hiw-hub {
+          padding: 1rem 1.6rem;
+          border-radius: 999px;
+          background: #12211A;
+          color: #FFFFFF;
+          font-size: 1.05rem;
+          font-weight: 700;
+          letter-spacing: -0.01em;
+          text-align: center;
+          white-space: nowrap;
+          box-shadow: 0 16px 32px -14px rgba(18,33,26,0.65), 0 0 0 7px rgba(22,163,74,0.07);
+        }
+
+        /* flanking panels */
+        .hiw-panel {
+          display: flex;
+          gap: 12px;
+          padding: 14px;
+          border-radius: 24px;
+          background: rgba(255,255,255,0.5);
+          border: 1px solid #E4EBE6;
+        }
+        .hiw-browser {
+          flex: 1 1 0;
+          min-width: 0;
+          background: #FFFFFF;
+          border: 1px solid #EDF2EF;
+          border-radius: 16px;
+          overflow: hidden;
+          box-shadow: 0 10px 24px -16px rgba(21,32,25,0.5);
+        }
+        .hiw-browser-bar { display: flex; gap: 5px; padding: 12px 14px; border-bottom: 1px solid #F1F5F3; }
+        .hiw-browser-bar span { width: 8px; height: 8px; border-radius: 50%; background: #DDE5E0; }
+        .hiw-browser-body { padding: 14px; display: flex; flex-direction: column; gap: 9px; }
+        .hiw-sk { height: 8px; border-radius: 999px; background: #EDF2EF; }
+        .hiw-spark { display: block; width: 100%; height: 44px; margin: 3px 0; }
+
+        .hiw-statlist { flex: 0 0 150px; display: flex; flex-direction: column; gap: 2px; }
+        .hiw-statrow { display: flex; align-items: center; gap: 9px; padding: 7px 9px; border-radius: 12px; }
+        .hiw-statrow.hl { background: #FFFFFF; box-shadow: 0 8px 18px -14px rgba(21,32,25,0.7); }
+        .hiw-statrow-ico {
           width: 26px;
           height: 26px;
-          border-radius: 999px;
-          background: #E8F7ED;
-          color: #15803D;
-          display: flex;
-          align-items: center;
-          justify-content: center;
+          border-radius: 8px;
+          background: #F1F5F3;
+          color: #66736B;
+          display: grid;
+          place-items: center;
           flex-shrink: 0;
-          transition: transform 0.25s ease, background 0.25s ease, color 0.25s ease;
         }
-        .pp-node:hover .pp-node-icon { transform: scale(1.1); background: #16A34A; color: #FFFFFF; }
-        .pp-node:hover .pp-node-chevron { transform: translateX(3px); background: #16A34A; color: #FFFFFF; }
-        .pp-conn-cell { margin-top: 0; }
-        .pp-conn-spacer { visibility: hidden; }
-        .pp-conn-cell svg { display: block; width: 100%; height: 280px; }
-        .pp-conn-cell path {
-          fill: none;
-          stroke: #16A34A;
-          stroke-opacity: 0.65;
-          stroke-width: 3;
-          stroke-linecap: round;
-          stroke-dasharray: 3 9;
-          animation: pp-dash 1.1s linear infinite;
-        }
-        @keyframes pp-dash { to { stroke-dashoffset: -26; } }
-        .pp-conn-arrow { fill: #16A34A; fill-opacity: 0.6; }
-        .pp-engine-cell {
-          height: 280px;
+        .hiw-statrow b { display: block; font-size: 0.68rem; font-weight: 600; color: #8A968F; }
+        .hiw-statrow em { display: block; font-style: normal; font-size: 0.8rem; font-weight: 800; color: #152019; margin-top: 1px; }
+
+        .hiw-rail {
+          flex: 0 0 42px;
           display: flex;
+          flex-direction: column;
           align-items: center;
           justify-content: center;
+          gap: 18px;
+          color: #98A49D;
         }
-        .pp-engine {
+        .hiw-rail > span { width: 34px; height: 34px; border-radius: 11px; display: grid; place-items: center; }
+        .hiw-rail > span.on { background: #FFFFFF; color: #15803D; box-shadow: 0 8px 18px -12px rgba(21,32,25,0.7); }
+        .hiw-console {
+          flex: 1;
+          min-width: 0;
+          display: flex;
+          flex-direction: column;
+          padding: 6px;
           background: #FFFFFF;
-          border: 2px solid #16A34A;
-          border-radius: 22px;
-          padding: 2.2rem 1.6rem;
-          text-align: center;
-          max-width: 250px;
+          border: 1px solid #EDF2EF;
+          border-radius: 18px;
+          box-shadow: 0 12px 26px -18px rgba(21,32,25,0.6);
         }
-        .pp-engine-icon {
-          width: 68px;
-          height: 68px;
+        .hiw-userrow { display: flex; align-items: center; gap: 10px; padding: 10px 8px; border-bottom: 1px solid #F3F7F5; }
+        .hiw-avatar {
+          width: 26px;
+          height: 26px;
           border-radius: 50%;
-          background: #E8F7ED;
-          color: #15803D;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          margin: 0 auto 0.85rem;
-          transition: transform 0.3s ease;
+          background: #EEF3F0;
+          color: #9AA69F;
+          display: grid;
+          place-items: center;
+          flex-shrink: 0;
         }
-        .pp-engine:hover .pp-engine-icon { transform: scale(1.12) rotate(8deg); }
-        .pp-engine-title { font-size: 1.05rem; font-weight: 800; color: #152019; }
-        .pp-engine-divider { width: 28px; height: 2px; background: #16A34A; margin: 0.6rem auto; }
-        .pp-engine-sub { font-size: 0.72rem; color: #66736B; line-height: 1.55; }
-        @keyframes pp-vdash { to { background-position-y: 12px; } }
-        @media (max-width: 900px) {
-          .pp-flow { display: flex; flex-direction: column; align-items: stretch; }
-          .pp-flow-col { height: auto; }
-          .pp-conn-cell {
-            margin: 12px auto;
-            width: 2px;
-            height: 44px;
-            background: repeating-linear-gradient(180deg, #16A34A 0 3px, transparent 3px 12px);
-            animation: pp-vdash 1.1s linear infinite;
-          }
-          .pp-conn-cell svg { display: none; }
-          .pp-conn-spacer { display: none; }
-          .pp-engine-cell { height: auto; }
-          .hiw-col-head { text-align: center; margin-bottom: 10px; }
-          .pp-engine { max-width: none; width: 100%; }
+        .hiw-userrow b { display: block; font-size: 0.78rem; font-weight: 700; color: #152019; }
+        .hiw-userrow span { display: block; font-size: 0.67rem; color: #8A968F; margin-top: 1px; }
+        .hiw-enter {
+          margin: 10px 4px 4px;
+          padding: 10px;
+          border-radius: 12px;
+          border: 1px solid #E4EBE6;
+          text-align: center;
+          font-size: 0.78rem;
+          font-weight: 700;
+          color: #152019;
+        }
+
+        @media (max-width: 1080px) {
+          .hiw-stage-grid { grid-template-columns: 1fr; justify-items: center; gap: 2rem; }
+          .hiw-panel { width: 100%; max-width: 420px; }
+          .hiw-stage-head { margin-bottom: 2.5rem; }
+        }
+        @media (max-width: 560px) {
+          .hiw-stage { padding: 2.5rem 1.25rem; border-radius: 22px; }
+          .hiw-core { grid-template-columns: 52px 34px auto 34px 52px; }
+          .hiw-tile { width: 52px; height: 52px; border-radius: 15px; }
+          .hiw-tiles { gap: 16px; }
+          .hiw-wire { width: 34px; height: 188px; }
+          .hiw-hub { padding: 0.8rem 0.9rem; font-size: 0.85rem; }
+          .hiw-panel { flex-direction: column; }
+          .hiw-statlist, .hiw-rail { flex: none; }
+          .hiw-rail { flex-direction: row; justify-content: flex-start; gap: 10px; }
         }
 
         /* ── How It Works: bottom stat bar ── */
@@ -978,35 +1329,121 @@ function Index() {
           .hiw-stat:last-child { border-bottom: none; }
         }
 
-        /* ── Testimonials marquee ── */
+        /* ── Testimonials: copy-left / stacked-quote-cards-right ── */
         .tm-section { padding: 6rem 0; }
-        .tm-marquee {
-          overflow: hidden;
-          -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
-          mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+        .tm-split {
+          display: grid;
+          grid-template-columns: minmax(0, 4fr) minmax(0, 7fr);
+          gap: 3rem;
+          align-items: center;
         }
-        .tm-track {
+        @media (max-width: 900px) { .tm-split { grid-template-columns: 1fr; gap: 2.5rem; } }
+        .tm-badge {
+          display: inline-flex;
+          align-items: center;
+          background: #66736B;
+          color: #FFFFFF;
+          font-size: 0.8rem;
+          font-weight: 600;
+          padding: 0.5rem 1.1rem;
+          border-radius: 9999px;
+        }
+        .tm-cta {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.75rem;
+          margin-top: 2rem;
+          background: #0A2A1D;
+          color: #FFFFFF;
+          border-radius: 9999px;
+          padding: 0.4rem 0.4rem 0.4rem 1.5rem;
+          font-size: 0.85rem;
+          font-weight: 700;
+          text-decoration: none;
+        }
+        .tm-cta-arrow {
           display: flex;
-          gap: 1.25rem;
-          width: max-content;
-          padding: 0.75rem 0;
-          animation: pp-scroll-x 48s linear infinite;
-        }
-        .tm-track.tm-reverse { animation-direction: reverse; }
-        .tm-marquee:hover .tm-track { animation-play-state: paused; }
-        .tm-card {
-          width: 340px;
+          align-items: center;
+          justify-content: center;
+          width: 40px;
+          height: 40px;
           flex-shrink: 0;
+          border-radius: 9999px;
+          background: rgba(255,255,255,0.14);
+          transition: transform 0.2s ease, background 0.2s ease;
+        }
+        .tm-cta:hover .tm-cta-arrow { background: rgba(255,255,255,0.24); transform: scale(1.06) rotate(6deg); }
+        /* Vertical auto-scroll: content is rendered twice, then translated by
+           exactly one copy's height (-50%) so the loop seams invisibly. */
+        .tm-stack {
+          max-height: 640px;
+          overflow: hidden;
+          -webkit-mask-image: linear-gradient(180deg, transparent, #000 8%, #000 92%, transparent);
+          mask-image: linear-gradient(180deg, transparent, #000 8%, #000 92%, transparent);
+        }
+        .tm-stack-track {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-end;
+          gap: 1.5rem;
+          animation: tm-scroll-y 36s linear infinite;
+        }
+        .tm-stack:hover .tm-stack-track { animation-play-state: paused; }
+        @keyframes tm-scroll-y { from { transform: translateY(0); } to { transform: translateY(-50%); } }
+        .tm-qcard {
+          position: relative;
+          display: flex;
+          align-items: flex-start;
+          gap: 1.25rem;
+          padding: 1.75rem 2rem;
+          border-radius: 20px;
+          margin: 0;
+        }
+        .tm-qcard--side {
+          width: 88%;
           background: #FFFFFF;
           border: 1px solid #DDE7E1;
-          border-radius: 14px;
-          padding: 1.5rem;
           box-shadow: 0 2px 8px rgba(21,32,25,0.04);
         }
-        @media (max-width: 600px) { .tm-card { width: 280px; } }
-        .tm-quote { font-size: 0.9rem; color: #152019; line-height: 1.65; }
-        .tm-attr { margin-top: 1rem; font-size: 0.78rem; font-weight: 700; color: #15803D; }
-        .tm-attr span { display: block; font-weight: 500; color: #66736B; margin-top: 2px; }
+        .tm-qcard--muted { opacity: 0.55; }
+        .tm-qcard--featured {
+          width: 100%;
+          overflow: hidden;
+          background: linear-gradient(165deg, #0A2A1D 0%, #0F3D29 60%, #073B2A 100%);
+          box-shadow: 0 20px 45px rgba(10,26,16,0.25);
+        }
+        .tm-avatar {
+          width: 60px;
+          height: 60px;
+          flex-shrink: 0;
+          border-radius: 50%;
+          object-fit: cover;
+          border: 3px solid #FFFFFF;
+          box-shadow: 0 4px 12px rgba(21,32,25,0.12);
+        }
+        .tm-qcard--featured .tm-avatar { width: 72px; height: 72px; }
+        .tm-qtext { font-size: 1rem; font-weight: 500; line-height: 1.6; }
+        .tm-qcard--side .tm-qtext { color: #152019; }
+        .tm-qcard--featured .tm-qtext { color: #FFFFFF; position: relative; z-index: 1; }
+        .tm-qattr { margin-top: 0.75rem; font-size: 0.85rem; }
+        .tm-qcard--side .tm-qattr { color: #66736B; }
+        .tm-qcard--featured .tm-qattr { color: rgba(255,255,255,0.75); position: relative; z-index: 1; }
+        .tm-qattr b { font-style: normal; }
+        .tm-qmark {
+          position: absolute;
+          right: 1.5rem;
+          bottom: -1.5rem;
+          font-family: Georgia, serif;
+          font-size: 10rem;
+          line-height: 1;
+          color: rgba(255,255,255,0.06);
+          pointer-events: none;
+          user-select: none;
+        }
+        @media (max-width: 700px) {
+          .tm-qcard--side { width: 100%; }
+          .tm-qcard { padding: 1.5rem; }
+        }
 
         /* ── FAQ (native details/summary) ── */
         .faq-split {
@@ -1025,23 +1462,24 @@ function Index() {
           align-items: center;
           justify-content: space-between;
           gap: 1.5rem;
-          padding: 1.25rem 0;
-          font-size: 0.95rem;
-          font-weight: 600;
+          padding: 1.75rem 0;
+          font-size: 1.1rem;
+          font-weight: 700;
+          letter-spacing: -0.01em;
           color: #152019;
         }
         .faq-item summary::-webkit-details-marker { display: none; }
         .faq-item summary::after {
           content: '+';
-          font-size: 1.1rem;
-          font-weight: 700;
-          color: #15803D;
+          font-size: 1.3rem;
+          font-weight: 400;
+          color: #9CA3AF;
           flex-shrink: 0;
         }
-        .faq-item[open] summary::after { content: '−'; }
+        .faq-item[open] summary::after { content: '×'; }
         .faq-a {
-          padding: 0 2rem 1.25rem 0;
-          font-size: 0.85rem;
+          padding: 0 2rem 1.75rem 0;
+          font-size: 0.9rem;
           color: #66736B;
           line-height: 1.7;
         }
@@ -1225,7 +1663,7 @@ function Index() {
         .me-note { margin-top: 1.75rem; font-size: 0.85rem; color: #66736B; }
 
         /* Subtle blurred green glow behind a section — same mechanism as
-           .pp-flow::before / .xp-section, reused here for two more sections. */
+           .hiw-stage::before / .xp-section, reused here for two more sections. */
         .sw-glow-wrap { position: relative; isolation: isolate; }
         .sw-glow-wrap::before {
           content: '';
@@ -1238,14 +1676,13 @@ function Index() {
         }
         .sw-glow-wrap > * { position: relative; z-index: 1; }
 
-        /* Full-bleed alternating band. The page canvas is white now, so section
+        /* Full-bleed alternating band. The page canvas is white, so section
            rhythm comes from a true-neutral surface + the forest CTA band, not
            from the old green tint. Wraps .sw-section (which is width-capped and
            therefore can't go edge to edge itself). */
         .sw-band { background: var(--brand-surface); }
         /* Cards inside a band need to stay white or they vanish into it. */
-        .sw-band .sw-card,
-        .sw-band .tm-card { background: #FFFFFF; }
+        .sw-band .sw-card { background: #FFFFFF; }
 
         /* ── Social proof: logo wall + outcome stats ──
            Sits directly under the hero because that is where both reference
@@ -1280,34 +1717,129 @@ function Index() {
         }
         .proof-logo:hover { color: #152019; }
 
-        .stats-band {
+        /* ── Outcome cards: photo-style tiles (dummy photo tinted by the brand
+           gradient via background-blend-mode) ── */
+        .outcome-cards {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+          grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
           gap: 1rem;
           padding: 3.5rem 0;
         }
-        .stat-card {
-          padding: 1.75rem 1.5rem;
-          border: 1px solid #DDE7E1;
-          border-radius: 16px;
+        .outcome-card {
+          position: relative;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          min-height: 380px;
+          padding: 1.25rem;
+          border-radius: 22px;
+          overflow: hidden;
+          color: #FFFFFF;
+          background-size: cover;
+          background-position: center;
+          background-blend-mode: multiply;
+          box-shadow: 0 10px 30px rgba(10,26,16,0.18);
+          transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+        a.outcome-card:hover {
+          transform: translateY(-3px);
+          box-shadow: 0 16px 38px rgba(10,26,16,0.26);
+        }
+        .outcome-card::after {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(180deg, rgba(0,0,0,0) 45%, rgba(0,0,0,0.4) 100%);
+          pointer-events: none;
+        }
+        .outcome-card-top,
+        .outcome-bottom { position: relative; z-index: 1; }
+        .outcome-card-top {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 0.75rem;
+        }
+        .outcome-pill {
+          display: inline-flex;
+          align-items: center;
           background: #FFFFFF;
-        }
-        /* Amber, not green: the one non-green accent, so the number reads as
-           data rather than as another brand element. */
-        .stat-value {
-          font-size: clamp(1.9rem, 3.5vw, 2.5rem);
-          font-weight: 800;
-          letter-spacing: -0.03em;
-          line-height: 1;
-          color: #B45309;
-        }
-        .stat-label {
-          margin-top: 0.6rem;
-          font-size: 0.95rem;
-          font-weight: 700;
           color: #152019;
+          font-size: 0.78rem;
+          font-weight: 700;
+          padding: 0.5rem 0.9rem;
+          border-radius: 9999px;
+          white-space: nowrap;
         }
-        .stat-sub { margin-top: 0.2rem; font-size: 0.85rem; color: #66736B; }
+        .outcome-arrow {
+          flex-shrink: 0;
+          width: 36px;
+          height: 36px;
+          border-radius: 9999px;
+          background: #FFFFFF;
+          color: #152019;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: transform 0.2s ease;
+        }
+        a.outcome-arrow:hover,
+        a.outcome-card:hover .outcome-arrow { transform: scale(1.08) rotate(6deg); }
+        .outcome-value {
+          font-size: clamp(1.4rem, 2.6vw, 1.7rem);
+          font-weight: 800;
+          letter-spacing: -0.02em;
+          line-height: 1.15;
+        }
+        .outcome-caption {
+          margin-top: 0.4rem;
+          font-size: 0.85rem;
+          line-height: 1.45;
+          color: rgba(255,255,255,0.82);
+          max-width: 88%;
+        }
+        .outcome-cta-heading {
+          font-size: clamp(1.3rem, 2.4vw, 1.55rem);
+          font-weight: 800;
+          letter-spacing: -0.02em;
+          line-height: 1.2;
+          margin-bottom: 1rem;
+        }
+        .outcome-cta-form {
+          display: flex;
+          align-items: center;
+          gap: 4px;
+          padding: 4px;
+          background: rgba(255,255,255,0.14);
+          border: 1px solid rgba(255,255,255,0.35);
+          border-radius: 9999px;
+          backdrop-filter: blur(6px);
+        }
+        .outcome-cta-form input {
+          flex: 1;
+          min-width: 0;
+          background: transparent;
+          border: none;
+          outline: none;
+          color: #FFFFFF;
+          font-size: 0.85rem;
+          padding: 0.5rem 0.25rem 0.5rem 0.75rem;
+        }
+        .outcome-cta-form input::placeholder { color: rgba(255,255,255,0.65); }
+        .outcome-cta-form button {
+          flex-shrink: 0;
+          background: #FFFFFF;
+          color: #152019;
+          font-size: 0.78rem;
+          font-weight: 700;
+          padding: 0.55rem 1.05rem;
+          border: none;
+          border-radius: 9999px;
+          cursor: pointer;
+          white-space: nowrap;
+          transition: transform 0.15s ease;
+        }
+        .outcome-cta-form button:hover { transform: translateY(-1px); }
 
         /* ── CTA Band ──
            Stays LIGHT on purpose. It renders inside .pp-footer-cover, the opaque
@@ -1364,6 +1896,17 @@ function Index() {
           line-height: 1.75;
           max-width: 560px;
           margin-bottom: 3.5rem;
+        }
+        /* Heading-left / intro-right header row (Solution section only) */
+        .sw-section-header-split {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-end;
+          gap: 2.5rem;
+          margin-bottom: 3.5rem;
+        }
+        @media (max-width: 900px) {
+          .sw-section-header-split { flex-direction: column; align-items: flex-start; }
         }
 
         /* ── Split gallery section: half copy / half bento ── */
@@ -1678,7 +2221,8 @@ function Index() {
         }
         .sw-cards-grid {
           display: grid;
-          grid-template-columns: repeat(4, 1fr);
+          grid-template-columns: repeat(3, 1fr) 1.3fr;
+          align-items: start;
           gap: 1.25rem;
         }
         @media (max-width: 1100px) { .sw-cards-grid { grid-template-columns: repeat(2, 1fr); } }
@@ -1691,8 +2235,11 @@ function Index() {
           background: #FFFFFF;
           border: 1px solid #DDE7E1;
           border-radius: 16px;
+          min-height: 380px;
           box-shadow: 0 2px 8px rgba(21,32,25,0.04);
           position: relative;
+          display: flex;
+          flex-direction: column;
           transition: transform 0.15s ease-out, box-shadow 0.25s ease, border-color 0.25s ease;
           transform-style: preserve-3d;
           will-change: transform;
@@ -1704,36 +2251,18 @@ function Index() {
           border-color: rgba(22,163,74,0.3);
           box-shadow: 0 20px 45px rgba(21,32,25,0.12);
         }
-        .sw-card-line {
-          position: absolute;
-          left: 1.5rem;
-          right: 1.5rem;
-          bottom: 0;
-          height: 3px;
-          border-radius: 3px 3px 0 0;
-          opacity: 0;
-          transform: scaleX(0.6);
-          transform-origin: left;
-          transition: opacity 0.25s ease, transform 0.25s ease;
+        .sw-card--featured {
+          background: #E8F7ED;
+          border-color: rgba(22,163,74,0.22);
+          min-height: 460px;
+          border-radius: 16px 96px 16px 16px;
         }
-        .sw-card:hover .sw-card-line {
-          opacity: 1;
-          transform: scaleX(1);
+        @media (max-width: 1100px) {
+          .sw-card--featured { border-radius: 16px 64px 16px 16px; }
         }
-        .sw-card-number {
-          font-size: 0.62rem;
-          font-weight: 700;
-          letter-spacing: 0.18em;
-          color: rgba(21,32,25,0.2);
-          font-variant-numeric: tabular-nums;
-          margin-bottom: 1.5rem;
-        }
-        .sw-card-tag {
-          font-size: 0.65rem;
-          font-weight: 700;
-          letter-spacing: 0.15em;
-          text-transform: uppercase;
-          margin-bottom: 1rem;
+        .sw-card-icon {
+          display: flex;
+          margin-bottom: 1.75rem;
         }
         .sw-card-title {
           font-size: clamp(1rem, 1.8vw, 1.25rem);
@@ -1747,128 +2276,209 @@ function Index() {
           color: #66736B;
           line-height: 1.65;
           margin-bottom: 1.75rem;
+          flex: 1;
         }
-        .sw-card-cta {
-          font-size: 0.62rem;
-          font-weight: 700;
-          letter-spacing: 0.18em;
-          text-transform: uppercase;
+        .sw-card-arrow {
           display: inline-flex;
           align-items: center;
-          gap: 0.35rem;
-          transition: color 0.2s;
+          justify-content: center;
+          align-self: flex-start;
+          width: 40px;
+          height: 40px;
+          flex-shrink: 0;
+          border-radius: 9999px;
+          background: #FFFFFF;
+          border: 1px solid #DDE7E1;
+          color: #152019;
+          transition: transform 0.2s ease, background 0.2s ease, color 0.2s ease;
         }
-        .sw-card-cta:hover { color: #15803D !important; }
+        .sw-card:hover .sw-card-arrow {
+          transform: scale(1.08) rotate(6deg);
+        }
+        .sw-card-arrow--solid {
+          background: #15803D;
+          border-color: #15803D;
+          color: #FFFFFF;
+        }
 
         /* ── Capabilities section (exact match to reference) ── */
-        .sw-tabs-wrap {
-          margin-top: 2.5rem;
+        /* ── Feature bento grid ── */
+        .ft-grid {
+          display: grid;
+          grid-template-columns: repeat(6, 1fr);
+          gap: 1.25rem;
+          margin-top: 3rem;
+        }
+        .ft-card { grid-column: span 2; }
+        .ft-card.ft-wide { grid-column: span 3; }
+        @media (max-width: 1024px) {
+          .ft-grid { grid-template-columns: repeat(2, 1fr); }
+          .ft-card, .ft-card.ft-wide { grid-column: span 1; }
+          .ft-card:last-child { grid-column: span 2; }
+        }
+        @media (max-width: 640px) {
+          .ft-grid { grid-template-columns: 1fr; gap: 1rem; }
+          .ft-card, .ft-card.ft-wide, .ft-card:last-child { grid-column: span 1; }
+        }
+        .ft-card {
+          background: #F6FAF8;
           border: 1px solid #DDE7E1;
-          border-radius: 8px;
-          overflow: hidden;
-        }
-        .sw-tabs-bar {
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          border-bottom: 1px solid #DDE7E1;
-          background: #E8F7ED;
-        }
-        @media (max-width: 768px) {
-          .sw-tabs-bar { grid-template-columns: 1fr; }
-        }
-        .sw-tab-btn {
-          padding: 1.25rem 1.5rem;
-          border: none;
-          background: transparent;
-          color: #66736B;
-          font-size: 0.7rem;
-          font-weight: 700;
-          letter-spacing: 0.18em;
-          text-transform: uppercase;
-          cursor: pointer;
-          transition: color 0.2s ease;
-          position: relative;
-          border-right: 1px solid #DDE7E1;
-        }
-        .sw-tab-btn:nth-child(3) { border-right: none; }
-        @media (max-width: 768px) {
-          .sw-tab-btn { border-right: none; border-bottom: 1px solid #DDE7E1; }
-          .sw-tab-btn:nth-child(3) { border-bottom: none; }
-        }
-        .sw-tab-btn:hover {
-          color: #152019;
-        }
-        .sw-tab-btn.active {
-          color: #15803D;
-          background: #E8F7ED;
-        }
-        .sw-tab-btn.active::after {
-          content: '';
-          position: absolute;
-          bottom: 0;
-          left: 0;
-          width: 100%;
-          height: 2px;
-          background: linear-gradient(90deg, #0F7A4C, #16A34A);
-        }
-        .sw-tab-content {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          padding: 3rem 2.5rem;
-        }
-        @media (max-width: 768px) {
-          .sw-tab-content { grid-template-columns: 1fr; gap: 2rem; padding: 2.5rem 1.75rem; }
-        }
-        .sw-tab-left {
-          padding-right: 3rem;
-          border-right: 1px solid #DDE7E1;
-        }
-        @media (max-width: 768px) {
-          .sw-tab-left {
-            padding-right: 0;
-            border-right: none;
-            border-bottom: 1px solid #DDE7E1;
-            padding-bottom: 2rem;
-          }
-        }
-        .sw-tab-heading {
-          font-size: clamp(1.25rem, 2.2vw, 1.75rem);
-          font-weight: 700;
-          letter-spacing: -0.02em;
-          line-height: 1.25;
-          margin-bottom: 1rem;
-        }
-        .sw-tab-body {
-          font-size: 0.9rem;
-          color: #66736B;
-          line-height: 1.7;
-        }
-        .sw-tab-right {
-          padding-left: 3rem;
-        }
-        @media (max-width: 768px) {
-          .sw-tab-right { padding-left: 0; padding-top: 2rem; }
-        }
-        .sw-tab-bullets {
-          list-style: none;
+          border-radius: 18px;
+          padding: 1.5rem;
           display: flex;
           flex-direction: column;
-          gap: 1rem;
+          transition: border-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
         }
-        .sw-tab-bullets li {
+        .ft-card:hover {
+          border-color: #B6DCC6;
+          transform: translateY(-3px);
+          box-shadow: 0 18px 40px -24px rgba(15,42,28,0.35);
+        }
+        .ft-vis {
+          position: relative;
+          height: 200px;
+          margin-bottom: 1.5rem;
           display: flex;
           align-items: center;
-          gap: 1rem;
-          font-size: 0.85rem;
-          color: #66736B;
-          line-height: 1.5;
+          justify-content: center;
+          overflow: hidden;
         }
-        .sw-tab-bullets li::before {
-          content: '—';
-          color: rgba(21,32,25,0.35);
-          flex-shrink: 0;
-          font-size: 0.8rem;
-          margin-top: 0.1em;
+        .ft-card.ft-wide .ft-vis { height: 244px; }
+        .ft-title {
+          font-size: 1.3rem;
+          font-weight: 700;
+          letter-spacing: -0.025em;
+          line-height: 1.25;
+          margin-bottom: 0.55rem;
+        }
+        .ft-card.ft-wide .ft-title { font-size: 1.45rem; }
+        .ft-desc { font-size: 0.85rem; color: #66736B; line-height: 1.65; }
+
+        /* window chrome shared by the feature mock-ups */
+        .ft-win {
+          background: #FFFFFF;
+          border: 1px solid #E4EDE8;
+          border-radius: 12px;
+          box-shadow: 0 12px 30px -18px rgba(15,42,28,0.45);
+          overflow: hidden;
+        }
+        .ft-win-bar {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          padding: 9px 12px;
+          border-bottom: 1px solid #EFF5F2;
+        }
+        .ft-dot { width: 7px; height: 7px; border-radius: 50%; background: #16A34A; flex-shrink: 0; }
+        .ft-sk { display: block; height: 7px; border-radius: 999px; background: #E6EDE9; }
+        .ft-sk-a { background: rgba(22,163,74,0.28); }
+
+        /* 1 · Pilot AI */
+        .ft-ai-win { width: 88%; }
+        .ft-ai-body { padding: 14px 14px 36px; display: flex; flex-direction: column; gap: 12px; }
+        .ft-ai-q {
+          align-self: flex-end;
+          max-width: 80%;
+          font-size: 0.72rem;
+          font-weight: 600;
+          color: #15803D;
+          background: #E8F7ED;
+          border: 1px solid #C9E9D6;
+          padding: 7px 11px;
+          border-radius: 12px 12px 3px 12px;
+        }
+        .ft-ai-a { display: flex; gap: 9px; }
+        .ft-ai-ico {
+          width: 20px; height: 20px; border-radius: 7px; flex-shrink: 0;
+          background: linear-gradient(135deg, #0F7A4C, #16A34A);
+          color: #FFFFFF; display: grid; place-items: center;
+        }
+        .ft-ai-lines { flex: 1; display: flex; flex-direction: column; gap: 7px; padding-top: 5px; }
+        .ft-ai-bar {
+          position: absolute;
+          left: 10%; right: 10%; bottom: 4px;
+          display: flex; align-items: center; justify-content: space-between; gap: 10px;
+          padding: 6px 6px 6px 13px;
+          background: #FFFFFF;
+          border: 1.5px solid #16A34A;
+          border-radius: 11px;
+          box-shadow: 0 12px 26px -12px rgba(15,122,76,0.55);
+          font-size: 0.68rem;
+          color: #8A968F;
+        }
+        .ft-ai-btn {
+          display: inline-flex; align-items: center; gap: 5px; flex-shrink: 0;
+          background: linear-gradient(135deg, #0F7A4C, #16A34A);
+          color: #FFFFFF; font-size: 0.66rem; font-weight: 700;
+          padding: 6px 12px; border-radius: 8px;
+        }
+
+        /* 2 · Realtime dashboards */
+        .ft-stack { position: relative; width: 90%; padding-top: 28px; }
+        .ft-layer-2 { position: absolute; top: 0; left: 8%; right: 8%; height: 36px; opacity: 0.45; z-index: 1; }
+        .ft-layer-1 { position: absolute; top: 14px; left: 4%; right: 4%; height: 36px; opacity: 0.7; z-index: 2; }
+        .ft-layer-0 { position: relative; z-index: 3; }
+        .ft-live {
+          margin-left: auto; flex-shrink: 0;
+          font-size: 0.55rem; font-weight: 800; letter-spacing: 0.12em;
+          color: #15803D; background: #E8F7ED; border: 1px solid #C9E9D6;
+          padding: 2px 7px; border-radius: 999px;
+        }
+        .ft-dash-body { padding: 13px 14px 15px; display: flex; flex-direction: column; gap: 13px; }
+        .ft-kpis { display: flex; gap: 22px; }
+        .ft-kpis b { display: block; font-size: 0.95rem; font-weight: 800; color: #152019; line-height: 1; }
+        .ft-kpis span { display: block; font-size: 0.6rem; color: #8A968F; margin-top: 4px; }
+        .ft-bars { display: flex; align-items: flex-end; gap: 5px; height: 58px; }
+        .ft-bars i {
+          flex: 1; border-radius: 3px 3px 0 0; background: #D8EEE1;
+          transform-origin: bottom;
+          animation: ft-grow 0.9s cubic-bezier(0.22,1,0.36,1) backwards;
+        }
+        .ft-bars i:last-child { background: linear-gradient(180deg, #16A34A, #0F7A4C); }
+        @keyframes ft-grow { from { transform: scaleY(0.12); opacity: 0; } }
+
+        /* 3 · Integrations orbit */
+        .ft-orbit { position: relative; width: 230px; height: 230px; display: grid; place-items: center; }
+        .ft-ring { position: absolute; border-radius: 50%; border: 1px dashed #D6E5DC; }
+        .ft-ring-1 { inset: 36px; }
+        .ft-ring-2 { inset: 0; }
+        .ft-hub {
+          width: 48px; height: 48px; border-radius: 15px; position: relative; z-index: 2;
+          background: linear-gradient(135deg, #0F7A4C, #16A34A);
+          color: #FFFFFF; display: grid; place-items: center;
+          box-shadow: 0 14px 28px -10px rgba(15,122,76,0.7);
+        }
+        .ft-node {
+          position: absolute; z-index: 2;
+          font-size: 0.62rem; font-weight: 700; color: #3C4A42;
+          background: #FFFFFF; border: 1px solid #E4EDE8; border-radius: 999px;
+          padding: 5px 10px; white-space: nowrap;
+          box-shadow: 0 8px 16px -10px rgba(15,42,28,0.55);
+        }
+
+        /* 4 · Alerts */
+        .ft-alerts { display: flex; flex-direction: column; gap: 9px; width: 100%; }
+        .ft-alert {
+          display: flex; align-items: center; gap: 10px;
+          background: #FFFFFF; border: 1px solid #E4EDE8; border-radius: 10px;
+          padding: 9px 11px;
+          box-shadow: 0 10px 20px -16px rgba(15,42,28,0.6);
+        }
+        .ft-alert b { display: block; font-size: 0.72rem; font-weight: 700; color: #152019; }
+        .ft-alert span { display: block; font-size: 0.63rem; color: #8A968F; margin-top: 2px; }
+        .ft-alert-ico { width: 26px; height: 26px; border-radius: 8px; display: grid; place-items: center; flex-shrink: 0; }
+
+        /* 5 · Reports */
+        .ft-doc { width: 84%; }
+        .ft-doc-body { padding: 13px 14px 15px; display: flex; flex-direction: column; gap: 10px; }
+        .ft-doc-h { display: flex; align-items: center; gap: 7px; font-size: 0.72rem; font-weight: 700; color: #152019; }
+        .ft-doc-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+        .ft-doc-row em { font-style: normal; font-size: 0.65rem; font-weight: 700; color: #152019; flex-shrink: 0; }
+        .ft-badge {
+          align-self: flex-start; margin-top: 2px;
+          font-size: 0.6rem; font-weight: 700; color: #15803D;
+          background: #E8F7ED; border: 1px solid #C9E9D6;
+          padding: 4px 9px; border-radius: 999px;
         }
 
         /* ── Product-preview tile animations ── */
@@ -1924,14 +2534,54 @@ function Index() {
               ))}
             </div>
           </div>
-          <div className="stats-band">
-            {OUTCOME_STATS.map((s) => (
-              <div className="stat-card" key={s.label}>
-                <div className="stat-value">{s.value}</div>
-                <div className="stat-label">{s.label}</div>
-                <div className="stat-sub">{s.sub}</div>
-              </div>
+          <div className="outcome-cards">
+            {OUTCOME_CARDS.map((c) => (
+              <Link
+                to={c.href}
+                className="outcome-card"
+                key={c.pill}
+                style={{ backgroundImage: `${c.gradient}, url(${c.photo})` }}
+              >
+                <div className="outcome-card-top">
+                  <span className="outcome-pill">{c.pill}</span>
+                  <span className="outcome-arrow" aria-hidden="true">
+                    <ArrowUpRight size={16} strokeWidth={2.5} />
+                  </span>
+                </div>
+                <div className="outcome-bottom">
+                  <div className="outcome-value">{c.value}</div>
+                  <div className="outcome-caption">{c.caption}</div>
+                </div>
+              </Link>
             ))}
+
+            <div
+              className="outcome-card"
+              style={{
+                backgroundImage: `${OUTCOME_CTA_CARD.gradient}, url(${OUTCOME_CTA_CARD.photo})`,
+              }}
+            >
+              <div className="outcome-card-top">
+                <span className="outcome-pill">{OUTCOME_CTA_CARD.pill}</span>
+                <Link to="/demo" className="outcome-arrow" aria-label="Book a demo">
+                  <ArrowUpRight size={16} strokeWidth={2.5} />
+                </Link>
+              </div>
+              <div className="outcome-bottom">
+                <div className="outcome-cta-heading">{OUTCOME_CTA_CARD.heading}</div>
+                <form className="outcome-cta-form" onSubmit={handleOutcomeCtaSubmit}>
+                  <input
+                    type="email"
+                    required
+                    placeholder="Your email"
+                    aria-label="Your email"
+                    value={ctaEmail}
+                    onChange={(e) => setCtaEmail(e.target.value)}
+                  />
+                  <button type="submit">Get Started</button>
+                </form>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -1969,152 +2619,7 @@ function Index() {
         <div className="sw-band">
           <div className="sw-section">
             <div ref={sec5.ref} className={`loop-section reveal${sec5.visible ? " show" : ""}`}>
-              <div className="hiw-badge">
-                <LayoutGrid size={13} strokeWidth={2.2} />
-                How It Works
-              </div>
-              <h2 className="sw-section-h2">
-                Data in. <span style={{ color: "#15803D" }}>Decisions</span> out.
-              </h2>
-              <p className="sw-section-body">
-                The whole product in one picture: your Tally books, POS bills, and stock movements
-                stream into Pilot AI — and come out the other side as live dashboards, risk alerts,
-                and purchase calls you can act on the same day.
-              </p>
-              <div className="pp-flow">
-                <div>
-                  <div className="hiw-col-head">
-                    <span className="hiw-col-badge">
-                      <PlugConnectedIcon size={14} strokeWidth={2.2} /> 1. CONNECT
-                    </span>
-                    <span className="hiw-col-sub">Your data sources</span>
-                  </div>
-                  <div className="pp-flow-col">
-                    <div className="pp-node">
-                      <div className="pp-node-icon">
-                        <FileText size={20} strokeWidth={1.8} />
-                      </div>
-                      <div className="pp-node-body">
-                        <div className="pp-node-title">Tally ERP</div>
-                        <div className="pp-node-sub">Vouchers, ledgers, VAT</div>
-                      </div>
-                      <div className="pp-node-chevron">
-                        <ChevronRight size={14} strokeWidth={2.4} />
-                      </div>
-                    </div>
-                    <div className="pp-node">
-                      <div className="pp-node-icon">
-                        <Receipt size={20} strokeWidth={1.8} />
-                      </div>
-                      <div className="pp-node-body">
-                        <div className="pp-node-title">POS Billing</div>
-                        <div className="pp-node-sub">Every bill, as it prints</div>
-                      </div>
-                      <div className="pp-node-chevron">
-                        <ChevronRight size={14} strokeWidth={2.4} />
-                      </div>
-                    </div>
-                    <div className="pp-node">
-                      <div className="pp-node-icon">
-                        <Package size={20} strokeWidth={1.8} />
-                      </div>
-                      <div className="pp-node-body">
-                        <div className="pp-node-title">Inventory</div>
-                        <div className="pp-node-sub">Stock in, stock out</div>
-                      </div>
-                      <div className="pp-node-chevron">
-                        <ChevronRight size={14} strokeWidth={2.4} />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="pp-conn-cell" aria-hidden="true">
-                  <div className="hiw-col-head pp-conn-spacer">
-                    <span className="hiw-col-badge">spacer</span>
-                    <span className="hiw-col-sub">spacer</span>
-                  </div>
-                  <svg viewBox="0 0 70 280">
-                    <path d="M4 40 C40 40 30 140 60 140" />
-                    <path d="M4 140 L60 140" />
-                    <path d="M4 240 C40 240 30 140 60 140" />
-                    <polygon className="pp-conn-arrow" points="60,133 60,147 70,140" />
-                  </svg>
-                </div>
-                <div>
-                  <div className="hiw-col-head center">
-                    <span className="hiw-col-badge">2. ANALYZE</span>
-                    <span className="hiw-col-sub">AI engine</span>
-                  </div>
-                  <div className="pp-engine-cell">
-                    <div className="pp-engine">
-                      <div className="pp-engine-icon">
-                        <Sparkles size={26} strokeWidth={1.7} />
-                      </div>
-                      <div className="pp-engine-title">Pilot AI</div>
-                      <div className="pp-engine-divider" />
-                      <div className="pp-engine-sub">
-                        Scans every transaction for waste, variance, and margin risk
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="pp-conn-cell" aria-hidden="true">
-                  <div className="hiw-col-head pp-conn-spacer">
-                    <span className="hiw-col-badge">spacer</span>
-                    <span className="hiw-col-sub">spacer</span>
-                  </div>
-                  <svg viewBox="0 0 70 280">
-                    <polygon className="pp-conn-arrow" points="0,133 0,147 10,140" />
-                    <path d="M10 140 C40 140 30 40 66 40" />
-                    <path d="M10 140 L66 140" />
-                    <path d="M10 140 C40 140 30 240 66 240" />
-                  </svg>
-                </div>
-                <div>
-                  <div className="hiw-col-head">
-                    <span className="hiw-col-badge">3. ACT</span>
-                    <span className="hiw-col-sub">Insights & actions</span>
-                  </div>
-                  <div className="pp-flow-col">
-                    <div className="pp-node">
-                      <div className="pp-node-icon">
-                        <LayoutDashboard size={20} strokeWidth={1.8} />
-                      </div>
-                      <div className="pp-node-body">
-                        <div className="pp-node-title">Live Dashboards</div>
-                        <div className="pp-node-sub">Sales & margin, per outlet</div>
-                      </div>
-                      <div className="pp-node-chevron">
-                        <ChevronRight size={14} strokeWidth={2.4} />
-                      </div>
-                    </div>
-                    <div className="pp-node">
-                      <div className="pp-node-icon">
-                        <Bell size={20} strokeWidth={1.8} />
-                      </div>
-                      <div className="pp-node-body">
-                        <div className="pp-node-title">Risk Alerts</div>
-                        <div className="pp-node-sub">Waste, VAT, reconciliation</div>
-                      </div>
-                      <div className="pp-node-chevron">
-                        <ChevronRight size={14} strokeWidth={2.4} />
-                      </div>
-                    </div>
-                    <div className="pp-node">
-                      <div className="pp-node-icon">
-                        <ShoppingCart size={20} strokeWidth={1.8} />
-                      </div>
-                      <div className="pp-node-body">
-                        <div className="pp-node-title">Purchase Calls</div>
-                        <div className="pp-node-sub">What to buy, and when</div>
-                      </div>
-                      <div className="pp-node-chevron">
-                        <ChevronRight size={14} strokeWidth={2.4} />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <HowItWorksFlow />
               <div className="hiw-stats">
                 <div className="hiw-stat">
                   <div className="hiw-stat-icon">
@@ -2165,48 +2670,55 @@ function Index() {
         <div className="sw-rule" id="features" />
         <div className="sw-section">
           <div ref={sec3.ref} className={`platforms-section reveal${sec3.visible ? " show" : ""}`}>
-            <div className="sw-section-tag">↳ The Solution</div>
-            <h2 className="sw-section-h2">Stop guessing. Run your restaurant on data.</h2>
-            <p className="sw-section-body">
-              PlatePielet connects the systems you already use and turns them into one intelligence
-              layer for your entire operation.
-            </p>
+            <div className="sw-section-header-split">
+              <div>
+                <div className="sw-section-tag">↳ The Solution</div>
+                <h2 className="sw-section-h2" style={{ marginBottom: 0 }}>
+                  Stop guessing. Run your restaurant on data.
+                </h2>
+              </div>
+              <p className="sw-section-body" style={{ marginBottom: 0, maxWidth: 380 }}>
+                PlatePielet connects the systems you already use and turns them into one
+                intelligence layer for your entire operation.
+              </p>
+            </div>
             <div className="sw-cards-grid">
               <PlatformCard
-                number="01 "
                 tag="Inventory"
                 title="Smart Inventory Tracking"
                 description="Live stock counts built from your POS sales and purchase bills — with alerts before you run out or over-order."
                 cta="Explore Inventory"
                 href="/product/inventory-intelligence"
                 accent="#22C55E"
+                icon={Package}
               />
               <PlatformCard
-                number="02 "
                 tag="Waste AI"
                 title="Waste Detection"
                 description="Pilot AI flags spoilage, over-prep, and shrinkage patterns per outlet — before they hit your month-end P&L."
                 cta="Explore Waste AI"
                 href="#menu-engineering"
                 accent="#D97706"
+                icon={Trash2}
               />
               <PlatformCard
-                number="03 "
                 tag="Purchasing"
                 title="Purchase Optimization"
                 description="Market-price intelligence and demand forecasts tell you what to buy, how much, and when — so you stop overpaying vendors."
                 cta="Explore Purchasing"
                 href="/product/purchase-suggestions"
                 accent="#16A34A"
+                icon={ShoppingCart}
               />
               <PlatformCard
-                number="04 "
                 tag="Accounting"
                 title="Tally & POS Sync"
                 description="Your books reconcile themselves — every sale, purchase, and voucher matched automatically between POS and Tally."
                 cta="Explore Integrations"
                 href="/integrations"
                 accent="#0F7A4C"
+                icon={Receipt}
+                featured
               />
             </div>
           </div>
@@ -2220,31 +2732,207 @@ function Index() {
           <div ref={sec4.ref} className={`caps-section reveal${sec4.visible ? " show" : ""}`}>
             <div className="sw-section-tag">↳ Features</div>
             <h2 className="sw-section-h2">Everything you need to run a profitable kitchen.</h2>
-            <div className="sw-tabs-wrap">
-              <div className="sw-tabs-bar">
-                {tabs.map((t, i) => (
-                  <button
-                    key={t.label}
-                    className={`sw-tab-btn${activeTab === i ? " active" : ""}`}
-                    onClick={() => setActiveTab(i)}
-                  >
-                    {t.label}
-                  </button>
-                ))}
-              </div>
-              <div className="sw-tab-content">
-                <div className="sw-tab-left">
-                  <h3 className="sw-tab-heading">{tabs[activeTab].heading}</h3>
-                  <p className="sw-tab-body">{tabs[activeTab].body}</p>
+            <div className="ft-grid">
+              <article className="ft-card ft-wide">
+                <div className="ft-vis">
+                  <div className="ft-win ft-ai-win">
+                    <div className="ft-win-bar">
+                      <span className="ft-dot" />
+                      <span className="ft-sk" style={{ width: "46%" }} />
+                    </div>
+                    <div className="ft-ai-body">
+                      <div className="ft-ai-q">Why is food cost up in Velachery?</div>
+                      <div className="ft-ai-a">
+                        <span className="ft-ai-ico">
+                          <Sparkles size={11} strokeWidth={2.2} />
+                        </span>
+                        <div className="ft-ai-lines">
+                          <span className="ft-sk" style={{ width: "100%" }} />
+                          <span className="ft-sk" style={{ width: "84%" }} />
+                          <span className="ft-sk ft-sk-a" style={{ width: "44%" }} />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="ft-ai-bar">
+                    <span>Ask Pilot anything about your outlets…</span>
+                    <span className="ft-ai-btn">
+                      <Zap size={11} strokeWidth={2.4} /> Ask
+                    </span>
+                  </div>
                 </div>
-                <div className="sw-tab-right">
-                  <ul className="sw-tab-bullets">
-                    {tabs[activeTab].bullets.map((b, idx) => (
-                      <li key={idx}>{b}</li>
+                <h3 className="ft-title">Pilot AI Insights</h3>
+                <p className="ft-desc">
+                  Ask in plain language, get an answer from your own numbers. Pilot reads every
+                  bill, voucher, and stock movement, then tells you where money is leaking.
+                </p>
+              </article>
+
+              <article className="ft-card ft-wide">
+                <div className="ft-vis">
+                  <div className="ft-stack">
+                    <div className="ft-win ft-layer-2" />
+                    <div className="ft-win ft-layer-1" />
+                    <div className="ft-win ft-layer-0">
+                      <div className="ft-win-bar">
+                        <span className="ft-dot" />
+                        <span className="ft-sk" style={{ width: "34%" }} />
+                        <span className="ft-live">LIVE</span>
+                      </div>
+                      <div className="ft-dash-body">
+                        <div className="ft-kpis">
+                          <div>
+                            <b>₹2.4L</b>
+                            <span>Sales today</span>
+                          </div>
+                          <div>
+                            <b>28.4%</b>
+                            <span>Food cost</span>
+                          </div>
+                          <div>
+                            <b>847</b>
+                            <span>Bills</span>
+                          </div>
+                        </div>
+                        <div className="ft-bars">
+                          {[38, 56, 44, 72, 58, 84, 66, 94].map((h, i) => (
+                            <i key={i} style={{ height: `${h}%`, animationDelay: `${i * 60}ms` }} />
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <h3 className="ft-title">Realtime Dashboards</h3>
+                <p className="ft-desc">
+                  Sales, food cost, stock, and receivables update as they happen — not at month-end.
+                  Drill from the group view to a single outlet or invoice in two taps.
+                </p>
+              </article>
+
+              <article className="ft-card">
+                <div className="ft-vis">
+                  <div className="ft-orbit">
+                    <span className="ft-ring ft-ring-2" />
+                    <span className="ft-ring ft-ring-1" />
+                    <span className="ft-hub">
+                      <Zap size={20} strokeWidth={2} />
+                    </span>
+                    <span
+                      className="ft-node"
+                      style={{ top: 0, left: "50%", transform: "translateX(-50%)" }}
+                    >
+                      Tally ERP
+                    </span>
+                    <span
+                      className="ft-node"
+                      style={{ top: "50%", right: 0, transform: "translateY(-50%)" }}
+                    >
+                      POS
+                    </span>
+                    <span
+                      className="ft-node"
+                      style={{ bottom: 0, left: "50%", transform: "translateX(-50%)" }}
+                    >
+                      Zoho
+                    </span>
+                    <span
+                      className="ft-node"
+                      style={{ top: "50%", left: 0, transform: "translateY(-50%)" }}
+                    >
+                      Excel
+                    </span>
+                  </div>
+                </div>
+                <h3 className="ft-title">Tally &amp; POS Sync</h3>
+                <p className="ft-desc">
+                  No migration, no new hardware. Your books reconcile themselves against POS
+                  billing.
+                </p>
+              </article>
+
+              <article className="ft-card">
+                <div className="ft-vis">
+                  <div className="ft-alerts">
+                    {(
+                      [
+                        [
+                          Package,
+                          "#EF4444",
+                          "rgba(239,68,68,0.12)",
+                          "Tomatoes below par",
+                          "Reorder 12 kg before service",
+                        ],
+                        [
+                          Trash2,
+                          "#D97706",
+                          "rgba(217,119,6,0.12)",
+                          "Prep waste up 18%",
+                          "Anna Nagar · dinner shift",
+                        ],
+                        [
+                          ShoppingCart,
+                          "#16A34A",
+                          "rgba(22,163,74,0.12)",
+                          "Paneer price dropped 6%",
+                          "Good day to buy 40 kg",
+                        ],
+                      ] as const
+                    ).map(([Icon, color, bg, title, sub]) => (
+                      <div
+                        key={title}
+                        className="ft-alert"
+                        style={{ borderLeft: `3px solid ${color}` }}
+                      >
+                        <span className="ft-alert-ico" style={{ background: bg, color }}>
+                          <Icon size={13} strokeWidth={2.2} />
+                        </span>
+                        <div>
+                          <b>{title}</b>
+                          <span>{sub}</span>
+                        </div>
+                      </div>
                     ))}
-                  </ul>
+                  </div>
                 </div>
-              </div>
+                <h3 className="ft-title">Stock &amp; Waste Alerts</h3>
+                <p className="ft-desc">
+                  Get told before you run out, over-order, or quietly bleed margin to spoilage.
+                </p>
+              </article>
+
+              <article className="ft-card">
+                <div className="ft-vis">
+                  <div className="ft-win ft-doc">
+                    <div className="ft-win-bar">
+                      <span className="ft-dot" />
+                      <span className="ft-sk" style={{ width: "38%" }} />
+                    </div>
+                    <div className="ft-doc-body">
+                      <div className="ft-doc-h">
+                        <FileText size={13} strokeWidth={2} /> VAT Summary · August
+                      </div>
+                      {(
+                        [
+                          ["72%", "₹18.4L"],
+                          ["58%", "₹92,100"],
+                          ["64%", "₹4,820"],
+                        ] as const
+                      ).map(([w, amt]) => (
+                        <div key={amt} className="ft-doc-row">
+                          <span className="ft-sk" style={{ width: w }} />
+                          <em>{amt}</em>
+                        </div>
+                      ))}
+                      <span className="ft-badge">Ready to file</span>
+                    </div>
+                  </div>
+                </div>
+                <h3 className="ft-title">Reports &amp; VAT</h3>
+                <p className="ft-desc">
+                  Filing-ready summaries built from reconciled data, with mismatches flagged early.
+                </p>
+              </article>
             </div>
           </div>
         </div>
@@ -2379,32 +3067,51 @@ function Index() {
         <div className="sw-band">
           <div className="sw-section">
             <div className="tm-section">
-              <div className="sw-section-tag">↳ Testimonials</div>
-              <h2 className="sw-section-h2">Restaurant owners run on PlatePielet.</h2>
-              <div className="tm-marquee">
-                <div className="tm-track">
-                  {[...TESTIMONIALS, ...TESTIMONIALS].map((t, i) => (
-                    <figure className="tm-card" key={i}>
-                      <blockquote className="tm-quote">"{t.quote}"</blockquote>
-                      <figcaption className="tm-attr">
-                        {t.name}
-                        <span>{t.place}</span>
-                      </figcaption>
-                    </figure>
-                  ))}
+              <div className="tm-split">
+                <div className="tm-copy">
+                  <span className="tm-badge">Testimonials &amp; Reviews</span>
+                  <h2 className="sw-section-h2" style={{ marginTop: "1.5rem", maxWidth: 420 }}>
+                    Restaurant owners run on PlatePielet.
+                  </h2>
+                  <p className="sw-section-body" style={{ maxWidth: 380 }}>
+                    Real feedback from outlet owners and finance leads who use PlatePielet every day
+                    to control cost and cut manual work.
+                  </p>
+                  <Link to="/demo" className="tm-cta">
+                    <span>Book a Demo</span>
+                    <span className="tm-cta-arrow">
+                      <ArrowUpRight size={16} strokeWidth={2.5} />
+                    </span>
+                  </Link>
                 </div>
-              </div>
-              <div className="tm-marquee">
-                <div className="tm-track tm-reverse">
-                  {[...TM_ROW2, ...TM_ROW2].map((t, i) => (
-                    <figure className="tm-card" key={i}>
-                      <blockquote className="tm-quote">"{t.quote}"</blockquote>
-                      <figcaption className="tm-attr">
-                        {t.name}
-                        <span>{t.place}</span>
-                      </figcaption>
-                    </figure>
-                  ))}
+                <div className="tm-stack">
+                  <div className="tm-stack-track">
+                    {[...TESTIMONIALS, ...TESTIMONIALS].map((t, i) => {
+                      const variant = i % 3;
+                      const cls =
+                        variant === 1
+                          ? "tm-qcard tm-qcard--featured"
+                          : variant === 2
+                            ? "tm-qcard tm-qcard--side tm-qcard--muted"
+                            : "tm-qcard tm-qcard--side";
+                      return (
+                        <figure className={cls} key={i}>
+                          <img className="tm-avatar" src={t.avatar} alt="" />
+                          <div>
+                            <blockquote className="tm-qtext">"{t.quote}"</blockquote>
+                            <figcaption className="tm-qattr">
+                              –{t.name} as <b>{t.role}</b>
+                            </figcaption>
+                          </div>
+                          {variant === 1 && (
+                            <span className="tm-qmark" aria-hidden="true">
+                              "
+                            </span>
+                          )}
+                        </figure>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
             </div>
@@ -2450,14 +3157,10 @@ function Index() {
           <div className="platforms-section">
             <div className="faq-split">
               <div>
-                <div className="sw-section-tag">↳ FAQ</div>
-                <h2 className="sw-section-h2">Questions, answered.</h2>
-                <p className="sw-section-body" style={{ marginBottom: "1.75rem" }}>
-                  Everything owners usually ask before connecting their data.
-                </p>
-                <a href="/demo" className="btn-ghost">
-                  TALK TO US
-                </a>
+                <div className="sw-section-tag">FAQ</div>
+                <h2 className="sw-section-h2" style={{ marginBottom: 0 }}>
+                  Questions, answered.
+                </h2>
               </div>
               <div className="faq-list">
                 {FAQS.map(([q, a]) => (
@@ -2490,26 +3193,37 @@ function Index() {
           </div>
         </div>
       </PlatePieletFooter>
+
+      <button
+        type="button"
+        aria-label="Back to top"
+        onClick={scrollToTop}
+        className={`pp-back-to-top${showTop ? " show" : ""}`}
+      >
+        <ArrowUp size={18} strokeWidth={2.5} />
+      </button>
     </div>
   );
 }
 
 function PlatformCard({
-  number,
   tag,
   title,
   description,
   cta,
   href,
   accent,
+  icon: Icon,
+  featured,
 }: {
-  number?: string;
   tag: string;
   title: string;
   description: string;
   cta: string;
   href: string;
   accent: string;
+  icon: React.ComponentType<{ size?: number; strokeWidth?: number }>;
+  featured?: boolean;
 }) {
   const cardRef = useRef<HTMLDivElement>(null);
   const [tilt, setTilt] = useState({ rx: 0, ry: 0, scale: 1 });
@@ -2523,34 +3237,34 @@ function PlatformCard({
     setTilt({ rx: py * -8, ry: px * 8, scale: 1.03 });
   };
 
+  const arrowClass = `sw-card-arrow${featured ? " sw-card-arrow--solid" : ""}`;
+
   return (
     <div
       ref={cardRef}
-      className="sw-card group"
+      className={`sw-card group${featured ? " sw-card--featured" : ""}`}
       onMouseMove={handleMouseMove}
       onMouseLeave={() => setTilt({ rx: 0, ry: 0, scale: 1 })}
       style={{
         transform: `perspective(800px) rotateX(${tilt.rx}deg) rotateY(${tilt.ry}deg) scale(${tilt.scale})`,
       }}
     >
-      {number && <div className="sw-card-number">{number}</div>}
-      <div className="sw-card-tag" style={{ color: accent }}>
-        ↳ {tag}
+      <div className="sw-card-icon" style={{ color: featured ? accent : T.text }}>
+        <Icon size={30} strokeWidth={1.5} />
       </div>
       <h3 className="sw-card-title">{title}</h3>
       <p className="sw-card-desc">{description}</p>
       {/* in-page anchors stay native; routes go through the router or the SPA
           does a full reload */}
       {href.startsWith("#") ? (
-        <a href={href} className="sw-card-cta" style={{ color: accent }}>
-          {cta} →
+        <a href={href} className={arrowClass} aria-label={cta}>
+          <ArrowUpRight size={16} strokeWidth={2.5} aria-hidden="true" />
         </a>
       ) : (
-        <Link to={href} className="sw-card-cta" style={{ color: accent }}>
-          {cta} →
+        <Link to={href} className={arrowClass} aria-label={cta}>
+          <ArrowUpRight size={16} strokeWidth={2.5} aria-hidden="true" />
         </Link>
       )}
-      <div className="sw-card-line" style={{ background: accent }} />
     </div>
   );
 }

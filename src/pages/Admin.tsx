@@ -1,8 +1,11 @@
-import { useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { Link, Redirect, Route, Switch, useHistory, useLocation } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
+  Building2,
+  Copy,
+  Inbox,
   KeyRound,
   LayoutDashboard,
   LogOut,
@@ -19,10 +22,28 @@ import {
 
 import { AppPage } from "@/components/ionic/AppPage";
 import { AppLogo } from "@/components/AppLogo";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Switch as ToggleSwitch } from "@/components/ui/switch";
 import {
@@ -54,15 +75,25 @@ import { cn } from "@/lib/utils";
 import {
   clearTokens,
   createRole,
+  createTenant,
+  createUser,
   deleteRole,
+  deleteTenant,
+  deleteUser,
   getStoredUser,
+  listDemoRequests,
   listPages,
   listRoles,
+  listTenants,
   listUsers,
   logout as apiLogout,
+  resetUserPassword,
   updateRole,
+  updateTenant,
   updateUser,
+  type AdminTenant,
   type AdminUser,
+  type DemoRequest,
   type PageInfo,
   type Role,
 } from "@/lib/auth";
@@ -71,11 +102,17 @@ const NAV_ITEMS = [
   { icon: LayoutDashboard, label: "Overview", to: "/admin" },
   { icon: UsersIcon, label: "Users", to: "/admin/users" },
   { icon: KeyRound, label: "Roles", to: "/admin/roles" },
+  { icon: Building2, label: "Clients", to: "/admin/clients" },
+  { icon: Inbox, label: "Demo requests", to: "/admin/demo-requests" },
 ];
 
 /* Shared queries — react-query dedupes them across the admin screens. */
-function useAdminUsers() {
-  return useQuery({ queryKey: ["admin", "users"], queryFn: listUsers, staleTime: 30_000 });
+function useAdminUsers(q?: string) {
+  return useQuery({
+    queryKey: ["admin", "users", q ?? ""],
+    queryFn: () => listUsers(q),
+    staleTime: 30_000,
+  });
 }
 
 function useRoles() {
@@ -84,6 +121,18 @@ function useRoles() {
 
 function usePages() {
   return useQuery({ queryKey: ["admin", "pages"], queryFn: listPages, staleTime: Infinity });
+}
+
+function useTenants() {
+  return useQuery({ queryKey: ["admin", "tenants"], queryFn: listTenants, staleTime: 30_000 });
+}
+
+function useDemoRequests() {
+  return useQuery({
+    queryKey: ["admin", "demo-requests"],
+    queryFn: listDemoRequests,
+    staleTime: 30_000,
+  });
 }
 
 /* ── Shell ───────────────────────────────────────────────── */
@@ -255,13 +304,13 @@ function StatCard({
 
 /* ── Overview ────────────────────────────────────────────── */
 function AdminOverview() {
-  const { data: users, isLoading, error } = useAdminUsers();
+  const { data, isLoading, error } = useAdminUsers();
 
   const stats = useMemo(() => {
-    const list = users ?? [];
+    const list = data?.items ?? [];
     const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
     return {
-      total: list.length,
+      total: data?.total ?? list.length,
       admins: list.filter((u) => u.is_admin).length,
       verified: list.filter((u) => u.is_verified).length,
       newThisWeek: list.filter((u) => new Date(u.created_at).getTime() >= weekAgo).length,
@@ -270,7 +319,7 @@ function AdminOverview() {
         .sort((a, b) => +new Date(b.created_at) - +new Date(a.created_at))
         .slice(0, 5),
     };
-  }, [users]);
+  }, [data]);
 
   if (error) return <p className="text-sm text-destructive">{(error as Error).message}</p>;
   const n = (v: number) => (isLoading ? "…" : v.toLocaleString());
@@ -299,7 +348,10 @@ function AdminOverview() {
         <CardContent className="px-5 py-4">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="text-sm font-semibold text-foreground">Recent signups</h2>
-            <Link to="/admin/users" className="text-[12px] font-medium text-primary hover:underline">
+            <Link
+              to="/admin/users"
+              className="text-[12px] font-medium text-primary hover:underline"
+            >
               View all
             </Link>
           </div>
@@ -335,13 +387,130 @@ function AdminOverview() {
   );
 }
 
+/* ── New user ────────────────────────────────────────────── */
+function UserEditor({ roles, onClose }: { roles: Role[]; onClose: () => void }) {
+  const queryClient = useQueryClient();
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [roleId, setRoleId] = useState("");
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  const save = useMutation({
+    mutationFn: () =>
+      createUser({
+        full_name: fullName.trim(),
+        email: email.trim(),
+        password,
+        role_id: roleId || null,
+        is_admin: isAdmin,
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
+      queryClient.invalidateQueries({ queryKey: ["admin", "roles"] });
+      toast.success(`${fullName.trim()} added.`);
+      onClose();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const canSave = fullName.trim().length >= 2 && email.trim().length > 3 && password.length >= 8;
+
+  return (
+    <Card className="border border-primary/30 bg-card shadow-sm">
+      <CardContent className="px-5 py-4">
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-sm font-semibold text-foreground">Add user</h2>
+          <Button variant="ghost" size="sm" onClick={onClose} className="h-8 w-8 p-0">
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2 sm:max-w-2xl">
+          <div>
+            <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+              Full name
+            </label>
+            <Input value={fullName} onChange={(e) => setFullName(e.target.value)} autoFocus />
+          </div>
+          <div>
+            <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+              Email
+            </label>
+            <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+          </div>
+          <div>
+            <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+              Temporary password
+            </label>
+            <Input
+              type="text"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="8+ chars, upper/lower/number/special"
+            />
+          </div>
+          <div>
+            <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+              Role
+            </label>
+            <select
+              value={roleId}
+              onChange={(e) => setRoleId(e.target.value)}
+              className="h-9 w-full rounded-lg border border-input bg-background px-2 text-[13px] font-medium text-foreground outline-none focus:border-primary/70"
+            >
+              <option value="">No access</option>
+              {roles.map((r) => (
+                <option key={r.id} value={r.id}>
+                  {r.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <label className="mt-4 flex w-fit cursor-pointer items-center gap-2 text-[12px] text-muted-foreground">
+          <input
+            type="checkbox"
+            checked={isAdmin}
+            onChange={(e) => setIsAdmin(e.target.checked)}
+            className="h-4 w-4 rounded border-border text-primary focus:ring-primary/20"
+          />
+          Grant admin access
+        </label>
+
+        <div className="mt-5 flex items-center gap-2">
+          <Button size="sm" disabled={!canSave || save.isPending} onClick={() => save.mutate()}>
+            {save.isPending ? "Adding…" : "Add user"}
+          </Button>
+          <Button variant="ghost" size="sm" onClick={onClose}>
+            Cancel
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 /* ── Users ───────────────────────────────────────────────── */
 function AdminUsers() {
   const queryClient = useQueryClient();
   const me = getStoredUser();
+  const [qInput, setQInput] = useState("");
   const [q, setQ] = useState("");
-  const { data: users, isLoading, error } = useAdminUsers();
+  const [adding, setAdding] = useState(false);
+  const [deletingUser, setDeletingUser] = useState<AdminUser | null>(null);
+  const [resetResult, setResetResult] = useState<{ name: string; password: string } | null>(null);
+  const { data, isLoading, error } = useAdminUsers(q);
   const { data: roles } = useRoles();
+  const { data: tenants } = useTenants();
+  const users = data?.items ?? [];
+
+  // Debounce so every keystroke doesn't hit the server.
+  useEffect(() => {
+    const t = setTimeout(() => setQ(qInput), 300);
+    return () => clearTimeout(t);
+  }, [qInput]);
 
   const patchUser = useMutation({
     mutationFn: ({
@@ -349,7 +518,7 @@ function AdminUsers() {
       patch,
     }: {
       id: string;
-      patch: { is_admin?: boolean; role_id?: string | null };
+      patch: { is_admin?: boolean; role_id?: string | null; tenant_id?: string | null };
       message: string;
     }) => updateUser(id, patch),
     onSuccess: (_d, vars) => {
@@ -360,9 +529,20 @@ function AdminUsers() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const filtered = (users ?? []).filter((u: AdminUser) =>
-    `${u.full_name} ${u.email}`.toLowerCase().includes(q.toLowerCase()),
-  );
+  const resetPassword = useMutation({
+    mutationFn: (id: string) => resetUserPassword(id),
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const removeUser = useMutation({
+    mutationFn: (id: string) => deleteUser(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
+      toast.success("User removed.");
+      setDeletingUser(null);
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
 
   return (
     <div className="space-y-4">
@@ -370,16 +550,24 @@ function AdminUsers() {
         <div className="relative w-full max-w-xs">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
+            value={qInput}
+            onChange={(e) => setQInput(e.target.value)}
             placeholder="Search name or email…"
             className="pl-9"
           />
         </div>
-        <span className="shrink-0 text-[12px] text-muted-foreground">
-          {filtered.length} of {users?.length ?? 0}
-        </span>
+        <div className="flex shrink-0 items-center gap-3">
+          <span className="text-[12px] text-muted-foreground">
+            {users.length} of {data?.total ?? 0}
+          </span>
+          <Button size="sm" onClick={() => setAdding(true)} disabled={adding}>
+            <UserPlus className="mr-1.5 h-4 w-4" />
+            Add user
+          </Button>
+        </div>
       </div>
+
+      {adding && <UserEditor roles={roles ?? []} onClose={() => setAdding(false)} />}
 
       {error && <p className="text-sm text-destructive">{(error as Error).message}</p>}
 
@@ -390,19 +578,21 @@ function AdminUsers() {
               <TableHead>Name</TableHead>
               <TableHead>Email</TableHead>
               <TableHead>Role</TableHead>
+              <TableHead>Client</TableHead>
               <TableHead>Joined</TableHead>
               <TableHead className="text-right">Admin</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {isLoading && (
               <TableRow>
-                <TableCell colSpan={5} className="py-8 text-center text-muted-foreground">
+                <TableCell colSpan={7} className="py-8 text-center text-muted-foreground">
                   Loading users…
                 </TableCell>
               </TableRow>
             )}
-            {filtered.map((u) => (
+            {users.map((u) => (
               <TableRow key={u.id}>
                 <TableCell className="font-medium">
                   {u.full_name}
@@ -435,6 +625,27 @@ function AdminUsers() {
                     ))}
                   </select>
                 </TableCell>
+                <TableCell>
+                  <select
+                    value={u.tenant_id ?? ""}
+                    disabled={patchUser.isPending}
+                    onChange={(e) =>
+                      patchUser.mutate({
+                        id: u.id,
+                        patch: { tenant_id: e.target.value || null },
+                        message: e.target.value ? "Client updated." : "Client cleared.",
+                      })
+                    }
+                    className="h-8 rounded-lg border border-input bg-background px-2 text-[12px] font-medium text-foreground outline-none focus:border-primary/70"
+                  >
+                    <option value="">No client</option>
+                    {(tenants ?? []).map((t) => (
+                      <option key={t.id} value={t.id}>
+                        {t.name}
+                      </option>
+                    ))}
+                  </select>
+                </TableCell>
                 <TableCell className="text-muted-foreground">
                   {new Date(u.created_at).toLocaleDateString()}
                 </TableCell>
@@ -452,11 +663,39 @@ function AdminUsers() {
                     }
                   />
                 </TableCell>
+                <TableCell className="text-right">
+                  <div className="flex items-center justify-end gap-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 w-8 p-0"
+                      title="Reset password"
+                      disabled={resetPassword.isPending}
+                      onClick={() =>
+                        resetPassword.mutate(u.id, {
+                          onSuccess: (password) => setResetResult({ name: u.full_name, password }),
+                        })
+                      }
+                    >
+                      <KeyRound className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive"
+                      title="Remove user"
+                      disabled={u.id === me?.id || removeUser.isPending}
+                      onClick={() => setDeletingUser(u)}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                </TableCell>
               </TableRow>
             ))}
-            {!isLoading && filtered.length === 0 && (
+            {!isLoading && users.length === 0 && (
               <TableRow>
-                <TableCell colSpan={5} className="py-8 text-center text-muted-foreground">
+                <TableCell colSpan={7} className="py-8 text-center text-muted-foreground">
                   No users match “{q}”.
                 </TableCell>
               </TableRow>
@@ -464,6 +703,64 @@ function AdminUsers() {
           </TableBody>
         </Table>
       </div>
+
+      <AlertDialog
+        open={deletingUser !== null}
+        onOpenChange={(open) => !open && setDeletingUser(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove {deletingUser?.full_name}?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This permanently deletes their account ({deletingUser?.email}). They'll need to be
+              re-added from scratch to regain access.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={removeUser.isPending}
+              onClick={() => deletingUser && removeUser.mutate(deletingUser.id)}
+            >
+              Remove user
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <Dialog open={resetResult !== null} onOpenChange={(open) => !open && setResetResult(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Password reset for {resetResult?.name}</DialogTitle>
+            <DialogDescription>
+              Share this temporary password with them directly — it won't be shown again.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex items-center gap-2 rounded-lg border border-border bg-secondary/30 px-3 py-2">
+            <code className="flex-1 text-[13px] font-mono text-foreground">
+              {resetResult?.password}
+            </code>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 w-7 p-0"
+              title="Copy"
+              onClick={() => {
+                if (resetResult) navigator.clipboard.writeText(resetResult.password);
+                toast.success("Copied to clipboard.");
+              }}
+            >
+              <Copy className="h-3.5 w-3.5" />
+            </Button>
+          </div>
+          <DialogFooter>
+            <Button size="sm" onClick={() => setResetResult(null)}>
+              Done
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
@@ -662,6 +959,302 @@ function AdminRoles() {
   );
 }
 
+/* ── Clients (tenant private-database mapping) ──────────────── */
+function ClientEditor({
+  tenant,
+  onClose,
+}: {
+  tenant: AdminTenant | null; // null = creating
+  onClose: () => void;
+}) {
+  const queryClient = useQueryClient();
+  const [name, setName] = useState(tenant?.name ?? "");
+  const [slug, setSlug] = useState(tenant?.slug ?? "");
+  const [connectionString, setConnectionString] = useState("");
+
+  const save = useMutation({
+    mutationFn: () =>
+      tenant
+        ? updateTenant(tenant.id, {
+            name: name.trim(),
+            ...(connectionString.trim() ? { connection_string: connectionString.trim() } : {}),
+          })
+        : createTenant(name.trim(), slug.trim(), connectionString.trim()),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "tenants"] });
+      toast.success(tenant ? "Client updated." : `${name.trim()} added.`);
+      onClose();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const slugValid = /^[a-z0-9-]+$/.test(slug.trim());
+  const canSave = tenant
+    ? name.trim().length >= 2
+    : name.trim().length >= 2 && slugValid && connectionString.trim().length >= 10;
+
+  return (
+    <Card className="border border-primary/30 bg-card shadow-sm">
+      <CardContent className="px-5 py-4">
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-sm font-semibold text-foreground">
+            {tenant ? `Edit client — ${tenant.name}` : "New client"}
+          </h2>
+          <Button variant="ghost" size="sm" onClick={onClose} className="h-8 w-8 p-0">
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2 sm:max-w-2xl">
+          <div>
+            <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+              Client name
+            </label>
+            <Input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="e.g. Acme Restaurants"
+              autoFocus
+            />
+          </div>
+          {!tenant && (
+            <div>
+              <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                Slug
+              </label>
+              <Input
+                value={slug}
+                onChange={(e) => setSlug(e.target.value.toLowerCase())}
+                placeholder="acme-restaurants"
+              />
+            </div>
+          )}
+        </div>
+
+        <label className="mb-1.5 mt-4 block text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+          Database connection string{tenant && " (leave blank to keep the current one)"}
+        </label>
+        <Input
+          value={connectionString}
+          onChange={(e) => setConnectionString(e.target.value)}
+          placeholder="postgresql://user:password@host:5432/dbname"
+          className="max-w-2xl font-mono text-[12px]"
+        />
+        <p className="mt-1.5 text-[11px] text-muted-foreground">
+          Create this client's own Postgres database yourself first, then paste its connection
+          string here — the backend sets up its tables and starts routing this client's users to it.
+        </p>
+
+        <div className="mt-5 flex items-center gap-2">
+          <Button size="sm" disabled={!canSave || save.isPending} onClick={() => save.mutate()}>
+            {save.isPending ? "Saving…" : tenant ? "Save changes" : "Add client"}
+          </Button>
+          <Button variant="ghost" size="sm" onClick={onClose}>
+            Cancel
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function AdminClients() {
+  const queryClient = useQueryClient();
+  const { data: tenants, isLoading, error } = useTenants();
+  const [editing, setEditing] = useState<AdminTenant | null | undefined>(undefined); // undefined = closed
+  const [deleting, setDeleting] = useState<AdminTenant | null>(null);
+
+  const remove = useMutation({
+    mutationFn: (id: string) => deleteTenant(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "tenants"] });
+      queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
+      toast.success("Client removed — its private database was left untouched.");
+      setDeleting(null);
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-[13px] text-muted-foreground">
+          Each client's data lives in its own private database. Create the database yourself, then
+          map it here.
+        </p>
+        <Button size="sm" onClick={() => setEditing(null)} disabled={editing !== undefined}>
+          <Plus className="mr-1.5 h-4 w-4" />
+          New client
+        </Button>
+      </div>
+
+      {editing !== undefined && (
+        <ClientEditor
+          key={editing?.id ?? "new"}
+          tenant={editing}
+          onClose={() => setEditing(undefined)}
+        />
+      )}
+
+      {error && <p className="text-sm text-destructive">{(error as Error).message}</p>}
+      {isLoading && <p className="text-sm text-muted-foreground">Loading clients…</p>}
+
+      <div className="grid gap-3 md:grid-cols-2">
+        {(tenants ?? []).map((t) => (
+          <Card key={t.id} className="border border-border/60 bg-card shadow-sm">
+            <CardContent className="px-5 py-4">
+              <div className="flex items-center justify-between gap-2">
+                <div>
+                  <h3 className="text-sm font-semibold text-foreground">{t.name}</h3>
+                  <p className="text-[11px] text-muted-foreground">
+                    {t.slug} · {t.user_count} user{t.user_count === 1 ? "" : "s"}
+                  </p>
+                </div>
+                <div className="flex shrink-0 items-center gap-1">
+                  <Badge
+                    variant="secondary"
+                    className={cn(
+                      "text-[10px] font-medium",
+                      t.db_status === "active"
+                        ? "bg-green-500/15 text-green-600"
+                        : "bg-destructive/15 text-destructive",
+                    )}
+                  >
+                    {t.db_status === "active" ? "Connected" : "Setup failed"}
+                  </Badge>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 w-8 p-0"
+                    title="Edit client"
+                    onClick={() => setEditing(t)}
+                  >
+                    <Pencil className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive"
+                    title="Remove client"
+                    disabled={remove.isPending}
+                    onClick={() => setDeleting(t)}
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+        {!isLoading && (tenants ?? []).length === 0 && (
+          <p className="text-sm text-muted-foreground">No clients yet.</p>
+        )}
+      </div>
+
+      <AlertDialog open={deleting !== null} onOpenChange={(open) => !open && setDeleting(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove {deleting?.name}?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This only removes the mapping — the private database itself is left untouched. Its{" "}
+              {deleting?.user_count ?? 0} user{deleting?.user_count === 1 ? "" : "s"} will keep
+              their accounts but lose access to this client until reassigned.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={remove.isPending}
+              onClick={() => deleting && remove.mutate(deleting.id)}
+            >
+              Remove client
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
+  );
+}
+
+/* ── Demo requests ───────────────────────────────────────── */
+function AdminDemoRequests() {
+  const { data: requests, isLoading, error } = useDemoRequests();
+  const [q, setQ] = useState("");
+
+  const filtered = (requests ?? []).filter((r: DemoRequest) =>
+    `${r.first_name} ${r.last_name} ${r.email} ${r.restaurant}`
+      .toLowerCase()
+      .includes(q.toLowerCase()),
+  );
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between gap-3">
+        <div className="relative w-full max-w-xs">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="Search name, email, restaurant…"
+            className="pl-9"
+          />
+        </div>
+        <span className="shrink-0 text-[12px] text-muted-foreground">
+          {filtered.length} of {requests?.length ?? 0}
+        </span>
+      </div>
+
+      {error && <p className="text-sm text-destructive">{(error as Error).message}</p>}
+
+      <div className="rounded-xl border border-border/60 bg-card">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Name</TableHead>
+              <TableHead>Email</TableHead>
+              <TableHead>Restaurant</TableHead>
+              <TableHead>Phone</TableHead>
+              <TableHead>POS system</TableHead>
+              <TableHead>Submitted</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {isLoading && (
+              <TableRow>
+                <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
+                  Loading demo requests…
+                </TableCell>
+              </TableRow>
+            )}
+            {filtered.map((r) => (
+              <TableRow key={r.id}>
+                <TableCell className="font-medium">
+                  {r.first_name} {r.last_name}
+                </TableCell>
+                <TableCell className="text-muted-foreground">{r.email}</TableCell>
+                <TableCell>{r.restaurant}</TableCell>
+                <TableCell className="text-muted-foreground">{r.phone || "—"}</TableCell>
+                <TableCell className="text-muted-foreground">{r.pos_system || "—"}</TableCell>
+                <TableCell className="text-muted-foreground">
+                  {new Date(r.submitted_at).toLocaleDateString()}
+                </TableCell>
+              </TableRow>
+            ))}
+            {!isLoading && filtered.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
+                  {requests?.length === 0 ? "No demo requests yet." : `No requests match "${q}".`}
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
+    </div>
+  );
+}
+
 export default function AdminPage() {
   // Declarative guard (see Dashboard.tsx) — the backend enforces it too.
   const user = getStoredUser();
@@ -674,6 +1267,9 @@ export default function AdminPage() {
         <Switch>
           <Route exact path="/admin" component={AdminOverview} />
           <Route exact path="/admin/users" component={AdminUsers} />
+          <Route exact path="/admin/roles" component={AdminRoles} />
+          <Route exact path="/admin/clients" component={AdminClients} />
+          <Route exact path="/admin/demo-requests" component={AdminDemoRequests} />
           <Redirect to="/admin" />
         </Switch>
       </AdminShell>

@@ -1,12 +1,13 @@
 import { AppPage } from "@/components/ionic/AppPage";
 import { PlatePieletNav } from "@/components/PlatePieletNav";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { ArrowRight, Calendar, Check, Loader2 } from "lucide-react";
 import { API_URL } from "@/lib/apiBase";
 import { SALES_PHONE, SALES_PHONE_HREF } from "@/lib/contact";
 
 function DemoPage() {
+  const location = useLocation<{ email?: string } | undefined>();
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -14,7 +15,7 @@ function DemoPage() {
   const [form, setForm] = useState({
     firstName: "",
     lastName: "",
-    email: "",
+    email: location.state?.email ?? "",
     restaurant: "",
     phone: "",
     posSystem: "",

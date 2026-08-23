@@ -243,7 +243,9 @@ function SignupPage() {
               </button>
             </div>
             {confirmPassword && confirmPassword !== password && (
-              <p className="text-[11px] text-destructive mt-1 font-medium">Passwords do not match</p>
+              <p className="text-[11px] text-destructive mt-1 font-medium">
+                Passwords do not match
+              </p>
             )}
           </div>
           {/* Terms */}

@@ -51,8 +51,9 @@ Conventions:
 ## Adding a new dashboard route
 
 1. Create `src/pages/dashboard/<Name>.tsx` exporting the page component as default
-2. Add a `<Route exact path="/dashboard/<name>" component={<Name>} />` to the `<Switch>` in `src/pages/Dashboard.tsx`
+2. Add a `<Route exact path="/dashboard/<name>" render={gate("<name>", <Name>)} />` to the `<Switch>` in `src/pages/Dashboard.tsx`
 3. Add a nav item to the `*_ITEMS` arrays in `src/components/dashboard/DashboardLayout.tsx`
+4. Add the page key to `backend/auth/pages.py` so it can be granted to a role, and gate its endpoints with `require_page("<name>")`
 
 ## Architecture
 
@@ -63,6 +64,7 @@ Conventions:
 - `getStoredUser()` / `getAccessToken()` are the source of truth for client-side auth state
 - Login/signup are single-step email + password → JWT. OTP and Google OAuth helpers are commented out in `src/lib/auth.ts` (backend routes are commented out too)
 - Admins (`user.is_admin`) are redirected to `/admin` after login; `src/pages/Admin.tsx` guards itself with `getStoredUser()` and the backend enforces it via `require_admin`
+- Role-based page access: the stored user carries `pages: string[]`. `canOpenPage(key)` (`src/lib/auth.ts`) drives both the sidebar filter (`allowedItems` in `DashboardLayout.tsx`) and the route gate (`Gated` in `Dashboard.tsx`). Page keys mirror the route (`/dashboard` → `overview`, `/dashboard/pos` → `pos`) and must match `backend/auth/pages.py`. Profile is never gated
 - Auto-refresh: on 401, `refreshAccessToken()` is called once, then retried
 - The pre-paint dark/light theme init script is inline in `index.html` (keep in sync with `STORAGE_KEY` in `src/components/theme-provider.tsx`)
 

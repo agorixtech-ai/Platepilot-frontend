@@ -14,7 +14,8 @@ const badgeVariants = cva(
         warning: "border-transparent bg-warning-soft text-warning-foreground",
         destructive: "border-transparent bg-destructive-soft text-destructive",
         outline: "border-border text-foreground",
-        amber: "border-transparent bg-[color-mix(in_srgb,var(--brand-amber)_22%,white)] text-[color-mix(in_srgb,var(--brand-forest)_80%,var(--brand-amber))]",
+        amber:
+          "border-transparent bg-[color-mix(in_srgb,var(--brand-amber)_22%,white)] text-[color-mix(in_srgb,var(--brand-forest)_80%,var(--brand-amber))]",
       },
     },
     defaultVariants: {

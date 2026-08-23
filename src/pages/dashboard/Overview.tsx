@@ -295,7 +295,11 @@ function OverviewPage() {
         setRange({ kind: "30d" });
         break;
       case "year":
-        setRange({ kind: "custom", from: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000), to: new Date() });
+        setRange({
+          kind: "custom",
+          from: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000),
+          to: new Date(),
+        });
         break;
     }
   };

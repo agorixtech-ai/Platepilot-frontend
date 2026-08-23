@@ -165,21 +165,35 @@ export async function logout(): Promise<void> {
   clearTokens();
 }
 
+// Every caller on the page can hit a 401 around the same moment (parallel
+// queries on mount). The backend rotates + blacklists the refresh token on
+// each use, so firing one /refresh per caller means only the first succeeds
+// and the rest get an already-revoked token. Share one in-flight call.
+let refreshInFlight: Promise<AuthTokens | null> | null = null;
+
 export async function refreshAccessToken(): Promise<AuthTokens | null> {
-  const refreshToken = getRefreshToken();
-  if (!refreshToken) return null;
-  const res = await fetch(`${API_BASE}/refresh`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ refresh_token: refreshToken }),
-  });
-  if (!res.ok) {
-    clearTokens();
-    return null;
+  if (refreshInFlight) return refreshInFlight;
+  refreshInFlight = (async () => {
+    const refreshToken = getRefreshToken();
+    if (!refreshToken) return null;
+    const res = await fetch(`${API_BASE}/refresh`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ refresh_token: refreshToken }),
+    });
+    if (!res.ok) {
+      clearTokens();
+      return null;
+    }
+    const data: AuthTokens = await res.json();
+    saveTokens(data);
+    return data;
+  })();
+  try {
+    return await refreshInFlight;
+  } finally {
+    refreshInFlight = null;
   }
-  const data: AuthTokens = await res.json();
-  saveTokens(data);
-  return data;
 }
 
 export async function getMe(): Promise<User | null> {
@@ -234,7 +248,18 @@ export interface AdminUser {
   is_admin: boolean;
   role_id: string | null;
   role_name: string | null;
+  tenant_id: string | null;
+  tenant_name: string | null;
   created_at: string;
+}
+
+export interface AdminTenant {
+  id: string;
+  name: string;
+  slug: string;
+  db_status: string;
+  has_db: boolean;
+  user_count: number;
 }
 
 export interface Role {
@@ -251,28 +276,78 @@ export interface PageInfo {
   group: string;
 }
 
+export interface DemoRequest {
+  id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  restaurant: string;
+  phone: string;
+  pos_system: string;
+  message: string;
+  submitted_at: string;
+}
+
 async function adminFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
-  const res = await fetch(`${API_URL}/admin${path}`, {
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${getAccessToken()}`,
-      ...(options.headers as Record<string, string>),
-    },
-  });
+  const doFetch = () =>
+    fetch(`${API_URL}/admin${path}`, {
+      ...options,
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${getAccessToken()}`,
+        ...(options.headers as Record<string, string>),
+      },
+    });
+
+  let res = await doFetch();
+  if (res.status === 401) {
+    // Access token expired mid-session (30 min TTL) — refresh once and retry,
+    // same as getMe(), otherwise every admin action here silently 401s.
+    const refreshed = await refreshAccessToken();
+    if (refreshed) res = await doFetch();
+  }
   return handleResponse<T>(res);
 }
 
-export async function listUsers(): Promise<AdminUser[]> {
-  return (await adminFetch<{ items: AdminUser[] }>("/users")).items;
+export async function listUsers(q?: string): Promise<{ items: AdminUser[]; total: number }> {
+  const qs = q ? `?q=${encodeURIComponent(q)}&limit=200` : "?limit=200";
+  return adminFetch<{ items: AdminUser[]; total: number }>(`/users${qs}`);
+}
+
+export async function resetUserPassword(userId: string): Promise<string> {
+  const res = await adminFetch<{ data: { temp_password: string } }>(
+    `/users/${userId}/reset-password`,
+    {
+      method: "POST",
+    },
+  );
+  return res.data.temp_password;
+}
+
+export async function deleteUser(userId: string): Promise<void> {
+  await adminFetch(`/users/${userId}`, { method: "DELETE" });
+}
+
+export async function listDemoRequests(): Promise<DemoRequest[]> {
+  return (await adminFetch<{ items: DemoRequest[] }>("/demo-requests")).items;
 }
 
 /** Partial update — send only the fields that change. */
 export async function updateUser(
   userId: string,
-  patch: { is_admin?: boolean; role_id?: string | null },
+  patch: { is_admin?: boolean; role_id?: string | null; tenant_id?: string | null },
 ): Promise<void> {
   await adminFetch(`/users/${userId}`, { method: "PATCH", body: JSON.stringify(patch) });
+}
+
+export async function createUser(body: {
+  full_name: string;
+  email: string;
+  password: string;
+  role_id?: string | null;
+  is_admin?: boolean;
+}): Promise<void> {
+  await adminFetch("/users", { method: "POST", body: JSON.stringify(body) });
 }
 
 export async function listPages(): Promise<PageInfo[]> {
@@ -289,6 +364,33 @@ export async function createRole(name: string, pages: string[]): Promise<void> {
 
 export async function updateRole(id: string, name: string, pages: string[]): Promise<void> {
   await adminFetch(`/roles/${id}`, { method: "PATCH", body: JSON.stringify({ name, pages }) });
+}
+
+export async function listTenants(): Promise<AdminTenant[]> {
+  return (await adminFetch<{ items: AdminTenant[] }>("/tenants")).items;
+}
+
+export async function createTenant(
+  name: string,
+  slug: string,
+  connectionString: string,
+): Promise<void> {
+  await adminFetch("/tenants", {
+    method: "POST",
+    body: JSON.stringify({ name, slug, connection_string: connectionString }),
+  });
+}
+
+export async function updateTenant(
+  id: string,
+  patch: { name?: string; connection_string?: string },
+): Promise<void> {
+  await adminFetch(`/tenants/${id}`, { method: "PATCH", body: JSON.stringify(patch) });
+}
+
+/** Only removes the client mapping — its private database and data are untouched. */
+export async function deleteTenant(id: string): Promise<void> {
+  await adminFetch(`/tenants/${id}`, { method: "DELETE" });
 }
 
 export async function deleteRole(id: string): Promise<void> {

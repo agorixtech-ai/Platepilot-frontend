@@ -729,6 +729,7 @@ function AnimatedDashboard({
                 }}
               >
                 <CountUp target={s.value} trigger={cardIdx} />
+                {s.label === "Food Cost %" && "%"}
               </div>
             </div>
           ))}
@@ -932,7 +933,7 @@ export function PlatePieletHero() {
         position: "relative",
         width: "100%",
         overflow: "hidden",
-        fontFamily: "'Inter Variable', 'Inter', system-ui, sans-serif",
+        fontFamily: "'Plus Jakarta Sans Variable', 'Plus Jakarta Sans', system-ui, sans-serif",
         color: T.text,
         background: `radial-gradient(900px 520px at 72% 28%, rgba(22,163,74,0.1), transparent 58%),
                      radial-gradient(700px 400px at 18% 80%, rgba(163,230,53,0.07), transparent 55%),
