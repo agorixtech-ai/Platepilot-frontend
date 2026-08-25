@@ -46,7 +46,6 @@ export function Sidebar() {
       <SidebarHeader className="px-4 py-4">
         <AppLogo
           to="/"
-          showText
           className="group-data-[collapsible=icon]:justify-center"
           textWrapperClassName="group-data-[collapsible=icon]:hidden"
           textClassName="font-extrabold text-xl tracking-tight text-sidebar-foreground"

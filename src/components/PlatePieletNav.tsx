@@ -49,6 +49,23 @@ const themes = {
     gradientCTA: "linear-gradient(135deg, #073B2A 0%, #0F7A4C 55%, #15803D 100%)",
     solidColor: "#FFFFFF",
   },
+  /* Landing page navbar — horizontal brand gradient (forest → lime). */
+  brand: {
+    bg: "linear-gradient(90deg, #105e32 0%, #56db2d 100%)",
+    ink: "#FFFFFF",
+    text: "#FFFFFF",
+    nav: "rgba(255,255,255,0.94)",
+    border: "rgba(255,255,255,0.22)",
+    borderStrong: "rgba(255,255,255,0.42)",
+    dropdownBg: "#FFFFFF",
+    dropdownBorder: "#DDE7E1",
+    dropdownItem: "#152019",
+    dropdownHover: "#E8F7ED",
+    iconBg: "#E8F7ED",
+    iconColor: "#15803D",
+    gradientCTA: "linear-gradient(135deg, #073B2A 0%, #0F7A4C 55%, #15803D 100%)",
+    solidColor: "#FFFFFF",
+  },
   dark: {
     bg: "#071A14",
     ink: "#FFFFFF",
@@ -166,7 +183,7 @@ type PlatePieletNavProps = {
   insetClass?: string;
   sticky?: boolean;
   /** Landing uses light; Demo stays dark. */
-  variant?: "light" | "dark";
+  variant?: "light" | "dark" | "brand";
 };
 
 export function PlatePieletNav({
@@ -274,6 +291,43 @@ export function PlatePieletNav({
           margin-inline: auto;
           padding-inline: 2.5rem;
         }
+        .pp-nav__bar {
+          display: flex;
+          align-items: center;
+          gap: 24px;
+          min-height: 76px;
+          padding-block: 10px;
+        }
+        .pp-nav__brand {
+          display: flex;
+          align-items: center;
+          flex-shrink: 0;
+          text-decoration: none;
+          line-height: 0;
+        }
+        /* logo.png is a wide wordmark (539×337), not a square icon — never
+           crop it with object-fit: cover or it reads as broken "plate/pielet"
+           lines clipped by the bar. */
+        .pp-nav__brand img {
+          display: block;
+          height: 42px;
+          width: auto;
+          max-width: 168px;
+          object-fit: contain;
+          object-position: left center;
+        }
+        /* On the green landing bar, knock out the PNG's black matte so only
+           the white wordmark shows over the brand fill. */
+        .pp-nav--brand .pp-nav__brand img {
+          mix-blend-mode: lighten;
+        }
+        .pp-nav__actions {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          margin-left: auto;
+          flex-shrink: 0;
+        }
         .pp-btn-solid {
           background: ${T.gradientCTA};
           box-shadow: 0 4px 14px rgba(15,122,76,0.28);
@@ -304,6 +358,13 @@ export function PlatePieletNav({
           font: inherit;
           line-height: 1;
           cursor: pointer;
+          min-height: 36px;
+        }
+        .pp-nav__links > a,
+        .pp-nav__item {
+          display: inline-flex;
+          align-items: center;
+          min-height: 36px;
         }
         .pp-nav__chevron {
           transition: transform 0.2s ease;
@@ -412,15 +473,6 @@ export function PlatePieletNav({
           .pp-nav__mobile-panel.open {
             display: flex;
           }
-          /* The desktop grid splits the two outer columns 50/50 regardless
-             of content — with the nav column hidden/empty, that squeezes
-             the logo into a track narrower than its text and it overflows
-             into the toggle button. auto/1fr/auto gives logo and toggle
-             their natural width and lets the empty middle column absorb
-             the rest. */
-          .pp-nav__inset {
-            grid-template-columns: auto 1fr auto !important;
-          }
         }
         .pp-nav__mobile-panel {
           flex-direction: column;
@@ -461,51 +513,31 @@ export function PlatePieletNav({
         }
       `}</style>
 
-      <div ref={navRef}>
-        <header
-          className={insetClass}
-          style={{
-            position: sticky ? "sticky" : "relative",
-            top: sticky ? 0 : undefined,
-            zIndex: 50,
-            paddingTop: 28,
-            paddingBottom: 32,
-            display: "grid",
-            gridTemplateColumns: "minmax(0, 1fr) auto minmax(0, 1fr)",
-            alignItems: "center",
-            gap: 24,
-            background: sticky ? T.bg : undefined,
-            borderBottom: sticky ? `1px solid ${T.border}` : undefined,
-          }}
-        >
-          <Link
-            to="/"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 10,
-              justifySelf: "start",
-              textDecoration: "none",
-            }}
-          >
-            <img
-              src={LOGO_SRC}
-              alt={LOGO_ALT}
-              width={36}
-              height={36}
-              style={{ display: "block", flexShrink: 0, borderRadius: 10, objectFit: "cover" }}
-            />
-            <span
-              style={{
-                fontWeight: 700,
-                fontSize: 20,
-                letterSpacing: ".14em",
-                lineHeight: 1,
-                color: T.text,
-              }}
-            >
-              PlatePielet
-            </span>
+      {/* Sticky lives on this wrapper, not the <header>, because a sticky
+          element can never leave its parent's box — the wrapper here is
+          header + mobile panel tall (~101px), so sticking to the header
+          itself let it pop out of view after ~100px of scroll. The wrapper
+          is a direct child of <main> (full page height), and being
+          full-bleed it also paints the stuck bar edge-to-edge instead of
+          only across the 1280px inset. */}
+      <div
+        ref={navRef}
+        className={`pp-nav${variant === "brand" ? " pp-nav--brand" : ""}`}
+        style={
+          sticky
+            ? {
+                position: "sticky",
+                top: 0,
+                zIndex: 50,
+                background: T.bg,
+                borderBottom: `1px solid ${T.border}`,
+              }
+            : undefined
+        }
+      >
+        <header className={`${insetClass} pp-nav__bar`}>
+          <Link to="/" className="pp-nav__brand" aria-label={LOGO_ALT}>
+            <img src={LOGO_SRC} alt="" width={539} height={337} decoding="async" />
           </Link>
 
           <nav
@@ -513,10 +545,12 @@ export function PlatePieletNav({
             style={{
               display: "flex",
               alignItems: "center",
+              justifyContent: "center",
+              flex: 1,
               gap: 28,
               fontSize: 14.5,
               color: T.nav,
-              justifySelf: "center",
+              minWidth: 0,
             }}
           >
             {links.map((item) => {
@@ -604,7 +638,7 @@ export function PlatePieletNav({
             })}
           </nav>
 
-          <div style={{ display: "flex", alignItems: "center", gap: 10, justifySelf: "end" }}>
+          <div className="pp-nav__actions">
             <div
               className="pp-nav__buttons"
               style={{ display: "flex", alignItems: "center", gap: 10 }}

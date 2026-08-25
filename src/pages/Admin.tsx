@@ -165,7 +165,6 @@ function AdminShell({ children }: { children: ReactNode }) {
           <div className="flex h-full w-full items-center justify-between gap-2 px-3 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
             <AppLogo
               to="/admin"
-              showText
               subtitle="Admin Console"
               className="flex-1 group-data-[collapsible=icon]:flex-none group-data-[collapsible=icon]:justify-center"
               textWrapperClassName="group-data-[collapsible=icon]:hidden"

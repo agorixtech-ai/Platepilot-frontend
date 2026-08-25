@@ -42,7 +42,6 @@ export function AuthPageShell({
           <div className="mb-8">
             <AppLogo
               to="/"
-              showText
               className="hover:opacity-80 transition-opacity"
               textClassName="font-extrabold text-2xl tracking-tight text-foreground"
             />

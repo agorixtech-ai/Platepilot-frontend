@@ -25,6 +25,7 @@ import {
   LayoutGrid,
   Megaphone,
   Package,
+  Plug,
   Receipt,
   Shield,
   ShoppingCart,
@@ -565,8 +566,8 @@ const ME_DISHES = [
     earnsPct: 22,
     tier: "Underpriced",
     act: "Everyone orders it, but it barely profits. Raise the price a little.",
-    color: "#92400E",
-    bg: "rgba(245,158,11,0.1)",
+    color: "#2563EB",
+    bg: "rgba(37,99,235,0.1)",
     icon: Tag,
     area: "br",
   },
@@ -578,8 +579,8 @@ const ME_DISHES = [
     earnsPct: 95,
     tier: "Hidden Gem",
     act: "Earns a lot, but few people order it. Recommend it more.",
-    color: "#0F7A4C",
-    bg: "#E8F7ED",
+    color: "#B7791F",
+    bg: "rgba(245,158,11,0.12)",
     icon: Megaphone,
     area: "tl",
   },
@@ -597,6 +598,13 @@ const ME_DISHES = [
     area: "bl",
   },
 ];
+
+const WASTE_RECOMMENDATIONS = [
+  ["OVERPRODUCTION", "More prepared than sold", "Reduce preparation quantities based on actual sales and demand patterns.", "Reduce Prep · Improve Forecasting", "#2563EB"],
+  ["HIGH WASTE", "Unusually high ingredient loss", "Review preparation, storage, handling, portion control, and supplier quality.", "Investigate · Reduce Loss", "#B91C1C"],
+  ["STOCK VARIANCE", "Stock usage is higher than expected", "Review recipes, portions, stock movements, and wastage records.", "Review · Investigate · Correct", "#B7791F"],
+  ["SPOILAGE RISK", "Stock may expire before it is used", "Prioritise existing stock, reduce future purchases, or promote dishes that use those ingredients.", "Use First · Reduce Orders", "#15803D"],
+] as const;
 
 /* ─── Scroll reveal hook ─────────────────────────────────────────────────── */
 function useReveal(threshold = 0.18) {
@@ -662,6 +670,34 @@ const HIW_OUTLETS: [string, string][] = [
   ["T. Nagar", "Margin 28% · healthy"],
 ];
 
+const DATA_DECISION_STEPS = [
+  {
+    Icon: Plug,
+    title: "Connect Your Data",
+    description: "Bring together data from your POS, inventory, accounting, and other restaurant systems.",
+  },
+  {
+    Icon: LayoutDashboard,
+    title: "See Everything in One Place",
+    description: "View sales, costs, inventory, menu performance, and branch activity from one simple dashboard.",
+  },
+  {
+    Icon: BarChart3,
+    title: "Understand Your Performance",
+    description: "Identify trends, issues, and opportunities across your restaurant.",
+  },
+  {
+    Icon: Bell,
+    title: "Discover What Needs Attention",
+    description: "Spot wastage, stock and sales mismatches, underperforming items, and unusual changes early.",
+  },
+  {
+    Icon: Target,
+    title: "Make Better Decisions",
+    description: "Use clear insights to reduce costs, improve operations, and decide with confidence.",
+  },
+] as const;
+
 function HiwWire({ side }: { side: "in" | "out" }) {
   return (
     <svg className="hiw-wire" viewBox="0 0 54 218" aria-hidden="true">
@@ -678,66 +714,45 @@ function HowItWorksFlow() {
       <div className="hiw-stage-head">
         <div className="hiw-badge">
           <LayoutGrid size={13} strokeWidth={2.2} />
-          How It Works
+          From Data to Decision
         </div>
         <h2 className="hiw-h2">
-          Data in. <span style={{ color: "#15803D" }}>Decisions</span> out.
+          Data In. <span style={{ color: "#15803D" }}>Decisions Out.</span>
         </h2>
         <p className="hiw-lede">
-          Your Tally books, POS bills, and stock movements stream into Pilot AI — and come out the
-          other side as live dashboards, risk alerts, and purchase calls you can act on the same
-          day.
+          Bring your Tally, POS, and inventory data into PlatePielet and turn everyday operational
+          information into live dashboards, risk alerts, and action-ready recommendations.
         </p>
+        <p className="hiw-lede" style={{ marginTop: "0.85rem" }}>
+          PlatePielet helps you connect the numbers behind your restaurant and turn them into faster,
+          smarter decisions on purchasing, stock control, costs, and daily operations.
+        </p>
+        <div className="hiw-mantra">Connect your data. See what matters. Act the same day.</div>
         <Link to="/demo" className="hiw-cta">
           See it on your data <ArrowRight size={15} strokeWidth={2.4} />
         </Link>
       </div>
-
       {/* floating accent tiles, matching the corners of the stage */}
       {[
         { Icon: FileText, tint: "#E8F7ED", color: "#15803D", style: { top: "6%", left: "9%" } },
         { Icon: Bell, tint: "#FDECEF", color: "#DC2657", style: { top: "9%", right: "10%" } },
-        {
-          Icon: BarChart3,
-          tint: "#EAF1FE",
-          color: "#2563EB",
-          style: { top: "27%", left: "3.5%" },
-        },
-        {
-          Icon: ShoppingCart,
-          tint: "#EEEDFD",
-          color: "#5B4BD6",
-          style: { top: "30%", right: "4%" },
-        },
+        { Icon: BarChart3, tint: "#EAF1FE", color: "#2563EB", style: { top: "27%", left: "3.5%" } },
+        { Icon: ShoppingCart, tint: "#EEEDFD", color: "#5B4BD6", style: { top: "30%", right: "4%" } },
       ].map(({ Icon, tint, color, style }, i) => (
         <div key={i} className="hiw-tile hiw-tile-float" style={style as CSSProperties}>
-          <span style={{ background: tint, color }}>
-            <Icon size={19} strokeWidth={1.9} />
-          </span>
+          <span style={{ background: tint, color }}><Icon size={19} strokeWidth={1.9} /></span>
         </div>
       ))}
 
       <div className="hiw-stage-grid">
-        {/* ── left: dashboard mock + stat list ── */}
         <div className="hiw-panel">
           <div className="hiw-browser">
-            <div className="hiw-browser-bar">
-              <span />
-              <span />
-              <span />
-            </div>
+            <div className="hiw-browser-bar"><span /><span /><span /></div>
             <div className="hiw-browser-body">
               <div className="hiw-sk" style={{ width: "62%" }} />
               <div className="hiw-sk" style={{ width: "44%" }} />
               <svg className="hiw-spark" viewBox="0 0 120 44" preserveAspectRatio="none">
-                <path
-                  d="M0 34 L15 28 L30 31 L45 20 L60 24 L75 12 L90 16 L105 6 L120 9"
-                  fill="none"
-                  stroke="#16A34A"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
+                <path d="M0 34 L15 28 L30 31 L45 20 L60 24 L75 12 L90 16 L105 6 L120 9" fill="none" stroke="#16A34A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
               <div className="hiw-sk" style={{ width: "78%" }} />
               <div className="hiw-sk" style={{ width: "52%" }} />
@@ -746,27 +761,17 @@ function HowItWorksFlow() {
           <div className="hiw-statlist">
             {HIW_STATS.map(([Icon, label, value], i) => (
               <div key={label} className={`hiw-statrow${i === 2 ? " hl" : ""}`}>
-                <span className="hiw-statrow-ico">
-                  <Icon size={13} strokeWidth={2} />
-                </span>
-                <div>
-                  <b>{label}</b>
-                  <em>{value}</em>
-                </div>
+                <span className="hiw-statrow-ico"><Icon size={13} strokeWidth={2} /></span>
+                <div><b>{label}</b><em>{value}</em></div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* ── centre: tiles → hub → tiles ── */}
         <div className="hiw-core">
           <div className="hiw-tiles">
             {HIW_IN.map(({ Icon, tint, color, label }) => (
-              <div key={label} className="hiw-tile" title={label}>
-                <span style={{ background: tint, color }}>
-                  <Icon size={19} strokeWidth={1.9} />
-                </span>
-              </div>
+              <div key={label} className="hiw-tile" title={label}><span style={{ background: tint, color }}><Icon size={19} strokeWidth={1.9} /></span></div>
             ))}
           </div>
           <HiwWire side="in" />
@@ -774,41 +779,23 @@ function HowItWorksFlow() {
           <HiwWire side="out" />
           <div className="hiw-tiles">
             {HIW_OUT.map(({ Icon, tint, color, label }) => (
-              <div key={label} className="hiw-tile" title={label}>
-                <span style={{ background: tint, color }}>
-                  <Icon size={19} strokeWidth={1.9} />
-                </span>
-              </div>
+              <div key={label} className="hiw-tile" title={label}><span style={{ background: tint, color }}><Icon size={19} strokeWidth={1.9} /></span></div>
             ))}
           </div>
         </div>
 
-        {/* ── right: tool rail + outlet console ── */}
         <div className="hiw-panel">
           <div className="hiw-rail">
-            <span className="on">
-              <LayoutDashboard size={16} strokeWidth={1.9} />
-            </span>
-            <span>
-              <Sparkles size={16} strokeWidth={1.9} />
-            </span>
-            <span>
-              <Shield size={16} strokeWidth={1.9} />
-            </span>
-            <span>
-              <Trash2 size={16} strokeWidth={1.9} />
-            </span>
+            <span className="on"><LayoutDashboard size={16} strokeWidth={1.9} /></span>
+            <span><Sparkles size={16} strokeWidth={1.9} /></span>
+            <span><Shield size={16} strokeWidth={1.9} /></span>
+            <span><Trash2 size={16} strokeWidth={1.9} /></span>
           </div>
           <div className="hiw-console">
             {HIW_OUTLETS.map(([name, meta]) => (
               <div key={name} className="hiw-userrow">
-                <span className="hiw-avatar">
-                  <Star size={12} strokeWidth={2} />
-                </span>
-                <div>
-                  <b>{name}</b>
-                  <span>{meta}</span>
-                </div>
+                <span className="hiw-avatar"><Star size={12} strokeWidth={2} /></span>
+                <div><b>{name}</b><span>{meta}</span></div>
               </div>
             ))}
             <div className="hiw-enter">Open dashboard</div>
@@ -853,7 +840,7 @@ function Index() {
       duration: 1.1,
       smoothWheel: true,
       syncTouch: false,
-      anchors: { offset: -110 },
+      anchors: { offset: -76 },
     });
     lenisRef.current = lenis;
 
@@ -917,7 +904,7 @@ function Index() {
            :where() keeps the reset's specificity at (0,1,0) so page classes
            like .sw-section still override it by source order. */
         .pp-landing,
-        .pp-landing *:where(:not(.ig-root, .ig-root *)) { box-sizing: border-box; margin: 0; padding: 0; }
+        .pp-landing *:where(:not(.ig-root, .ig-root *, .pp-nav, .pp-nav *)) { box-sizing: border-box; margin: 0; padding: 0; }
         .pp-landing a { text-decoration: none; }
 
         /* ── Reveal animation ── */
@@ -1102,7 +1089,7 @@ function Index() {
         }
         .hiw-stage > * { position: relative; z-index: 1; }
 
-        .hiw-stage-head { max-width: 640px; margin: 0 auto 3.5rem; text-align: center; }
+        .hiw-stage-head { max-width: 760px; margin: 0 auto 3.5rem; text-align: center; }
         .hiw-stage-head .hiw-badge { margin-bottom: 1.25rem; }
         .hiw-h2 {
           font-size: clamp(2rem, 3.6vw, 3.1rem);
@@ -1111,7 +1098,20 @@ function Index() {
           line-height: 1.1;
           margin-bottom: 1rem;
         }
-        .hiw-lede { font-size: 0.9rem; color: #66736B; line-height: 1.75; }
+        .hiw-lede {
+          max-width: 690px;
+          margin-inline: auto;
+          font-size: 0.9rem;
+          color: #66736B;
+          line-height: 1.75;
+          text-wrap: pretty;
+        }
+        .hiw-mantra {
+          margin-top: 1.15rem;
+          color: #15803D;
+          font-size: 0.84rem;
+          font-weight: 800;
+        }
         .hiw-cta {
           display: inline-flex;
           align-items: center;
@@ -1288,21 +1288,22 @@ function Index() {
         .hiw-stats {
           margin-top: 3rem;
           display: grid;
-          grid-template-columns: repeat(4, 1fr);
-          background: #FFFFFF;
-          border: 1px solid #DDE7E1;
-          border-radius: 18px;
-          box-shadow: 0 2px 10px rgba(21,32,25,0.05);
-          overflow: hidden;
+          grid-template-columns: repeat(5, minmax(0, 1fr));
+          gap: 12px;
         }
         .hiw-stat {
           display: flex;
+          min-height: 218px;
+          flex-direction: column;
           align-items: flex-start;
           gap: 0.85rem;
           padding: 1.75rem 1.5rem;
-          border-right: 1px solid #E3ECE6;
+          border: 1px solid #DDE7E1;
+          border-radius: 18px;
+          background: #FFFFFF;
+          box-shadow: 0 2px 10px rgba(21,32,25,0.05);
         }
-        .hiw-stat:last-child { border-right: none; }
+        .hiw-stat-top { display: flex; align-items: center; gap: 10px; }
         .hiw-stat-icon {
           width: 44px;
           height: 44px;
@@ -1316,17 +1317,89 @@ function Index() {
           transition: transform 0.25s ease, background 0.25s ease, color 0.25s ease;
         }
         .hiw-stat:hover .hiw-stat-icon { transform: scale(1.1); background: #16A34A; color: #FFFFFF; }
-        .hiw-stat-title { font-size: 0.9rem; font-weight: 700; color: #152019; margin-bottom: 3px; }
+        .hiw-stat-step { font-size: 0.7rem; font-weight: 800; color: #15803D; }
+        .hiw-stat-title {
+          min-height: 2.6em;
+          font-size: 0.9rem;
+          font-weight: 700;
+          color: #152019;
+          line-height: 1.3;
+          margin-bottom: 5px;
+        }
         .hiw-stat-sub { font-size: 0.78rem; color: #66736B; line-height: 1.5; }
-        @media (max-width: 900px) {
-          .hiw-stats { grid-template-columns: repeat(2, 1fr); }
-          .hiw-stat:nth-child(2) { border-right: none; }
-          .hiw-stat:nth-child(1), .hiw-stat:nth-child(2) { border-bottom: 1px solid #E3ECE6; }
+        @media (max-width: 1100px) {
+          .hiw-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+          .hiw-stat:nth-child(5) {
+            grid-column: 1 / -1;
+            width: calc(50% - 6px);
+            justify-self: center;
+          }
         }
         @media (max-width: 560px) {
           .hiw-stats { grid-template-columns: 1fr; }
-          .hiw-stat { border-right: none !important; border-bottom: 1px solid #E3ECE6; }
-          .hiw-stat:last-child { border-bottom: none; }
+          .hiw-stat { min-height: 0; }
+          .hiw-stat:nth-child(5) { grid-column: auto; width: auto; }
+        }
+        .hiw-journey-footer {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.7rem;
+          margin-top: 1.5rem;
+          color: #66736B;
+          font-size: 0.82rem;
+        }
+        .hiw-journey-footer strong { color: #152019; }
+        .hiw-journey-footer span::after { content: "·"; margin-left: 0.7rem; color: #A8B4AD; }
+        @media (max-width: 560px) {
+          .hiw-journey-footer { flex-direction: column; gap: 0.25rem; }
+          .hiw-journey-footer span::after { display: none; }
+        }
+
+        .waste-lede { max-width: 760px; }
+        .waste-metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 2.5rem; }
+        .waste-metrics > div { display: flex; flex-direction: column; gap: 5px; padding: 1.2rem 1.3rem; border: 1px solid #DDE7E1; border-radius: 16px; background: #F7FAF8; }
+        .waste-metrics strong { color: #152019; font-size: 0.85rem; }
+        .waste-metrics span { color: #66736B; font-size: 0.75rem; line-height: 1.5; }
+        .waste-ai-heading { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; margin: 3.5rem 0 1.25rem; }
+        .waste-ai-heading span { color: #152019; font-size: 1.1rem; font-weight: 800; }
+        .waste-ai-heading small { color: #15803D; font-size: 0.75rem; font-weight: 700; }
+        .waste-recommendations { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+        .waste-card { min-height: 245px; padding: 1.35rem; border: 1px solid #DDE7E1; border-top: 4px solid var(--waste-color); border-radius: 16px; background: #FFFFFF; box-shadow: 0 10px 24px -20px rgba(21,32,25,0.55); }
+        .waste-card-label { color: var(--waste-color); font-size: 0.62rem; font-weight: 800; letter-spacing: 0.12em; }
+        .waste-card h3 { margin: 0.65rem 0 0.9rem; color: #152019; font-size: 0.95rem; line-height: 1.3; }
+        .waste-card-ai { display: inline-block; padding: 4px 8px; border-radius: 999px; background: #E8F7ED; color: #15803D; font-size: 0.6rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; }
+        .waste-card p { margin: 0.7rem 0 1rem; color: #66736B; font-size: 0.77rem; line-height: 1.55; }
+        .waste-card-action { color: #152019; font-size: 0.7rem; line-height: 1.4; }
+        .waste-footer { margin: 3.5rem auto 0; text-align: center; max-width: 620px; }
+        .waste-footer strong { display: block; color: #152019; font-size: 1.4rem; }
+        .waste-footer span { display: block; margin-top: 0.45rem; color: #15803D; font-weight: 800; }
+        .waste-footer p { margin: 0.7rem 0 0; color: #66736B; font-size: 0.85rem; line-height: 1.6; }
+        @media (max-width: 980px) { .waste-recommendations { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+        @media (max-width: 700px) {
+          .waste-metrics, .waste-recommendations { grid-template-columns: 1fr; }
+          .waste-ai-heading { flex-direction: column; gap: 0.4rem; }
+        }
+        .about-section { padding: 5rem 0; }
+        .about-intro { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(300px, 0.9fr); gap: 4rem; align-items: end; }
+        .about-intro .sw-section-body { margin-bottom: 0; }
+        .about-grid { display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 14px; margin-top: 3.5rem; }
+        .about-copy, .about-card { min-height: 220px; padding: 1.5rem; border: 1px solid #DDE7E1; border-radius: 18px; background: #F7FAF8; }
+        .about-copy { display: flex; align-items: center; color: #66736B; font-size: 0.9rem; line-height: 1.75; }
+        .about-copy p { margin: 0; }
+        .about-card { background: #FFFFFF; box-shadow: 0 12px 28px -22px rgba(21,32,25,0.55); }
+        .about-card--accent { background: #E8F7ED; border-color: #C9E9D6; }
+        .about-card-label { margin-bottom: 1rem; color: #15803D; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; }
+        .about-card p { margin: 0; color: #66736B; font-size: 0.84rem; line-height: 1.7; }
+        .about-card strong { display: block; margin-top: 1.25rem; color: #152019; font-size: 0.85rem; line-height: 1.45; }
+        @media (max-width: 900px) {
+          .about-intro { grid-template-columns: 1fr; gap: 1.5rem; }
+          .about-grid { grid-template-columns: 1fr 1fr; }
+          .about-copy { grid-column: 1 / -1; min-height: 0; }
+        }
+        @media (max-width: 600px) {
+          .about-grid { grid-template-columns: 1fr; }
+          .about-copy { grid-column: auto; }
         }
 
         /* ── Testimonials: copy-left / stacked-quote-cards-right ── */
@@ -1606,11 +1679,32 @@ function Index() {
           letter-spacing: 0.08em;
           text-transform: uppercase;
         }
+        .me-quad-ai {
+          display: inline-flex;
+          align-items: center;
+          margin-top: 2px;
+          padding: 3px 7px;
+          border-radius: 999px;
+          background: rgba(255,255,255,0.78);
+          color: #152019;
+          font-size: 0.58rem;
+          font-weight: 800;
+          letter-spacing: 0.05em;
+          text-transform: uppercase;
+        }
         .me-quad-desc {
           font-size: 0.74rem;
           line-height: 1.45;
           color: rgba(21,32,25,0.68);
           max-width: 15rem;
+        }
+        .me-subhead {
+          margin-top: -0.45rem;
+          margin-bottom: 1rem;
+          color: #15803D;
+          font-size: 1rem;
+          font-weight: 800;
+          letter-spacing: -0.01em;
         }
         .me-dot {
           position: absolute;
@@ -2487,7 +2581,7 @@ function Index() {
 
         /* ── Smooth anchor scrolling + offset for the sticky nav ── */
         .app-page-scroll { scroll-behavior: smooth; }
-        .pp-landing [id] { scroll-margin-top: 110px; }
+        .pp-landing [id] { scroll-margin-top: 76px; }
 
         /* ── Reduced motion: page-level guard (hero has its own) ── */
         @media (prefers-reduced-motion: reduce) {
@@ -2517,7 +2611,7 @@ function Index() {
         {/* H1 and title both lead with "restaurant" — the SEO audit flagged its
             absence as the second-biggest problem after the canonical. */}
         <Seo title={PAGE_TITLE} description={PAGE_DESCRIPTION} />
-        <PlatePieletNav variant="light" sticky />
+        <PlatePieletNav variant="brand" sticky />
         <PlatePieletHero />
 
         {/* ══════════════════════════════════════════════════════════════════ */}
@@ -2604,9 +2698,13 @@ function Index() {
             </div>
             <div>
               <p className="intro-body">
-                PlatePielet connects your <strong>Tally books</strong>, <strong>POS sales</strong>,
-                and <strong>inventory</strong> into one intelligence layer — so every purchasing,
-                pricing, and prep decision is backed by live data instead of gut feel.
+                PlatePielet transforms your restaurant data into clear, actionable insights in real
+                time. Monitor performance, identify trends, detect issues, and uncover opportunities
+                across sales, inventory, costs, and operations, all from one intelligent platform.
+              </p>
+              <p className="intro-body" style={{ marginTop: "1rem" }}>
+                Make faster, data-driven decisions with the information that matters most to your
+                restaurant.
               </p>
             </div>
           </div>
@@ -2621,44 +2719,24 @@ function Index() {
             <div ref={sec5.ref} className={`loop-section reveal${sec5.visible ? " show" : ""}`}>
               <HowItWorksFlow />
               <div className="hiw-stats">
-                <div className="hiw-stat">
-                  <div className="hiw-stat-icon">
-                    <Zap size={20} strokeWidth={1.8} />
-                  </div>
-                  <div>
-                    <div className="hiw-stat-title">Real-time insights</div>
-                    <div className="hiw-stat-sub">Always up-to-date data across all sources</div>
-                  </div>
-                </div>
-                <div className="hiw-stat">
-                  <div className="hiw-stat-icon">
-                    <Shield size={20} strokeWidth={1.8} />
-                  </div>
-                  <div>
-                    <div className="hiw-stat-title">Reduce risk</div>
-                    <div className="hiw-stat-sub">Catch issues early and protect your margins</div>
-                  </div>
-                </div>
-                <div className="hiw-stat">
-                  <div className="hiw-stat-icon">
-                    <Target size={20} strokeWidth={1.8} />
-                  </div>
-                  <div>
-                    <div className="hiw-stat-title">Smarter decisions</div>
-                    <div className="hiw-stat-sub">AI-powered recommendations you can act on</div>
-                  </div>
-                </div>
-                <div className="hiw-stat">
-                  <div className="hiw-stat-icon">
-                    <TrendingUp size={20} strokeWidth={1.8} />
-                  </div>
-                  <div>
-                    <div className="hiw-stat-title">Grow profitability</div>
-                    <div className="hiw-stat-sub">
-                      Optimize operations and increase your bottom line
+                {DATA_DECISION_STEPS.map(({ Icon, title, description }, index) => (
+                  <div className="hiw-stat" key={title}>
+                    <div className="hiw-stat-top">
+                      <div className="hiw-stat-icon">
+                        <Icon size={20} strokeWidth={1.8} />
+                      </div>
+                      <div className="hiw-stat-step">Step {index + 1}</div>
+                    </div>
+                    <div>
+                      <div className="hiw-stat-title">{title}</div>
+                      <div className="hiw-stat-sub">{description}</div>
                     </div>
                   </div>
-                </div>
+                ))}
+              </div>
+              <div className="hiw-journey-footer">
+                <span>From Data to Decision</span>
+                <strong>Connect. Understand. Improve.</strong>
               </div>
             </div>
           </div>
@@ -2730,8 +2808,14 @@ function Index() {
         <div className="sw-rule" />
         <div className="sw-section">
           <div ref={sec4.ref} className={`caps-section reveal${sec4.visible ? " show" : ""}`}>
-            <div className="sw-section-tag">↳ Features</div>
-            <h2 className="sw-section-h2">Everything you need to run a profitable kitchen.</h2>
+            <div className="sw-section-tag">AI-Powered Insights</div>
+            <h2 className="sw-section-h2">
+              Everything You Need to Run a Smarter, More Profitable Restaurant.
+            </h2>
+            <p className="sw-section-body">
+              Connect your restaurant data, understand performance in real time, and turn insights
+              into actions that improve your business.
+            </p>
             <div className="ft-grid">
               <article className="ft-card ft-wide">
                 <div className="ft-vis">
@@ -2947,10 +3031,14 @@ function Index() {
             className={`platforms-section reveal${sec10.visible ? " show" : ""}`}
           >
             <div className="sw-section-tag">↳ Menu Engineering</div>
-            <h2 className="sw-section-h2">Every dish lands in one of four quadrants.</h2>
+            <h2 className="sw-section-h2">Understand What Sells. Know What Makes Money.</h2>
+            <div className="me-subhead">Every Dish. One Clear Strategy.</div>
             <p className="sw-section-body" style={{ marginBottom: 0 }}>
-              Plot how often a dish sells against how much it earns, and your menu sorts itself — no
-              spreadsheets, no consultants, just data PlatePielet already tracks.
+              PlatePielet combines sales, food cost, and menu performance data to show exactly how
+              every dish is performing.
+              <br /><br />
+              See which items drive profit, which need attention, and get AI-powered recommendations
+              on what to promote, optimise, reprice, or review.
             </p>
             <div className="me-formula">
               <div className="me-f-step">
@@ -3024,6 +3112,7 @@ function Index() {
                           <span className="me-quad-tier" style={{ color: d.color }}>
                             {d.tier}
                           </span>
+                          <span className="me-quad-ai">AI suggestion</span>
                           <span className="me-quad-desc">{d.act}</span>
                         </div>
                       </MagicCard>
@@ -3057,6 +3146,100 @@ function Index() {
               PlatePielet plots your whole menu like this, automatically — from the POS sales and
               purchase costs it already tracks.
             </p>
+          </div>
+        </div>
+
+        {/* ══════════════════════════════════════════════════════════════════ */}
+        {/* WASTE MANAGEMENT                                                  */}
+        {/* ══════════════════════════════════════════════════════════════════ */}
+        <div className="sw-rule" id="waste-management" />
+        <div className="sw-section sw-glow-wrap">
+          <div className="platforms-section waste-section">
+            <div className="sw-section-tag">↳ Waste Management</div>
+            <h2 className="sw-section-h2">See Where Waste Happens. Understand Why. Reduce It.</h2>
+            <p className="sw-section-body waste-lede">
+              PlatePielet gives you a clear view of where food and inventory waste is happening, what
+              it is costing your business, and how to reduce it.
+              <br /><br />
+              By connecting stock movements, consumption, sales, and wastage data, PlatePielet helps
+              you identify patterns, investigate unusual losses, and take action before waste impacts
+              profitability.
+            </p>
+            <div className="waste-metrics">
+              <div><strong>Track the true cost</strong><span>By item, category, branch, and time period.</span></div>
+              <div><strong>Identify waste patterns</strong><span>Overproduction, spoilage, excess consumption, and slow-moving stock.</span></div>
+              <div><strong>Compare stock vs sales</strong><span>Spot unexpected variances and unrecorded usage.</span></div>
+            </div>
+            <div className="waste-ai-heading">
+              <span>AI-Powered Waste Recommendations</span>
+              <small>Understand the cause. Know what to do next.</small>
+            </div>
+            <div className="waste-recommendations">
+              {WASTE_RECOMMENDATIONS.map(([label, issue, recommendation, action, color]) => (
+                <article className="waste-card" key={label} style={{ "--waste-color": color } as CSSProperties}>
+                  <div className="waste-card-label">{label}</div>
+                  <h3>{issue}</h3>
+                  <div className="waste-card-ai">AI recommendation</div>
+                  <p>{recommendation}</p>
+                  <strong className="waste-card-action">Action: {action}</strong>
+                </article>
+              ))}
+            </div>
+            <div className="waste-footer">
+              <strong>Turn Waste Into Savings</strong>
+              <span>Detect. Understand. Recommend. Reduce.</span>
+              <p>PlatePielet turns waste data into clear actions that help reduce food cost, improve inventory control, and protect your margins.</p>
+            </div>
+          </div>
+        </div>
+
+        {/* ══════════════════════════════════════════════════════════════════ */}
+        {/* ABOUT US                                                           */}
+        {/* ══════════════════════════════════════════════════════════════════ */}
+        <div className="sw-rule" id="about-us" />
+        <div className="sw-section">
+          <div className="about-section">
+            <div className="sw-section-tag">About Us</div>
+            <div className="about-intro">
+              <div>
+                <h2 className="sw-section-h2">Optimise Your Restaurant’s Performance with PlatePielet</h2>
+              </div>
+              <p className="sw-section-body">
+                PlatePielet is built for restaurateurs who want a smarter, clearer way to run their
+                business.
+                <br /><br />
+                Our mission is to help restaurants improve performance by turning everyday operational
+                data into meaningful insights and actions. We put your business goals at the centre of
+                everything we build.
+              </p>
+            </div>
+            <div className="about-grid">
+              <div className="about-copy">
+                <p>
+                  Restaurant owners often manage sales, inventory, food costs, wastage, and financial
+                  information across multiple disconnected systems. PlatePielet brings this data
+                  together, giving you one clear view of your restaurant’s performance and helping you
+                  make faster, better-informed decisions.
+                </p>
+              </div>
+              <article className="about-card">
+                <div className="about-card-label">Built for the Restaurant Industry</div>
+                <p>
+                  We understand that every restaurant operates differently. PlatePielet is designed to
+                  work alongside your existing systems and simplify the way you understand your
+                  business, whether you operate a single restaurant or multiple locations.
+                </p>
+              </article>
+              <article className="about-card about-card--accent">
+                <div className="about-card-label">Our Vision</div>
+                <p>
+                  We believe restaurant owners should spend less time searching through spreadsheets
+                  and disconnected systems, and more time focusing on their customers and growing
+                  their business.
+                </p>
+                <strong>Better visibility. Smarter decisions. Stronger restaurants.</strong>
+              </article>
+            </div>
           </div>
         </div>
 

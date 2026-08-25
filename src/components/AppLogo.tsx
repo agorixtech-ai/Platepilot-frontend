@@ -1,13 +1,13 @@
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
-export const LOGO_SRC = "/logo.webp";
+export const LOGO_SRC = "/logo.png";
 export const LOGO_ALT = "PlatePielet";
 
 const iconSizes = {
-  sm: "h-8 w-8",
-  md: "h-9 w-9",
-  lg: "h-11 w-11",
+  sm: "h-8 w-auto max-w-[120px]",
+  md: "h-10 w-auto max-w-[150px]",
+  lg: "h-12 w-auto max-w-[180px]",
 } as const;
 
 type AppLogoProps = {
@@ -38,7 +38,7 @@ export function AppLogo({
       <img
         src={LOGO_SRC}
         alt={LOGO_ALT}
-        className={cn(iconSizes[size], "shrink-0 rounded-xl object-cover", iconClassName)}
+        className={cn(iconSizes[size], "shrink-0 object-contain", iconClassName)}
       />
       {showText && (
         <div className={cn("min-w-0", textWrapperClassName)}>

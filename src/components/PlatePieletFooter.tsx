@@ -1,6 +1,8 @@
 import { Link } from "react-router-dom";
 import { useEffect, useRef, type ReactNode } from "react";
+import { Mail, Phone } from "lucide-react";
 import { LOGO_SRC, LOGO_ALT } from "@/components/AppLogo";
+import { SALES_PHONE, SALES_PHONE_HREF, SALES_EMAIL } from "@/lib/contact";
 
 type FooterLink = { label: string; href: string };
 type FooterColumn = { title: string; links: FooterLink[] };
@@ -157,20 +159,40 @@ export function PlatePieletFooter({ children, mode = "reveal" }: PlatePieletFoot
         .pp-footer-logo {
           display: inline-flex;
           align-items: center;
-          gap: 10px;
-          font-size: 1.1rem;
-          font-weight: 700;
-          letter-spacing: 0.02em;
           color: #FFFFFF;
           text-decoration: none;
         }
-        .pp-footer-logo img { border-radius: 10px; object-fit: cover; }
+        .pp-footer-logo img {
+          display: block;
+          width: 58px;
+          height: 42px;
+          object-fit: contain;
+          object-position: left center;
+        }
         .pp-footer-tagline {
           margin-top: 1rem;
           font-size: 0.85rem;
           line-height: 1.7;
           color: rgba(246,250,247,0.55);
         }
+        .pp-footer-contact {
+          margin-top: 1.25rem;
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+        }
+        .pp-footer-contact a {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          font-size: 0.85rem;
+          color: rgba(246,250,247,0.72);
+          text-decoration: none;
+          transition: color 0.2s;
+          width: fit-content;
+        }
+        .pp-footer-contact a:hover { color: #4ADE80; }
+        .pp-footer-contact svg { flex-shrink: 0; opacity: 0.55; }
         .pp-footer-cols {
           display: flex;
           gap: 3.5rem;
@@ -216,13 +238,22 @@ export function PlatePieletFooter({ children, mode = "reveal" }: PlatePieletFoot
         <div className="pp-footer-inner">
           <div className="pp-footer-brand">
             <Link to="/" className="pp-footer-logo">
-              <img src={LOGO_SRC} alt={LOGO_ALT} width={36} height={36} />
-              <span>PlatePielet</span>
+              <img src={LOGO_SRC} alt={LOGO_ALT} width={58} height={42} />
             </Link>
             <p className="pp-footer-tagline">
               Restaurant intelligence built from your Tally books, POS sales, and inventory — in one
               place.
             </p>
+            <div className="pp-footer-contact">
+              <a href={SALES_PHONE_HREF}>
+                <Phone size={15} aria-hidden="true" />
+                {SALES_PHONE}
+              </a>
+              <a href={`mailto:${SALES_EMAIL}`}>
+                <Mail size={15} aria-hidden="true" />
+                {SALES_EMAIL}
+              </a>
+            </div>
           </div>
           <div className="pp-footer-cols">
             {COLUMNS.map((col) => (
