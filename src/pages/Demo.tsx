@@ -70,7 +70,7 @@ function DemoPage() {
         fontFamily: "'Inter Variable', 'Inter', system-ui, sans-serif",
       }}
     >
-      <PlatePieletNav sticky variant="light" />
+      <PlatePieletNav sticky variant="brand" />
 
       <main className="pt-16 pb-20 px-6">
         <div className="mx-auto max-w-6xl">
@@ -107,210 +107,293 @@ function DemoPage() {
                 </Link>
               </div>
             ) : (
-              <div className="grid lg:grid-cols-2 gap-12 items-start">
-                {/* Form */}
-                <form
-                  onSubmit={handleSubmit}
-                  className="space-y-6 rounded-2xl border border-border bg-card p-8 md:p-10 lg:sticky lg:top-24"
-                >
-                  <div className="grid gap-6 md:grid-cols-2 md:col-span-full">
-                    <div>
-                      <label className="block text-sm font-medium text-foreground/80 mb-2">
-                        First name
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        value={form.firstName}
-                        onChange={update("firstName")}
-                        className={inputClass}
-                        placeholder="John"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-foreground/80 mb-2">
-                        Last name
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        value={form.lastName}
-                        onChange={update("lastName")}
-                        className={inputClass}
-                        placeholder="Doe"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-foreground/80 mb-2">
-                      Work email
-                    </label>
-                    <input
-                      type="email"
-                      required
-                      value={form.email}
-                      onChange={update("email")}
-                      className={inputClass}
-                      placeholder="john@restaurant.com"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-foreground/80 mb-2">
-                      Restaurant name
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={form.restaurant}
-                      onChange={update("restaurant")}
-                      className={inputClass}
-                      placeholder="Your Restaurant"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-foreground/80 mb-2">
-                      Phone number
-                    </label>
-                    <input
-                      type="tel"
-                      value={form.phone}
-                      onChange={update("phone")}
-                      className={inputClass}
-                      placeholder="+971 50 606 3372"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-foreground/80 mb-2">
-                      Current POS / ERP system
-                    </label>
-                    <input
-                      type="text"
-                      value={form.posSystem}
-                      onChange={update("posSystem")}
-                      className={inputClass}
-                      placeholder="e.g. Tally, Petpooja, Toast"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-foreground/80 mb-2">
-                      Message (optional)
-                    </label>
-                    <textarea
-                      rows={3}
-                      value={form.message}
-                      onChange={update("message")}
-                      className={`${inputClass} resize-none`}
-                      placeholder="Tell us what you'd like to see in the demo..."
-                    />
-                  </div>
-
-                  {error && <p className="text-destructive text-sm text-center">{error}</p>}
-
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="group inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground transition hover:bg-primary-hover disabled:opacity-60"
+              <>
+                <div className="grid items-start gap-12 lg:grid-cols-2">
+                  {/* Form */}
+                  <form
+                    onSubmit={handleSubmit}
+                    className="space-y-6 rounded-2xl border border-border bg-card p-8 md:p-10 lg:sticky lg:top-24"
                   >
-                    {loading ? (
-                      <>
-                        <Loader2 size={16} className="animate-spin" />
-                        Submitting...
-                      </>
-                    ) : (
-                      <>
-                        Schedule My Demo
-                        <ArrowRight size={16} className="transition group-hover:translate-x-0.5" />
-                      </>
-                    )}
-                  </button>
-
-                  <p className="text-center text-xs text-muted-foreground">
-                    No credit card required · Free setup · We respect your privacy
-                  </p>
-                </form>
-
-                {/* Benefits & Contact */}
-                <div className="space-y-8">
-                  {/* Benefits */}
-                  <div>
-                    <h3 className="text-lg font-semibold mb-6">With our platform you can</h3>
-                    <ul className="space-y-4">
-                      {[
-                        "Streamline your restaurant operations end-to-end",
-                        "Make data-driven decisions with real-time insights",
-                        "Reduce manual entry and save hours every week",
-                        "Scale efficiently while maintaining profitability",
-                      ].map((benefit, i) => (
-                        <li key={i} className="flex items-start gap-3">
-                          <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center mt-0.5">
-                            <Check size={16} className="text-primary" strokeWidth={3} />
-                          </div>
-                          <span className="text-sm text-foreground/80">{benefit}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  {/* Contact Info */}
-                  <div>
-                    <h3 className="text-lg font-semibold mb-6">You can also reach us</h3>
-                    <div className="space-y-6">
-                      <div className="flex items-start gap-4">
-                        <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                          <span className="text-sm font-semibold text-primary">📧</span>
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium text-foreground">Email</p>
-                          <a
-                            href="mailto:demo@platepilotsystems.com"
-                            className="text-sm text-primary hover:underline"
-                          >
-                            demo@platepilotsystems.com
-                          </a>
-                        </div>
+                    <div className="grid gap-6 md:grid-cols-2 md:col-span-full">
+                      <div>
+                        <label className="block text-sm font-medium text-foreground/80 mb-2">
+                          First name
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          value={form.firstName}
+                          onChange={update("firstName")}
+                          className={inputClass}
+                          placeholder="John"
+                        />
                       </div>
-                      <div className="flex items-start gap-4">
-                        <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                          <span className="text-sm font-semibold text-primary">📞</span>
+                      <div>
+                        <label className="block text-sm font-medium text-foreground/80 mb-2">
+                          Last name
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          value={form.lastName}
+                          onChange={update("lastName")}
+                          className={inputClass}
+                          placeholder="Doe"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-foreground/80 mb-2">
+                        Work email
+                      </label>
+                      <input
+                        type="email"
+                        required
+                        value={form.email}
+                        onChange={update("email")}
+                        className={inputClass}
+                        placeholder="john@restaurant.com"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-foreground/80 mb-2">
+                        Restaurant name
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={form.restaurant}
+                        onChange={update("restaurant")}
+                        className={inputClass}
+                        placeholder="Your Restaurant"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-foreground/80 mb-2">
+                        Phone number
+                      </label>
+                      <input
+                        type="tel"
+                        value={form.phone}
+                        onChange={update("phone")}
+                        className={inputClass}
+                        placeholder="+971 50 606 3372"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-foreground/80 mb-2">
+                        Current POS / ERP system
+                      </label>
+                      <input
+                        type="text"
+                        value={form.posSystem}
+                        onChange={update("posSystem")}
+                        className={inputClass}
+                        placeholder="e.g. Tally, Petpooja, Toast"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-foreground/80 mb-2">
+                        Message (optional)
+                      </label>
+                      <textarea
+                        rows={3}
+                        value={form.message}
+                        onChange={update("message")}
+                        className={`${inputClass} resize-none`}
+                        placeholder="Tell us what you'd like to see in the demo..."
+                      />
+                    </div>
+
+                    {error && <p className="text-destructive text-sm text-center">{error}</p>}
+
+                    <button
+                      type="submit"
+                      disabled={loading}
+                      className="group inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground transition hover:bg-primary-hover disabled:opacity-60"
+                    >
+                      {loading ? (
+                        <>
+                          <Loader2 size={16} className="animate-spin" />
+                          Submitting...
+                        </>
+                      ) : (
+                        <>
+                          Schedule My Demo
+                          <ArrowRight
+                            size={16}
+                            className="transition group-hover:translate-x-0.5"
+                          />
+                        </>
+                      )}
+                    </button>
+
+                    <p className="text-center text-xs text-muted-foreground">
+                      No credit card required · Free setup · We respect your privacy
+                    </p>
+                  </form>
+
+                  {/* Benefits & Contact */}
+                  <div className="space-y-8">
+                    {/* Benefits */}
+                    <div>
+                      <h3 className="text-lg font-semibold mb-6">With our platform you can</h3>
+                      <ul className="space-y-4">
+                        {[
+                          "Streamline your restaurant operations end-to-end",
+                          "Make data-driven decisions with real-time insights",
+                          "Reduce manual entry and save hours every week",
+                          "Scale efficiently while maintaining profitability",
+                        ].map((benefit, i) => (
+                          <li key={i} className="flex items-start gap-3">
+                            <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center mt-0.5">
+                              <Check size={16} className="text-primary" strokeWidth={3} />
+                            </div>
+                            <span className="text-sm text-foreground/80">{benefit}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    {/* Contact Info */}
+                    <div>
+                      <h3 className="text-lg font-semibold mb-6">You can also reach us</h3>
+                      <div className="space-y-6">
+                        <div className="flex items-start gap-4">
+                          <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                            <span className="text-sm font-semibold text-primary">📧</span>
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-foreground">Email</p>
+                            <a
+                              href="mailto:demo@platepilotsystems.com"
+                              className="text-sm text-primary hover:underline"
+                            >
+                              demo@platepilotsystems.com
+                            </a>
+                          </div>
                         </div>
-                        <div>
-                          <p className="text-sm font-medium text-foreground">Phone</p>
-                          <a
-                            href={SALES_PHONE_HREF}
-                            className="text-sm text-primary hover:underline"
-                          >
-                            {SALES_PHONE}
-                          </a>
+                        <div className="flex items-start gap-4">
+                          <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                            <span className="text-sm font-semibold text-primary">📞</span>
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-foreground">Phone</p>
+                            <a
+                              href={SALES_PHONE_HREF}
+                              className="text-sm text-primary hover:underline"
+                            >
+                              {SALES_PHONE}
+                            </a>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
 
-                  {/* Locations */}
-                  <div>
-                    <h3 className="text-lg font-semibold mb-4">Our locations</h3>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="text-sm">
-                        <p className="font-medium text-foreground mb-1">India</p>
-                        <p className="text-foreground/70 text-xs leading-relaxed">
-                          Hyderabad, Telangana
-                        </p>
-                      </div>
-                      <div className="text-sm">
-                        <p className="font-medium text-foreground mb-1">Global</p>
-                        <p className="text-foreground/70 text-xs leading-relaxed">
-                          Remote team available worldwide
-                        </p>
+                    {/* Locations */}
+                    <div>
+                      <h3 className="text-lg font-semibold mb-4">Our locations</h3>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="text-sm">
+                          <p className="font-medium text-foreground mb-1">India</p>
+                          <p className="text-foreground/70 text-xs leading-relaxed">
+                            Hyderabad, Telangana
+                          </p>
+                        </div>
+                        <div className="text-sm">
+                          <p className="font-medium text-foreground mb-1">Global</p>
+                          <p className="text-foreground/70 text-xs leading-relaxed">
+                            Remote team available worldwide
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
+
+                <section className="mt-16 border-t border-border pt-12">
+                  <div className="max-w-2xl">
+                    <p className="text-xs font-bold uppercase tracking-widest text-primary">
+                      What we will cover in the demo
+                    </p>
+                    <h2 className="mt-2 text-2xl font-bold tracking-tight text-foreground">
+                      A practical walkthrough built around your restaurant
+                    </h2>
+                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                      We’ll first understand how you operate today, then show how PlatePielet
+                      connects your data and turns it into clear actions for your team.
+                    </p>
+                  </div>
+                  <div className="mt-8 grid gap-4 md:grid-cols-2">
+                    {[
+                      {
+                        title: "We get to know your business",
+                        text: "We’ll ask about your outlets, team, current systems, and the decisions that take the most time today.",
+                      },
+                      {
+                        title: "A tailored walkthrough",
+                        text: "We’ll walk through sales, food cost, stock, branch performance, and menu insights based on your goals.",
+                      },
+                    ].map((item, index) => (
+                      <div key={item.title} className="rounded-xl border border-border bg-card p-5">
+                        <span className="text-xs font-bold text-primary">0{index + 1}</span>
+                        <h3 className="mt-3 text-sm font-bold text-foreground">{item.title}</h3>
+                        <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+                          {item.text}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                  <h3 className="mt-12 text-lg font-bold text-foreground">
+                    Other things we’ll cover
+                  </h3>
+                  <div className="mt-4 grid gap-x-8 gap-y-5 sm:grid-cols-2 lg:grid-cols-3">
+                    {[
+                      [
+                        "Your tech stack",
+                        "POS, Tally, inventory, and the tools your team already uses.",
+                      ],
+                      [
+                        "Your goals",
+                        "The outcomes you want to improve and how success is measured.",
+                      ],
+                      [
+                        "Where ROI matters",
+                        "Whether the priority is reducing waste, saving time, or increasing sales.",
+                      ],
+                      [
+                        "Growth plans",
+                        "Your outlet plans and the reporting you need as you scale.",
+                      ],
+                      [
+                        "Your current structure",
+                        "Who owns decisions and how information moves through your team.",
+                      ],
+                      [
+                        "Your biggest challenges",
+                        "The operational issues where better visibility could help first.",
+                      ],
+                    ].map(([title, text]) => (
+                      <div key={title} className="flex items-start gap-3">
+                        <span className="mt-1 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-primary/10 text-xs font-bold text-primary">
+                          ✓
+                        </span>
+                        <div>
+                          <h4 className="text-sm font-semibold text-foreground">{title}</h4>
+                          <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                            {text}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              </>
             )}
           </div>
         </div>
