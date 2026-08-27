@@ -29,6 +29,7 @@ import {
   type Period,
 } from "@/services/dashboardService";
 import { MenuWasteAnalysis } from "@/components/dashboard/MenuWasteAnalysis";
+import { recommendationCopy } from "@/lib/menuRecommendations";
 
 const TIER = {
   star: {
@@ -83,21 +84,6 @@ function TierBadge({ tier }: { tier: Tier }) {
       {config.label}
     </Badge>
   );
-}
-
-function recommendationCopy(item: MenuEngineeringItem) {
-  const raise = Math.max(1, Math.round(item.price * 0.08));
-  const monthlyGain = raise * item.sold;
-  if (item.quadrant === "star") {
-    return "Keep the price steady. Feature this dish and upsell it.";
-  }
-  if (item.quadrant === "plow_horse") {
-    return `A ${fmtCurrency(raise)} price increase could add about ${fmtCurrency(monthlyGain)} over 30 days at current sales.`;
-  }
-  if (item.quadrant === "puzzle") {
-    return "Don't discount first. Make it easier to notice and pair it with a popular item.";
-  }
-  return "Review the recipe and supplier cost first; if neither improves, consider removing it.";
 }
 
 /** Window label for column headers and copy — the period is selectable now,
@@ -440,6 +426,46 @@ export default function MenuEngineeringPage() {
           );
         })}
       </section>
+
+      <Card className="border-border/60 bg-card shadow-sm">
+        <CardHeader className="border-b border-border/40 px-5 pb-3 pt-4">
+          <CardTitle className="text-sm font-bold text-foreground">Menu Recommendations</CardTitle>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            One clear action for each priority dish
+          </p>
+        </CardHeader>
+        <CardContent className="divide-y divide-border/40 p-0">
+          {all
+            .slice()
+            .sort((a, b) => b.revenue - a.revenue)
+            .slice(0, 4)
+            .map((item) => {
+              const config = TIER[item.quadrant];
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => setSelected(item)}
+                  className="flex w-full items-start gap-3 px-5 py-3 text-left transition-colors hover:bg-muted/30"
+                >
+                  <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-xs font-bold text-foreground">{item.dish}</span>
+                    <span className="mt-0.5 block text-[11px] leading-relaxed text-muted-foreground">
+                      {recommendationCopy(item)}
+                    </span>
+                  </span>
+                  <TierBadge tier={item.quadrant} />
+                </button>
+              );
+            })}
+          {!all.length && (
+            <p className="px-5 py-4 text-xs text-muted-foreground">
+              Recommendations will appear when menu sales are synced.
+            </p>
+          )}
+        </CardContent>
+      </Card>
 
       <Card className="border-border/60 bg-card shadow-sm">
         <CardHeader className="gap-3 border-b border-border/40 px-5 pb-3 pt-4">

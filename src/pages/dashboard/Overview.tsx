@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
@@ -18,6 +18,7 @@ import {
   Check,
   Building2,
   Wallet,
+  Lightbulb,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -55,16 +56,16 @@ import {
   type Tone,
   type MetricKey,
 } from "@/components/dashboard/shared";
-import { dashboardService, type Period } from "@/services/dashboardService";
+import { dashboardService } from "@/services/dashboardService";
 import { ChannelBreakdown } from "@/components/dashboard/ChannelBreakdown";
 import { InventoryAlertsCard } from "@/components/dashboard/InventoryAlertsCard";
 import { ItemAvatar } from "@/components/dashboard/ItemAvatar";
 import { useBranchFilter } from "@/contexts/BranchFilterContext";
 import { useDateRange, rangeToPeriod } from "@/contexts/DateRangeContext";
 import { AllLocationsOverview, ComparisonChart } from "@/components/dashboard/AllLocationsOverview";
-import { MenuWasteAnalysis } from "@/components/dashboard/MenuWasteAnalysis";
 import { SingleLocationView } from "@/components/dashboard/SingleLocationView";
 import { useCounterAnimation } from "@/hooks/useCounterAnimation";
+import { recommendationCopy } from "@/lib/menuRecommendations";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -279,30 +280,9 @@ function OverviewPage() {
   const [isReconOpen, setIsReconOpen] = useState(false);
   const queryClient = useQueryClient();
   const { branch, locations } = useBranchFilter();
-  const { range, setRange } = useDateRange();
+  const { range } = useDateRange();
   const period = rangeToPeriod(range);
   const reducedMotion = useReducedMotion();
-
-  const handlePeriodChange = (newPeriod: Period) => {
-    switch (newPeriod) {
-      case "today":
-        setRange({ kind: "today" });
-        break;
-      case "week":
-        setRange({ kind: "7d" });
-        break;
-      case "month":
-        setRange({ kind: "30d" });
-        break;
-      case "year":
-        setRange({
-          kind: "custom",
-          from: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000),
-          to: new Date(),
-        });
-        break;
-    }
-  };
 
   const metricsQuery = useQuery({
     queryKey: ["dashboard", "metrics", period, branch],
@@ -410,7 +390,20 @@ function OverviewPage() {
 
   // Waste % — same ingredient-variance-vs-revenue math as the Menu
   // Engineering page's "Wastage" tile, over the waste-analysis period toggle
-  const wasteItems = menuEngineeringQuery.data?.items ?? [];
+  const wasteItems = useMemo(
+    () => menuEngineeringQuery.data?.items ?? [],
+    [menuEngineeringQuery.data?.items],
+  );
+  const menuRecommendations = useMemo(
+    () =>
+      [...wasteItems]
+        .sort((a, b) => {
+          const priority = { dog: 4, plow_horse: 3, puzzle: 2, star: 1 } as const;
+          return priority[b.quadrant] - priority[a.quadrant] || b.waste_pct - a.waste_pct;
+        })
+        .slice(0, 3),
+    [wasteItems],
+  );
   const wasteRevenue = wasteItems.reduce((sum, i) => sum + i.revenue, 0);
   const wasteCost = wasteItems.reduce((sum, i) => sum + i.waste_cost, 0);
   const wastePctValue = wasteRevenue > 0 ? (wasteCost / wasteRevenue) * 100 : 0;
@@ -538,15 +531,75 @@ function OverviewPage() {
         </motion.div>
       </AnimatePresence>
 
-      {/* ── Revenue by location | Dish Activity ──────────────────────────────── */}
-      <section className="grid gap-4 lg:grid-cols-2">
+      {/* ── Revenue by location + AI insights ───────────────────────────────── */}
+      <section className="grid items-start gap-4 lg:grid-cols-2">
         <ComparisonChart locations={locations} />
-        <MenuWasteAnalysis
-          items={wasteItems}
-          period={period}
-          onPeriodChange={handlePeriodChange}
-          isLoading={menuEngineeringQuery.isLoading}
-        />
+        <Card className="border border-border/60 bg-card shadow-sm">
+          <CardHeader className="border-b border-border/40 px-5 pb-3 pt-4">
+            <div className="flex items-center gap-2">
+              <span className="grid h-7 w-7 place-items-center rounded-lg bg-primary/10 text-primary">
+                <Lightbulb className="h-3.5 w-3.5" />
+              </span>
+              <div>
+                <CardTitle className="text-[13px] font-bold text-foreground">AI Insights</CardTitle>
+                <p className="text-[10px] text-muted-foreground">
+                  Recommended next actions from your live data
+                </p>
+              </div>
+              <Link
+                to="/dashboard/ai"
+                className="ml-auto text-[10px] font-semibold text-primary hover:underline"
+              >
+                Ask Pilot AI →
+              </Link>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-2 px-5 py-4">
+            {menuEngineeringQuery.isLoading ? (
+              <div className="space-y-2">
+                {[1, 2, 3].map((item) => (
+                  <div key={item} className="h-12 animate-pulse rounded-lg bg-secondary" />
+                ))}
+              </div>
+            ) : menuRecommendations.length ? (
+              menuRecommendations.map((item) => (
+                <Link
+                  key={item.id}
+                  to="/dashboard/menu-engineering"
+                  className="group flex items-start gap-3 rounded-lg border border-border/50 bg-muted/20 p-3 transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:bg-primary/5 hover:shadow-sm"
+                >
+                  <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-[11px] font-bold text-foreground">{item.dish}</span>
+                    <span className="mt-0.5 block text-[11px] leading-relaxed text-muted-foreground">
+                      {recommendationCopy(item)}
+                    </span>
+                    <span className="mt-2 flex flex-wrap gap-2 text-[10px] font-medium text-muted-foreground">
+                      <span className="rounded bg-background px-1.5 py-0.5">
+                        {item.sold.toLocaleString()} sold
+                      </span>
+                      <span className="rounded bg-background px-1.5 py-0.5">
+                        {fmtCurrency(item.revenue)} revenue
+                      </span>
+                      {item.waste_pct > 0 && (
+                        <span className="rounded bg-orange-500/10 px-1.5 py-0.5 text-orange-600">
+                          {fmtPct(item.waste_pct)} waste
+                        </span>
+                      )}
+                    </span>
+                  </span>
+                  <span className="mt-0.5 flex shrink-0 items-center gap-0.5 text-[10px] font-semibold text-primary opacity-70 transition-opacity group-hover:opacity-100">
+                    View <ChevronRight className="h-3.5 w-3.5" />
+                  </span>
+                </Link>
+              ))
+            ) : (
+              <p className="rounded-lg border border-border/50 bg-muted/20 p-3 text-[11px] text-muted-foreground">
+                Menu Engineering recommendations will appear when menu sales are synced.
+              </p>
+            )}
+          </CardContent>
+        </Card>
       </section>
 
       {/* ── KPI Row ─────────────────────────────────────────────────────────── */}

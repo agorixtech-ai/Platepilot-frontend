@@ -5,7 +5,7 @@
  * ⚠️ PLACEHOLDER — replace with the real UAE sales line before launch.
  * Gulf F&B buyers call; a dead number is worse than no number.
  */
-export const SALES_PHONE = "+971 4 000 0000";
+export const SALES_PHONE = "+971 50 606 3372";
 
 /** tel: hrefs must be digits + leading `+` only — no spaces, no punctuation. */
 export const SALES_PHONE_HREF = `tel:${SALES_PHONE.replace(/[^\d+]/g, "")}`;

@@ -7,10 +7,9 @@ import {
   useRef,
   useState,
   type CSSProperties,
-  type FormEvent,
   type ReactNode,
 } from "react";
-import { Link, useHistory } from "react-router-dom";
+import { Link } from "react-router-dom";
 import Lenis from "lenis";
 import {
   ArrowRight,
@@ -18,6 +17,7 @@ import {
   ArrowUpRight,
   BarChart3,
   Bell,
+  CircleDollarSign,
   ClipboardCheck,
   FileText,
   IndianRupee,
@@ -413,57 +413,6 @@ const PAGE_DESCRIPTION =
  * placeholder text can never be mistaken for a real brand's mark.
  * ponytail: swap to <img> once real logo SVGs exist — same grid, same classes.
  */
-const CUSTOMER_LOGOS = [
-  "Your Client 1",
-  "Your Client 2",
-  "Your Client 3",
-  "Your Client 4",
-  "Your Client 5",
-  "Your Client 6",
-];
-
-/* Outcome cards: same placeholder figures as before, restyled as clickable
-   photo-style tiles. `photo` is a dummy image (loremflickr, keyworded to each
-   card's topic) — swap for real photography before launch; `gradient` stays
-   as a translucent brand-color tint blended over it (see .outcome-card's
-   background-blend-mode).
-   Third slot is a CTA card instead of a third stat, matching the reference
-   3-card widget (2 highlight cards + 1 email-capture card). */
-type OutcomeCard = {
-  pill: string;
-  href: string;
-  gradient: string;
-  photo: string;
-  value: string;
-  caption: string;
-};
-
-const OUTCOME_CARDS: OutcomeCard[] = [
-  {
-    pill: "Food Cost",
-    href: "/product/food-cost-analysis",
-    gradient: "linear-gradient(160deg, #14532D 0%, #15803D 55%, #0A2E1E 100%)",
-    photo: "https://loremflickr.com/800/900/restaurant,inventory",
-    value: "AED 1,800/mo",
-    caption: "Average leakage found per outlet, in month one",
-  },
-  {
-    pill: "Tally + POS",
-    href: "/integrations",
-    gradient: "linear-gradient(160deg, #166534 0%, #16A34A 55%, #0F3D29 100%)",
-    photo: "https://loremflickr.com/800/900/restaurant,pos",
-    value: "6 hrs saved",
-    caption: "Every week, per finance lead, on reconciliation",
-  },
-];
-
-const OUTCOME_CTA_CARD = {
-  pill: "Book a Demo",
-  gradient: "linear-gradient(165deg, #0A2A1D 0%, #0F3D29 55%, #073B2A 100%)",
-  photo: "https://loremflickr.com/800/900/restaurant,team",
-  heading: "Start recovering margin today",
-};
-
 /* ─── Testimonials & FAQ content ─────────────────────────────────────────────
  * ⚠️ PLACEHOLDER DATA — quotes, names, and outlets are fabricated, same as
  * CUSTOMER_LOGOS/OUTCOME_CARDS above. `avatar` is a dummy portrait
@@ -656,18 +605,18 @@ const HIW_OUT = [
   { Icon: ShoppingCart, tint: "#E8F7ED", color: "#15803D", label: "Purchase calls" },
 ];
 
-const HIW_STATS: [typeof IndianRupee, string, string][] = [
-  [IndianRupee, "Sales today", "₹2,18,300"],
-  [Receipt, "Bills", "611"],
-  [Target, "Food cost", "28.4%"],
-  [Package, "Items tracked", "980"],
-  [Bell, "Open alerts", "12"],
+const HIW_STATS: [typeof CircleDollarSign, string, string][] = [
+  [CircleDollarSign, "Sales this month", "AED 147,200"],
+  [Receipt, "POS orders", "3,842"],
+  [Target, "Food cost", "31.2%"],
+  [Package, "Stock items", "246"],
+  [Bell, "Open alerts", "8"],
 ];
 
 const HIW_OUTLETS: [string, string][] = [
-  ["Anna Nagar", "Margin 31% · healthy"],
-  ["Velachery", "Margin 24% · watch"],
-  ["T. Nagar", "Margin 28% · healthy"],
+  ["Marina Branch", "Margin 31% · healthy"],
+  ["Downtown Branch", "Margin 24% · watch"],
+  ["Mall Branch", "Margin 28% · healthy"],
 ];
 
 const DATA_DECISION_STEPS = [
@@ -717,15 +666,14 @@ function HowItWorksFlow() {
           From Data to Decision
         </div>
         <h2 className="hiw-h2">
-          Data In. <span style={{ color: "#15803D" }}>Decisions Out.</span>
+          From data in <span style={{ color: "#15803D" }}>to decisions out.</span>
         </h2>
         <p className="hiw-lede">
-          Bring your Tally, POS, and inventory data into PlatePielet and turn everyday operational
-          information into live dashboards, risk alerts, and action-ready recommendations.
+          Connect your Tally, POS, and inventory data in one place.
         </p>
         <p className="hiw-lede" style={{ marginTop: "0.85rem" }}>
-          PlatePielet helps you connect the numbers behind your restaurant and turn them into faster,
-          smarter decisions on purchasing, stock control, costs, and daily operations.
+          PlatePielet turns those numbers into live dashboards, risk alerts, and clear recommendations
+          for purchasing, stock control, costs, and daily operations.
         </p>
         <div className="hiw-mantra">Connect your data. See what matters. Act the same day.</div>
         <Link to="/demo" className="hiw-cta">
@@ -811,17 +759,6 @@ function Index() {
   const mainRef = useRef<HTMLElement | null>(null);
   const lenisRef = useRef<Lenis | null>(null);
   const [showTop, setShowTop] = useState(false);
-  const [ctaEmail, setCtaEmail] = useState("");
-  const history = useHistory();
-
-  // Outcome-card CTA hands the typed email to /demo (via router state) rather
-  // than submitting anywhere itself — there's no standalone capture endpoint,
-  // and DemoPage already owns the real form + POST /api/demo-requests.
-  const handleOutcomeCtaSubmit = (e: FormEvent) => {
-    e.preventDefault();
-    history.push("/demo", { email: ctaEmail });
-  };
-
   /* Smooth, eased scrolling for this page only — scoped to the page's own
      .app-page-scroll ancestor so Dashboard/Login keep native touch scroll.
      Wheel input only (syncTouch: false): mobile keeps its fast native touch
@@ -2617,68 +2554,6 @@ function Index() {
         {/* ══════════════════════════════════════════════════════════════════ */}
         {/* SOCIAL PROOF — logo wall + outcome stats, immediately after hero   */}
         {/* ══════════════════════════════════════════════════════════════════ */}
-        <div className="sw-section">
-          <div className="proof-band">
-            <div className="proof-label">Trusted by restaurant groups across the UAE and India</div>
-            <div className="proof-logos">
-              {CUSTOMER_LOGOS.map((name) => (
-                <div className="proof-logo" key={name}>
-                  {name}
-                </div>
-              ))}
-            </div>
-          </div>
-          <div className="outcome-cards">
-            {OUTCOME_CARDS.map((c) => (
-              <Link
-                to={c.href}
-                className="outcome-card"
-                key={c.pill}
-                style={{ backgroundImage: `${c.gradient}, url(${c.photo})` }}
-              >
-                <div className="outcome-card-top">
-                  <span className="outcome-pill">{c.pill}</span>
-                  <span className="outcome-arrow" aria-hidden="true">
-                    <ArrowUpRight size={16} strokeWidth={2.5} />
-                  </span>
-                </div>
-                <div className="outcome-bottom">
-                  <div className="outcome-value">{c.value}</div>
-                  <div className="outcome-caption">{c.caption}</div>
-                </div>
-              </Link>
-            ))}
-
-            <div
-              className="outcome-card"
-              style={{
-                backgroundImage: `${OUTCOME_CTA_CARD.gradient}, url(${OUTCOME_CTA_CARD.photo})`,
-              }}
-            >
-              <div className="outcome-card-top">
-                <span className="outcome-pill">{OUTCOME_CTA_CARD.pill}</span>
-                <Link to="/demo" className="outcome-arrow" aria-label="Book a demo">
-                  <ArrowUpRight size={16} strokeWidth={2.5} />
-                </Link>
-              </div>
-              <div className="outcome-bottom">
-                <div className="outcome-cta-heading">{OUTCOME_CTA_CARD.heading}</div>
-                <form className="outcome-cta-form" onSubmit={handleOutcomeCtaSubmit}>
-                  <input
-                    type="email"
-                    required
-                    placeholder="Your email"
-                    aria-label="Your email"
-                    value={ctaEmail}
-                    onChange={(e) => setCtaEmail(e.target.value)}
-                  />
-                  <button type="submit">Get Started</button>
-                </form>
-              </div>
-            </div>
-          </div>
-        </div>
-
         {/* ══════════════════════════════════════════════════════════════════ */}
         {/* INTRO BAND — "Our software powers…"                               */}
         {/* ══════════════════════════════════════════════════════════════════ */}

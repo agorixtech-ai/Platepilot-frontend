@@ -404,7 +404,7 @@ function MainPanel({
           <div className="min-w-0 flex-1">
             <LocationSwitcher />
           </div>
-          <div className="self-start sm:self-auto">
+          <div className="flex shrink-0 items-center">
             <DateRangePicker />
           </div>
         </div>

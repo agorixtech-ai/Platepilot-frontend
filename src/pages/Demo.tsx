@@ -179,7 +179,7 @@ function DemoPage() {
                       value={form.phone}
                       onChange={update("phone")}
                       className={inputClass}
-                      placeholder="+1 (555) 000-0000"
+                      placeholder="+971 50 606 3372"
                     />
                   </div>
 
