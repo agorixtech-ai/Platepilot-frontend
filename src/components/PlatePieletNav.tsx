@@ -1,0 +1,728 @@
+import { Link } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import {
+  ArrowRight,
+  BarChart3,
+  Bell,
+  BookOpen,
+  Boxes,
+  Building2,
+  Calculator,
+  ChefHat,
+  ChevronDown,
+  Coffee,
+  CreditCard,
+  FileSpreadsheet,
+  LayoutDashboard,
+  Menu,
+  Phone,
+  PieChart,
+  Plug,
+  ShoppingCart,
+  Sparkles,
+  Store,
+  Table2,
+  TrendingUp,
+  Upload,
+  Users,
+  UtensilsCrossed,
+  X,
+  type LucideIcon,
+} from "lucide-react";
+import { LOGO_ALT, LOGO_SRC } from "@/components/AppLogo";
+import { SALES_PHONE, SALES_PHONE_HREF } from "@/lib/contact";
+
+const themes = {
+  light: {
+    bg: "#FFFFFF",
+    ink: "#FFFFFF",
+    text: "#152019",
+    nav: "#66736B",
+    border: "rgba(21,32,25,0.1)",
+    borderStrong: "rgba(21,32,25,0.2)",
+    dropdownBg: "#FFFFFF",
+    dropdownBorder: "#DDE7E1",
+    dropdownItem: "#152019",
+    dropdownHover: "#E8F7ED",
+    iconBg: "#E8F7ED",
+    iconColor: "#15803D",
+    gradientCTA: "linear-gradient(135deg, #073B2A 0%, #0F7A4C 55%, #15803D 100%)",
+    solidColor: "#FFFFFF",
+  },
+  /* Landing page navbar — horizontal brand gradient (forest → lime). */
+  brand: {
+    bg: "linear-gradient(90deg, #105e32 0%, #56db2d 100%)",
+    ink: "#FFFFFF",
+    text: "#FFFFFF",
+    nav: "rgba(255,255,255,0.94)",
+    border: "rgba(255,255,255,0.22)",
+    borderStrong: "rgba(255,255,255,0.42)",
+    dropdownBg: "#FFFFFF",
+    dropdownBorder: "#DDE7E1",
+    dropdownItem: "#152019",
+    dropdownHover: "#E8F7ED",
+    iconBg: "#E8F7ED",
+    iconColor: "#15803D",
+    gradientCTA: "linear-gradient(135deg, #073B2A 0%, #0F7A4C 55%, #15803D 100%)",
+    solidColor: "#FFFFFF",
+  },
+  dark: {
+    bg: "#071A14",
+    ink: "#FFFFFF",
+    text: "#fff",
+    nav: "rgba(255,255,255,0.72)",
+    border: "rgba(255,255,255,0.08)",
+    borderStrong: "rgba(255,255,255,0.22)",
+    dropdownBg: "rgba(17, 17, 19, 0.96)",
+    dropdownBorder: "rgba(255, 255, 255, 0.12)",
+    dropdownItem: "rgba(255, 255, 255, 0.75)",
+    dropdownHover: "rgba(255, 255, 255, 0.06)",
+    iconBg: "rgba(255, 255, 255, 0.08)",
+    iconColor: "#4ADE80",
+    gradientCTA: "linear-gradient(135deg, #073B2A 0%, #0F7A4C 55%, #15803D 100%)",
+    solidColor: "#FFFFFF",
+  },
+} as const;
+
+const btnBase = {
+  display: "inline-flex" as const,
+  alignItems: "center" as const,
+  justifyContent: "center" as const,
+  boxSizing: "border-box" as const,
+  fontFamily: "inherit",
+  textDecoration: "none",
+  lineHeight: 1,
+  whiteSpace: "nowrap" as const,
+};
+
+type MegaLink = { label: string; href: string; icon: LucideIcon };
+type MegaColumn = { title: string; href: string; links: MegaLink[] };
+type NavItem = { label: string; href: string } | { label: string; mega: MegaColumn[] };
+
+const defaultLinks: NavItem[] = [
+  { label: "Home", href: "/" },
+  {
+    label: "Product",
+    mega: [
+      {
+        title: "Analytics",
+        href: "/product",
+        links: [
+          { label: "Dashboard", href: "/product/dashboard", icon: LayoutDashboard },
+          { label: "Sales Analytics", href: "/product/sales-analytics", icon: TrendingUp },
+          { label: "Branch Performance", href: "/product/branch-performance", icon: BarChart3 },
+          { label: "Alerts & Insights", href: "/product/alerts-insights", icon: Bell },
+          { label: "Data Upload", href: "/product/data-upload", icon: Upload },
+        ],
+      },
+      {
+        title: "Intelligence",
+        href: "/product",
+        links: [
+          {
+            label: "Inventory Intelligence",
+            href: "/product/inventory-intelligence",
+            icon: Boxes,
+          },
+          { label: "Food Cost Analysis", href: "/product/food-cost-analysis", icon: PieChart },
+          { label: "Menu Performance", href: "/product/menu-performance", icon: UtensilsCrossed },
+          {
+            label: "Purchase Suggestions",
+            href: "/product/purchase-suggestions",
+            icon: ShoppingCart,
+          },
+          { label: "PlatePielet AI", href: "/product/ai", icon: Sparkles },
+        ],
+      },
+    ],
+  },
+  {
+    label: "Solutions",
+    mega: [
+      {
+        title: "By business type",
+        href: "/solutions",
+        links: [
+          { label: "Multi-Branch Restaurants", href: "/solutions/multi-branch", icon: Building2 },
+          { label: "Independent Restaurants", href: "/solutions/independent", icon: Store },
+          { label: "Cafes", href: "/solutions/cafes", icon: Coffee },
+          { label: "Cloud Kitchens", href: "/solutions/cloud-kitchens", icon: ChefHat },
+          { label: "Restaurant Groups", href: "/solutions/restaurant-groups", icon: Users },
+        ],
+      },
+    ],
+  },
+  {
+    label: "Integrations",
+    mega: [
+      {
+        title: "Connect your stack",
+        href: "/integrations",
+        links: [
+          { label: "POS Systems", href: "/integrations#pos-systems", icon: CreditCard },
+          { label: "Tally", href: "/integrations#tally", icon: BookOpen },
+          { label: "CSV Upload", href: "/integrations#csv-upload", icon: FileSpreadsheet },
+          { label: "Excel Upload", href: "/integrations#excel-upload", icon: Table2 },
+          {
+            label: "Accounting Systems",
+            href: "/integrations#accounting-systems",
+            icon: Calculator,
+          },
+          { label: "API Integrations", href: "/integrations#api-integrations", icon: Plug },
+        ],
+      },
+    ],
+  },
+  { label: "Pricing", href: "/pricing" },
+  { label: "Resources", href: "/resources" },
+  { label: "Company", href: "/company" },
+];
+
+type PlatePieletNavProps = {
+  links?: NavItem[];
+  insetClass?: string;
+  sticky?: boolean;
+  /** Landing uses light; Demo stays dark. */
+  variant?: "light" | "dark" | "brand";
+};
+
+export function PlatePieletNav({
+  links = defaultLinks,
+  insetClass = "pp-nav__inset",
+  sticky = false,
+  variant = "light",
+}: PlatePieletNavProps) {
+  const T = themes[variant];
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const navRef = useRef<HTMLDivElement>(null);
+
+  const btnOutlineSm = {
+    ...btnBase,
+    fontSize: 14,
+    fontWeight: 700,
+    letterSpacing: "0.06em",
+    height: 40,
+    padding: "0 18px",
+    color: "#15803D",
+    border: "1px solid #16A34A",
+    borderRadius: 12,
+    background: "#FFFFFF",
+  };
+
+  const btnSolidSm = {
+    ...btnOutlineSm,
+    color: T.solidColor,
+    border: "none",
+    // background + boxShadow live in the .pp-btn-solid CSS class below so
+    // its :hover rule can override them (inline style beats CSS, hover
+    // included). `undefined` clears the "#FFFFFF" spread in from
+    // btnOutlineSm (React omits undefined style props entirely).
+    background: undefined,
+  };
+
+  const phoneLinkStyle = {
+    ...btnBase,
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 7,
+    height: 40,
+    padding: "0 10px",
+    fontSize: 14,
+    fontWeight: 700,
+    color: T.text,
+    background: "transparent",
+    border: "none",
+    whiteSpace: "nowrap" as const,
+  };
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (navRef.current && !navRef.current.contains(event.target as Node)) {
+        setOpenDropdown(null);
+        setMobileOpen(false);
+      }
+    }
+    function handleEscape(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setOpenDropdown(null);
+        setMobileOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleEscape);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, []);
+
+  const mobileLink = (item: { label: string; href: string }) =>
+    item.href.startsWith("#") ? (
+      <a
+        key={item.label}
+        href={item.href}
+        className="pp-nav__mobile-link"
+        onClick={() => setMobileOpen(false)}
+      >
+        {item.label}
+      </a>
+    ) : (
+      <Link
+        key={item.label}
+        to={item.href}
+        className="pp-nav__mobile-link"
+        onClick={() => setMobileOpen(false)}
+      >
+        {item.label}
+      </Link>
+    );
+
+  return (
+    <>
+      <style>{`
+        /* Same container geometry as .sw-section / .pp-hero__inset so the
+           logo and buttons line up with the hero copy and every section below.
+           Must match .sw-section's own breakpoint exactly (2.5rem down to
+           1.25rem at 640px) — clamp(20px,3vw,40px) drifted from that between
+           640-1333px, pulling the nav's edges in from the rest of the page. */
+        .pp-nav__inset {
+          max-width: 1280px;
+          margin-inline: auto;
+          padding-inline: 2.5rem;
+        }
+        .pp-nav__bar {
+          display: flex;
+          align-items: center;
+          gap: 24px;
+          min-height: 76px;
+          padding-block: 10px;
+        }
+        .pp-nav__brand {
+          display: flex;
+          align-items: center;
+          flex-shrink: 0;
+          text-decoration: none;
+          line-height: 0;
+        }
+        /* logo.png is a wide wordmark (539×337), not a square icon — never
+           crop it with object-fit: cover or it reads as broken "plate/pielet"
+           lines clipped by the bar. */
+        .pp-nav__brand img {
+          display: block;
+          height: 42px;
+          width: auto;
+          max-width: 168px;
+          object-fit: contain;
+          object-position: left center;
+        }
+        /* On the green landing bar, knock out the PNG's black matte so only
+           the white wordmark shows over the brand fill. */
+        .pp-nav--brand .pp-nav__brand img {
+          mix-blend-mode: lighten;
+        }
+        .pp-nav__actions {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          margin-left: auto;
+          flex-shrink: 0;
+        }
+        .pp-btn-solid {
+          background: ${T.gradientCTA};
+          box-shadow: 0 4px 14px rgba(15,122,76,0.28);
+          transition: box-shadow .2s ease, transform .15s ease;
+        }
+        .pp-btn-solid:hover {
+          box-shadow: 0 10px 26px rgba(15,122,76,0.38), inset 0 1px 0 rgba(255,255,255,0.18);
+          transform: translateY(-1px);
+        }
+        @media (max-width: 640px) {
+          .pp-nav__inset {
+            padding-inline: 1.25rem;
+          }
+        }
+        /* Panel is positioned relative to its trigger so single-column menus
+           (Solutions, Integrations) sit under the label, not the logo. */
+        .pp-nav__item {
+          position: relative;
+        }
+        .pp-nav__trigger {
+          display: inline-flex;
+          align-items: center;
+          gap: 5px;
+          padding: 0;
+          background: none;
+          border: none;
+          color: inherit;
+          font: inherit;
+          line-height: 1;
+          cursor: pointer;
+          min-height: 36px;
+        }
+        .pp-nav__links > a,
+        .pp-nav__item {
+          display: inline-flex;
+          align-items: center;
+          min-height: 36px;
+        }
+        .pp-nav__chevron {
+          transition: transform 0.2s ease;
+        }
+        .pp-nav__trigger[aria-expanded="true"] .pp-nav__chevron {
+          transform: rotate(180deg);
+        }
+        .pp-nav__mega {
+          position: absolute;
+          top: calc(100% + 14px);
+          left: 50%;
+          transform: translateX(-50%);
+          display: grid;
+          padding: 6px;
+          background: ${T.dropdownBg};
+          border: 1px solid ${T.dropdownBorder};
+          border-radius: 18px;
+          box-shadow: 0 24px 60px rgba(7, 26, 20, 0.14);
+          z-index: 70;
+        }
+        .pp-nav__mega--1 {
+          width: min(340px, calc(100vw - 40px));
+          grid-template-columns: minmax(0, 1fr);
+        }
+        .pp-nav__mega--2 {
+          width: min(640px, calc(100vw - 40px));
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        .pp-nav__mega--3 {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+        .pp-nav__mega--4 {
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+        }
+        .pp-nav__mega-col {
+          display: flex;
+          flex-direction: column;
+          padding: 26px 22px 30px;
+        }
+        .pp-nav__mega-col + .pp-nav__mega-col {
+          border-left: 1px solid ${T.dropdownBorder};
+        }
+        .pp-nav__mega-title {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          margin-bottom: 16px;
+          font-size: 0.95rem;
+          font-weight: 600;
+          color: ${T.text};
+          text-decoration: none;
+        }
+        .pp-nav__mega-title svg {
+          transition: transform 0.2s ease;
+        }
+        .pp-nav__mega-title:hover svg {
+          transform: translateX(3px);
+        }
+        .pp-nav__mega-link {
+          display: flex;
+          align-items: center;
+          gap: 11px;
+          padding: 7px 10px;
+          margin-inline: -10px;
+          border-radius: 10px;
+          font-size: 0.85rem;
+          line-height: 1.35;
+          color: ${T.dropdownItem};
+          text-decoration: none;
+          transition: background 0.15s ease, color 0.15s ease;
+        }
+        .pp-nav__mega-link:hover {
+          background: ${T.dropdownHover};
+          color: ${T.text};
+        }
+        .pp-nav__mega-icon {
+          display: grid;
+          place-items: center;
+          flex-shrink: 0;
+          width: 30px;
+          height: 30px;
+          border-radius: 8px;
+          background: ${T.iconBg};
+          color: ${T.iconColor};
+        }
+        .pp-nav__toggle {
+          display: none;
+        }
+        .pp-nav__mobile-panel {
+          display: none;
+        }
+        /* 1240px: measured natural width of logo + 7-item nav + both buttons
+           is ~1190px at full padding — below that the grid's auto-sized
+           center column overflows the right column instead of wrapping,
+           overlapping "Company" under the buttons. 1100px left a dead zone. */
+        @media (max-width: 1240px) {
+          .pp-nav__links {
+            display: none !important;
+          }
+          .pp-nav__buttons {
+            display: none !important;
+          }
+          .pp-nav__toggle {
+            display: inline-flex !important;
+          }
+          .pp-nav__mobile-panel.open {
+            display: flex;
+          }
+        }
+        .pp-nav__mobile-panel {
+          flex-direction: column;
+          gap: 4px;
+          padding: 8px 2.5rem 20px;
+          border-top: 1px solid ${T.border};
+          max-height: calc(100vh - 120px);
+          overflow-y: auto;
+        }
+        @media (max-width: 640px) {
+          .pp-nav__mobile-panel {
+            padding-inline: 1.25rem;
+          }
+        }
+        .pp-nav__mobile-group {
+          padding: 1.1rem 0.25rem 0.4rem;
+          font-size: 0.65rem;
+          font-weight: 700;
+          letter-spacing: 0.16em;
+          text-transform: uppercase;
+          color: ${T.nav};
+          opacity: 0.7;
+        }
+        .pp-nav__mobile-link {
+          padding: 0.85rem 0.25rem;
+          font-size: 0.95rem;
+          color: ${T.nav};
+          text-decoration: none;
+          border-bottom: 1px solid ${T.border};
+        }
+        .pp-nav__mobile-buttons {
+          display: flex;
+          gap: 10px;
+          margin-top: 14px;
+        }
+        .pp-nav__mobile-buttons a {
+          flex: 1;
+        }
+      `}</style>
+
+      {/* Sticky lives on this wrapper, not the <header>, because a sticky
+          element can never leave its parent's box — the wrapper here is
+          header + mobile panel tall (~101px), so sticking to the header
+          itself let it pop out of view after ~100px of scroll. The wrapper
+          is a direct child of <main> (full page height), and being
+          full-bleed it also paints the stuck bar edge-to-edge instead of
+          only across the 1280px inset. */}
+      <div
+        ref={navRef}
+        className={`pp-nav${variant === "brand" ? " pp-nav--brand" : ""}`}
+        style={
+          sticky
+            ? {
+                position: "sticky",
+                top: 0,
+                zIndex: 50,
+                background: T.bg,
+                borderBottom: `1px solid ${T.border}`,
+              }
+            : undefined
+        }
+      >
+        <header className={`${insetClass} pp-nav__bar`}>
+          <Link to="/" className="pp-nav__brand" aria-label={LOGO_ALT}>
+            <img src={LOGO_SRC} alt="" width={539} height={337} decoding="async" />
+          </Link>
+
+          <nav
+            className="pp-nav__links"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flex: 1,
+              gap: 28,
+              fontSize: 14.5,
+              color: T.nav,
+              minWidth: 0,
+            }}
+          >
+            {links.map((item) => {
+              if ("mega" in item) {
+                const open = openDropdown === item.label;
+                return (
+                  <div key={item.label} className="pp-nav__item">
+                    <button
+                      type="button"
+                      className="pp-nav__trigger"
+                      onClick={() => setOpenDropdown(open ? null : item.label)}
+                      aria-haspopup="true"
+                      aria-expanded={open}
+                    >
+                      {item.label}
+                      <ChevronDown className="pp-nav__chevron" size={15} strokeWidth={2.2} />
+                    </button>
+                    {open && (
+                      <div
+                        className={`pp-nav__mega pp-nav__mega--${Math.min(item.mega.length, 4)}`}
+                      >
+                        {item.mega.map((col) => (
+                          <div key={col.title} className="pp-nav__mega-col">
+                            <Link
+                              to={col.href}
+                              className="pp-nav__mega-title"
+                              onClick={() => setOpenDropdown(null)}
+                            >
+                              {col.title}
+                              <ArrowRight size={15} strokeWidth={2.2} />
+                            </Link>
+                            {col.links.map(({ label, href, icon: Icon }) => (
+                              <Link
+                                key={label}
+                                to={href}
+                                className="pp-nav__mega-link"
+                                onClick={() => setOpenDropdown(null)}
+                              >
+                                <span className="pp-nav__mega-icon">
+                                  <Icon size={16} strokeWidth={2} />
+                                </span>
+                                {label}
+                              </Link>
+                            ))}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              }
+
+              const isHash = item.href.startsWith("#");
+              if (isHash) {
+                return (
+                  <a
+                    key={item.label}
+                    href={item.href}
+                    style={{
+                      cursor: "pointer",
+                      lineHeight: 1,
+                      color: "inherit",
+                      textDecoration: "none",
+                    }}
+                  >
+                    {item.label}
+                  </a>
+                );
+              }
+
+              return (
+                <Link
+                  key={item.label}
+                  to={item.href}
+                  style={{
+                    cursor: "pointer",
+                    lineHeight: 1,
+                    color: "inherit",
+                    textDecoration: "none",
+                  }}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
+          </nav>
+
+          <div className="pp-nav__actions">
+            <div
+              className="pp-nav__buttons"
+              style={{ display: "flex", alignItems: "center", gap: 10 }}
+            >
+              {/* No phone number here on purpose: .pp-nav__inset is capped at
+                  1280px, so this row has 1200px to work with and already needs
+                  1072px. The 160px number overflowed the links column at every
+                  desktop width — a media query can't fix a fixed-width
+                  container. It lives in the hero CTA, the footer CTA band and
+                  the mobile panel instead. */}
+              <Link to="/login" style={btnOutlineSm}>
+                Log In
+              </Link>
+              <Link to="/demo" className="pp-btn-solid" style={btnSolidSm}>
+                Book a Demo
+              </Link>
+            </div>
+            <button
+              type="button"
+              className="pp-nav__toggle"
+              onClick={() => setMobileOpen((v) => !v)}
+              aria-label={mobileOpen ? "Close menu" : "Open menu"}
+              aria-expanded={mobileOpen}
+              style={{
+                alignItems: "center",
+                justifyContent: "center",
+                width: 40,
+                height: 40,
+                borderRadius: 9999,
+                border: `1px solid ${T.borderStrong}`,
+                background: "transparent",
+                color: T.text,
+                cursor: "pointer",
+                padding: 0,
+              }}
+            >
+              {mobileOpen ? <X size={18} /> : <Menu size={18} />}
+            </button>
+          </div>
+        </header>
+
+        <div
+          className={`pp-nav__mobile-panel${mobileOpen ? " open" : ""}`}
+          style={{ background: T.bg }}
+        >
+          {links.map((item) =>
+            "mega" in item
+              ? item.mega.map((col) => (
+                  <div
+                    key={`${item.label}-${col.title}`}
+                    style={{ display: "flex", flexDirection: "column" }}
+                  >
+                    <Link
+                      to={col.href}
+                      className="pp-nav__mobile-group"
+                      onClick={() => setMobileOpen(false)}
+                      style={{ display: "block" }}
+                    >
+                      {item.label} · {col.title}
+                    </Link>
+                    {col.links.map(mobileLink)}
+                  </div>
+                ))
+              : mobileLink(item),
+          )}
+          <div className="pp-nav__mobile-buttons">
+            <a href={SALES_PHONE_HREF} style={phoneLinkStyle} onClick={() => setMobileOpen(false)}>
+              <Phone size={15} strokeWidth={2.2} />
+              {SALES_PHONE}
+            </a>
+            <Link to="/login" style={btnOutlineSm} onClick={() => setMobileOpen(false)}>
+              Log In
+            </Link>
+            <Link
+              to="/demo"
+              className="pp-btn-solid"
+              style={btnSolidSm}
+              onClick={() => setMobileOpen(false)}
+            >
+              Book a Demo
+            </Link>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}

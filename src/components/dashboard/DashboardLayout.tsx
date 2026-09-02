@@ -1,21 +1,8 @@
-import { useEffect, useState, type ReactNode } from "react";
-import { Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { Link, useHistory, useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import {
-  LayoutDashboard,
-  ShoppingCart,
-  FileText,
-  Settings,
-  LogOut,
-  UserCircle,
-  Package,
-  Truck,
-  Building2,
-  Sparkles,
-  BarChart3,
-  UtensilsCrossed,
-  Star,
-} from "lucide-react";
+import { LogOut } from "lucide-react";
+import { AppLogo } from "@/components/AppLogo";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -40,52 +27,53 @@ import {
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { ThemeToggle } from "@/components/theme-toggle";
 import {
   getStoredUser,
+  canOpenPage,
   clearTokens,
   logout as apiLogout,
   getMe,
   updateStoredUser,
+  type User,
 } from "@/lib/auth";
 import { BranchFilterProvider } from "@/contexts/BranchFilterContext";
 import { DateRangeProvider } from "@/contexts/DateRangeContext";
 import { LocationSwitcher } from "@/components/dashboard/LocationSwitcher";
 import { DateRangePicker } from "@/components/dashboard/DateRangePicker";
+import { FloatingAiAssistant } from "@/components/ui/glowing-ai-chat-assistant";
+import { MobileTabBar } from "@/components/dashboard/MobileTabBar";
+import {
+  ADMIN_ITEMS,
+  AI_ITEMS,
+  MAIN_ITEMS,
+  OPS_ITEMS,
+  pageKeyOf,
+  type NavItem,
+} from "@/components/dashboard/navItems";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { isNativeApp } from "@/lib/native";
+import StackIcon from "@/components/ui/icons/stack-icon";
+import type { AnimatedIconHandle } from "@/components/ui/icons/types";
 
-export type NavItem = {
-  icon: React.ElementType;
-  label: string;
-  to: string;
-  count?: number;
-  badge?: string;
-};
+export type { NavItem } from "@/components/dashboard/navItems";
+export {
+  ADMIN_ITEMS,
+  AI_ITEMS,
+  MAIN_ITEMS,
+  NAV_ITEMS,
+  OPS_ITEMS,
+  pageKeyOf,
+} from "@/components/dashboard/navItems";
 
-const MAIN_ITEMS: NavItem[] = [
-  { icon: LayoutDashboard, label: "Overview", to: "/dashboard" },
-  { icon: ShoppingCart, label: "POS Sales", to: "/dashboard/pos" },
-  { icon: FileText, label: "Tally / Accounting", to: "/dashboard/tally" },
-];
 
-const OPS_ITEMS: NavItem[] = [
-  { icon: Package, label: "Inventory", to: "/dashboard/inventory" },
-  { icon: Truck, label: "Suppliers", to: "/dashboard/suppliers" },
-  { icon: Building2, label: "Branches", to: "/dashboard/branches" },
-  { icon: Star, label: "Reviews", to: "/dashboard/reviews" },
-];
-
-const AI_ITEMS: NavItem[] = [
-  { icon: Sparkles, label: "PlatePilot AI", to: "/dashboard/ai", badge: "AI" },
-  { icon: BarChart3, label: "Reports", to: "/dashboard/reports" },
-];
-
-const ADMIN_ITEMS: NavItem[] = [
-  { icon: UserCircle, label: "Profile", to: "/dashboard/profile" },
-  { icon: Settings, label: "Settings", to: "/dashboard/settings" },
-];
-
-export const NAV_ITEMS = [...MAIN_ITEMS, ...OPS_ITEMS, ...AI_ITEMS, ...ADMIN_ITEMS];
+/* Profile is never gated (everyone may see their own), and /admin is already
+   guarded by is_admin — everything else needs the page in the user's role. */
+function allowedItems(items: NavItem[], user: User | null): NavItem[] {
+  return items.filter((item) => {
+    if (item.to === "/dashboard/profile" || item.to === "/admin") return true;
+    return canOpenPage(pageKeyOf(item.to), user);
+  });
+}
 
 function NavSection({
   items,
@@ -103,76 +91,13 @@ function NavSection({
       </SidebarGroupLabel>
       <SidebarGroupContent>
         <SidebarMenu className="gap-0.5">
-          {items.map(({ icon: Icon, label: itemLabel, to, count, badge }) => {
-            const isActive = pathname === to || (to !== "/dashboard" && pathname.startsWith(to));
-            return (
-              <SidebarMenuItem key={to}>
-                <SidebarMenuButton
-                  asChild
-                  isActive={isActive}
-                  tooltip={itemLabel}
-                  className={cn(
-                    "group/nav h-10 rounded-xl text-[13px] font-medium text-sidebar-foreground/65",
-                    "transition-[background,box-shadow,transform,color] duration-200 ease-out",
-                    "hover:bg-sidebar-accent/70 hover:text-sidebar-foreground",
-                    "hover:translate-x-1 group-data-[collapsible=icon]:hover:translate-x-0",
-                    "active:scale-[0.98] group-data-[collapsible=icon]:active:scale-100",
-                    "group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:rounded-lg",
-                    "data-[active=true]:bg-transparent data-[active=true]:text-inherit",
-                    isActive && [
-                      "bg-sidebar-accent/50 text-sidebar-foreground translate-x-1",
-                      "shadow-[inset_0_1px_0_0_oklch(1_0_0/8%)]",
-                      "hover:bg-sidebar-accent hover:shadow-[0_4px_24px_oklch(0.62_0.19_260/18%)]",
-                      "group-data-[collapsible=icon]:translate-x-0",
-                      "group-data-[collapsible=icon]:!bg-sidebar-primary group-data-[collapsible=icon]:text-sidebar-primary-foreground",
-                      "group-data-[collapsible=icon]:shadow-[0_0_14px_oklch(0.62_0.19_260/35%)]",
-                      "group-data-[collapsible=icon]:ring-2 group-data-[collapsible=icon]:ring-sidebar-primary/30",
-                      "group-data-[collapsible=icon]:hover:!bg-sidebar-primary group-data-[collapsible=icon]:hover:shadow-[0_0_18px_oklch(0.62_0.19_260/45%)]",
-                    ],
-                  )}
-                >
-                  <Link
-                    to={to as any}
-                    className="flex items-center gap-2.5 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:gap-0"
-                  >
-                    <span
-                      className={cn(
-                        "flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-all duration-200",
-                        "group-data-[collapsible=icon]:h-auto group-data-[collapsible=icon]:w-auto group-data-[collapsible=icon]:rounded-none group-data-[collapsible=icon]:bg-transparent group-data-[collapsible=icon]:shadow-none group-data-[collapsible=icon]:ring-0",
-                        isActive
-                          ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-[0_0_18px_oklch(0.62_0.19_260/40%)] ring-2 ring-sidebar-primary/30 group-data-[collapsible=icon]:bg-transparent group-data-[collapsible=icon]:text-inherit group-data-[collapsible=icon]:shadow-none group-data-[collapsible=icon]:ring-0"
-                          : "bg-transparent group-hover/nav:bg-sidebar-foreground/10 group-hover/nav:scale-110 group-hover/nav:ring-1 group-hover/nav:ring-sidebar-foreground/10 group-data-[collapsible=icon]:group-hover/nav:scale-100 group-data-[collapsible=icon]:group-hover/nav:ring-0 group-data-[collapsible=icon]:group-hover/nav:bg-transparent",
-                      )}
-                    >
-                      <Icon className="h-4 w-4 shrink-0 transition-transform duration-200 group-hover/nav:scale-105 group-data-[collapsible=icon]:group-hover/nav:scale-100" />
-                    </span>
-                    <span
-                      className={cn(
-                        "transition-colors duration-200 group-data-[collapsible=icon]:hidden",
-                        isActive && "font-semibold text-sidebar-primary",
-                      )}
-                    >
-                      {itemLabel}
-                    </span>
-                  </Link>
-                </SidebarMenuButton>
-                {badge && (
-                  <SidebarMenuBadge className="rounded bg-primary/15 px-1.5 text-[9px] font-bold tracking-wider text-primary">
-                    {badge}
-                  </SidebarMenuBadge>
-                )}
-                {count !== undefined && (
-                  <SidebarMenuBadge
-                    className={cn(
-                      "rounded-md bg-sidebar-border/60 text-[10px] font-semibold text-sidebar-foreground/60",
-                      isActive && "bg-sidebar-primary/15 text-sidebar-primary",
-                    )}
-                  >
-                    {count}
-                  </SidebarMenuBadge>
-                )}
-              </SidebarMenuItem>
-            );
+          {items.map((item) => {
+            // match on a segment boundary — a bare startsWith lit up both "Menu"
+            // and "Menu Engineering" on /dashboard/menu-engineering
+            const isActive =
+              pathname === item.to ||
+              (item.to !== "/dashboard" && pathname.startsWith(`${item.to}/`));
+            return <NavRow key={item.to} item={item} isActive={isActive} />;
           })}
         </SidebarMenu>
       </SidebarGroupContent>
@@ -180,13 +105,68 @@ function NavSection({
   );
 }
 
+function NavRow({ item, isActive }: { item: NavItem; isActive: boolean }) {
+  const { icon: Icon, label: itemLabel, to, count, badge } = item;
+  // the icon is 16px inside a 40px row — drive its animation from the whole row
+  const iconRef = useRef<AnimatedIconHandle>(null);
+  return (
+    <SidebarMenuItem
+      onMouseEnter={() => iconRef.current?.startAnimation()}
+      onMouseLeave={() => iconRef.current?.stopAnimation()}
+    >
+      <SidebarMenuButton
+        asChild
+        isActive={isActive}
+        tooltip={itemLabel}
+        className={cn(
+          "group/nav h-10 rounded-xl text-[13px] font-medium text-sidebar-foreground",
+          "transition-[background,color] duration-200 ease-out",
+          "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+          "group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:rounded-lg",
+          // must stay a data-[active] variant — a plain bg-* class loses on
+          // specificity to the base data-[active=true]:bg-sidebar-accent
+          "data-[active=true]:bg-sidebar-primary data-[active=true]:text-sidebar-primary-foreground",
+          isActive && "hover:bg-sidebar-primary hover:text-sidebar-primary-foreground",
+        )}
+      >
+        <Link
+          to={to}
+          className="flex items-center gap-2.5 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:gap-0"
+        >
+          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg group-data-[collapsible=icon]:h-auto group-data-[collapsible=icon]:w-auto">
+            <Icon ref={iconRef} className="h-4 w-4 shrink-0" />
+          </span>
+          <span className={cn("group-data-[collapsible=icon]:hidden", isActive && "font-semibold")}>
+            {itemLabel}
+          </span>
+        </Link>
+      </SidebarMenuButton>
+      {badge && (
+        <SidebarMenuBadge className="rounded bg-primary/15 px-1.5 text-[9px] font-bold tracking-wider text-primary">
+          {badge}
+        </SidebarMenuBadge>
+      )}
+      {count !== undefined && (
+        <SidebarMenuBadge
+          className={cn(
+            "rounded-md bg-sidebar-border/60 text-[10px] font-semibold text-sidebar-foreground/60",
+            isActive && "bg-white/20 text-sidebar-primary-foreground",
+          )}
+        >
+          {count}
+        </SidebarMenuBadge>
+      )}
+    </SidebarMenuItem>
+  );
+}
+
 export function DashboardLayout({ children }: { children?: ReactNode }) {
-  const navigate = useNavigate();
-  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const history = useHistory();
+  const { pathname } = useLocation();
 
   useEffect(() => {
-    if (!getStoredUser()) navigate({ to: "/login" });
-  }, [navigate]);
+    if (!getStoredUser()) history.replace("/login");
+  }, [history]);
 
   const profileQuery = useQuery({
     queryKey: ["auth", "me"],
@@ -212,7 +192,7 @@ export function DashboardLayout({ children }: { children?: ReactNode }) {
       clearTokens();
     }
     toast.success("Signed out successfully.");
-    navigate({ to: "/login" });
+    history.push("/login");
   };
 
   const initials = (user?.full_name ?? "U")
@@ -222,90 +202,92 @@ export function DashboardLayout({ children }: { children?: ReactNode }) {
     .toUpperCase()
     .slice(0, 2);
 
-  const role = (user as any)?.role ?? "Owner";
+  const role = user?.is_admin ? "Administrator" : (user?.role_name ?? "No role");
 
   return (
     <BranchFilterProvider>
       <DateRangeProvider>
         <SidebarProvider className="dashboard-shell min-h-screen bg-background">
-        <Sidebar collapsible="icon" className="border-r border-sidebar-border/80 bg-sidebar">
-          {/* Logo Header */}
-          <SidebarHeader className="!gap-0 !p-0 h-14 shrink-0 border-b border-sidebar-border/80">
-            <div className="flex h-full w-full items-center justify-between gap-2 px-3 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
+          <Sidebar collapsible="icon" className="border-r border-sidebar-border/80 bg-sidebar">
+            {/* Logo Header */}
+            <SidebarHeader className="!gap-0 !p-0 shrink-0 border-b border-sidebar-border/80">
+              <div className="flex h-full w-full items-center justify-between gap-2 px-3 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
+                <AppLogo
+                  to="/"
+                  subtitle="Restaurant OS"
+                  className="flex-1 group-data-[collapsible=icon]:flex-none group-data-[collapsible=icon]:justify-center"
+                  textWrapperClassName="group-data-[collapsible=icon]:hidden"
+                  textClassName="text-sidebar-foreground"
+                  subtitleClassName="text-sidebar-primary/80"
+                />
+                <SidebarTrigger
+                  title="Collapse sidebar"
+                  className="h-9 w-9 shrink-0 rounded-xl text-sidebar-foreground/50 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground group-data-[collapsible=icon]:hidden"
+                />
+              </div>
+            </SidebarHeader>
+
+            {/* Navigation — only the pages this user's role allows */}
+            <SidebarContent className="py-2 overflow-x-hidden">
+              {[
+                { label: "Main", items: allowedItems(MAIN_ITEMS, user) },
+                { label: "Operations", items: allowedItems(OPS_ITEMS, user) },
+                { label: "Intelligence", items: allowedItems(AI_ITEMS, user) },
+                {
+                  label: "Administration",
+                  items: allowedItems(
+                    user?.is_admin
+                      ? [...ADMIN_ITEMS, { icon: StackIcon, label: "Admin Console", to: "/admin" }]
+                      : ADMIN_ITEMS,
+                    user,
+                  ),
+                },
+              ]
+                .filter((section) => section.items.length > 0)
+                .map((section, i) => (
+                  <div key={section.label}>
+                    {i > 0 && <SidebarSeparator className="mx-3 my-1 bg-sidebar-border/60" />}
+                    <NavSection items={section.items} label={section.label} pathname={pathname} />
+                  </div>
+                ))}
+            </SidebarContent>
+
+            {/* Footer — Tenant + User */}
+            <SidebarFooter className="border-t border-sidebar-border/80 p-3 gap-2">
+              {/* User profile */}
               <Link
-                to="/"
-                className="flex min-w-0 flex-1 items-center gap-3 select-none group-data-[collapsible=icon]:flex-none group-data-[collapsible=icon]:justify-center"
+                to="/dashboard/profile"
+                className="flex items-center gap-2.5 rounded-xl px-2 py-2 transition-all duration-200 hover:bg-sidebar-accent/80 group-data-[collapsible=icon]:justify-center"
               >
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-sidebar-primary text-sidebar-primary-foreground shadow-sm">
-                  <UtensilsCrossed className="h-4 w-4" />
-                </span>
-                <div className="min-w-0 group-data-[collapsible=icon]:hidden">
-                  <p className="truncate text-[15px] font-bold leading-tight tracking-tight text-sidebar-foreground">
-                    PlatePilot
+                <Avatar className="h-8 w-8 shrink-0 ring-2 ring-sidebar-border/60">
+                  <AvatarFallback className="bg-primary/20 text-primary text-xs font-bold">
+                    {initials}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
+                  <p className="truncate text-[12px] font-semibold leading-tight text-sidebar-foreground">
+                    {user?.full_name ?? "User"}
                   </p>
-                  <p className="truncate text-[10px] leading-tight text-sidebar-primary/80 font-medium">
-                    Restaurant OS
-                  </p>
+                  <p className="truncate text-[10px] text-sidebar-foreground/50">{role}</p>
                 </div>
               </Link>
-              <SidebarTrigger
-                title="Collapse sidebar"
-                className="h-9 w-9 shrink-0 rounded-xl text-sidebar-foreground/50 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground group-data-[collapsible=icon]:hidden"
-              />
-            </div>
-          </SidebarHeader>
 
-          {/* Navigation */}
-          <SidebarContent className="py-2 overflow-x-hidden">
-            <NavSection items={MAIN_ITEMS} label="Main" pathname={pathname} />
-            <SidebarSeparator className="mx-3 my-1 bg-sidebar-border/60" />
-            <NavSection items={OPS_ITEMS} label="Operations" pathname={pathname} />
-            <SidebarSeparator className="mx-3 my-1 bg-sidebar-border/60" />
-            <NavSection items={AI_ITEMS} label="Intelligence" pathname={pathname} />
-            <SidebarSeparator className="mx-3 my-1 bg-sidebar-border/60" />
-            <NavSection items={ADMIN_ITEMS} label="Administration" pathname={pathname} />
-          </SidebarContent>
-
-          {/* Footer — Tenant + User */}
-          <SidebarFooter className="border-t border-sidebar-border/80 p-3 gap-2">
-            {/* User profile */}
-            <Link
-              to="/dashboard/profile"
-              className="flex items-center gap-2.5 rounded-xl px-2 py-2 transition-all duration-200 hover:bg-sidebar-accent/80 group-data-[collapsible=icon]:justify-center"
-            >
-              <Avatar className="h-8 w-8 shrink-0 ring-2 ring-sidebar-border/60">
-                <AvatarFallback className="bg-primary/20 text-primary text-xs font-bold">
-                  {initials}
-                </AvatarFallback>
-              </Avatar>
-              <div className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
-                <p className="truncate text-[12px] font-semibold leading-tight text-sidebar-foreground">
-                  {user?.full_name ?? "User"}
-                </p>
-                <p className="truncate text-[10px] text-sidebar-foreground/50">{role}</p>
+              {/* Actions row */}
+              <div className="flex items-center gap-1 group-data-[collapsible=icon]:hidden">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleLogout}
+                  className="h-8 flex-1 justify-start gap-2 rounded-lg px-2 text-[11px] font-medium text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-destructive"
+                >
+                  <LogOut className="h-3.5 w-3.5" />
+                  Sign out
+                </Button>
               </div>
-            </Link>
+            </SidebarFooter>
 
-            {/* Actions row */}
-            <div className="flex items-center gap-1 group-data-[collapsible=icon]:hidden">
-              <ThemeToggle
-                buttonClassName="text-sidebar-foreground/55 hover:text-sidebar-foreground hover:bg-sidebar-accent"
-                contentAlign="center"
-              />
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleLogout}
-                className="h-8 flex-1 justify-start gap-2 rounded-lg px-2 text-[11px] font-medium text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-destructive"
-              >
-                <LogOut className="h-3.5 w-3.5" />
-                Sign out
-              </Button>
-            </div>
-          </SidebarFooter>
-
-          <SidebarRail />
-        </Sidebar>
+            <SidebarRail />
+          </Sidebar>
 
           <MainPanel onLogout={handleLogout} userName={user?.full_name ?? "there"}>
             {children}
@@ -326,16 +308,22 @@ function MainPanel({
   userName: string;
 }) {
   const { state, isMobile } = useSidebar();
+  const compact = useIsMobile() || isNativeApp();
+  const { pathname } = useLocation();
   const firstName = userName.split(" ")[0] ?? userName;
   const hour = new Date().getHours();
   const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
 
   return (
     <SidebarInset className="flex flex-col overflow-hidden bg-background dashboard-canvas">
-      <header className="sticky top-0 z-[var(--z-sticky)] shrink-0 border-b border-border/60 bg-card/90 backdrop-blur-xl">
-        <div className="mx-auto flex h-[4.25rem] w-full max-w-[1600px] items-center gap-3 px-4 sm:px-6 md:px-8">
-          {(state === "collapsed" || isMobile) && (
+      <header className="sticky top-0 z-[var(--z-sticky)] shrink-0 border-b border-border bg-white pt-[env(safe-area-inset-top)]">
+        <div className="dashboard-topbar-inner flex w-full items-center gap-3 px-4 sm:px-6 md:px-8">
+          {/* Sidebar hamburger stays for tablet/desktop; phones use bottom tabs. */}
+          {(state === "collapsed" || isMobile) && !compact && (
             <SidebarTrigger className="h-9 w-9 shrink-0 rounded-xl text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground [&_svg]:size-4" />
+          )}
+          {compact && (
+            <SidebarTrigger className="h-9 w-9 shrink-0 rounded-xl text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground md:hidden [&_svg]:size-4" />
           )}
 
           <div className="min-w-0 flex-1">
@@ -359,7 +347,6 @@ function MainPanel({
               })}
             </div>
 
-            <ThemeToggle className="hidden sm:inline-flex" contentAlign="center" />
             <Button
               variant="ghost"
               size="sm"
@@ -373,21 +360,40 @@ function MainPanel({
         </div>
       </header>
 
-      {/* Location switcher + date range — the owner's first touch every visit */}
-      <div className="shrink-0 border-b border-border/60 bg-background/60 backdrop-blur-xl">
-        <div className="mx-auto flex w-full max-w-[1600px] flex-col items-stretch gap-2 px-4 py-2.5 sm:flex-row sm:items-center sm:gap-3 sm:px-6 md:px-8">
+      {/* Location switcher + date range — the owner's first touch every visit.
+          Hidden on Market Prices (external gov data, not branch/period scoped),
+          Pilot AI (chat scopes itself; questions carry their own timeframe),
+          and Menu Engineering (fixed 30-day, whole-menu view). */}
+      <div
+        className="shrink-0 border-b border-border/60 bg-background/60 backdrop-blur-xl"
+        hidden={
+          pathname === "/dashboard/market-prices" ||
+          pathname === "/dashboard/ai" ||
+          pathname === "/dashboard/menu-engineering"
+        }
+      >
+        <div className="flex w-full flex-col items-stretch gap-2 px-4 py-2.5 sm:flex-row sm:items-center sm:gap-3 sm:px-6 md:px-8">
           <div className="min-w-0 flex-1">
             <LocationSwitcher />
           </div>
-          <div className="self-start sm:self-auto">
+          <div className="flex shrink-0 items-center">
             <DateRangePicker />
           </div>
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-4 py-5 sm:px-6 md:px-8 md:py-6">
-        <div className="mx-auto w-full max-w-[1600px]">{children ?? <Outlet />}</div>
+      <div
+        className={cn(
+          "flex-1 overflow-y-auto px-4 py-5 sm:px-6 md:px-8 md:py-6",
+          compact && "pb-[calc(4.75rem+env(safe-area-inset-bottom))]",
+        )}
+      >
+        <div className="w-full">{children}</div>
       </div>
+
+      {/* On phones / Android app, Pilot lives in the tab bar — skip the floating chip. */}
+      {pathname !== "/dashboard/ai" && !compact && <FloatingAiAssistant />}
+      {compact && <MobileTabBar />}
     </SidebarInset>
   );
 }

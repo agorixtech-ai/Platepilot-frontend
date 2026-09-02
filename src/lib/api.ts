@@ -100,3 +100,45 @@ export const tallyApi = {
     return request<PaginatedResponse<TallyVoucher>>(`/api/tally-vouchers?${q}`);
   },
 };
+
+// ── AI Agent ──────────────────────────────────────────────
+export interface AgentHistoryMessage {
+  role: "user" | "assistant";
+  content: string;
+}
+
+export interface AgentQueryResponse {
+  answer: string;
+  used_data: boolean;
+  table_data: Record<string, unknown>[] | null;
+  query_log: Record<string, unknown>[];
+}
+
+export const agentApi = {
+  query: (question: string, branch?: string, history?: AgentHistoryMessage[]) =>
+    request<AgentQueryResponse>("/api/agent/query", {
+      method: "POST",
+      body: JSON.stringify({ question, branch, history }),
+    }),
+};
+
+export interface ConversationMeta {
+  id: string;
+  title: string;
+  updated_at: string;
+}
+
+export const conversationsApi = {
+  list: () => request<{ items: ConversationMeta[] }>("/api/agent/conversations"),
+  get: (id: string) =>
+    request<{ id: string; title: string; messages: Record<string, unknown>[] }>(
+      `/api/agent/conversations/${id}`,
+    ),
+  save: (id: string, title: string, messages: unknown[]) =>
+    request<{ success: boolean }>(`/api/agent/conversations/${id}`, {
+      method: "PUT",
+      body: JSON.stringify({ title, messages }),
+    }),
+  remove: (id: string) =>
+    request<{ success: boolean }>(`/api/agent/conversations/${id}`, { method: "DELETE" }),
+};

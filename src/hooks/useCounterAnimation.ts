@@ -6,10 +6,7 @@ interface UseCounterAnimationOptions {
   decimals?: number;
 }
 
-export function useCounterAnimation(
-  end: number,
-  options: UseCounterAnimationOptions = {}
-) {
+export function useCounterAnimation(end: number, options: UseCounterAnimationOptions = {}) {
   const { duration = 1500, start = 0, decimals = 0 } = options;
   const [count, setCount] = useState(start);
   const [isAnimating, setIsAnimating] = useState(false);

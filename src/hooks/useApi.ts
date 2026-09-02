@@ -3,10 +3,13 @@ import {
   healthApi,
   posSalesApi,
   tallyApi,
+  agentApi,
+  conversationsApi,
   type PosSalesParams,
   type TallyParams,
+  type AgentHistoryMessage,
 } from "../lib/api";
-import { login, register, logout, getMe, sendOtp, verifyOtp, verifyEmail } from "../lib/auth";
+import { login, register, logout, getMe } from "../lib/auth";
 
 // ── Query Keys ────────────────────────────────────────────
 export const KEYS = {
@@ -14,6 +17,7 @@ export const KEYS = {
   me: ["me"] as const,
   posSales: (p: PosSalesParams) => ["pos-sales", p] as const,
   tally: (p: TallyParams) => ["tally-vouchers", p] as const,
+  conversations: ["agent-conversations"] as const,
 };
 
 // ── Health ────────────────────────────────────────────────
@@ -69,41 +73,6 @@ export function useLogout() {
   });
 }
 
-export function useSendOtp() {
-  return useMutation({
-    mutationFn: ({ email, purpose }: { email: string; purpose: "login" | "verify" }) =>
-      sendOtp(email, purpose),
-  });
-}
-
-export function useVerifyOtp() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: ({
-      email,
-      otp,
-      purpose,
-    }: {
-      email: string;
-      otp: string;
-      purpose: "login" | "verify";
-    }) => verifyOtp(email, otp, purpose),
-    onSuccess: (data) => {
-      qc.setQueryData(KEYS.me, data.user);
-    },
-  });
-}
-
-export function useVerifyEmail() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: ({ email, otp }: { email: string; otp: string }) => verifyEmail(email, otp),
-    onSuccess: (data) => {
-      qc.setQueryData(KEYS.me, data.user);
-    },
-  });
-}
-
 // ── POS Sales ─────────────────────────────────────────────
 export function usePosSales(params: PosSalesParams = {}) {
   return useQuery({
@@ -117,5 +86,41 @@ export function useTallyVouchers(params: TallyParams = {}) {
   return useQuery({
     queryKey: KEYS.tally(params),
     queryFn: () => tallyApi.list(params),
+  });
+}
+
+// ── AI Agent ──────────────────────────────────────────────
+export function useConversations() {
+  return useQuery({
+    queryKey: KEYS.conversations,
+    queryFn: conversationsApi.list,
+  });
+}
+
+export function useSaveConversation() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, title, messages }: { id: string; title: string; messages: unknown[] }) =>
+      conversationsApi.save(id, title, messages),
+    onSuccess: () => qc.invalidateQueries({ queryKey: KEYS.conversations }),
+  });
+}
+
+export function useDeleteConversation() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => conversationsApi.remove(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: KEYS.conversations }),
+  });
+}
+
+export function useAgentQuery() {
+  // Branch is a conversational filter for Pilot AI ("show sales for Airport Branch"),
+  // not the dashboard switcher's — that switcher is hidden on the AI page, and silently
+  // applying it would contradict the branch the user names in chat (zero-row results).
+  // Server-side entitlement enforcement is the eventual owner of this parameter.
+  return useMutation({
+    mutationFn: ({ question, history }: { question: string; history?: AgentHistoryMessage[] }) =>
+      agentApi.query(question, undefined, history),
   });
 }

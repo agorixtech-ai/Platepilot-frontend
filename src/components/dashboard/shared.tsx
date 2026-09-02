@@ -98,7 +98,7 @@ export const METRIC_CONFIG: Record<
     label: "Total Sales",
     tabLabel: "Sales",
     chartColor: "var(--color-primary)",
-    activeTab: "bg-primary text-primary-foreground",
+    activeTab: "bg-primary text-primary-foreground border-0",
   },
   orders: {
     label: "Orders",
@@ -116,7 +116,7 @@ export const METRIC_CONFIG: Record<
     label: "Gross Margin %",
     tabLabel: "Margin",
     chartColor: "var(--color-chart-3)",
-    activeTab: "bg-primary text-primary-foreground",
+    activeTab: "bg-primary text-primary-foreground border-0",
   },
 };
 
@@ -153,10 +153,10 @@ export function PeriodChip({
     <button
       onClick={onClick}
       className={cn(
-        "rounded-full px-3 py-1 text-[11px] font-semibold transition-all duration-200 ease-out",
+        "rounded-full border px-3 py-1 text-[11px] font-semibold transition-all duration-200 ease-out",
         active
-          ? "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 hover:scale-105"
-          : "text-muted-foreground hover:text-foreground hover:bg-muted/70 hover:scale-105",
+          ? "border-primary/40 bg-primary/15 text-primary shadow-sm hover:bg-primary/20 hover:scale-105"
+          : "border-transparent text-muted-foreground hover:text-foreground hover:bg-muted/70 hover:scale-105",
       )}
     >
       {label}
@@ -346,7 +346,10 @@ export function AreaTrend({
                 <div className="rounded-xl border border-border/60 bg-card/95 backdrop-blur-sm px-4 py-3 text-[11px] shadow-xl animate-in fade-in zoom-in duration-200">
                   <p className="font-bold text-foreground mb-2 text-[12px]">{d.label}</p>
                   <div className="flex items-center gap-2.5">
-                    <span className="h-2.5 w-2.5 rounded-full shadow-sm" style={{ backgroundColor: color }} />
+                    <span
+                      className="h-2.5 w-2.5 rounded-full shadow-sm"
+                      style={{ backgroundColor: color }}
+                    />
                     <span className="text-muted-foreground font-medium">{currentLabel}:</span>
                     <span className="font-bold text-foreground tabular-nums text-[13px]">
                       {formatValue(d.value)}

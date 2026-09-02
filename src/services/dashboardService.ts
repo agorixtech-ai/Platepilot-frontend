@@ -129,6 +129,79 @@ export interface RecentTransaction {
   items: string;
 }
 
+/** One over-purchased ingredient: Tally purchases beyond what sold dishes'
+    recipes required over the period (theoretical-vs-actual variance). */
+export interface WasteCompositionItem {
+  name: string; // stockitem
+  unit: string; // "kg" | "l" | "pcs"
+  qty: number; // waste = bought_qty − needed_qty, in stock unit
+  bought_qty: number;
+  needed_qty: number;
+  cost: number;
+  pct: number;
+}
+
+/** Expected-vs-actual consumption totals for one stock unit (kg/l/pcs),
+    summed across every over-purchased ingredient in that unit — not capped
+    by the `items` list's `limit`. */
+export interface WasteUnitTotal {
+  unit: string;
+  needed_qty: number; // expected consumption
+  bought_qty: number; // actual consumption
+  variance_qty: number; // bought − needed
+  cost: number;
+  efficiency_pct: number; // needed / bought * 100
+}
+
+export interface WasteCompositionData {
+  period: string;
+  currency: string;
+  total_cost: number;
+  over_count: number; // ingredients purchased beyond recipe needs
+  last_sync: string | null;
+  items: WasteCompositionItem[];
+  totals: WasteUnitTotal[]; // sorted by cost desc
+}
+
+export interface RecipeIngredient {
+  name: string;
+  qty: number;
+  unit: string; // "g" | "ml" | "pc"
+  cost_aed: number;
+  /** "tally" = computed live from purchase vouchers; "static" = seeded estimate */
+  cost_source?: "tally" | "static";
+  stockitem?: string;
+  qty_in_stock_unit?: number;
+  stock_unit?: string;
+  cost_per_stock_unit?: number;
+}
+
+export interface MenuEngineeringItem {
+  id: string;
+  dish: string;
+  category: string;
+  price: number;
+  cost: number;
+  margin_pct: number;
+  /** cost as % of menu price (complement of margin_pct) */
+  food_cost_pct: number;
+  /** price − cost, AED */
+  gross_profit: number;
+  /** live: units sold in POS over the trailing 30 days */
+  sold: number;
+  /** live: POS revenue over the trailing 30 days */
+  revenue: number;
+  /** portions-worth of ingredient variance (purchases vs. recipe usage) over 30 days */
+  waste_qty: number;
+  /** allocated ingredient-variance cost (AED) over the trailing 30 days */
+  waste_cost: number;
+  /** allocated waste cost as % of the dish's 30-day revenue */
+  waste_pct: number;
+  /** popularity × profitability quadrant vs menu medians */
+  quadrant: "star" | "plow_horse" | "puzzle" | "dog";
+  ingredients: RecipeIngredient[];
+}
+
 async function apiFetch<T>(path: string): Promise<T> {
   const token = typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
   const headers: Record<string, string> = { "Content-Type": "application/json" };
@@ -199,6 +272,18 @@ export const dashboardService = {
   getRecentTransactions(branch?: string | null, limit = 25) {
     return apiFetch<{ items: RecentTransaction[] }>(
       `/dashboard/recent-transactions${qs({ branch, limit })}`,
+    );
+  },
+
+  getWasteComposition(period: Period, branch?: string | null, limit = 10) {
+    return apiFetch<WasteCompositionData>(
+      `/dashboard/waste-composition${qs({ period, branch, limit })}`,
+    );
+  },
+
+  getMenuEngineering(period: Period = "month", branch?: string | null) {
+    return apiFetch<{ period: string; currency: string; items: MenuEngineeringItem[] }>(
+      `/dashboard/menu-engineering${qs({ period, branch })}`,
     );
   },
 };

@@ -1,6 +1,7 @@
-import { Link } from "@tanstack/react-router";
+import { Link } from "react-router-dom";
 import { useState } from "react";
 import { LayoutDashboard, ShoppingCart, FileText, Users, Settings, LogOut } from "lucide-react";
+import { AppLogo } from "@/components/AppLogo";
 import {
   Sidebar as SidebarComponent,
   SidebarContent,
@@ -43,15 +44,12 @@ export function Sidebar() {
     <SidebarComponent collapsible="icon" className="border-r border-sidebar-border bg-sidebar">
       {/* Logo */}
       <SidebarHeader className="px-4 py-4">
-        <Link
+        <AppLogo
           to="/"
-          className="flex items-center gap-2 font-extrabold text-xl tracking-tight text-sidebar-foreground select-none group-data-[collapsible=icon]:justify-center"
-        >
-          <span className="text-primary">λ</span>
-          <span className="text-sidebar-foreground/70 font-bold text-lg group-data-[collapsible=icon]:hidden">
-            gorix
-          </span>
-        </Link>
+          className="group-data-[collapsible=icon]:justify-center"
+          textWrapperClassName="group-data-[collapsible=icon]:hidden"
+          textClassName="font-extrabold text-xl tracking-tight text-sidebar-foreground"
+        />
       </SidebarHeader>
 
       <SidebarSeparator className="bg-sidebar-border" />
@@ -69,7 +67,7 @@ export function Sidebar() {
                   <SidebarMenuButton
                     asChild
                     tooltip={label}
-                    className="rounded-xl hover:bg-sidebar-accent text-sidebar-foreground/60 hover:text-sidebar-foreground"
+                    className="rounded-xl text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-primary data-[active=true]:text-sidebar-primary-foreground"
                   >
                     <Link to={href}>
                       <Icon className="h-4 w-4 shrink-0" />
@@ -91,7 +89,7 @@ export function Sidebar() {
           <Avatar className="h-8 w-8 shrink-0">
             <AvatarFallback
               suppressHydrationWarning
-              className="bg-gradient-to-tr from-primary to-success text-primary-foreground text-[11px] font-extrabold"
+              className="bg-primary text-primary-foreground text-[11px] font-extrabold"
             >
               {initials}
             </AvatarFallback>

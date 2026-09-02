@@ -87,9 +87,7 @@ function ReviewColumn({
   emptyMessage: string;
 }) {
   const badgeColor =
-    accent === "green"
-      ? "bg-success/15 text-success"
-      : "bg-destructive/15 text-destructive";
+    accent === "green" ? "bg-success/15 text-success" : "bg-destructive/15 text-destructive";
 
   return (
     <div className="flex-1">

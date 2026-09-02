@@ -211,7 +211,7 @@ function NeedsAttentionStrip({
 
 // ── Comparison chart ─────────────────────────────────────────────────────────
 
-function ComparisonChart({ locations }: { locations: Location[] }) {
+export function ComparisonChart({ locations }: { locations: Location[] }) {
   const { range } = useDateRange();
   const branches = locations.map((l) => l.name);
   const [hidden, setHidden] = useState<Set<string>>(new Set());
@@ -245,45 +245,41 @@ function ComparisonChart({ locations }: { locations: Location[] }) {
     });
 
   return (
-    <Card className="border border-border/60 bg-card shadow-sm animate-fade-in-up stagger-3">
-      <CardHeader className="border-b border-border/40 px-5 pb-3 pt-4">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <CardTitle className="text-[13px] font-bold text-foreground">
-              Revenue by location
-            </CardTitle>
-            <p className="mt-0.5 text-[10px] text-muted-foreground">
-              Daily revenue, all locations overlaid — click a name to toggle it
-            </p>
-          </div>
-          {/* Legend doubles as series toggles */}
-          <div className="flex flex-wrap items-center gap-1.5">
-            {locations.map((loc) => {
-              const off = hidden.has(loc.name);
-              return (
-                <button
-                  key={loc.name}
-                  onClick={() => toggle(loc.name)}
-                  aria-pressed={!off}
-                  className={cn(
-                    "flex items-center gap-1.5 rounded-full border border-border/60 px-2.5 py-1 text-[10.5px] font-semibold transition-all duration-200",
-                    off
-                      ? "text-muted-foreground/50 line-through opacity-60"
-                      : "text-foreground hover:border-border",
-                  )}
-                >
-                  <span
-                    className="h-2 w-2 rounded-full"
-                    style={{ backgroundColor: off ? "var(--color-muted-foreground)" : loc.color }}
-                  />
-                  {loc.name}
-                </button>
-              );
-            })}
-          </div>
-        </div>
+    <Card className="flex h-full flex-col border border-border/60 bg-card shadow-sm animate-fade-in-up stagger-3">
+      <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-3 border-b border-border/40 px-5 pb-3 pt-4">
+        <CardTitle
+          title="Daily revenue, all locations overlaid — click a name to toggle it"
+          className="text-[13px] font-bold text-foreground"
+        >
+          Revenue by location
+        </CardTitle>
       </CardHeader>
       <CardContent className="px-5 pb-5 pt-3">
+        {/* Legend doubles as series toggles */}
+        <div className="mb-3 flex flex-wrap items-center gap-1.5">
+          {locations.map((loc) => {
+            const off = hidden.has(loc.name);
+            return (
+              <button
+                key={loc.name}
+                onClick={() => toggle(loc.name)}
+                aria-pressed={!off}
+                className={cn(
+                  "flex items-center gap-1.5 rounded-full border border-border/60 px-2.5 py-1 text-[10.5px] font-semibold transition-all duration-200",
+                  off
+                    ? "text-muted-foreground/50 line-through opacity-60"
+                    : "text-foreground hover:border-border",
+                )}
+              >
+                <span
+                  className="h-2 w-2 rounded-full"
+                  style={{ backgroundColor: off ? "var(--color-muted-foreground)" : loc.color }}
+                />
+                {loc.name}
+              </button>
+            );
+          })}
+        </div>
         <div className="h-[280px] w-full">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={chartData} margin={{ top: 8, right: 8, left: -10, bottom: 0 }}>
@@ -392,7 +388,6 @@ export function AllLocationsOverview() {
             <div key={i} className="h-[132px] rounded-xl skeleton-shimmer" />
           ))}
         </div>
-        <div className="h-[360px] rounded-xl skeleton-shimmer" />
       </div>
     );
   }
@@ -417,7 +412,7 @@ export function AllLocationsOverview() {
         })}
       </div>
 
-      <ComparisonChart locations={locations} />
+      {/* ComparisonChart moved to Overview, paired half/half with Dish Activity */}
     </div>
   );
 }

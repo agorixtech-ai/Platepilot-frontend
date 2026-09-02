@@ -3,7 +3,6 @@ import { Bell, LogOut, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useAuthStore } from "@/store/authStore";
-import { ThemeToggle } from "@/components/theme-toggle";
 
 export function Header() {
   const user = useAuthStore((state) => state.user);
@@ -16,7 +15,7 @@ export function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-20 flex items-center gap-3 border-b border-border bg-background/80 px-5 py-3.5 backdrop-blur-xl">
+    <header className="sticky top-0 z-20 flex items-center gap-3 border-b border-border bg-white px-5 py-3.5">
       <SidebarTrigger className="text-muted-foreground hover:text-foreground hover:bg-secondary" />
 
       <div className="flex-1 min-w-0">
@@ -30,8 +29,6 @@ export function Header() {
           })}
         </p>
       </div>
-
-      <ThemeToggle />
 
       <Button
         variant="ghost"
