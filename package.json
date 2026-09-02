@@ -9,9 +9,19 @@
     "build:dev": "vite build --mode development",
     "preview": "vite preview",
     "lint": "eslint .",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "cap:sync": "bunx cap sync android",
+    "cap:open": "bunx cap open android",
+    "android:build": "vite build && bunx cap sync android",
+    "android:run": "vite build && bunx cap sync android && bunx cap run android"
   },
   "dependencies": {
+    "@capacitor/android": "^7.4.2",
+    "@capacitor/app": "^7.0.2",
+    "@capacitor/core": "^7.4.2",
+    "@capacitor/keyboard": "^7.0.2",
+    "@capacitor/splash-screen": "^7.0.2",
+    "@capacitor/status-bar": "^7.0.2",
     "@fontsource-variable/inter": "^5.3.0",
     "@fontsource-variable/plus-jakarta-sans": "^5.3.0",
     "@hookform/resolvers": "^5.2.2",
@@ -79,6 +89,7 @@
     "zustand": "^4.4.7"
   },
   "devDependencies": {
+    "@capacitor/cli": "^7.4.2",
     "@eslint/js": "^9.32.0",
     "@types/leaflet": "^1.9.21",
     "@types/node": "^22.16.5",

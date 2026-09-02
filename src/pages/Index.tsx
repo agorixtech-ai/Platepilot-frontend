@@ -9,7 +9,7 @@ import {
   type CSSProperties,
   type ReactNode,
 } from "react";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import Lenis from "lenis";
 import {
   ArrowRight,
@@ -47,6 +47,8 @@ import { CrossPlatformSection } from "@/components/CrossPlatformSection";
 import { PlatePieletFooter } from "@/components/PlatePieletFooter";
 import { Seo } from "@/components/Seo";
 import { SALES_PHONE, SALES_PHONE_HREF } from "@/lib/contact";
+import { getStoredUser } from "@/lib/auth";
+import { isNativeApp } from "@/lib/native";
 
 /* ─── Product-preview tiles ──────────────────────────────────────────────────
    Coded mini-mockups of the real dashboard modules (src/pages/dashboard/*):
@@ -658,43 +660,123 @@ function HiwWire({ side }: { side: "in" | "out" }) {
 }
 
 function HowItWorksFlow() {
+  const [activeStep, setActiveStep] = useState(0);
+  const [isAnimating, setIsAnimating] = useState(false);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIsAnimating(true);
+      setActiveStep((prev) => (prev + 1) % DATA_DECISION_STEPS.length);
+      setTimeout(() => setIsAnimating(false), 500);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
-    <div className="hiw-stage">
+    <div className="hiw-stage-enhanced">
       <div className="hiw-stage-head">
-        <div className="hiw-badge">
+        <div className="hiw-badge-enhanced">
           <LayoutGrid size={13} strokeWidth={2.2} />
           From Data to Decision
         </div>
-        <h2 className="hiw-h2">
+        <h2 className="hiw-h2-enhanced">
           From data in <span style={{ color: "#15803D" }}>to decisions out.</span>
         </h2>
-        <p className="hiw-lede">
+        <p className="hiw-lede-enhanced">
           Connect your Tally, POS, and inventory data in one place.
         </p>
-        <p className="hiw-lede" style={{ marginTop: "0.85rem" }}>
+        <p className="hiw-lede-enhanced" style={{ marginTop: "0.85rem" }}>
           PlatePielet turns those numbers into live dashboards, risk alerts, and clear recommendations
           for purchasing, stock control, costs, and daily operations.
         </p>
-        <div className="hiw-mantra">Connect your data. See what matters. Act the same day.</div>
-        <Link to="/demo" className="hiw-cta">
+        <div className="hiw-mantra-enhanced">Connect your data. See what matters. Act the same day.</div>
+        <Link to="/demo" className="hiw-cta-enhanced">
           See it on your data <ArrowRight size={15} strokeWidth={2.4} />
         </Link>
       </div>
-      {/* floating accent tiles, matching the corners of the stage */}
-      {[
-        { Icon: FileText, tint: "#E8F7ED", color: "#15803D", style: { top: "6%", left: "9%" } },
-        { Icon: Bell, tint: "#FDECEF", color: "#DC2657", style: { top: "9%", right: "10%" } },
-        { Icon: BarChart3, tint: "#EAF1FE", color: "#2563EB", style: { top: "27%", left: "3.5%" } },
-        { Icon: ShoppingCart, tint: "#EEEDFD", color: "#5B4BD6", style: { top: "30%", right: "4%" } },
-      ].map(({ Icon, tint, color, style }, i) => (
-        <div key={i} className="hiw-tile hiw-tile-float" style={style as CSSProperties}>
-          <span style={{ background: tint, color }}><Icon size={19} strokeWidth={1.9} /></span>
-        </div>
-      ))}
 
-      <div className="hiw-stage-grid">
-        <div className="hiw-panel">
-          <div className="hiw-browser">
+      {/* Enhanced Data Flow Visualization */}
+      <div className="hiw-flow-container">
+        {/* Data Sources Section */}
+        <div className="hiw-flow-section hiw-flow-input">
+          <div className="hiw-flow-label">DATA SOURCES</div>
+          <div className="hiw-flow-cards">
+            {HIW_IN.map(({ Icon, tint, color, label }, index) => (
+              <div 
+                key={label} 
+                className={`hiw-flow-card ${activeStep === index ? 'active' : ''}`}
+                style={{ animationDelay: `${index * 100}ms` }}
+              >
+                <div className="hiw-flow-card-icon" style={{ background: tint, color }}>
+                  <Icon size={20} strokeWidth={1.8} />
+                </div>
+                <div className="hiw-flow-card-text">{label}</div>
+                <div className="hiw-flow-pulse" style={{ background: color }} />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Central Processing Hub */}
+        <div className="hiw-flow-center">
+          <div className="hiw-flow-hub">
+            <div className="hiw-flow-hub-inner">
+              <Sparkles size={24} strokeWidth={2} className="hiw-flow-hub-icon" />
+              <div className="hiw-flow-hub-text">Pilot AI</div>
+            </div>
+            <div className="hiw-flow-ring" />
+            <div className="hiw-flow-ring hiw-flow-ring-2" />
+          </div>
+          
+          {/* Animated Connection Lines */}
+          <div className="hiw-flow-connections">
+            <div className="hiw-flow-line hiw-flow-line-left" />
+            <div className="hiw-flow-line hiw-flow-line-right" />
+          </div>
+        </div>
+
+        {/* Outputs Section */}
+        <div className="hiw-flow-section hiw-flow-output">
+          <div className="hiw-flow-label">DECISIONS & ACTIONS</div>
+          <div className="hiw-flow-cards">
+            {HIW_OUT.map(({ Icon, tint, color, label }, index) => (
+              <div 
+                key={label} 
+                className={`hiw-flow-card ${activeStep === (index + 3) % DATA_DECISION_STEPS.length ? 'active' : ''}`}
+                style={{ animationDelay: `${(index + 3) * 100}ms` }}
+              >
+                <div className="hiw-flow-card-icon" style={{ background: tint, color }}>
+                  <Icon size={20} strokeWidth={1.8} />
+                </div>
+                <div className="hiw-flow-card-text">{label}</div>
+                <div className="hiw-flow-pulse" style={{ background: color }} />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Interactive Step Indicators */}
+      <div className="hiw-steps-tracker">
+        {DATA_DECISION_STEPS.map((step, index) => (
+          <div 
+            key={step.title}
+            className={`hiw-step-item ${activeStep === index ? 'active' : ''}`}
+            onClick={() => setActiveStep(index)}
+          >
+            <div className="hiw-step-number">{index + 1}</div>
+            <div className="hiw-step-content">
+              <div className="hiw-step-title">{step.title}</div>
+              <div className="hiw-step-desc">{step.description}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Visual Panels */}
+      <div className="hiw-visual-panels">
+        <div className="hiw-panel-enhanced">
+          <div className="hiw-browser-enhanced">
             <div className="hiw-browser-bar"><span /><span /><span /></div>
             <div className="hiw-browser-body">
               <div className="hiw-sk" style={{ width: "62%" }} />
@@ -716,23 +798,7 @@ function HowItWorksFlow() {
           </div>
         </div>
 
-        <div className="hiw-core">
-          <div className="hiw-tiles">
-            {HIW_IN.map(({ Icon, tint, color, label }) => (
-              <div key={label} className="hiw-tile" title={label}><span style={{ background: tint, color }}><Icon size={19} strokeWidth={1.9} /></span></div>
-            ))}
-          </div>
-          <HiwWire side="in" />
-          <div className="hiw-hub">Pilot AI</div>
-          <HiwWire side="out" />
-          <div className="hiw-tiles">
-            {HIW_OUT.map(({ Icon, tint, color, label }) => (
-              <div key={label} className="hiw-tile" title={label}><span style={{ background: tint, color }}><Icon size={19} strokeWidth={1.9} /></span></div>
-            ))}
-          </div>
-        </div>
-
-        <div className="hiw-panel">
+        <div className="hiw-panel-enhanced">
           <div className="hiw-rail">
             <span className="on"><LayoutDashboard size={16} strokeWidth={1.9} /></span>
             <span><Sparkles size={16} strokeWidth={1.9} /></span>
@@ -1012,6 +1078,17 @@ function Index() {
           border: 1px solid #E4EBE6;
           overflow: hidden;
         }
+
+        /* ── Enhanced How It Works stage ── */
+        .hiw-stage-enhanced {
+          position: relative;
+          margin-top: 1rem;
+          padding: 4rem 2.5rem 3.5rem;
+          border-radius: 32px;
+          background: linear-gradient(135deg, #F8FBF9 0%, #F3F6F4 50%, #E8F7ED 100%);
+          border: 1px solid #D4E5DC;
+          overflow: hidden;
+        }
         /* dashed guide grid — pure background, no extra markup */
         .hiw-stage::before {
           content: '';
@@ -1028,6 +1105,65 @@ function Index() {
 
         .hiw-stage-head { max-width: 760px; margin: 0 auto 3.5rem; text-align: center; }
         .hiw-stage-head .hiw-badge { margin-bottom: 1.25rem; }
+
+        /* Enhanced header styles */
+        .hiw-badge-enhanced {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.4rem;
+          padding: 0.5rem 1rem;
+          border-radius: 999px;
+          border: 1px solid rgba(22,163,74,0.35);
+          background: linear-gradient(135deg, #E8F7ED 0%, #D4F1DD 100%);
+          color: #15803D;
+          font-size: 0.7rem;
+          font-weight: 700;
+          letter-spacing: 0.14em;
+          text-transform: uppercase;
+          margin-bottom: 1.5rem;
+          box-shadow: 0 4px 12px rgba(22,163,74,0.15);
+        }
+        .hiw-badge-enhanced svg { flex-shrink: 0; transition: transform 0.3s ease; }
+        .hiw-badge-enhanced:hover svg { transform: scale(1.2) rotate(-10deg); }
+
+        .hiw-h2-enhanced {
+          font-size: clamp(2.2rem, 4vw, 3.5rem);
+          font-weight: 800;
+          letter-spacing: -0.04em;
+          line-height: 1.1;
+          margin-bottom: 1.2rem;
+        }
+        .hiw-lede-enhanced {
+          max-width: 700px;
+          margin-inline: auto;
+          font-size: 0.95rem;
+          color: #66736B;
+          line-height: 1.8;
+        }
+        .hiw-mantra-enhanced {
+          margin-top: 1.5rem;
+          color: #15803D;
+          font-size: 0.9rem;
+          font-weight: 800;
+          letter-spacing: 0.02em;
+        }
+        .hiw-cta-enhanced {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.6rem;
+          margin-top: 2rem;
+          padding: 1rem 2rem;
+          border-radius: 999px;
+          background: linear-gradient(135deg, #0A2A1D 0%, #0F3D29 100%);
+          color: #FFFFFF !important;
+          font-size: 0.9rem;
+          font-weight: 700;
+          box-shadow: 0 16px 36px -16px rgba(10,26,16,0.8);
+          transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .hiw-cta-enhanced:hover { transform: translateY(-3px); box-shadow: 0 20px 42px -16px rgba(10,26,16,0.9); }
+        .hiw-cta-enhanced svg { transition: transform 0.3s ease; }
+        .hiw-cta-enhanced:hover svg { transform: translateX(4px); }
         .hiw-h2 {
           font-size: clamp(2rem, 3.6vw, 3.1rem);
           font-weight: 800;
@@ -1066,6 +1202,295 @@ function Index() {
         .hiw-cta:hover { transform: translateY(-2px); box-shadow: 0 18px 36px -14px rgba(18,33,26,0.8); }
         .hiw-cta svg { transition: transform 0.2s ease; }
         .hiw-cta:hover svg { transform: translateX(3px); }
+
+        /* ── Enhanced Flow Container ── */
+        .hiw-flow-container {
+          display: grid;
+          grid-template-columns: 1fr auto 1fr;
+          gap: 2rem;
+          align-items: center;
+          margin: 3rem 0;
+          position: relative;
+        }
+
+        .hiw-flow-section {
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
+        }
+
+        .hiw-flow-label {
+          font-size: 0.65rem;
+          font-weight: 700;
+          letter-spacing: 0.2em;
+          text-transform: uppercase;
+          color: #15803D;
+          text-align: center;
+          margin-bottom: 0.5rem;
+        }
+
+        .hiw-flow-cards {
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
+        }
+
+        .hiw-flow-card {
+          position: relative;
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+          padding: 1rem 1.25rem;
+          background: #FFFFFF;
+          border: 1px solid #E4EBE6;
+          border-radius: 16px;
+          box-shadow: 0 4px 12px rgba(21,32,25,0.06);
+          transition: all 0.3s ease;
+          cursor: pointer;
+        }
+
+        .hiw-flow-card:hover {
+          transform: translateX(8px);
+          box-shadow: 0 8px 20px rgba(21,32,25,0.12);
+          border-color: #C9E9D6;
+        }
+
+        .hiw-flow-card.active {
+          transform: scale(1.05);
+          border-color: #16A34A;
+          box-shadow: 0 12px 28px rgba(22,163,74,0.25);
+        }
+
+        .hiw-flow-card-icon {
+          width: 44px;
+          height: 44px;
+          border-radius: 12px;
+          display: grid;
+          place-items: center;
+          flex-shrink: 0;
+          transition: transform 0.3s ease;
+        }
+
+        .hiw-flow-card:hover .hiw-flow-card-icon {
+          transform: scale(1.1);
+        }
+
+        .hiw-flow-card-text {
+          font-size: 0.85rem;
+          font-weight: 600;
+          color: #152019;
+        }
+
+        .hiw-flow-pulse {
+          position: absolute;
+          right: 12px;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          opacity: 0;
+          animation: pulse 2s ease-in-out infinite;
+        }
+
+        .hiw-flow-card.active .hiw-flow-pulse {
+          opacity: 1;
+        }
+
+        @keyframes pulse {
+          0%, 100% { transform: translateY(-50%) scale(1); opacity: 0.6; }
+          50% { transform: translateY(-50%) scale(1.5); opacity: 0; }
+        }
+
+        /* Central Hub */
+        .hiw-flow-center {
+          position: relative;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .hiw-flow-hub {
+          position: relative;
+          width: 120px;
+          height: 120px;
+          display: grid;
+          place-items: center;
+        }
+
+        .hiw-flow-hub-inner {
+          width: 80px;
+          height: 80px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #0F7A4C 0%, #16A34A 100%);
+          color: #FFFFFF;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 0.25rem;
+          box-shadow: 0 12px 32px rgba(15,122,76,0.4);
+          z-index: 2;
+          position: relative;
+        }
+
+        .hiw-flow-hub-icon {
+          animation: rotate 8s linear infinite;
+        }
+
+        @keyframes rotate {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+
+        .hiw-flow-hub-text {
+          font-size: 0.75rem;
+          font-weight: 700;
+          letter-spacing: 0.05em;
+        }
+
+        .hiw-flow-ring {
+          position: absolute;
+          border-radius: 50%;
+          border: 2px dashed rgba(22,163,74,0.3);
+          animation: spin 20s linear infinite;
+        }
+
+        .hiw-flow-ring { inset: 0; }
+        .hiw-flow-ring-2 { inset: 12px; animation-duration: 15s; animation-direction: reverse; }
+
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+
+        .hiw-flow-connections {
+          position: absolute;
+          inset: 0;
+          pointer-events: none;
+        }
+
+        .hiw-flow-line {
+          position: absolute;
+          height: 2px;
+          background: linear-gradient(90deg, transparent, #16A34A, transparent);
+          animation: flowLine 2s ease-in-out infinite;
+        }
+
+        .hiw-flow-line-left {
+          left: -60px;
+          right: 50%;
+          top: 50%;
+          transform: translateY(-50%);
+        }
+
+        .hiw-flow-line-right {
+          left: 50%;
+          right: -60px;
+          top: 50%;
+          transform: translateY(-50%);
+        }
+
+        @keyframes flowLine {
+          0%, 100% { opacity: 0.3; }
+          50% { opacity: 1; }
+        }
+
+        /* Step Tracker */
+        .hiw-steps-tracker {
+          display: grid;
+          grid-template-columns: repeat(5, minmax(0, 1fr));
+          gap: 1rem;
+          margin-top: 2.5rem;
+        }
+
+        .hiw-step-item {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          padding: 1rem;
+          background: #FFFFFF;
+          border: 1px solid #E4EBE6;
+          border-radius: 16px;
+          cursor: pointer;
+          transition: all 0.3s ease;
+        }
+
+        .hiw-step-item:hover {
+          border-color: #C9E9D6;
+          transform: translateY(-2px);
+        }
+
+        .hiw-step-item.active {
+          border-color: #16A34A;
+          background: #E8F7ED;
+          box-shadow: 0 8px 20px rgba(22,163,74,0.2);
+        }
+
+        .hiw-step-number {
+          width: 32px;
+          height: 32px;
+          border-radius: 50%;
+          background: #F3F6F4;
+          color: #66736B;
+          display: grid;
+          place-items: center;
+          font-size: 0.85rem;
+          font-weight: 700;
+          flex-shrink: 0;
+          transition: all 0.3s ease;
+        }
+
+        .hiw-step-item.active .hiw-step-number {
+          background: #16A34A;
+          color: #FFFFFF;
+        }
+
+        .hiw-step-content {
+          flex: 1;
+          min-width: 0;
+        }
+
+        .hiw-step-title {
+          font-size: 0.8rem;
+          font-weight: 700;
+          color: #152019;
+          margin-bottom: 0.15rem;
+        }
+
+        .hiw-step-desc {
+          font-size: 0.7rem;
+          color: #66736B;
+          line-height: 1.4;
+        }
+
+        /* Visual Panels */
+        .hiw-visual-panels {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 1.5rem;
+          margin-top: 2.5rem;
+        }
+
+        .hiw-panel-enhanced {
+          display: flex;
+          gap: 12px;
+          padding: 16px;
+          border-radius: 24px;
+          background: rgba(255,255,255,0.7);
+          border: 1px solid #E4EBE6;
+          box-shadow: 0 8px 24px rgba(21,32,25,0.08);
+        }
+
+        .hiw-browser-enhanced {
+          flex: 1 1 0;
+          min-width: 0;
+          background: #FFFFFF;
+          border: 1px solid #EDF2EF;
+          border-radius: 16px;
+          overflow: hidden;
+          box-shadow: 0 12px 28px -20px rgba(21,32,25,0.5);
+        }
 
         .hiw-stage-grid {
           display: grid;
@@ -1209,6 +1634,32 @@ function Index() {
           .hiw-panel { width: 100%; max-width: 420px; }
           .hiw-stage-head { margin-bottom: 2.5rem; }
         }
+
+        /* Enhanced responsive styles */
+        @media (max-width: 1080px) {
+          .hiw-flow-container {
+            grid-template-columns: 1fr;
+            gap: 2rem;
+          }
+          .hiw-flow-center {
+            order: -1;
+            margin-bottom: 1rem;
+          }
+          .hiw-flow-cards {
+            flex-direction: row;
+            flex-wrap: wrap;
+            justify-content: center;
+          }
+          .hiw-steps-tracker {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+          }
+          .hiw-steps-tracker .hiw-step-item:last-child {
+            grid-column: 1 / -1;
+          }
+          .hiw-visual-panels {
+            grid-template-columns: 1fr;
+          }
+        }
         @media (max-width: 560px) {
           .hiw-stage { padding: 2.5rem 1.25rem; border-radius: 22px; }
           .hiw-core { grid-template-columns: 52px 34px auto 34px 52px; }
@@ -1219,6 +1670,45 @@ function Index() {
           .hiw-panel { flex-direction: column; }
           .hiw-statlist, .hiw-rail { flex: none; }
           .hiw-rail { flex-direction: row; justify-content: flex-start; gap: 10px; }
+
+          /* Enhanced mobile styles */
+          .hiw-stage-enhanced {
+            padding: 2rem 1rem;
+            border-radius: 24px;
+          }
+          .hiw-flow-container {
+            gap: 1.5rem;
+          }
+          .hiw-flow-cards {
+            flex-direction: column;
+          }
+          .hiw-flow-card {
+            padding: 0.85rem 1rem;
+          }
+          .hiw-flow-hub {
+            width: 100px;
+            height: 100px;
+          }
+          .hiw-flow-hub-inner {
+            width: 70px;
+            height: 70px;
+          }
+          .hiw-steps-tracker {
+            grid-template-columns: 1fr;
+            gap: 0.75rem;
+          }
+          .hiw-steps-tracker .hiw-step-item:last-child {
+            grid-column: auto;
+          }
+          .hiw-step-item {
+            padding: 0.85rem;
+          }
+          .hiw-visual-panels {
+            gap: 1rem;
+          }
+          .hiw-panel-enhanced {
+            padding: 12px;
+          }
         }
 
         /* ── How It Works: bottom stat bar ── */
@@ -3328,6 +3818,25 @@ function PlatformCard({
 }
 
 export default function IndexRoute() {
+  const history = useHistory();
+
+  // Native Android/iOS: never mount the marketing page. Replace inside an
+  // IonPage so IonRouterOutlet isn't left blank (bare <Redirect> shows nothing).
+  useEffect(() => {
+    if (!isNativeApp()) return;
+    history.replace(getStoredUser() ? "/dashboard" : "/login");
+  }, [history]);
+
+  if (isNativeApp()) {
+    return (
+      <AppPage title="PlatePielet">
+        <div className="flex min-h-full items-center justify-center bg-background" aria-busy="true">
+          <p className="text-sm text-muted-foreground">Opening PlatePielet…</p>
+        </div>
+      </AppPage>
+    );
+  }
+
   return (
     <AppPage title={PAGE_TITLE}>
       <Index />

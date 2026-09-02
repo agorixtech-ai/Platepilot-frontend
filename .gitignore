@@ -31,3 +31,10 @@ dist-ssr
 *.sln
 *.sw?
 .vercel
+
+# Capacitor / Android
+android/
+.capacitor/
+*.keystore
+*.jks
+local.properties

@@ -13,6 +13,10 @@ import "@fontsource-variable/inter";
 
 import "./styles.css";
 import App from "./App";
+import { initNativeShell } from "./lib/nativeShell";
+
+/* Status bar / back-button / keyboard — no-ops on web. */
+void initNativeShell();
 
 /* No StrictMode: IonReactRouter's page-transition stack manager is not
    StrictMode-safe (double-mounted effects freeze transitions mid-flight). */

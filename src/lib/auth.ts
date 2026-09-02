@@ -1,6 +1,7 @@
-import { API_URL } from "./apiBase";
+import { getApiUrl } from "./apiBase";
 
-const API_BASE = `${API_URL}/auth`;
+const API_BASE = () => `${getApiUrl()}/auth`;
+
 
 export interface User {
   id: string;
@@ -77,7 +78,7 @@ async function apiFetch(path: string, options: RequestInit = {}): Promise<Respon
     ...(options.headers as Record<string, string>),
   };
   if (token) headers["Authorization"] = `Bearer ${token}`;
-  return fetch(`${API_BASE}${path}`, { ...options, headers });
+  return fetch(`${API_BASE()}${path}`, { ...options, headers });
 }
 
 async function handleResponse<T>(res: Response): Promise<T> {
@@ -176,7 +177,7 @@ export async function refreshAccessToken(): Promise<AuthTokens | null> {
   refreshInFlight = (async () => {
     const refreshToken = getRefreshToken();
     if (!refreshToken) return null;
-    const res = await fetch(`${API_BASE}/refresh`, {
+    const res = await fetch(`${API_BASE()}/refresh`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ refresh_token: refreshToken }),
@@ -234,7 +235,7 @@ export async function changePassword(
 
 /* ══ GOOGLE OAUTH DISABLED — backend /api/auth/google is commented out ══
 export function getGoogleOAuthUrl(): string {
-  return `${API_BASE}/google`;
+  return `${API_BASE()}/google`;
 }
 */
 
@@ -282,7 +283,7 @@ export interface DemoRequest {
   last_name: string;
   email: string;
   restaurant: string;
-  phone: string;
+  phone: string; 
   pos_system: string;
   message: string;
   submitted_at: string;
@@ -290,7 +291,7 @@ export interface DemoRequest {
 
 async function adminFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
   const doFetch = () =>
-    fetch(`${API_URL}/admin${path}`, {
+    fetch(`${getApiUrl()}/admin${path}`, {
       ...options,
       headers: {
         "Content-Type": "application/json",

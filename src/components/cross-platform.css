@@ -1,0 +1,341 @@
+/* PlatePielet cross-platform marketing section + device frames */
+
+.xp-section {
+  padding: 4.5rem 1.25rem 5rem;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% 0%, rgba(232, 247, 237, 0.9), transparent 70%),
+    #ffffff;
+}
+
+.xp-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.xp-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  background: #e8f7ed;
+  color: #15803d;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.xp-title {
+  margin: 1rem auto 0.5rem;
+  max-width: 16ch;
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1.1;
+  color: #152019;
+}
+
+.xp-sub {
+  margin: 0 auto 2.5rem;
+  max-width: 36rem;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #66736b;
+}
+
+.xp-devices {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 1rem;
+  min-height: 220px;
+  margin-bottom: 2rem;
+}
+
+.xp-device {
+  flex-shrink: 0;
+}
+
+.xp-bezel {
+  background: #071a14;
+  border-radius: 10px;
+  padding: 8px;
+  box-shadow: 0 24px 48px -28px rgba(7, 26, 20, 0.65);
+}
+
+.xp-bezel-flat {
+  border-radius: 14px;
+}
+
+.xp-bezel-phone {
+  border-radius: 18px;
+  padding: 6px;
+  position: relative;
+}
+
+.xp-notch {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  z-index: 2;
+  width: 36%;
+  height: 6px;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  background: #0a1a10;
+}
+
+.xp-monitor .xp-bezel {
+  width: 280px;
+  height: 170px;
+}
+
+.xp-laptop .xp-bezel {
+  width: 220px;
+  height: 138px;
+}
+
+.xp-tablet .xp-bezel {
+  width: 140px;
+  height: 190px;
+}
+
+.xp-phone .xp-bezel {
+  width: 92px;
+  height: 178px;
+}
+
+.xp-stand {
+  width: 14px;
+  height: 18px;
+  margin: 0 auto;
+  background: #c5d4cb;
+}
+
+.xp-base {
+  width: 90px;
+  height: 8px;
+  margin: 0 auto;
+  border-radius: 999px;
+  background: #a8bdb0;
+}
+
+.xp-laptop-deck {
+  height: 10px;
+  margin: 0 -8px;
+  border-radius: 0 0 8px 8px;
+  background: linear-gradient(180deg, #d5e2da, #b7c9be);
+}
+
+.xp-screen {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px;
+  border-radius: 6px;
+  background: linear-gradient(180deg, #ffffff 0%, #f6f7f8 100%);
+  overflow: hidden;
+}
+
+.xp-screen--phone {
+  padding: 14px 7px 7px;
+  gap: 5px;
+}
+
+.xp-screen-bar {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 10px;
+}
+
+.xp-brand-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #16a34a;
+  flex-shrink: 0;
+}
+
+.xp-brand-name {
+  font-size: 7px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: #071a14;
+}
+
+.xp-screen-meta {
+  display: flex;
+  gap: 4px;
+}
+
+.xp-screen-meta span {
+  flex: 1;
+  height: 14px;
+  border-radius: 4px;
+  background: #e8f7ed;
+}
+
+.xp-chart {
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+}
+
+.xp-screen-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.xp-screen-rows span {
+  display: block;
+  height: 5px;
+  border-radius: 999px;
+  background: #dde7e1;
+}
+
+.xp-screen-rows span:nth-child(1) {
+  width: 92%;
+}
+.xp-screen-rows span:nth-child(2) {
+  width: 70%;
+}
+.xp-screen-rows span:nth-child(3) {
+  width: 82%;
+}
+
+.xp-phone-kpis {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+}
+
+.xp-phone-kpis div {
+  padding: 4px;
+  border-radius: 5px;
+  background: #e8f7ed;
+  text-align: left;
+}
+
+.xp-phone-kpis small {
+  display: block;
+  font-size: 5px;
+  font-weight: 700;
+  color: #66736b;
+  text-transform: uppercase;
+}
+
+.xp-phone-kpis strong {
+  font-size: 8px;
+  font-weight: 800;
+  color: #15803d;
+}
+
+.xp-phone-tabs {
+  display: flex;
+  justify-content: space-between;
+  gap: 3px;
+  margin-top: auto;
+  padding: 4px 2px 0;
+  border-top: 1px solid #dde7e1;
+}
+
+.xp-phone-tabs span {
+  flex: 1;
+  height: 4px;
+  border-radius: 999px;
+  background: #dde7e1;
+}
+
+.xp-phone-tabs span.is-on {
+  background: #16a34a;
+}
+
+.xp-pills {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  list-style: none;
+  margin: 0 0 1.75rem;
+  padding: 0;
+}
+
+.xp-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.45rem 0.8rem;
+  border-radius: 999px;
+  border: 1px solid #dde7e1;
+  background: #ffffff;
+  color: #152019;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.xp-pill svg {
+  color: #15803d;
+}
+
+.xp-stores {
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.xp-store-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.65rem 1rem;
+  border-radius: 12px;
+  background: #071a14;
+  color: #ffffff;
+  text-decoration: none;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.xp-store-btn:hover {
+  background: #0f7a4c;
+  transform: translateY(-1px);
+}
+
+.xp-store-copy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.15;
+}
+
+.xp-store-copy small {
+  font-size: 0.62rem;
+  opacity: 0.75;
+}
+
+.xp-store-copy strong {
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+@media (max-width: 900px) {
+  .xp-monitor,
+  .xp-laptop {
+    display: none;
+  }
+}
+
+@media (max-width: 520px) {
+  .xp-tablet {
+    display: none;
+  }
+  .xp-phone .xp-bezel {
+    width: 120px;
+    height: 230px;
+  }
+}

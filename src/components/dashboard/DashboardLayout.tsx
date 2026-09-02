@@ -2,21 +2,6 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Link, useHistory, useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { LogOut } from "lucide-react";
-import LayoutDashboardIcon from "@/components/ui/icons/layout-dashboard-icon";
-import ShoppingCartIcon from "@/components/ui/icons/shopping-cart-icon";
-import FileDescriptionIcon from "@/components/ui/icons/file-description-icon";
-import StackIcon from "@/components/ui/icons/stack-icon";
-import BookIcon from "@/components/ui/icons/book-icon";
-import SoupIcon from "@/components/ui/icons/soup-icon";
-import TruckElectricIcon from "@/components/ui/icons/truck-electric-icon";
-import CurrencyDollarIcon from "@/components/ui/icons/currency-dollar-icon";
-import MapPinIcon from "@/components/ui/icons/map-pin-icon";
-import StarIcon from "@/components/ui/icons/star-icon";
-import BrandOpenaiIcon from "@/components/ui/icons/brand-openai-icon";
-import ChartBarIcon from "@/components/ui/icons/chart-bar-icon";
-import UserIcon from "@/components/ui/icons/user-icon";
-import GearIcon from "@/components/ui/icons/gear-icon";
-import type { AnimatedIconHandle } from "@/components/ui/icons/types";
 import { AppLogo } from "@/components/AppLogo";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -42,7 +27,6 @@ import {
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import {
   getStoredUser,
   canOpenPage,
@@ -57,47 +41,30 @@ import { DateRangeProvider } from "@/contexts/DateRangeContext";
 import { LocationSwitcher } from "@/components/dashboard/LocationSwitcher";
 import { DateRangePicker } from "@/components/dashboard/DateRangePicker";
 import { FloatingAiAssistant } from "@/components/ui/glowing-ai-chat-assistant";
+import { MobileTabBar } from "@/components/dashboard/MobileTabBar";
+import {
+  ADMIN_ITEMS,
+  AI_ITEMS,
+  MAIN_ITEMS,
+  OPS_ITEMS,
+  pageKeyOf,
+  type NavItem,
+} from "@/components/dashboard/navItems";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { isNativeApp } from "@/lib/native";
+import StackIcon from "@/components/ui/icons/stack-icon";
+import type { AnimatedIconHandle } from "@/components/ui/icons/types";
 
-export type NavItem = {
-  icon: typeof LayoutDashboardIcon;
-  label: string;
-  to: string;
-  count?: number;
-  badge?: string;
-};
+export type { NavItem } from "@/components/dashboard/navItems";
+export {
+  ADMIN_ITEMS,
+  AI_ITEMS,
+  MAIN_ITEMS,
+  NAV_ITEMS,
+  OPS_ITEMS,
+  pageKeyOf,
+} from "@/components/dashboard/navItems";
 
-const MAIN_ITEMS: NavItem[] = [
-  { icon: LayoutDashboardIcon, label: "Overview", to: "/dashboard" },
-  { icon: ShoppingCartIcon, label: "POS Sales", to: "/dashboard/pos" },
-  { icon: FileDescriptionIcon, label: "Tally / Accounting", to: "/dashboard/tally" },
-];
-
-const OPS_ITEMS: NavItem[] = [
-  { icon: StackIcon, label: "Inventory", to: "/dashboard/inventory" },
-  { icon: BookIcon, label: "Menu", to: "/dashboard/menu" },
-  { icon: SoupIcon, label: "Menu Engineering", to: "/dashboard/menu-engineering" },
-  { icon: TruckElectricIcon, label: "Suppliers", to: "/dashboard/suppliers" },
-  { icon: CurrencyDollarIcon, label: "Market Prices", to: "/dashboard/market-prices" },
-  { icon: MapPinIcon, label: "Branches", to: "/dashboard/branches" },
-  { icon: StarIcon, label: "Reviews", to: "/dashboard/reviews" },
-];
-
-const AI_ITEMS: NavItem[] = [
-  { icon: BrandOpenaiIcon, label: "Pilot AI", to: "/dashboard/ai", badge: "AI" },
-  { icon: ChartBarIcon, label: "Reports", to: "/dashboard/reports" },
-];
-
-const ADMIN_ITEMS: NavItem[] = [
-  { icon: UserIcon, label: "Profile", to: "/dashboard/profile" },
-  { icon: GearIcon, label: "Settings", to: "/dashboard/settings" },
-];
-
-export const NAV_ITEMS = [...MAIN_ITEMS, ...OPS_ITEMS, ...AI_ITEMS, ...ADMIN_ITEMS];
-
-/** "/dashboard" → "overview", "/dashboard/pos" → "pos" — matches backend PAGES. */
-export function pageKeyOf(to: string): string {
-  return to === "/dashboard" ? "overview" : to.replace("/dashboard/", "");
-}
 
 /* Profile is never gated (everyone may see their own), and /admin is already
    guarded by is_admin — everything else needs the page in the user's role. */
@@ -341,6 +308,7 @@ function MainPanel({
   userName: string;
 }) {
   const { state, isMobile } = useSidebar();
+  const compact = useIsMobile() || isNativeApp();
   const { pathname } = useLocation();
   const firstName = userName.split(" ")[0] ?? userName;
   const hour = new Date().getHours();
@@ -348,10 +316,14 @@ function MainPanel({
 
   return (
     <SidebarInset className="flex flex-col overflow-hidden bg-background dashboard-canvas">
-      <header className="sticky top-0 z-[var(--z-sticky)] shrink-0 border-b border-border bg-white">
+      <header className="sticky top-0 z-[var(--z-sticky)] shrink-0 border-b border-border bg-white pt-[env(safe-area-inset-top)]">
         <div className="dashboard-topbar-inner flex w-full items-center gap-3 px-4 sm:px-6 md:px-8">
-          {(state === "collapsed" || isMobile) && (
+          {/* Sidebar hamburger stays for tablet/desktop; phones use bottom tabs. */}
+          {(state === "collapsed" || isMobile) && !compact && (
             <SidebarTrigger className="h-9 w-9 shrink-0 rounded-xl text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground [&_svg]:size-4" />
+          )}
+          {compact && (
+            <SidebarTrigger className="h-9 w-9 shrink-0 rounded-xl text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground md:hidden [&_svg]:size-4" />
           )}
 
           <div className="min-w-0 flex-1">
@@ -410,12 +382,18 @@ function MainPanel({
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-4 py-5 sm:px-6 md:px-8 md:py-6">
+      <div
+        className={cn(
+          "flex-1 overflow-y-auto px-4 py-5 sm:px-6 md:px-8 md:py-6",
+          compact && "pb-[calc(4.75rem+env(safe-area-inset-bottom))]",
+        )}
+      >
         <div className="w-full">{children}</div>
       </div>
 
-      {/* Pilot AI chat widget on every page; the AI page IS the chat already. */}
-      {pathname !== "/dashboard/ai" && <FloatingAiAssistant />}
+      {/* On phones / Android app, Pilot lives in the tab bar — skip the floating chip. */}
+      {pathname !== "/dashboard/ai" && !compact && <FloatingAiAssistant />}
+      {compact && <MobileTabBar />}
     </SidebarInset>
   );
 }
