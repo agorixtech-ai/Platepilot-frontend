@@ -38,6 +38,7 @@ import {
   Zap,
 } from "lucide-react";
 import { PlatePieletHero, T } from "@/components/PlatePieletHero";
+import { WhyPlatePieletSection } from "@/components/WhyPlatePieletSection";
 import { MagicCard } from "@/components/ui/magic-card";
 import { PlatePieletNav } from "@/components/PlatePieletNav";
 import InteractiveBentoGallery, {
@@ -926,6 +927,27 @@ function Index() {
         .sw-rule {
           height: 1px;
           background: #DDE7E1;
+        }
+
+        /* ── Mascot accents — sprinkled across sections for brand warmth ── */
+        .intro-band, .loop-section, .tm-copy, .cta-band { position: relative; }
+        .pp-mascot {
+          position: absolute;
+          pointer-events: none;
+          user-select: none;
+          filter: drop-shadow(0 12px 20px rgba(15, 122, 76, 0.18));
+          animation: pp-mascot-bob 4s ease-in-out infinite;
+        }
+        @keyframes pp-mascot-bob {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-10px); }
+        }
+        .pp-mascot--intro { top: -16px; right: 0; width: 120px; animation-delay: 0.2s; }
+        .pp-mascot--loop { bottom: -8px; right: 4px; width: 100px; animation-delay: 0.6s; }
+        .pp-mascot--testimonial { left: -8px; bottom: -28px; width: 110px; animation-delay: 1s; }
+        .pp-mascot--cta { right: 48px; bottom: 100%; width: 140px; margin-bottom: -18px; animation-delay: 0.4s; }
+        @media (max-width: 960px) {
+          .pp-mascot { display: none; }
         }
 
         /* ── Back-to-top ── */
@@ -3049,30 +3071,8 @@ function Index() {
         {/* ══════════════════════════════════════════════════════════════════ */}
         <div id="software-section" />
         <div className="sw-rule" />
-        <div className="sw-section">
-          <div
-            ref={sec1.ref}
-            className={`intro-band reveal${sec1.visible ? " show" : ""} flex flex-col gap-6`}
-          >
-            <div>
-              <div className="sw-eyebrow">Why PlatePielet</div>
-              <h2 className="intro-h2">
-                Restaurant intelligence powered by <span className="gradient-text-a">realtime</span>{" "}
-                <span className="gradient-text-b">AI&#8209;driven</span> analysis
-              </h2>
-            </div>
-            <div>
-              <p className="intro-body">
-                PlatePielet transforms your restaurant data into clear, actionable insights in real
-                time. Monitor performance, identify trends, detect issues, and uncover opportunities
-                across sales, inventory, costs, and operations, all from one intelligent platform.
-              </p>
-              <p className="intro-body" style={{ marginTop: "1rem" }}>
-                Make faster, data-driven decisions with the information that matters most to your
-                restaurant.
-              </p>
-            </div>
-          </div>
+        <div ref={sec1.ref}>
+          <WhyPlatePieletSection visible={sec1.visible} />
         </div>
 
         {/* ══════════════════════════════════════════════════════════════════ */}
@@ -3082,6 +3082,7 @@ function Index() {
         <div className="sw-band">
           <div className="sw-section">
             <div ref={sec5.ref} className={`loop-section reveal${sec5.visible ? " show" : ""}`}>
+              <img className="pp-mascot pp-mascot--loop" src="/hero/hero-mascot.png" alt="" />
               <HowItWorksFlow />
               <div className="hiw-stats">
                 {DATA_DECISION_STEPS.map(({ Icon, title, description }, index) => (
@@ -3617,6 +3618,7 @@ function Index() {
             <div className="tm-section">
               <div className="tm-split">
                 <div className="tm-copy">
+                  <img className="pp-mascot pp-mascot--testimonial" src="/hero/hero-mascot.png" alt="" />
                   <span className="tm-badge">Testimonials &amp; Reviews</span>
                   <h2 className="sw-section-h2" style={{ marginTop: "1.5rem", maxWidth: 420 }}>
                     Restaurant owners run on PlatePielet.
@@ -3729,6 +3731,7 @@ function Index() {
       <PlatePieletFooter>
         <div className="sw-section" id="contact">
           <div className="cta-band">
+            <img className="pp-mascot pp-mascot--cta" src="/hero/hero-mascot.png" alt="" />
             <h2 className="cta-heading">Start optimizing your restaurant today.</h2>
             <div className="cta-actions">
               <a href="/demo" className="btn-white">

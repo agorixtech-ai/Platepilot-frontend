@@ -1,6 +1,4 @@
-import { useEffect, useRef, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { useEffect, useState, type ReactNode } from "react";
 import { SALES_PHONE, SALES_PHONE_HREF } from "@/lib/contact";
 
 /** Matches PlatePielet brand palette — light landing (soft green-white).
@@ -20,9 +18,6 @@ export const T = {
   surface: "#FFFFFF",
   inset: "#E8F7ED",
   accent: "#16A34A",
-  /* Button/badge fill under WHITE text. #16A34A is only 3.30:1 against white,
-     which fails AA for a label; #15803D is 5.02:1. Fills that carry no text
-     keep using `accent`. */
   accentSolid: "#15803D",
   accentSoft: "rgba(22,163,74,0.12)",
   accentBorder: "rgba(22,163,74,0.28)",
@@ -32,20 +27,13 @@ export const T = {
   limeDark: "#0A1A10",
   gradient: "linear-gradient(90deg, #073B2A 0%, #0F7A4C 50%, #22C55E 100%)",
   gradientHover: "linear-gradient(90deg, #0A4A35 0%, #12965C 50%, #4ADE80 100%)",
-  /* Endpoints stay >= 3:1 on white (the AA floor for large text). The old
-     gradientB ended on #22C55E at 2.28:1 — an H1 nobody with low vision could
-     read. Both ramps now run dark -> mid -> brand so they still read as two
-     distinct highlights. */
   gradientA: "linear-gradient(90deg, #073B2A 0%, #0F7A4C 100%)",
   gradientB: "linear-gradient(90deg, #0F7A4C 0%, #16A34A 100%)",
-  /* Premium gradient/glow additions — button fill, decorative mint accents,
-     hero glow, and card glass. Never reaches #16A34A/#22C55E under text
-     (see the accentSolid note above on AA contrast). */
   gradientCTA: "linear-gradient(135deg, #073B2A 0%, #0F7A4C 55%, #15803D 100%)",
   gradientMint: "linear-gradient(135deg, #16A34A 0%, #84CC16 55%, #ECFCCB 100%)",
   glowHero:
-    "radial-gradient(closest-side, rgba(34,197,94,0.28) 0%, rgba(163,230,53,0.14) 45%, rgba(255,255,255,0) 72%)",
-  cardGlassBg: "rgba(255,255,255,0.86)",
+    "radial-gradient(closest-side, rgba(34,197,94,0.35) 0%, rgba(163,230,53,0.16) 40%, rgba(255,255,255,0) 70%)",
+  cardGlassBg: "#FFFFFF",
 } as const;
 
 const gradientClip = (gradient: string) =>
@@ -56,1116 +44,1150 @@ const gradientClip = (gradient: string) =>
     backgroundClip: "text",
   }) as const;
 
-const cardShell = {
-  border: `1px solid ${T.border}`,
-  borderRadius: 14,
-  background: T.cardGlassBg,
-  backdropFilter: "blur(10px) saturate(160%)",
-  WebkitBackdropFilter: "blur(10px) saturate(160%)",
-  boxShadow: "0 2px 10px rgba(7,26,20,0.06)",
+const IMG = {
+  chefs: ["/hero/hero-chef.jpg", "/hero/hero-chef-2.jpg", "/hero/hero-chef-3.jpg"] as const,
+  mascot: "/hero/hero-mascot.png",
+  tomatoes: "/hero/hero-tomatoes1.jpg",
+  salad: "/hero/hero-salad.jpg",
+  butter: "/hero/hero-butter-chicken.jpg",
+  biryani: "/hero/hero-biryani.jpg",
+  paneer: "/hero/hero-paneer.jpg",
 } as const;
 
-const LAYOUT = { max: 1280, pad: 40, stage: 1225 } as const;
-const STAGE_H = 640;
-const HALF = LAYOUT.stage / 2;
-const COPY_LEFT = 0;
-const COPY_WIDTH = HALF - COPY_LEFT - 24;
-const ANIM_INSET = 14;
-const LIST_W = 162;
-const LIST_LEFT = HALF + ANIM_INSET;
-const LIST_RIGHT = LIST_LEFT + LIST_W;
-const SPINE_GAP = 28;
-const SPINE_X = LIST_RIGHT + SPINE_GAP;
-const DASH_LEFT = SPINE_X + 8;
-const DASH_WIDTH = LAYOUT.stage - DASH_LEFT;
-const DASH_TOP = 36;
-const DASH_GAP = 10;
-const STAT_H = 90;
-const DASH_BOTTOM = STAGE_H - 36;
-const SPINE_BOTTOM = DASH_BOTTOM - 76; // trim ~7 dash segments below bottom stat row
-const LIST_H = 320;
-const LIST_TOP = (DASH_TOP + DASH_BOTTOM - LIST_H) / 2;
-const CONNECT_Y = LIST_TOP + LIST_H / 2;
+const TOP_SELLING = [
+  { name: "Butter Chicken", pct: 62, img: IMG.butter },
+  { name: "Biryani", pct: 48, img: IMG.biryani },
+  { name: "Paneer Tikka", pct: 36, img: IMG.paneer },
+] as const;
 
-const btnBase = {
-  display: "inline-flex" as const,
-  alignItems: "center" as const,
-  justifyContent: "center" as const,
-  boxSizing: "border-box" as const,
-  fontFamily: "inherit",
-  textDecoration: "none",
-  lineHeight: 1,
-  whiteSpace: "nowrap" as const,
-};
-const btnOutlineSm = {
-  ...btnBase,
-  fontSize: 14,
-  fontWeight: 700,
-  letterSpacing: "0.06em",
-  height: 40,
-  padding: "0 18px",
-  color: T.accentSolid,
-  border: `1px solid ${T.accent}`,
-  borderRadius: 12,
-  background: "#FFFFFF",
-};
-const btnSolidSm = {
-  ...btnOutlineSm,
-  color: T.ink,
-  border: "none",
-  // background + boxShadow live in the .pp-btn-solid CSS class (below) so
-  // its :hover rule can override them — inline style beats any CSS
-  // selector, hover included. `undefined` here clears the "#FFFFFF" spread
-  // in from btnOutlineSm (React omits undefined style props entirely), so
-  // the CSS class's background can actually take effect.
-  background: undefined,
-};
-const btnOutlineLg = { ...btnOutlineSm, fontSize: 16, height: 48, padding: "0 24px" };
-const btnSolidLg = { ...btnSolidSm, fontSize: 16, height: 48, padding: "0 26px" };
-
-// ── Alert card data ──────────────────────────────────────────────────────────
-type AlertCard = {
-  score: string;
-  risk: string;
-  date: string;
-  title: string;
-  subtitle: string;
-  message: string;
-  status: string;
-  statusColor: string;
-  badgeBg: string;
-  badgeFg: string;
-};
-
-const ALERT_CARDS: AlertCard[] = [
+const FEATURES = [
   {
-    score: "92",
-    risk: "Food Cost Risk",
-    date: "Tue, Sep 30",
-    title: "Food Cost",
-    subtitle: "Anna Nagar Outlet",
-    message: "Food cost running 6.4% over target — ₹41,800 margin at risk",
-    status: "Over Budget",
-    statusColor: T.warn,
-    badgeBg: "#FF5757", // red — highest risk
-    badgeFg: "#fff",
+    title: "Smart Inventory",
+    desc: "Live stock tracking with low stock alerts",
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+        <path d="M3.3 7 12 12l8.7-5M12 22V12" />
+      </svg>
+    ),
   },
   {
-    score: "67",
-    risk: "Inventory Risk",
-    date: "30 minutes ago",
-    title: "Stock Variance",
-    subtitle: "Velachery Branch",
-    message: "Inventory shrinkage gap of ₹18,400 detected",
-    status: "Variance Alert",
-    statusColor: "#f87171",
-    badgeBg: "#C8F135", // lime — lowest risk
-    badgeFg: T.limeDark,
+    title: "Waste Detection",
+    desc: "AI detects spoilage, over-prep & shrinkage",
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+        <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" />
+      </svg>
+    ),
   },
   {
-    score: "88",
-    risk: "Wastage Risk",
-    date: "Tue, Sep 30",
-    title: "Wastage",
-    subtitle: "Head Office",
-    message: "Kitchen wastage trending +2.1% — ₹9,600 above weekly norm",
-    status: "Needs Review",
-    statusColor: T.warn,
-    badgeBg: "#FF9B3E", // amber — mid risk
-    badgeFg: "#2D1200",
+    title: "Purchase Optimization",
+    desc: "Buy right, at the right time, at the best price",
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+        <circle cx="9" cy="20" r="1.5" />
+        <circle cx="18" cy="20" r="1.5" />
+        <path d="M3 4h2l2.4 12h11.2l2-8H7" />
+      </svg>
+    ),
   },
-];
+  {
+    title: "Automated Reports",
+    desc: "Real-time insights and performance reports",
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+        <path d="M14 2v6h6M8 13h8M8 17h5" />
+      </svg>
+    ),
+  },
+] as const;
 
-// ── Stat values per card ─────────────────────────────────────────────────────
-type CardStat = { label: string; value: number };
-const CARD_STATS: CardStat[][] = [
-  [
-    { label: "Food Cost %", value: 31 },
-    { label: "Purchase Orders", value: 14 },
-    { label: "Wastage Alerts", value: 3 },
-  ],
-  [
-    { label: "Food Cost %", value: 28 },
-    { label: "Purchase Orders", value: 9 },
-    { label: "Wastage Alerts", value: 1 },
-  ],
-  [
-    { label: "Food Cost %", value: 34 },
-    { label: "Purchase Orders", value: 22 },
-    { label: "Wastage Alerts", value: 5 },
-  ],
-];
-
-// ── Scrolling source list ────────────────────────────────────────────────────
-type IconKey = "file" | "pos" | "tag" | "zap";
-
-const ICON_PATHS: Record<IconKey, string> = {
-  file: "M3 2h7l4 4v11H3V2zm7 0v4h4",
-  pos: "M2 3h12v2H2zM3 5l1 9h8l1-9",
-  tag: "M2 2h6l6 6-6 6-6-6V2zm3.5 3.5a1 1 0 102 0 1 1 0 00-2 0",
-  zap: "M11 1L7 9h5l-3 6",
-};
-
-const BASE_ITEMS: { name: string; sub: string; icon: IconKey }[] = [
-  { name: "Invoice #INV-8821", sub: "Tally ERP", icon: "file" },
-  { name: "Sale #POS-2249", sub: "Anna Nagar", icon: "pos" },
-  { name: "Receipt #RCP-0344", sub: "Velachery", icon: "file" },
-  { name: "Purchase #PO-1192", sub: "Head Office", icon: "tag" },
-  { name: "Ledger #LED-7701", sub: "VAT Module", icon: "file" },
-  { name: "Bill #BILL-4432", sub: "Nungambakkam", icon: "pos" },
-  { name: "Journal #JV-5521", sub: "Accounts", icon: "tag" },
-  { name: "Transfer #TRF-9901", sub: "Bank Sync", icon: "zap" },
-  { name: "Sale #POS-3301", sub: "T. Nagar", icon: "pos" },
-];
-
-const SCROLL_ITEMS = [...BASE_ITEMS, ...BASE_ITEMS];
-const ROW_H = 50;
-const SCROLL_DISTANCE = BASE_ITEMS.length * ROW_H;
-
-// ── AI ticker ────────────────────────────────────────────────────────────────
-// 5 continuous paragraphs — each streams as one flowing block of text
-const AI_LINE_SETS = [
-  "Food cost trending 6.4% over target at Anna Nagar. Chicken and rice purchases up 12% week-on-week. Recommend renegotiating supplier rate before month-end.",
-  "Inventory shrinkage gap of ₹18,400 detected at Velachery. Three SKUs affected over the past 7 days. Stock count reconciliation suggested.",
-  "Food cost variance +3.2% above weekly threshold. Velachery branch exceeding budget on 4 items. Adjust procurement to recover margin gap.",
-  "Wastage trending +2.1% this week — ₹9,600 above the norm. Prep portions on 3 dishes look oversized. Kitchen review recommended.",
-  "14 purchase orders pending approval across outlets. 2 vendors flagged for price increases this month. Review before next delivery cycle.",
-];
-
-const SMALL_STATS = [
-  { val: "₹8.6L", label: "Inventory Value", color: T.text, delay: "1.02s" },
-  { val: "847", label: "Bills Today", color: T.text, delay: "1.07s" },
-  { val: "12", label: "AI Insights", color: T.accent, delay: "1.12s" },
-];
-
-// ── Count-up component ───────────────────────────────────────────────────────
-function CountUp({ target, trigger }: { target: number; trigger: number }) {
-  const [val, setVal] = useState(0);
+function LiveFoodCost() {
+  const [cost, setCost] = useState(0);
+  const [delta, setDelta] = useState(2.1);
 
   useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setCost(28.6);
+      setDelta(2.1);
+      return;
+    }
+
+    const base = 28.6;
     const t0 = performance.now();
-    const duration = 600;
+    let raf = 0;
+    let lastTick = 0;
+
     const tick = (now: number) => {
-      const p = Math.min(1, (now - t0) / duration);
-      const e = 1 - Math.pow(1 - p, 3); // ease-out cubic
-      setVal(Math.round(target * e));
-      if (p < 1) requestAnimationFrame(tick);
+      const intro = Math.min(1, (now - t0) / 1100);
+      if (intro < 1) {
+        setCost(base * (1 - Math.pow(1 - intro, 3)));
+      } else if (now - lastTick > 180) {
+        lastTick = now;
+        const wobble = Math.sin(now / 900) * 0.35 + Math.sin(now / 430) * 0.18;
+        const noise = (Math.random() - 0.5) * 0.12;
+        setCost(base + wobble + noise);
+        setDelta(2.1 + Math.sin(now / 1100) * 0.22 + (Math.random() - 0.5) * 0.08);
+      }
+      raf = requestAnimationFrame(tick);
     };
-    requestAnimationFrame(tick);
-  }, [trigger, target]);
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, []);
 
-  if (target >= 1000) {
-    const s = val >= 1000 ? `${(val / 1000).toFixed(1)}k` : String(val);
-    return <>{s}</>;
-  }
-  return <>{val}</>;
+  const down = delta >= 0;
+  return (
+    <>
+      <div className="pp-hero__metric">
+        {cost.toFixed(1)}%
+      </div>
+      <div className={`pp-hero__delta${down ? "" : " pp-hero__delta--up"}`}>
+        {down ? "↓" : "↑"} {Math.abs(delta).toFixed(1)}% vs last week
+      </div>
+    </>
+  );
 }
 
-// ── Streaming text component ─────────────────────────────────────────────────
-function StreamingText({
-  text,
-  trigger,
-  startDelay = 0,
-  onComplete,
-}: {
-  text: string;
-  trigger: number;
-  startDelay?: number;
-  onComplete?: () => void;
-}) {
-  const [displayed, setDisplayed] = useState("");
-
-  useEffect(() => {
-    setDisplayed("");
-    let intervalId: ReturnType<typeof setInterval> | undefined;
-    const timeoutId = setTimeout(() => {
-      let i = 0;
-      intervalId = setInterval(() => {
-        i++;
-        setDisplayed(text.slice(0, i));
-        if (i >= text.length) {
-          clearInterval(intervalId);
-          onComplete?.();
-        }
-      }, 22); // 22ms/char — fast enough to finish before cycling
-    }, startDelay);
-    return () => {
-      clearTimeout(timeoutId);
-      if (intervalId) clearInterval(intervalId);
-    };
-  }, [trigger, text, startDelay]);
-
-  return <>{displayed}</>;
+function ProgressBar({ pct, delay }: { pct: number; delay: string }) {
+  return (
+    <div className="pp-hero__bar">
+      <div className="pp-hero__bar-fill" style={{ width: `${pct}%`, animationDelay: delay }} />
+    </div>
+  );
 }
 
-// ── Animated dashboard mockup (shared between desktop scaled-stage and mobile
-//    scaled-stage — both render this at the same HALF × STAGE_H design size) ──
-function AnimatedDashboard({
-  card,
-  stats,
-  cardIdx,
-  aiIdx,
-  onAiComplete,
+function Float({
+  className,
+  delay,
+  variant = "a",
+  children,
 }: {
-  card: AlertCard;
-  stats: CardStat[];
-  cardIdx: number;
-  aiIdx: number;
-  onAiComplete: () => void;
+  className?: string;
+  delay: string;
+  variant?: "a" | "b" | "c";
+  children: ReactNode;
 }) {
   return (
     <div
-      style={{
-        position: "absolute",
-        inset: 0,
-        animation: "ag-float 3.5s 0.9s ease-in-out infinite alternate",
-      }}
+      className={`pp-hero__float pp-hero__float--${variant}${className ? ` ${className}` : ""}`}
+      style={{ ["--d" as string]: delay }}
     >
-      {/* Soft blurred glow behind the whole assembly — "green gradient
-          glow behind the dashboard" ask; blur(70px) makes exact bounds
-          forgiving. */}
-      <div
-        aria-hidden="true"
-        style={{
-          position: "absolute",
-          left: 40,
-          top: STAGE_H / 2 - 260,
-          width: 520,
-          height: 520,
-          background: T.glowHero,
-          filter: "blur(70px)",
-          pointerEvents: "none",
-        }}
-      />
-      {/* ── SCROLLING SOURCE LIST ── */}
-      <div
-        style={{
-          position: "absolute",
-          left: ANIM_INSET,
-          top: LIST_TOP,
-          width: LIST_W,
-          height: LIST_H,
-          overflow: "hidden",
-          ...cardShell,
-          borderRadius: 8,
-        }}
-      >
-        {/* Active-row highlight */}
-        <div
-          style={{
-            position: "absolute",
-            left: 0,
-            right: 0,
-            top: LIST_H / 2 - ROW_H / 2,
-            height: ROW_H,
-            background: `linear-gradient(90deg,${T.accentSoft},rgba(34,197,94,0.04))`,
-            borderTop: `1px solid ${T.accentBorder}`,
-            borderBottom: `1px solid ${T.accentBorder}`,
-            pointerEvents: "none",
-            zIndex: 3,
-          }}
-        />
-        <div
-          style={{
-            willChange: "transform",
-            animation: "ag-scroll 22s linear infinite",
-          }}
-        >
-          {SCROLL_ITEMS.map((item, idx) => (
-            <div
-              key={idx}
-              style={{
-                height: ROW_H,
-                display: "flex",
-                alignItems: "center",
-                gap: 10,
-                padding: "0 12px 0 13px",
-                borderBottom: `1px solid ${T.border}`,
-              }}
-            >
-              <span
-                style={{
-                  color: T.accent,
-                  flexShrink: 0,
-                  width: 18,
-                  height: 18,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 16 16"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d={ICON_PATHS[item.icon]} />
-                </svg>
-              </span>
-              <div style={{ minWidth: 0, flex: 1, overflow: "hidden" }}>
-                <div
-                  style={{
-                    fontSize: 12.5,
-                    fontWeight: 600,
-                    color: T.soft,
-                    whiteSpace: "nowrap",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                  }}
-                >
-                  {item.name}
-                </div>
-                <div
-                  style={{
-                    fontSize: 10.5,
-                    color: T.faint,
-                    whiteSpace: "nowrap",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    marginTop: 1,
-                  }}
-                >
-                  {item.sub}
-                </div>
-              </div>
-            </div>
-          ))}
+      {children}
+    </div>
+  );
+}
+
+function FoodCostCard() {
+  return (
+    <div className="pp-hero__card">
+      <div className="pp-hero__card-row">
+        <div>
+          <div className="pp-hero__label">Food Cost</div>
+          <LiveFoodCost />
+        </div>
+        <div className="pp-hero__icon-pill" aria-hidden>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+            <path d="M3 17l6-6 4 4 7-7" />
+            <path d="M14 8h6v6" />
+          </svg>
         </div>
       </div>
-
-      {/* ── SVG CONNECTOR ── */}
-      <svg
-        viewBox={`0 0 ${LAYOUT.stage / 2} ${STAGE_H}`}
-        width="100%"
-        height={STAGE_H}
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          overflow: "visible",
-          pointerEvents: "none",
-          zIndex: 1,
-        }}
-      >
+      <svg className="pp-hero__spark" viewBox="0 0 180 30" aria-hidden>
         <path
-          d={`M${LIST_RIGHT - HALF},${CONNECT_Y - 22} C${LIST_RIGHT - HALF + 12},${CONNECT_Y - 22} ${LIST_RIGHT - HALF + 22},${CONNECT_Y} ${SPINE_X - HALF},${CONNECT_Y}`}
+          d="M2 22 C22 20, 32 8, 52 10 S80 24, 102 12 S138 4, 178 8"
           fill="none"
-          stroke="rgba(34,197,94,0.22)"
-          strokeWidth="1.3"
-          strokeDasharray="3 5"
-        />
-        <path
-          d={`M${LIST_RIGHT - HALF},${CONNECT_Y} L${SPINE_X - HALF},${CONNECT_Y}`}
-          fill="none"
-          stroke="rgba(34,197,94,0.35)"
-          strokeWidth="1.3"
-          strokeDasharray="3 5"
-        />
-        <path
-          d={`M${LIST_RIGHT - HALF},${CONNECT_Y + 22} C${LIST_RIGHT - HALF + 12},${CONNECT_Y + 22} ${LIST_RIGHT - HALF + 22},${CONNECT_Y} ${SPINE_X - HALF},${CONNECT_Y}`}
-          fill="none"
-          stroke="rgba(34,197,94,0.22)"
-          strokeWidth="1.3"
-          strokeDasharray="3 5"
-        />
-        <path
-          d={`M${SPINE_X - HALF},${DASH_TOP + 10} L${SPINE_X - HALF},${SPINE_BOTTOM}`}
-          fill="none"
-          stroke="rgba(21,32,25,.12)"
-          strokeWidth="1.3"
-          strokeDasharray="3 5"
+          stroke="#16A34A"
+          strokeWidth="2.4"
+          strokeLinecap="round"
         />
       </svg>
+    </div>
+  );
+}
 
-      {/* ── CONNECTOR NODE (centered on spine) ── */}
-      {/* Thin mint-gradient ring behind the solid dot — a 2px sliver of
-          T.gradientMint peeks out around the smaller solid circle on top. */}
-      <div
-        style={{
-          position: "absolute",
-          left: SPINE_X - HALF - 10,
-          top: CONNECT_Y - 10,
-          width: 20,
-          height: 20,
-          borderRadius: "50%",
-          background: T.gradientMint,
-          zIndex: 3,
-        }}
-      />
-      <div
-        style={{
-          position: "absolute",
-          left: SPINE_X - HALF - 8,
-          top: CONNECT_Y - 8,
-          width: 16,
-          height: 16,
-          borderRadius: "50%",
-          background: T.accent,
-          zIndex: 4,
-          animation: "ag-node 2.8s ease-in-out infinite",
-        }}
-      />
-
-      {/* ── DASHBOARD COLUMN ── */}
-      <div
-        style={{
-          position: "absolute",
-          left: DASH_LEFT - HALF,
-          top: DASH_TOP,
-          width: DASH_WIDTH,
-          display: "flex",
-          flexDirection: "column",
-          gap: DASH_GAP,
-          zIndex: 2,
-        }}
-      >
-        {/* ── ANIMATION 1: ROTATING ALERT CARD ── */}
-        {/* Fixed height + clip prevents layout jump during card swap */}
-        <div style={{ position: "relative", height: 188, overflow: "hidden" }}>
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={cardIdx}
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{
-                opacity: 0,
-                y: -30,
-                transition: { duration: 0.3, ease: "easeIn" },
-              }}
-              transition={{ duration: 0.35, ease: "easeOut", delay: 0.05 }}
-              style={{
-                position: "absolute",
-                width: "100%",
-                borderRadius: 16,
-                background: T.cardGlassBg,
-                backdropFilter: "blur(10px) saturate(160%)",
-                WebkitBackdropFilter: "blur(10px) saturate(160%)",
-                border: "1px solid rgba(0,0,0,0.06)",
-                boxShadow: "0 4px 20px rgba(7,26,20,0.08)",
-                padding: "14px 16px",
-                boxSizing: "border-box",
-              }}
-            >
-              {/* Badge + Date */}
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  gap: 8,
-                  minHeight: 28,
-                }}
-              >
-                <span
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: 6,
-                    fontSize: 11,
-                    fontWeight: 700,
-                    lineHeight: 1,
-                    color: card.badgeFg,
-                    background: card.badgeBg,
-                    padding: "5px 9px",
-                    borderRadius: 9999,
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  <span style={{ fontSize: 13, fontWeight: 800 }}>{card.score}</span>
-                  {card.risk}
-                </span>
-                <span
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    fontSize: 11,
-                    lineHeight: 1,
-                    color: "#9CA3AF",
-                    background: "rgba(0,0,0,0.04)",
-                    border: "1px solid rgba(0,0,0,0.06)",
-                    padding: "5px 8px",
-                    borderRadius: 7,
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {card.date}
-                </span>
-              </div>
-
-              {/* Title + Bell */}
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  marginTop: 12,
-                }}
-              >
-                <div>
-                  <div style={{ fontSize: 15.5, fontWeight: 600, color: "#111827" }}>
-                    {card.title}
-                  </div>
-                  <div style={{ fontSize: 12.5, color: "#6B7280", marginTop: 2 }}>
-                    {card.subtitle}
-                  </div>
-                </div>
-                <span
-                  style={{
-                    color: "#9CA3AF",
-                    animation: "ag-bell 5s ease infinite",
-                    transformOrigin: "top center",
-                  }}
-                >
-                  <svg
-                    width="17"
-                    height="17"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.7"
-                  >
-                    <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
-                    <path d="M13.7 21a2 2 0 0 1-3.4 0" />
-                  </svg>
-                </span>
-              </div>
-
-              {/* Message */}
-              <div
-                style={{
-                  fontSize: 12,
-                  color: "#374151",
-                  background: "rgba(0,0,0,0.03)",
-                  border: "1px solid rgba(0,0,0,0.06)",
-                  borderRadius: 8,
-                  padding: "8px 11px",
-                  marginTop: 11,
-                }}
-              >
-                {card.message}
-              </div>
-
-              {/* Footer */}
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  marginTop: 10,
-                }}
-              >
-                <span
-                  style={{
-                    fontSize: 12,
-                    color: card.statusColor,
-                    fontWeight: 600,
-                    lineHeight: 1,
-                  }}
-                >
-                  {card.status}
-                </span>
-                <span
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: 4,
-                    fontSize: 12,
-                    color: "#9CA3AF",
-                    fontWeight: 500,
-                    cursor: "pointer",
-                    lineHeight: 1,
-                  }}
-                >
-                  Review
-                  <svg
-                    width="12"
-                    height="12"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <path d="M7 17 17 7M9 7h8v8" />
-                  </svg>
-                </span>
-              </div>
-            </motion.div>
-          </AnimatePresence>
+function WasteAlertCard() {
+  return (
+    <div className="pp-hero__card pp-hero__card--waste">
+      <div className="pp-hero__waste">
+        <span className="pp-hero__warn-icon" aria-hidden>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+            <path d="M10.3 3.9 1.8 18.2A2 2 0 0 0 3.5 21h17a2 2 0 0 0 1.7-2.8L13.7 3.9a2 2 0 0 0-3.4 0z" />
+            <path d="M12 9v5" />
+            <circle cx="12" cy="17.2" r="0.9" fill="currentColor" stroke="none" />
+          </svg>
+        </span>
+        <div className="pp-hero__waste-copy">
+          <div className="pp-hero__title">Waste Alert</div>
+          <div className="pp-hero__body">High wastage detected</div>
+          <div className="pp-hero__warn-text">Tomatoes • 8.5 kg</div>
         </div>
+      </div>
+      <img className="pp-hero__waste-bowl" src={IMG.tomatoes} alt="" draggable={false} />
+    </div>
+  );
+}
 
-        {/* ── ANIMATION 3: COUNT-UP STAT GRID ── */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
-            gap: DASH_GAP,
-          }}
-        >
-          {stats.map((s) => (
-            <div
-              key={s.label}
-              style={{
-                ...cardShell,
-                padding: "12px 13px",
-                height: STAT_H,
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "space-between",
-              }}
-            >
-              <div style={{ fontSize: 11, color: T.faint, lineHeight: 1.2 }}>{s.label}</div>
-              <div
-                style={{
-                  fontSize: 26,
-                  fontWeight: 700,
-                  color: T.text,
-                  lineHeight: 1,
-                  fontVariantNumeric: "tabular-nums",
-                }}
-              >
-                <CountUp target={s.value} trigger={cardIdx} />
-                {s.label === "Food Cost %" && "%"}
-              </div>
+function TopSellingCard() {
+  return (
+    <div className="pp-hero__card">
+      <div className="pp-hero__title" style={{ marginBottom: 12 }}>
+        Top Selling Items
+      </div>
+      <div className="pp-hero__sell-list">
+        {TOP_SELLING.map((item, i) => (
+          <div key={item.name} className="pp-hero__sell-row">
+            <img src={item.img} alt="" className="pp-hero__sell-img" draggable={false} />
+            <div className="pp-hero__sell-meta">
+              <div className="pp-hero__sell-name">{item.name}</div>
+              <ProgressBar pct={item.pct} delay={`${0.5 + i * 0.1}s`} />
             </div>
-          ))}
-        </div>
-
-        {/* ── AI ANALYSIS CARD ── */}
-        <div
-          style={{
-            ...cardShell,
-            padding: "13px 14px",
-            animation: "ag-pop .6s .93s both",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              gap: 8,
-              minHeight: 18,
-            }}
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}>
-              <span
-                style={{
-                  color: T.purple,
-                  display: "flex",
-                  alignItems: "center",
-
-                  flexShrink: 0,
-                }}
-              >
-                <svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor">
-                  <path d="M8 1l1.5 4.5L14 7l-4.5 1.5L8 14l-1.5-4.5L2 7l4.5-1.5z" />
-                </svg>
-              </span>
-              <span style={{ fontSize: 13, fontWeight: 600, color: T.text, lineHeight: 1 }}>
-                PlatePielet AI · Analysis
-              </span>
-            </div>
-            <span
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 3,
-                flexShrink: 0,
-              }}
-            >
-              {[0, 0.22, 0.44].map((d, i) => (
-                <span
-                  key={i}
-                  style={{
-                    display: "inline-block",
-                    width: 3,
-                    height: 3,
-                    borderRadius: "50%",
-                    background: T.faint,
-                    animation: `ag-dots 1.4s ${d}s infinite`,
-                  }}
-                />
-              ))}
-            </span>
+            <div className="pp-hero__sell-pct">{item.pct}%</div>
           </div>
-
-          {/* Continuous paragraph streaming — wraps naturally into ~3 lines */}
-          <div style={{ display: "flex", alignItems: "flex-start", gap: 6, marginTop: 10 }}>
-            <div
-              style={{
-                flex: 1,
-                fontSize: 12.5,
-                color: T.muted,
-                lineHeight: 1.6,
-                wordBreak: "break-word",
-                overflow: "hidden",
-                height: 60,
-              }}
-            >
-              <StreamingText text={AI_LINE_SETS[aiIdx]} trigger={aiIdx} onComplete={onAiComplete} />
-              <span
-                style={{
-                  display: "inline-block",
-                  width: 1.5,
-                  height: 10,
-                  background: T.accent,
-                  marginLeft: 1,
-                  verticalAlign: "middle",
-                  animation: "ag-blink 1s steps(1) infinite",
-                }}
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* ── SMALL STAT ROW ── */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
-            gap: DASH_GAP,
-          }}
-        >
-          {SMALL_STATS.map((s) => (
-            <div
-              key={s.label}
-              style={{
-                ...cardShell,
-                padding: "11px 12px",
-                minHeight: 58,
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
-                animation: `ag-pop .6s ${s.delay} both`,
-              }}
-            >
-              <div
-                style={{
-                  fontSize: 18,
-                  fontWeight: 700,
-                  color: s.color,
-                  letterSpacing: "-.01em",
-                  lineHeight: 1.1,
-                  fontVariantNumeric: "tabular-nums",
-                }}
-              >
-                {s.val}
-              </div>
-              <div style={{ fontSize: 10.5, color: T.faint2, marginTop: 3, lineHeight: 1.2 }}>
-                {s.label}
-              </div>
-            </div>
-          ))}
-        </div>
+        ))}
       </div>
     </div>
   );
 }
 
-// ── Component ────────────────────────────────────────────────────────────────
-export function PlatePieletHero() {
-  const wrapRef = useRef<HTMLDivElement>(null);
-  const stageRef = useRef<HTMLDivElement>(null);
-  const mobileWrapRef = useRef<HTMLDivElement>(null);
-  const mobileStageRef = useRef<HTMLDivElement>(null);
-  const [aiIdx, setAiIdx] = useState(0);
-  const [cardIdx, setCardIdx] = useState(0);
-  const isMobile = useIsMobile();
+function AiCard() {
+  return (
+    <div className="pp-hero__card">
+      <div className="pp-hero__card-row" style={{ alignItems: "center", marginBottom: 10, gap: 8 }}>
+        <span className="pp-hero__sparkle" aria-hidden>
+          <svg width="11" height="11" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M8 1l1.5 4.5L14 7l-4.5 1.5L8 14l-1.5-4.5L2 7l4.5-1.5z" />
+          </svg>
+        </span>
+        <span className="pp-hero__title">AI Recommendation</span>
+      </div>
+      <div className="pp-hero__ai-row">
+        <img src={IMG.paneer} alt="" className="pp-hero__ai-img" draggable={false} />
+        <p className="pp-hero__body">Increase portion size of Paneer Tikka in Branch 2.</p>
+      </div>
+    </div>
+  );
+}
 
-  // Scale fixed-pixel stage(s) to viewport. Desktop scales the full 1225-wide
-  // stage; mobile scales just the HALF-wide animated dashboard (copy renders
-  // as plain responsive text instead, see below).
+function PosCard() {
+  return (
+    <div className="pp-hero__card">
+      <div className="pp-hero__sync-row">
+        <span className="pp-hero__badge pp-hero__badge--tally">Tally</span>
+        <span className="pp-hero__sync-arrows" aria-hidden>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+            <path d="M7 7h11l-3-3M17 17H6l3 3" />
+          </svg>
+        </span>
+        <span className="pp-hero__badge pp-hero__badge--pos">POS</span>
+        <span className="pp-hero__check" aria-hidden>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4">
+            <path d="M20 6 9 17l-5-5" />
+          </svg>
+        </span>
+      </div>
+      <div className="pp-hero__title" style={{ marginTop: 8 }}>
+        POS &amp; Tally Synced
+      </div>
+      <p className="pp-hero__body" style={{ marginTop: 4 }}>
+        All sales, purchases &amp; vouchers reconciled automatically.
+      </p>
+    </div>
+  );
+}
+
+function ChefPhotoRotator() {
+  const [index, setIndex] = useState(0);
+
   useEffect(() => {
-    const resize = () => {
-      const wrap = wrapRef.current;
-      const stage = stageRef.current;
-      if (wrap && stage) {
-        const ratio = Math.min(1, wrap.clientWidth / LAYOUT.stage);
-        stage.style.transform = `scale(${ratio})`;
-        wrap.style.height = `${STAGE_H * ratio}px`;
-      }
-      const mWrap = mobileWrapRef.current;
-      const mStage = mobileStageRef.current;
-      if (mWrap && mStage) {
-        const ratio = Math.min(1, mWrap.clientWidth / HALF);
-        mStage.style.transform = `scale(${ratio})`;
-        mWrap.style.height = `${STAGE_H * ratio}px`;
-      }
-    };
-    resize();
-    // Observe the wrappers too: inside the Ionic shell the page can mount
-    // before layout, so the initial measurement may be 0-width.
-    const observer = new ResizeObserver(resize);
-    if (wrapRef.current) observer.observe(wrapRef.current);
-    if (mobileWrapRef.current) observer.observe(mobileWrapRef.current);
-    window.addEventListener("resize", resize);
-    return () => {
-      observer.disconnect();
-      window.removeEventListener("resize", resize);
-    };
-  }, [isMobile]);
-
-  // AI cycle: advance only after streaming finishes + 800ms pause
-  const aiPauseRef = useRef<ReturnType<typeof setTimeout>>(undefined);
-  const handleAiComplete = () => {
-    aiPauseRef.current = setTimeout(() => setAiIdx((i) => (i + 1) % AI_LINE_SETS.length), 800);
-  };
-  useEffect(() => () => clearTimeout(aiPauseRef.current), []);
-
-  // Alert card auto-rotate
-  useEffect(() => {
-    const id = setInterval(() => setCardIdx((i) => (i + 1) % ALERT_CARDS.length), 3500);
-    return () => clearInterval(id);
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const id = window.setInterval(() => {
+      setIndex((i) => (i + 1) % IMG.chefs.length);
+    }, 3200);
+    return () => window.clearInterval(id);
   }, []);
 
-  const card = ALERT_CARDS[cardIdx];
-  const stats = CARD_STATS[cardIdx];
-
   return (
-    <section
-      className="pp-hero"
-      style={{
-        position: "relative",
-        width: "100%",
-        overflow: "hidden",
-        fontFamily: "'Plus Jakarta Sans Variable', 'Plus Jakarta Sans', system-ui, sans-serif",
-        color: T.text,
-        background: `radial-gradient(900px 520px at 72% 28%, rgba(22,163,74,0.1), transparent 58%),
-                     radial-gradient(700px 400px at 18% 80%, rgba(163,230,53,0.07), transparent 55%),
-                     ${T.bg}`,
-        borderBottom: `1px solid ${T.border}`,
-        ["--hero-pad" as string]: `clamp(20px, 3vw, ${LAYOUT.pad}px)`,
-      }}
-    >
+    <div className="pp-hero__chef-photo">
+      {IMG.chefs.map((src, i) => (
+        <img
+          key={src}
+          src={src}
+          alt={i === 0 ? "Chef reviewing live kitchen insights on a tablet" : ""}
+          draggable={false}
+          className={i === index ? "is-active" : undefined}
+          aria-hidden={i !== index}
+        />
+      ))}
+    </div>
+  );
+}
+
+/** Full reference illustration — chef hub + orbiting cards + props + feature arc */
+function HeroComposition() {
+  return (
+    <div className="pp-hero__art" aria-label="PlatePielet product overview">
+      {/* Glow + pale disc */}
+      <div className="pp-hero__glow" aria-hidden />
+      <div className="pp-hero__pale" aria-hidden />
+
+      {/* Concentric dashed orbits + flow connectors */}
+      <svg className="pp-hero__orbit" viewBox="0 0 1080 720" preserveAspectRatio="xMidYMid meet" aria-hidden>
+        <defs>
+          <marker id="pp-arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+            <path d="M0,0 L6,3 L0,6 Z" fill="rgba(22,163,74,0.45)" />
+          </marker>
+        </defs>
+        <circle className="pp-hero__ring-a" cx="540" cy="330" r="270" />
+        <circle className="pp-hero__ring-b" cx="540" cy="330" r="220" />
+        <circle className="pp-hero__ring-c" cx="540" cy="330" r="170" />
+        <path className="pp-hero__flow" d="M220 120 C300 180, 360 240, 430 280" markerEnd="url(#pp-arrow)" />
+        <path className="pp-hero__flow" d="M860 110 C780 170, 720 230, 650 275" markerEnd="url(#pp-arrow)" />
+        <path className="pp-hero__flow" d="M210 380 C290 360, 360 345, 430 340" markerEnd="url(#pp-arrow)" />
+        <path className="pp-hero__flow" d="M870 360 C790 345, 720 335, 650 330" markerEnd="url(#pp-arrow)" />
+        <path className="pp-hero__flow" d="M850 500 C760 450, 680 400, 620 370" markerEnd="url(#pp-arrow)" />
+        <path className="pp-hero__feat-arc" d="M100 640 Q540 580 980 640" />
+      </svg>
+
+      {/* Top analytics badge */}
+      <Float className="pp-hero__analytics" delay="0.08s" variant="a">
+        <div className="pp-hero__analytics-badge" aria-hidden>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+            <path d="M4 19V9M10 19V5M16 19v-7M20 19V8" />
+            <path d="M3 19h18" />
+          </svg>
+        </div>
+      </Float>
+
+      {/* Chef hub */}
+      <div className="pp-hero__chef">
+        <div className="pp-hero__chef-halo">
+          <div className="pp-hero__chef-ring">
+            <ChefPhotoRotator />
+          </div>
+        </div>
+      </div>
+
+      {/* Cards */}
+      <Float className="pp-hero__slot pp-hero__slot--food" delay="0.15s" variant="a">
+        <FoodCostCard />
+      </Float>
+      <Float className="pp-hero__slot pp-hero__slot--waste" delay="0.22s" variant="b">
+        <WasteAlertCard />
+      </Float>
+      <Float className="pp-hero__slot pp-hero__slot--selling" delay="0.3s" variant="b">
+        <TopSellingCard />
+      </Float>
+      <Float className="pp-hero__slot pp-hero__slot--ai" delay="0.38s" variant="a">
+        <AiCard />
+      </Float>
+      <Float className="pp-hero__slot pp-hero__slot--pos" delay="0.46s" variant="c">
+        <PosCard />
+      </Float>
+
+      {/* Props from reference */}
+      <Float className="pp-hero__prop pp-hero__prop--mascot" delay="0.55s" variant="b">
+        <img src={IMG.mascot} alt="" draggable={false} />
+      </Float>
+      <Float className="pp-hero__prop pp-hero__prop--salad" delay="0.6s" variant="a">
+        <img src={IMG.salad} alt="" draggable={false} />
+      </Float>
+
+      {/* Feature icons sitting on the bottom dashed arc */}
+      <div className="pp-hero__arc-features">
+        {FEATURES.map((f) => (
+          <div key={f.title} className="pp-hero__arc-feature">
+            <div className="pp-hero__arc-icon">{f.icon}</div>
+            <div className="pp-hero__arc-title">{f.title}</div>
+            <div className="pp-hero__arc-desc">{f.desc}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export function PlatePieletHero() {
+  return (
+    <section className="pp-hero">
       <style>{`
-        .pp-hero__inset {
-          max-width: ${LAYOUT.max}px;
+        .pp-hero {
+          --pp-max: 1280px;
+          --pp-pad: clamp(20px, 4vw, 40px);
+          --pp-chef: clamp(170px, 22vw, 260px);
+          position: relative;
+          width: 100%;
+          overflow-x: clip;
+          overflow-y: visible;
+          font-family: 'Plus Jakarta Sans Variable', 'Plus Jakarta Sans', system-ui, sans-serif;
+          color: ${T.text};
+          background:
+            radial-gradient(900px 560px at 50% 48%, rgba(22,163,74,0.1), transparent 62%),
+            ${T.bg};
+          border-bottom: 1px solid ${T.border};
+        }
+        .pp-hero__bg {
+          position: absolute;
+          inset: 0;
+          background-image:
+            linear-gradient(rgba(21,32,25,.16) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(21,32,25,.16) 1px, transparent 1px);
+          background-size: 56px 56px;
+          opacity: 0.04;
+          pointer-events: none;
+        }
+        .pp-hero__inner {
+          position: relative;
+          z-index: 1;
+          max-width: var(--pp-max);
           margin-inline: auto;
-          padding-inline: var(--hero-pad);
+          padding: clamp(28px, 4vw, 48px) var(--pp-pad) clamp(40px, 5vw, 56px);
+          box-sizing: border-box;
         }
-        .pp-hero__stage {
-          position: absolute; left: 0; top: 0;
-          width: ${LAYOUT.stage}px; height: ${STAGE_H}px;
-          transform-origin: top left;
+
+        /* Half / half: copy | illustration */
+        .pp-hero__main {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) minmax(0, 1.08fr);
+          gap: clamp(20px, 3vw, 40px);
+          align-items: center;
+          min-width: 0;
         }
+
         .pp-hero__copy {
-          position: absolute;
-          left: ${COPY_LEFT}px; top: 88px;
-          width: ${COPY_WIDTH}px;
-          max-width: calc(50% - ${COPY_LEFT + 12}px);
+          min-width: 0;
+          max-width: 520px;
+          text-align: left;
+          animation: pp-up .7s .05s both;
         }
-        .pp-hero__anim {
-          position: absolute;
-          left: 50%; top: 0; width: 50%; height: 100%;
+        .pp-hero__copy h1 {
+          font-weight: 800;
+          font-size: clamp(30px, 3.2vw, 48px);
+          line-height: 1.12;
+          letter-spacing: -0.035em;
+          margin: 0;
         }
-        .pp-btn-solid {
-          background: ${T.gradientCTA};
-          box-shadow: 0 4px 14px rgba(15,122,76,0.28);
+        .pp-hero__copy p {
+          font-size: clamp(14.5px, 1.1vw, 16.5px);
+          line-height: 1.7;
+          color: ${T.muted};
+          margin: 16px 0 0;
+          max-width: 460px;
+        }
+        .pp-hero__ctas {
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: flex-start;
+          gap: 12px;
+          margin-top: 28px;
+        }
+        .pp-btn {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          box-sizing: border-box;
+          font-family: inherit;
+          text-decoration: none;
+          line-height: 1;
+          white-space: nowrap;
+          font-size: 15px;
+          font-weight: 700;
+          letter-spacing: 0.04em;
+          height: 48px;
+          padding: 0 22px;
+          border-radius: 12px;
           transition: box-shadow .2s ease, transform .15s ease;
         }
-        .pp-btn-solid:hover {
-          box-shadow: 0 10px 26px rgba(15,122,76,0.38), inset 0 1px 0 rgba(255,255,255,0.18);
+        .pp-btn--solid {
+          color: ${T.ink};
+          border: none;
+          background: ${T.gradientCTA};
+          box-shadow: 0 4px 14px rgba(15,122,76,0.28);
+        }
+        .pp-btn--solid:hover {
+          box-shadow: 0 10px 26px rgba(15,122,76,0.38);
           transform: translateY(-1px);
         }
+        .pp-btn--outline {
+          color: ${T.accentSolid};
+          border: 1px solid ${T.accent};
+          background: #fff;
+        }
 
-        @keyframes ag-up      { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:none} }
-        @keyframes ag-pop     { from{opacity:0;transform:translateY(10px) scale(.97)} to{opacity:1;transform:none} }
-        @keyframes ag-fadein  { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
-        @keyframes ag-float   { from{transform:translateY(0)} to{transform:translateY(-8px)} }
-        @keyframes ag-node    { 0%,100%{box-shadow:0 0 0 5px rgba(0,0,0,0),0 0 14px ${T.accentGlow}} 50%{box-shadow:0 0 0 9px rgba(34,197,94,.14),0 0 28px ${T.accentGlow}} }
-        @keyframes ag-scroll { from{transform:translate3d(0,0,0)} to{transform:translate3d(0,-${SCROLL_DISTANCE}px,0)} }
-        @keyframes ag-shimmer { 0%{background-position:-200px 0} 100%{background-position:220px 0} }
-        @keyframes ag-dots    { 0%,20%{opacity:.2} 50%{opacity:1} 80%,100%{opacity:.2} }
-        @keyframes ag-bell    { 0%,88%,100%{transform:rotate(0)} 90%{transform:rotate(12deg)} 92%{transform:rotate(-9deg)} 94%{transform:rotate(5deg)} }
-        @keyframes ag-blink   { 0%,49%{opacity:1} 50%,100%{opacity:0} }
+        /* ══════════════════════════════════════════
+           THE ILLUSTRATION (matches reference image)
+           ══════════════════════════════════════════ */
+        .pp-hero__art {
+          position: relative;
+          width: 100%;
+          max-width: none;
+          margin-inline: 0;
+          aspect-ratio: 1 / 1.05;
+          max-height: 580px;
+          overflow: visible;
+          animation: pp-fade .7s .12s both;
+          min-width: 0;
+        }
+
+        .pp-hero__glow {
+          position: absolute;
+          left: 50%;
+          top: 44%;
+          width: 58%;
+          height: 70%;
+          transform: translate(-50%, -50%);
+          background: ${T.glowHero};
+          filter: blur(28px);
+          pointer-events: none;
+          z-index: 0;
+        }
+        .pp-hero__pale {
+          position: absolute;
+          left: 50%;
+          top: 44%;
+          width: calc(var(--pp-chef) * 1.28);
+          height: calc(var(--pp-chef) * 1.28);
+          transform: translate(-50%, -50%);
+          border-radius: 50%;
+          background: rgba(210, 242, 222, 0.55);
+          pointer-events: none;
+          z-index: 1;
+        }
+
+        .pp-hero__orbit {
+          position: absolute;
+          inset: 0;
+          width: 100%;
+          height: 100%;
+          pointer-events: none;
+          z-index: 2;
+          overflow: visible;
+        }
+        .pp-hero__ring-a,
+        .pp-hero__ring-b,
+        .pp-hero__ring-c {
+          fill: none;
+          stroke: rgba(22,163,74,0.32);
+          stroke-width: 1.4;
+          stroke-dasharray: 5 7;
+        }
+        .pp-hero__ring-a { animation: pp-dash 34s linear infinite; }
+        .pp-hero__ring-b {
+          stroke: rgba(22,163,74,0.2);
+          stroke-dasharray: 3 9;
+          animation: pp-dash 46s linear infinite reverse;
+        }
+        .pp-hero__ring-c {
+          stroke: rgba(22,163,74,0.12);
+          stroke-dasharray: 2 11;
+          animation: pp-dash 58s linear infinite;
+        }
+        .pp-hero__flow {
+          fill: none;
+          stroke: rgba(22,163,74,0.35);
+          stroke-width: 1.3;
+          stroke-dasharray: 4 6;
+          animation: pp-dash 22s linear infinite;
+        }
+        .pp-hero__feat-arc {
+          fill: none;
+          stroke: rgba(22,163,74,0.28);
+          stroke-width: 1.4;
+          stroke-dasharray: 4 7;
+        }
+
+        /* Analytics badge */
+        .pp-hero__analytics {
+          position: absolute;
+          left: calc(50% - 20px);
+          top: 1%;
+          z-index: 8;
+        }
+        .pp-hero__analytics-badge {
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          background: linear-gradient(145deg, #22C55E, #0F7A4C);
+          color: #fff;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 8px 18px rgba(22,163,74,0.35);
+        }
+        .pp-hero__analytics-badge svg { width: 18px; height: 18px; }
+
+        /* Chef */
+        .pp-hero__chef {
+          position: absolute;
+          left: 50%;
+          top: 44%;
+          transform: translate(-50%, -50%);
+          width: var(--pp-chef);
+          height: var(--pp-chef);
+          z-index: 4;
+          animation: pp-pop .75s .05s both;
+        }
+        .pp-hero__chef-halo {
+          width: 100%;
+          height: 100%;
+          border-radius: 50%;
+          padding: 9px;
+          box-sizing: border-box;
+          background: rgba(34,197,94,0.14);
+          box-shadow: 0 0 0 12px rgba(34,197,94,0.07);
+        }
+        .pp-hero__chef-ring {
+          width: 100%;
+          height: 100%;
+          border-radius: 50%;
+          padding: 6px;
+          box-sizing: border-box;
+          background: linear-gradient(145deg, #22C55E 0%, #16A34A 45%, #0F7A4C 100%);
+          box-shadow: 0 16px 40px rgba(7,59,42,0.18);
+          animation: pp-ring 4s 1s ease-in-out infinite;
+        }
+        .pp-hero__chef-photo {
+          position: relative;
+          width: 100%;
+          height: 100%;
+          border-radius: 50%;
+          overflow: hidden;
+          border: 4px solid #fff;
+          background: ${T.inset};
+          box-sizing: border-box;
+        }
+        .pp-hero__chef-photo img {
+          position: absolute;
+          inset: 0;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          object-position: center 16%;
+          display: block;
+          opacity: 0;
+          transition: opacity 0.7s ease;
+        }
+        .pp-hero__chef-photo img.is-active {
+          opacity: 1;
+          z-index: 1;
+        }
+
+        /* Card slots — scaled for half-width column */
+        .pp-hero__slot { position: absolute; z-index: 6; }
+        .pp-hero__slot--food {
+          left: 0;
+          top: 4%;
+          width: min(190px, 40%);
+        }
+        .pp-hero__slot--waste {
+          right: 0;
+          top: 3%;
+          width: min(220px, 44%);
+          overflow: visible;
+          z-index: 8;
+        }
+        .pp-hero__slot--selling {
+          left: 0;
+          top: 38%;
+          width: min(200px, 42%);
+        }
+        .pp-hero__slot--ai {
+          right: 0;
+          top: 32%;
+          width: min(200px, 42%);
+        }
+        .pp-hero__slot--pos {
+          right: 1%;
+          bottom: 16%;
+          top: auto;
+          width: min(210px, 44%);
+        }
+
+        /* Decorative props */
+        .pp-hero__prop {
+          position: absolute;
+          z-index: 5;
+          pointer-events: none;
+        }
+        .pp-hero__prop img {
+          width: 100%;
+          height: 100%;
+          object-fit: contain;
+          display: block;
+          filter: drop-shadow(0 8px 16px rgba(0,0,0,0.12));
+        }
+        .pp-hero__prop--mascot {
+          left: 0;
+          bottom: 18%;
+          width: clamp(64px, 9vw, 88px);
+          height: clamp(64px, 9vw, 88px);
+          z-index: 7;
+        }
+        .pp-hero__prop--salad {
+          right: 0;
+          bottom: 16%;
+          width: clamp(90px, 12vw, 130px);
+          height: clamp(68px, 9vw, 95px);
+        }
+
+        .pp-hero__arc-features {
+          position: absolute;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          display: grid;
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          gap: 4px;
+          z-index: 6;
+          animation: pp-up .7s .4s both;
+        }
+        .pp-hero__arc-icon {
+          width: 32px;
+          height: 32px;
+          border-radius: 50%;
+          margin: 0 auto 6px;
+          background: #fff;
+          border: 1.5px solid ${T.accentBorder};
+          box-shadow: 0 3px 10px rgba(22,163,74,0.12);
+          color: ${T.accentSolid};
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .pp-hero__arc-icon svg { width: 14px; height: 14px; }
+        .pp-hero__arc-title {
+          font-size: 10.5px;
+          font-weight: 700;
+          color: ${T.text};
+          line-height: 1.2;
+        }
+        .pp-hero__arc-desc {
+          font-size: 9.5px;
+          color: ${T.faint};
+          line-height: 1.3;
+          margin-top: 2px;
+          max-width: 120px;
+          margin-inline: auto;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
+
+        /* Float — entrance only (no bobbing) */
+        .pp-hero__float {
+          animation: pp-fade .65s var(--d, 0s) both;
+        }
+        .pp-hero__float--b,
+        .pp-hero__float--c {
+          animation: pp-fade .65s var(--d, 0s) both;
+        }
+
+        /* Cards */
+        .pp-hero__card {
+          background: ${T.cardGlassBg};
+          border: 1px solid rgba(21,32,25,0.07);
+          border-radius: 14px;
+          box-shadow: 0 8px 22px rgba(7,26,20,0.08);
+          padding: 11px 12px;
+          box-sizing: border-box;
+          width: 100%;
+        }
+        .pp-hero__card-row {
+          display: flex;
+          align-items: flex-start;
+          justify-content: space-between;
+          gap: 8px;
+        }
+        .pp-hero__label {
+          font-size: 11.5px;
+          font-weight: 600;
+          color: ${T.muted};
+        }
+        .pp-hero__title {
+          font-size: 12.5px;
+          font-weight: 700;
+          color: ${T.text};
+          line-height: 1.25;
+        }
+        .pp-hero__metric {
+          font-size: clamp(22px, 2.4vw, 30px);
+          font-weight: 800;
+          color: ${T.text};
+          letter-spacing: -0.03em;
+          line-height: 1.05;
+          margin-top: 2px;
+          font-variant-numeric: tabular-nums;
+          white-space: nowrap;
+        }
+        .pp-hero__delta {
+          font-size: 11px;
+          font-weight: 600;
+          color: ${T.accentSolid};
+          margin-top: 4px;
+          white-space: nowrap;
+          font-variant-numeric: tabular-nums;
+        }
+        .pp-hero__delta--up { color: #C2410C; }
+        .pp-hero__body {
+          font-size: 11.5px;
+          color: ${T.soft};
+          line-height: 1.45;
+          margin: 0;
+        }
+        .pp-hero__icon-pill {
+          width: 30px;
+          height: 30px;
+          border-radius: 50%;
+          background: ${T.accentSoft};
+          color: ${T.accentSolid};
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+        }
+        .pp-hero__sell-img { width: 24px; height: 24px; }
+        .pp-hero__ai-img { width: 34px; height: 34px; }
+        .pp-hero__arc-feature {
+          text-align: center;
+          min-width: 0;
+          padding: 0 2px;
+        }
+        .pp-hero__spark {
+          display: block;
+          width: 100%;
+          height: 26px;
+          margin-top: 8px;
+        }
+        .pp-hero__spark path {
+          stroke-dasharray: 240;
+          animation: pp-draw 1.3s .45s ease both;
+        }
+        .pp-hero__card--waste {
+          position: relative;
+          overflow: visible;
+          padding-right: 52px;
+        }
+        .pp-hero__waste {
+          display: grid;
+          grid-template-columns: 26px 1fr;
+          column-gap: 10px;
+          align-items: start;
+        }
+        .pp-hero__waste-copy {
+          min-width: 0;
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+        }
+        .pp-hero__waste-copy .pp-hero__title {
+          line-height: 26px;
+        }
+        .pp-hero__warn-icon {
+          width: 26px;
+          height: 26px;
+          border-radius: 8px;
+          background: #FDE8D8;
+          color: #C2410C;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+        }
+        .pp-hero__warn-text {
+          font-size: 13px;
+          font-weight: 700;
+          color: #C2410C;
+          white-space: nowrap;
+        }
+        .pp-hero__waste-bowl {
+          position: absolute;
+          right: -10px;
+          bottom: -18px;
+          width: 64px;
+          height: 64px;
+          object-fit: contain;
+          pointer-events: none;
+          filter: drop-shadow(0 6px 12px rgba(0,0,0,0.14));
+        }
+        .pp-hero__sell-list { display: flex; flex-direction: column; gap: 10px; }
+        .pp-hero__sell-row {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          min-width: 0;
+        }
+        .pp-hero__sell-img {
+          width: 28px;
+          height: 28px;
+          border-radius: 50%;
+          object-fit: cover;
+          flex-shrink: 0;
+          border: 1.5px solid rgba(22,163,74,0.2);
+        }
+        .pp-hero__sell-meta { flex: 1; min-width: 0; }
+        .pp-hero__sell-name {
+          font-size: 11.5px;
+          font-weight: 600;
+          color: ${T.soft};
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          margin-bottom: 3px;
+        }
+        .pp-hero__sell-pct {
+          font-size: 12px;
+          font-weight: 700;
+          color: ${T.muted};
+          font-variant-numeric: tabular-nums;
+          width: 30px;
+          text-align: right;
+          flex-shrink: 0;
+          white-space: nowrap;
+        }
+        .pp-hero__bar {
+          height: 5px;
+          border-radius: 999px;
+          background: rgba(22,163,74,0.12);
+          overflow: hidden;
+        }
+        .pp-hero__bar-fill {
+          height: 100%;
+          border-radius: 999px;
+          background: linear-gradient(90deg,#16A34A,#22C55E);
+          transform-origin: left center;
+          animation: pp-bar .85s cubic-bezier(.22,1,.36,1) both;
+        }
+        .pp-hero__sparkle {
+          width: 22px;
+          height: 22px;
+          border-radius: 50%;
+          background: ${T.accentSoft};
+          color: ${T.accentSolid};
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+          animation: pp-sparkle 2.4s ease-in-out infinite;
+        }
+        .pp-hero__ai-row {
+          display: flex;
+          gap: 10px;
+          align-items: flex-start;
+        }
+        .pp-hero__ai-img {
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          object-fit: cover;
+          flex-shrink: 0;
+          border: 2px solid rgba(22,163,74,0.22);
+        }
+        .pp-hero__sync-row {
+          display: flex;
+          align-items: center;
+          gap: 7px;
+        }
+        .pp-hero__badge {
+          font-size: 10px;
+          font-weight: 800;
+          letter-spacing: 0.04em;
+          border-radius: 6px;
+          padding: 3px 7px;
+          line-height: 1;
+        }
+        .pp-hero__badge--tally {
+          color: #1e3a8a;
+          background: #EEF2FF;
+          border: 1px solid #C7D2FE;
+        }
+        .pp-hero__badge--pos {
+          color: ${T.accentSolid};
+          background: ${T.accentSoft};
+          border: 1px solid ${T.accentBorder};
+        }
+        .pp-hero__sync-arrows {
+          color: ${T.accent};
+          display: flex;
+          animation: pp-sync 1.8s ease-in-out infinite;
+        }
+        .pp-hero__check {
+          margin-left: auto;
+          color: ${T.accentSolid};
+          display: flex;
+        }
+
+        @keyframes pp-up {
+          from { opacity: 0; transform: translateY(14px); }
+          to   { opacity: 1; transform: none; }
+        }
+        @keyframes pp-fade {
+          from { opacity: 0; }
+          to   { opacity: 1; }
+        }
+        @keyframes pp-pop {
+          from { opacity: 0; transform: translate(-50%, -50%) scale(.9); }
+          to   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        }
+        @keyframes pp-dash { to { stroke-dashoffset: -80; } }
+        @keyframes pp-bar {
+          from { transform: scaleX(0); }
+          to   { transform: scaleX(1); }
+        }
+        @keyframes pp-draw {
+          from { stroke-dashoffset: 240; }
+          to   { stroke-dashoffset: 0; }
+        }
+        @keyframes pp-ring {
+          0%,100% { box-shadow: 0 16px 40px rgba(7,59,42,0.18); }
+          50% { box-shadow: 0 18px 48px rgba(7,59,42,0.24), 0 0 0 6px rgba(34,197,94,0.1); }
+        }
+        @keyframes pp-sparkle {
+          0%,100% { transform: scale(1) rotate(0); }
+          50% { transform: scale(1.1) rotate(10deg); }
+        }
+        @keyframes pp-sync {
+          0%,100% { transform: translateX(0); opacity: 1; }
+          50% { transform: translateX(2px); opacity: .7; }
+        }
+
+        /* Tablet */
+        @media (max-width: 1024px) {
+          .pp-hero { --pp-chef: clamp(150px, 20vw, 220px); }
+          .pp-hero__main { gap: 16px; }
+          .pp-hero__art { max-height: 500px; }
+          .pp-hero__slot--food,
+          .pp-hero__slot--waste { width: min(160px, 42%); }
+          .pp-hero__slot--selling,
+          .pp-hero__slot--ai { width: min(170px, 44%); }
+          .pp-hero__slot--pos { width: min(180px, 46%); }
+          .pp-hero__prop--salad { width: 90px; height: 68px; }
+          .pp-hero__prop--mascot { width: 60px; height: 60px; }
+          .pp-hero__arc-desc { display: none; }
+        }
+
+        /* Stack below 900 */
+        @media (max-width: 900px) {
+          .pp-hero { --pp-chef: min(200px, 48vw); }
+          .pp-hero__main {
+            grid-template-columns: 1fr;
+            gap: 28px;
+          }
+          .pp-hero__copy { max-width: none; }
+          .pp-hero__art {
+            aspect-ratio: auto;
+            max-height: none;
+            height: auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            align-items: start;
+          }
+          .pp-hero__glow,
+          .pp-hero__pale,
+          .pp-hero__orbit,
+          .pp-hero__analytics,
+          .pp-hero__prop { display: none; }
+          .pp-hero__chef {
+            position: relative;
+            left: auto;
+            top: auto;
+            transform: none;
+            grid-column: 1 / -1;
+            justify-self: center;
+            margin: 4px 0 12px;
+            animation: pp-up .7s .1s both;
+          }
+          .pp-hero__chef-ring { animation: none; }
+          .pp-hero__slot,
+          .pp-hero__slot--food,
+          .pp-hero__slot--waste,
+          .pp-hero__slot--selling,
+          .pp-hero__slot--ai,
+          .pp-hero__slot--pos {
+            position: relative;
+            left: auto;
+            right: auto;
+            top: auto;
+            bottom: auto;
+            width: 100%;
+          }
+          .pp-hero__slot--pos {
+            grid-column: 1 / -1;
+            max-width: 400px;
+            justify-self: center;
+          }
+          .pp-hero__float,
+          .pp-hero__float--a,
+          .pp-hero__float--b,
+          .pp-hero__float--c {
+            animation: pp-up .65s .2s both;
+          }
+          .pp-hero__arc-features {
+            position: relative;
+            left: auto;
+            right: auto;
+            bottom: auto;
+            grid-column: 1 / -1;
+            margin-top: 12px;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px 12px;
+          }
+          .pp-hero__arc-desc { display: block; }
+        }
+
+        @media (max-width: 480px) {
+          .pp-hero__ctas { flex-direction: column; align-items: stretch; }
+          .pp-btn { width: 100%; }
+          .pp-hero__art { grid-template-columns: 1fr; }
+          .pp-hero__slot--pos { grid-column: auto; max-width: none; }
+          .pp-hero__arc-features { grid-template-columns: 1fr; gap: 14px; }
+          .pp-hero__arc-feature {
+            display: grid;
+            grid-template-columns: 32px 1fr;
+            column-gap: 12px;
+            text-align: left;
+          }
+          .pp-hero__arc-icon { grid-row: 1 / 3; margin: 0; }
+          .pp-hero__arc-desc { margin-inline: 0; max-width: none; -webkit-line-clamp: unset; }
+        }
 
         @media (prefers-reduced-motion: reduce) {
-          * { animation-duration:.001s!important; animation-iteration-count:1!important; }
+          .pp-hero *, .pp-hero *::before, .pp-hero *::after {
+            animation-duration: 0.001s !important;
+            animation-iteration-count: 1 !important;
+          }
         }
       `}</style>
 
-      {/* Dot-grid overlay */}
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          backgroundImage:
-            "linear-gradient(rgba(21,32,25,.2) 1px,transparent 1px),linear-gradient(90deg,rgba(21,32,25,.2) 1px,transparent 1px)",
-          backgroundSize: "60px 60px",
-          opacity: 0.045,
-          pointerEvents: "none",
-        }}
-      />
+      <div className="pp-hero__bg" aria-hidden />
 
-      {/* ── MOBILE: plain responsive copy, no scaled canvas, no decorative dashboard ── */}
-      {isMobile && (
-        <div className="pp-hero__inset" style={{ paddingTop: 24, paddingBottom: 56 }}>
-          <h1
-            style={{
-              fontWeight: 800,
-              fontSize: "clamp(28px, 8vw, 40px)",
-              lineHeight: 1.15,
-              letterSpacing: "-.03em",
-              margin: 0,
-              color: T.text,
-              animation: "ag-up .7s .1s both",
-            }}
-          >
-            Control <span style={gradientClip(T.gradientA)}>Food Cost</span>, Inventory, Procurement
-            &amp; <span style={gradientClip(T.gradientB)}>Wastage</span> — All in One Place.
-          </h1>
-          <p
-            style={{
-              fontSize: 15.5,
-              lineHeight: 1.7,
-              color: T.muted,
-              margin: "16px 0 0",
-              animation: "ag-up .7s .22s both",
-            }}
-          >
-            PlatePielet unifies your POS sales, purchases, and stock into one live view — so you
-            catch cost leakage before it eats your margin, with Pilot AI flagging what needs
-            attention today.
-          </p>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 12,
-              marginTop: 24,
-              flexWrap: "wrap",
-              animation: "ag-up .7s .32s both",
-            }}
-          >
-            <a href="/demo" className="pp-btn-solid" style={{ ...btnSolidLg, flex: "1 1 auto" }}>
-              Book a Demo
-            </a>
-            <a href={SALES_PHONE_HREF} style={{ ...btnOutlineLg, flex: "1 1 auto" }}>
-              Call {SALES_PHONE}
-            </a>
-          </div>
-        </div>
-      )}
-
-      {/* ── MOBILE: animated dashboard mockup, scaled to fit width, below the copy ── */}
-      {isMobile && (
-        <div className="pp-hero__inset" style={{ paddingBottom: 40 }}>
-          {/* Same unpadded measuring div as the desktop stage wrapper */}
-          <div ref={mobileWrapRef} style={{ position: "relative", width: "100%", height: STAGE_H }}>
-            <div
-              ref={mobileStageRef}
-              style={{
-                position: "absolute",
-                left: 0,
-                top: 0,
-                width: HALF,
-                height: STAGE_H,
-                transformOrigin: "top left",
-              }}
-            >
-              {/* Fade-in lives on this inner element, not the scaled one above —
-                a CSS animation's transform keyframes would otherwise clobber
-                the JS-driven scale() on every frame. */}
-              <div
-                style={{
-                  position: "absolute",
-                  inset: 0,
-                  animation: "ag-fadein 0.6s 0.2s ease-out both",
-                }}
-              >
-                <AnimatedDashboard
-                  card={card}
-                  stats={stats}
-                  cardIdx={cardIdx}
-                  aiIdx={aiIdx}
-                  onAiComplete={handleAiComplete}
-                />
-              </div>
+      <div className="pp-hero__inner">
+        <div className="pp-hero__main">
+          <div className="pp-hero__copy">
+            <h1>
+              Control <span style={gradientClip(T.gradientA)}>Food Cost</span>, Inventory,
+              Procurement &amp; <span style={gradientClip(T.gradientB)}>Wastage</span> — All in One
+              Place.
+            </h1>
+            <p>
+              PlatePielet unifies your POS sales, purchases, and stock into one live view — so you
+              catch cost leakage before it eats your margin, with Pilot AI flagging what needs
+              attention today.
+            </p>
+            <div className="pp-hero__ctas">
+              <a href="/demo" className="pp-btn pp-btn--solid">
+                Book a Demo
+              </a>
+              <a href={SALES_PHONE_HREF} className="pp-btn pp-btn--outline">
+                Call {SALES_PHONE}
+              </a>
             </div>
           </div>
-        </div>
-      )}
 
-      {/* ── STAGE WRAPPER (desktop/tablet only — fixed-pixel canvas scaled to fit) ── */}
-      {!isMobile && (
-        <div className="pp-hero__inset">
-          {/* Unpadded measuring div: the abs-positioned stage anchors to it so
-              it starts at the inset's content edge (abs children ignore the
-              inset's padding), keeping the hero flush with the nav */}
-          <div ref={wrapRef} style={{ position: "relative", width: "100%", height: STAGE_H }}>
-            <div ref={stageRef} className="pp-hero__stage">
-              {/* ── LEFT HALF: COPY ── */}
-              <section className="pp-hero__copy">
-                <h1
-                  style={{
-                    fontWeight: 800,
-                    fontSize: 52,
-                    lineHeight: 1.08,
-                    letterSpacing: "-.04em",
-                    margin: 0,
-                    color: T.text,
-                    animation: "ag-up .7s .1s both",
-                  }}
-                >
-                  Control <span style={gradientClip(T.gradientA)}>Food Cost</span>, Inventory,
-                  <br />
-                  Procurement &amp; <span style={gradientClip(T.gradientB)}>Wastage</span>
-                  <br />— All in One Place.
-                </h1>
-                <p
-                  style={{
-                    fontSize: 17,
-                    lineHeight: 1.75,
-                    color: T.muted,
-                    margin: "20px 0 0",
-                    maxWidth: 460,
-                    animation: "ag-up .7s .22s both",
-                  }}
-                >
-                  PlatePielet unifies your POS sales, purchases, and stock into one live view — so
-                  you catch cost leakage before it eats your margin, with Pilot AI flagging what
-                  needs attention today.
-                </p>
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 14,
-                    marginTop: 32,
-                    animation: "ag-up .7s .32s both",
-                  }}
-                >
-                  <a href="/demo" className="pp-btn-solid" style={btnSolidLg}>
-                    Book a Demo
-                  </a>
-                  <a href={SALES_PHONE_HREF} style={btnOutlineLg}>
-                    Call {SALES_PHONE}
-                  </a>
-                </div>
-              </section>
-
-              {/* ── RIGHT HALF: ANIMATED DASHBOARD ── */}
-              <div
-                className="pp-hero__anim"
-                style={{ animation: "ag-fadein 0.6s 0.2s ease-out both" }}
-              >
-                <AnimatedDashboard
-                  card={card}
-                  stats={stats}
-                  cardIdx={cardIdx}
-                  aiIdx={aiIdx}
-                  onAiComplete={handleAiComplete}
-                />
-              </div>
-            </div>
-          </div>
+          <HeroComposition />
         </div>
-      )}
+      </div>
     </section>
   );
 }
