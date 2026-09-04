@@ -17,29 +17,21 @@ import {
   ArrowUpRight,
   BarChart3,
   Bell,
-  CircleDollarSign,
-  ClipboardCheck,
   FileText,
-  IndianRupee,
   LayoutDashboard,
-  LayoutGrid,
-  Megaphone,
   Package,
-  Plug,
   Receipt,
-  Shield,
   ShoppingCart,
   Sparkles,
-  Star,
-  Tag,
-  Target,
   Trash2,
   TrendingUp,
   Zap,
 } from "lucide-react";
 import { PlatePieletHero, T } from "@/components/PlatePieletHero";
 import { WhyPlatePieletSection } from "@/components/WhyPlatePieletSection";
-import { MagicCard } from "@/components/ui/magic-card";
+import { SolutionSection } from "@/components/SolutionSection";
+import { DataDecisionSection } from "@/components/DataDecisionSection";
+import { MenuEngineeringSection } from "@/components/MenuEngineeringSection";
 import { PlatePieletNav } from "@/components/PlatePieletNav";
 import InteractiveBentoGallery, {
   type BentoMediaItem,
@@ -493,64 +485,7 @@ const FAQS: [string, string][] = [
   ],
 ];
 
-/* ─── Menu-engineering quadrant matrix (mirrors dashboard/MenuEngineering) ──
-   area: which corner of the 2×2 grid this dish's tier occupies —
-   tr = popular + profitable, br = popular only, tl = profitable only, bl = neither. */
-const ME_DISHES = [
-  {
-    dish: "Chicken Biryani",
-    sells: "High",
-    sellsPct: 88,
-    earns: "₹92",
-    earnsPct: 80,
-    tier: "Best Seller",
-    act: "Sells well and earns well. Keep it front and center.",
-    color: "#15803D",
-    bg: "rgba(22,163,74,0.08)",
-    icon: Star,
-    area: "tr",
-  },
-  {
-    dish: "Butter Naan",
-    sells: "High",
-    sellsPct: 82,
-    earns: "₹18",
-    earnsPct: 22,
-    tier: "Underpriced",
-    act: "Everyone orders it, but it barely profits. Raise the price a little.",
-    color: "#2563EB",
-    bg: "rgba(37,99,235,0.1)",
-    icon: Tag,
-    area: "br",
-  },
-  {
-    dish: "Mutton Sukka",
-    sells: "Low",
-    sellsPct: 28,
-    earns: "₹120",
-    earnsPct: 95,
-    tier: "Hidden Gem",
-    act: "Earns a lot, but few people order it. Recommend it more.",
-    color: "#B7791F",
-    bg: "rgba(245,158,11,0.12)",
-    icon: Megaphone,
-    area: "tl",
-  },
-  {
-    dish: "Veg Cutlet",
-    sells: "Low",
-    sellsPct: 15,
-    earns: "₹9",
-    earnsPct: 8,
-    tier: "Dead Weight",
-    act: "Rarely ordered and barely profits. Take it off the menu.",
-    color: "#B91C1C",
-    bg: "rgba(239,68,68,0.08)",
-    icon: Trash2,
-    area: "bl",
-  },
-];
-
+/* ─── Waste AI recommendation cards ─────────────────────────────────────── */
 const WASTE_RECOMMENDATIONS = [
   ["OVERPRODUCTION", "More prepared than sold", "Reduce preparation quantities based on actual sales and demand patterns.", "Reduce Prep · Improve Forecasting", "#2563EB"],
   ["HIGH WASTE", "Unusually high ingredient loss", "Review preparation, storage, handling, portion control, and supplier quality.", "Investigate · Reduce Loss", "#B91C1C"],
@@ -578,247 +513,6 @@ function useReveal(threshold = 0.18) {
     return () => obs.disconnect();
   }, [threshold]);
   return { ref, visible };
-}
-
-/* ─── How It Works: hub-and-spoke stage ──────────────────────────────────────
-   Centred copy over a flanked diagram: source tiles → Pilot AI hub → output
-   tiles, with a dashboard mock on the left and an outlet console on the right.
-   Only the connector wires are SVG; everything else is real DOM so the mocks
-   keep crisp text and shadows. */
-
-/** Rounded orthogonal elbow: (x1,y1) → vertical bus at `bx` → (x2,y2). */
-function elbow(x1: number, y1: number, bx: number, x2: number, y2: number, r = 14) {
-  if (y1 === y2) return `M${x1} ${y1} H${x2}`;
-  const s = y2 > y1 ? 1 : -1;
-  return `M${x1} ${y1} H${bx - r} Q${bx} ${y1} ${bx} ${y1 + s * r} V${y2 - s * r} Q${bx} ${y2} ${bx + r} ${y2} H${x2}`;
-}
-
-/** Tile-column centres for a 58px tile with a 22px gap (see .hiw-tiles). */
-const HIW_CY = [29, 109, 189];
-
-const HIW_IN = [
-  { Icon: FileText, tint: "#E8F7ED", color: "#15803D", label: "Tally ERP" },
-  { Icon: Receipt, tint: "#EAF1FE", color: "#2563EB", label: "POS billing" },
-  { Icon: Package, tint: "#FDF1E3", color: "#C2760B", label: "Inventory" },
-];
-
-const HIW_OUT = [
-  { Icon: LayoutDashboard, tint: "#EEEDFD", color: "#5B4BD6", label: "Dashboards" },
-  { Icon: Bell, tint: "#FDECEF", color: "#DC2657", label: "Risk alerts" },
-  { Icon: ShoppingCart, tint: "#E8F7ED", color: "#15803D", label: "Purchase calls" },
-];
-
-const HIW_STATS: [typeof CircleDollarSign, string, string][] = [
-  [CircleDollarSign, "Sales this month", "AED 147,200"],
-  [Receipt, "POS orders", "3,842"],
-  [Target, "Food cost", "31.2%"],
-  [Package, "Stock items", "246"],
-  [Bell, "Open alerts", "8"],
-];
-
-const HIW_OUTLETS: [string, string][] = [
-  ["Marina Branch", "Margin 31% · healthy"],
-  ["Downtown Branch", "Margin 24% · watch"],
-  ["Mall Branch", "Margin 28% · healthy"],
-];
-
-const DATA_DECISION_STEPS = [
-  {
-    Icon: Plug,
-    title: "Connect Your Data",
-    description: "Bring together data from your POS, inventory, accounting, and other restaurant systems.",
-  },
-  {
-    Icon: LayoutDashboard,
-    title: "See Everything in One Place",
-    description: "View sales, costs, inventory, menu performance, and branch activity from one simple dashboard.",
-  },
-  {
-    Icon: BarChart3,
-    title: "Understand Your Performance",
-    description: "Identify trends, issues, and opportunities across your restaurant.",
-  },
-  {
-    Icon: Bell,
-    title: "Discover What Needs Attention",
-    description: "Spot wastage, stock and sales mismatches, underperforming items, and unusual changes early.",
-  },
-  {
-    Icon: Target,
-    title: "Make Better Decisions",
-    description: "Use clear insights to reduce costs, improve operations, and decide with confidence.",
-  },
-] as const;
-
-function HiwWire({ side }: { side: "in" | "out" }) {
-  return (
-    <svg className="hiw-wire" viewBox="0 0 54 218" aria-hidden="true">
-      {HIW_CY.map((cy) => (
-        <path key={cy} d={side === "in" ? elbow(0, cy, 27, 54, 109) : elbow(0, 109, 27, 54, cy)} />
-      ))}
-    </svg>
-  );
-}
-
-function HowItWorksFlow() {
-  const [activeStep, setActiveStep] = useState(0);
-  const [isAnimating, setIsAnimating] = useState(false);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setIsAnimating(true);
-      setActiveStep((prev) => (prev + 1) % DATA_DECISION_STEPS.length);
-      setTimeout(() => setIsAnimating(false), 500);
-    }, 3000);
-    return () => clearInterval(interval);
-  }, []);
-
-  return (
-    <div className="hiw-stage-enhanced">
-      <div className="hiw-stage-head">
-        <div className="hiw-badge-enhanced">
-          <LayoutGrid size={13} strokeWidth={2.2} />
-          From Data to Decision
-        </div>
-        <h2 className="hiw-h2-enhanced">
-          From data in <span style={{ color: "#15803D" }}>to decisions out.</span>
-        </h2>
-        <p className="hiw-lede-enhanced">
-          Connect your Tally, POS, and inventory data in one place.
-        </p>
-        <p className="hiw-lede-enhanced" style={{ marginTop: "0.85rem" }}>
-          PlatePielet turns those numbers into live dashboards, risk alerts, and clear recommendations
-          for purchasing, stock control, costs, and daily operations.
-        </p>
-        <div className="hiw-mantra-enhanced">Connect your data. See what matters. Act the same day.</div>
-        <Link to="/demo" className="hiw-cta-enhanced">
-          See it on your data <ArrowRight size={15} strokeWidth={2.4} />
-        </Link>
-      </div>
-
-      {/* Enhanced Data Flow Visualization */}
-      <div className="hiw-flow-container">
-        {/* Data Sources Section */}
-        <div className="hiw-flow-section hiw-flow-input">
-          <div className="hiw-flow-label">DATA SOURCES</div>
-          <div className="hiw-flow-cards">
-            {HIW_IN.map(({ Icon, tint, color, label }, index) => (
-              <div 
-                key={label} 
-                className={`hiw-flow-card ${activeStep === index ? 'active' : ''}`}
-                style={{ animationDelay: `${index * 100}ms` }}
-              >
-                <div className="hiw-flow-card-icon" style={{ background: tint, color }}>
-                  <Icon size={20} strokeWidth={1.8} />
-                </div>
-                <div className="hiw-flow-card-text">{label}</div>
-                <div className="hiw-flow-pulse" style={{ background: color }} />
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Central Processing Hub */}
-        <div className="hiw-flow-center">
-          <div className="hiw-flow-hub">
-            <div className="hiw-flow-hub-inner">
-              <Sparkles size={24} strokeWidth={2} className="hiw-flow-hub-icon" />
-              <div className="hiw-flow-hub-text">Pilot AI</div>
-            </div>
-            <div className="hiw-flow-ring" />
-            <div className="hiw-flow-ring hiw-flow-ring-2" />
-          </div>
-          
-          {/* Animated Connection Lines */}
-          <div className="hiw-flow-connections">
-            <div className="hiw-flow-line hiw-flow-line-left" />
-            <div className="hiw-flow-line hiw-flow-line-right" />
-          </div>
-        </div>
-
-        {/* Outputs Section */}
-        <div className="hiw-flow-section hiw-flow-output">
-          <div className="hiw-flow-label">DECISIONS & ACTIONS</div>
-          <div className="hiw-flow-cards">
-            {HIW_OUT.map(({ Icon, tint, color, label }, index) => (
-              <div 
-                key={label} 
-                className={`hiw-flow-card ${activeStep === (index + 3) % DATA_DECISION_STEPS.length ? 'active' : ''}`}
-                style={{ animationDelay: `${(index + 3) * 100}ms` }}
-              >
-                <div className="hiw-flow-card-icon" style={{ background: tint, color }}>
-                  <Icon size={20} strokeWidth={1.8} />
-                </div>
-                <div className="hiw-flow-card-text">{label}</div>
-                <div className="hiw-flow-pulse" style={{ background: color }} />
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Interactive Step Indicators */}
-      <div className="hiw-steps-tracker">
-        {DATA_DECISION_STEPS.map((step, index) => (
-          <div 
-            key={step.title}
-            className={`hiw-step-item ${activeStep === index ? 'active' : ''}`}
-            onClick={() => setActiveStep(index)}
-          >
-            <div className="hiw-step-number">{index + 1}</div>
-            <div className="hiw-step-content">
-              <div className="hiw-step-title">{step.title}</div>
-              <div className="hiw-step-desc">{step.description}</div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Visual Panels */}
-      <div className="hiw-visual-panels">
-        <div className="hiw-panel-enhanced">
-          <div className="hiw-browser-enhanced">
-            <div className="hiw-browser-bar"><span /><span /><span /></div>
-            <div className="hiw-browser-body">
-              <div className="hiw-sk" style={{ width: "62%" }} />
-              <div className="hiw-sk" style={{ width: "44%" }} />
-              <svg className="hiw-spark" viewBox="0 0 120 44" preserveAspectRatio="none">
-                <path d="M0 34 L15 28 L30 31 L45 20 L60 24 L75 12 L90 16 L105 6 L120 9" fill="none" stroke="#16A34A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-              <div className="hiw-sk" style={{ width: "78%" }} />
-              <div className="hiw-sk" style={{ width: "52%" }} />
-            </div>
-          </div>
-          <div className="hiw-statlist">
-            {HIW_STATS.map(([Icon, label, value], i) => (
-              <div key={label} className={`hiw-statrow${i === 2 ? " hl" : ""}`}>
-                <span className="hiw-statrow-ico"><Icon size={13} strokeWidth={2} /></span>
-                <div><b>{label}</b><em>{value}</em></div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="hiw-panel-enhanced">
-          <div className="hiw-rail">
-            <span className="on"><LayoutDashboard size={16} strokeWidth={1.9} /></span>
-            <span><Sparkles size={16} strokeWidth={1.9} /></span>
-            <span><Shield size={16} strokeWidth={1.9} /></span>
-            <span><Trash2 size={16} strokeWidth={1.9} /></span>
-          </div>
-          <div className="hiw-console">
-            {HIW_OUTLETS.map(([name, meta]) => (
-              <div key={name} className="hiw-userrow">
-                <span className="hiw-avatar"><Star size={12} strokeWidth={2} /></span>
-                <div><b>{name}</b><span>{meta}</span></div>
-              </div>
-            ))}
-            <div className="hiw-enter">Open dashboard</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
 }
 
 /* ─── Main page ──────────────────────────────────────────────────────────── */
@@ -3079,93 +2773,16 @@ function Index() {
         {/* HOW IT WORKS                                                       */}
         {/* ══════════════════════════════════════════════════════════════════ */}
         <div className="sw-rule" id="how-it-works" />
-        <div className="sw-band">
-          <div className="sw-section">
-            <div ref={sec5.ref} className={`loop-section reveal${sec5.visible ? " show" : ""}`}>
-              <img className="pp-mascot pp-mascot--loop" src="/hero/hero-mascot.png" alt="" />
-              <HowItWorksFlow />
-              <div className="hiw-stats">
-                {DATA_DECISION_STEPS.map(({ Icon, title, description }, index) => (
-                  <div className="hiw-stat" key={title}>
-                    <div className="hiw-stat-top">
-                      <div className="hiw-stat-icon">
-                        <Icon size={20} strokeWidth={1.8} />
-                      </div>
-                      <div className="hiw-stat-step">Step {index + 1}</div>
-                    </div>
-                    <div>
-                      <div className="hiw-stat-title">{title}</div>
-                      <div className="hiw-stat-sub">{description}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <div className="hiw-journey-footer">
-                <span>From Data to Decision</span>
-                <strong>Connect. Understand. Improve.</strong>
-              </div>
-            </div>
-          </div>
+        <div ref={sec5.ref}>
+          <DataDecisionSection visible={sec5.visible} />
         </div>
 
         {/* ══════════════════════════════════════════════════════════════════ */}
         {/* SOLUTION — feature cards                                           */}
         {/* ══════════════════════════════════════════════════════════════════ */}
         <div className="sw-rule" id="features" />
-        <div className="sw-section">
-          <div ref={sec3.ref} className={`platforms-section reveal${sec3.visible ? " show" : ""}`}>
-            <div className="sw-section-header-split">
-              <div>
-                <div className="sw-section-tag">↳ The Solution</div>
-                <h2 className="sw-section-h2" style={{ marginBottom: 0 }}>
-                  Stop guessing. Run your restaurant on data.
-                </h2>
-              </div>
-              <p className="sw-section-body" style={{ marginBottom: 0, maxWidth: 380 }}>
-                PlatePielet connects the systems you already use and turns them into one
-                intelligence layer for your entire operation.
-              </p>
-            </div>
-            <div className="sw-cards-grid">
-              <PlatformCard
-                tag="Inventory"
-                title="Smart Inventory Tracking"
-                description="Live stock counts built from your POS sales and purchase bills — with alerts before you run out or over-order."
-                cta="Explore Inventory"
-                href="/product/inventory-intelligence"
-                accent="#22C55E"
-                icon={Package}
-              />
-              <PlatformCard
-                tag="Waste AI"
-                title="Waste Detection"
-                description="Pilot AI flags spoilage, over-prep, and shrinkage patterns per outlet — before they hit your month-end P&L."
-                cta="Explore Waste AI"
-                href="#menu-engineering"
-                accent="#D97706"
-                icon={Trash2}
-              />
-              <PlatformCard
-                tag="Purchasing"
-                title="Purchase Optimization"
-                description="Market-price intelligence and demand forecasts tell you what to buy, how much, and when — so you stop overpaying vendors."
-                cta="Explore Purchasing"
-                href="/product/purchase-suggestions"
-                accent="#16A34A"
-                icon={ShoppingCart}
-              />
-              <PlatformCard
-                tag="Accounting"
-                title="Tally & POS Sync"
-                description="Your books reconcile themselves — every sale, purchase, and voucher matched automatically between POS and Tally."
-                cta="Explore Integrations"
-                href="/integrations"
-                accent="#0F7A4C"
-                icon={Receipt}
-                featured
-              />
-            </div>
-          </div>
+        <div ref={sec3.ref}>
+          <SolutionSection visible={sec3.visible} />
         </div>
 
         {/* ══════════════════════════════════════════════════════════════════ */}
@@ -3390,129 +3007,9 @@ function Index() {
         {/* ══════════════════════════════════════════════════════════════════ */}
         {/* MENU ENGINEERING SPOTLIGHT                                         */}
         {/* ══════════════════════════════════════════════════════════════════ */}
-        <div className="sw-rule" id="menu-engineering" />
-        <div className="sw-section sw-glow-wrap">
-          <div
-            ref={sec10.ref}
-            className={`platforms-section reveal${sec10.visible ? " show" : ""}`}
-          >
-            <div className="sw-section-tag">↳ Menu Engineering</div>
-            <h2 className="sw-section-h2">Understand What Sells. Know What Makes Money.</h2>
-            <div className="me-subhead">Every Dish. One Clear Strategy.</div>
-            <p className="sw-section-body" style={{ marginBottom: 0 }}>
-              PlatePielet combines sales, food cost, and menu performance data to show exactly how
-              every dish is performing.
-              <br /><br />
-              See which items drive profit, which need attention, and get AI-powered recommendations
-              on what to promote, optimise, reprice, or review.
-            </p>
-            <div className="me-formula">
-              <div className="me-f-step">
-                <span className="me-f-ico">
-                  <BarChart3 size={20} strokeWidth={1.8} />
-                </span>
-                <div>
-                  <div className="me-f-title">How often it sells</div>
-                  <div className="me-f-sub">Counted from your POS bills</div>
-                </div>
-              </div>
-              <div className="me-f-op" aria-hidden="true">
-                <span>+</span>
-              </div>
-              <div className="me-f-step">
-                <span className="me-f-ico">
-                  <IndianRupee size={20} strokeWidth={1.8} />
-                </span>
-                <div>
-                  <div className="me-f-title">Profit per plate</div>
-                  <div className="me-f-sub">Selling price minus ingredient cost</div>
-                </div>
-              </div>
-              <div className="me-f-op" aria-hidden="true">
-                <span>=</span>
-              </div>
-              <div className="me-f-step">
-                <span className="me-f-ico">
-                  <ClipboardCheck size={20} strokeWidth={1.8} />
-                </span>
-                <div>
-                  <div className="me-f-title">A clear verdict</div>
-                  <div className="me-f-sub">Promote, re-price, push, or remove</div>
-                </div>
-              </div>
-            </div>
-            <div className="me-example-lbl">Example · Four dishes from one menu</div>
-            <div className="me-matrix-wrap">
-              <div className="me-axis-y" aria-hidden="true">
-                <ArrowUp size={12} strokeWidth={2.5} />
-                Profit per plate
-              </div>
-              <div className="me-matrix-col">
-                <div className="me-matrix">
-                  {ME_DISHES.map((d) => (
-                    <div
-                      key={`${d.dish}-quad`}
-                      style={
-                        {
-                          gridArea: d.area,
-                          "--color-background": d.bg,
-                          "--color-border": "#DDE7E1",
-                        } as CSSProperties
-                      }
-                    >
-                      {/* Magic UI MagicCard — same mouse-tracking spotlight-border used on
-                          the marketing pages (pages.tsx), tinted per quadrant so the glow
-                          reinforces the tier's color instead of flattening it to one green. */}
-                      <MagicCard
-                        className="h-full w-full"
-                        gradientColor={d.color}
-                        gradientFrom={d.color}
-                        gradientTo={d.bg}
-                        gradientOpacity={0.14}
-                        gradientSize={220}
-                      >
-                        <div className="me-quad">
-                          <span className="me-quad-icon" style={{ color: d.color }}>
-                            <d.icon size={15} strokeWidth={2.2} />
-                          </span>
-                          <span className="me-quad-tier" style={{ color: d.color }}>
-                            {d.tier}
-                          </span>
-                          <span className="me-quad-ai">AI suggestion</span>
-                          <span className="me-quad-desc">{d.act}</span>
-                        </div>
-                      </MagicCard>
-                    </div>
-                  ))}
-                  {ME_DISHES.map((d) => (
-                    <div
-                      key={`${d.dish}-dot`}
-                      className="me-dot"
-                      style={
-                        {
-                          left: `${8 + d.sellsPct * 0.84}%`,
-                          top: `${100 - (8 + d.earnsPct * 0.84)}%`,
-                          "--dot-color": d.color,
-                        } as CSSProperties
-                      }
-                      title={`${d.dish} — ${d.sells} sales, ${d.earns} profit / plate`}
-                    >
-                      <span className="me-dot-marker" />
-                      <span className="me-dot-label">{d.dish}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-            <div className="me-axis-x" aria-hidden="true">
-              How often it sells
-              <ArrowRight size={12} strokeWidth={2.5} />
-            </div>
-            <p className="me-note">
-              PlatePielet plots your whole menu like this, automatically — from the POS sales and
-              purchase costs it already tracks.
-            </p>
-          </div>
+        <div className="sw-rule" />
+        <div id="menu-engineering" ref={sec10.ref}>
+          <MenuEngineeringSection visible={sec10.visible} />
         </div>
 
         {/* ══════════════════════════════════════════════════════════════════ */}
@@ -3753,69 +3250,6 @@ function Index() {
       >
         <ArrowUp size={18} strokeWidth={2.5} />
       </button>
-    </div>
-  );
-}
-
-function PlatformCard({
-  tag,
-  title,
-  description,
-  cta,
-  href,
-  accent,
-  icon: Icon,
-  featured,
-}: {
-  tag: string;
-  title: string;
-  description: string;
-  cta: string;
-  href: string;
-  accent: string;
-  icon: React.ComponentType<{ size?: number; strokeWidth?: number }>;
-  featured?: boolean;
-}) {
-  const cardRef = useRef<HTMLDivElement>(null);
-  const [tilt, setTilt] = useState({ rx: 0, ry: 0, scale: 1 });
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    const el = cardRef.current;
-    if (!el) return;
-    const rect = el.getBoundingClientRect();
-    const px = (e.clientX - rect.left) / rect.width - 0.5;
-    const py = (e.clientY - rect.top) / rect.height - 0.5;
-    setTilt({ rx: py * -8, ry: px * 8, scale: 1.03 });
-  };
-
-  const arrowClass = `sw-card-arrow${featured ? " sw-card-arrow--solid" : ""}`;
-
-  return (
-    <div
-      ref={cardRef}
-      className={`sw-card group${featured ? " sw-card--featured" : ""}`}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={() => setTilt({ rx: 0, ry: 0, scale: 1 })}
-      style={{
-        transform: `perspective(800px) rotateX(${tilt.rx}deg) rotateY(${tilt.ry}deg) scale(${tilt.scale})`,
-      }}
-    >
-      <div className="sw-card-icon" style={{ color: featured ? accent : T.text }}>
-        <Icon size={30} strokeWidth={1.5} />
-      </div>
-      <h3 className="sw-card-title">{title}</h3>
-      <p className="sw-card-desc">{description}</p>
-      {/* in-page anchors stay native; routes go through the router or the SPA
-          does a full reload */}
-      {href.startsWith("#") ? (
-        <a href={href} className={arrowClass} aria-label={cta}>
-          <ArrowUpRight size={16} strokeWidth={2.5} aria-hidden="true" />
-        </a>
-      ) : (
-        <Link to={href} className={arrowClass} aria-label={cta}>
-          <ArrowUpRight size={16} strokeWidth={2.5} aria-hidden="true" />
-        </Link>
-      )}
     </div>
   );
 }
