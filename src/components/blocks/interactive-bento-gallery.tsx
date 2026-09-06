@@ -124,7 +124,10 @@ function MediaItem({ item, className, onClick }: MediaItemProps) {
     <img
       src={item.url}
       alt={item.title}
-      className={cn("h-full w-full cursor-pointer object-cover", className)}
+      className={cn(
+        "h-full w-full cursor-pointer bg-[#E8F7ED] object-contain p-3",
+        className,
+      )}
       onClick={onClick}
       loading="lazy"
       decoding="async"
