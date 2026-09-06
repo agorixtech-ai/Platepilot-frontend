@@ -189,33 +189,33 @@ export function WhyPlatePieletSection({ visible }: { visible: boolean }) {
         }
         .why-pp__grid {
           display: grid;
-          grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.18fr);
-          gap: 40px;
+          grid-template-columns: var(--pp-split);
+          gap: var(--pp-split-gap);
           align-items: center;
         }
         .why-pp__eyebrow {
           display: flex;
           align-items: center;
-          gap: 12px;
-          font-size: 11px;
+          gap: 10px;
+          font-size: var(--pp-eyebrow);
           font-weight: 800;
-          letter-spacing: 0.22em;
+          letter-spacing: var(--pp-eyebrow-track);
           text-transform: uppercase;
           color: ${T.accentSolid};
           margin-bottom: 18px;
         }
         .why-pp__eyebrow::before {
           content: '';
-          width: 28px;
-          height: 2px;
+          width: 2px;
+          height: 12px;
           background: ${T.accent};
           flex-shrink: 0;
         }
         .why-pp__h2 {
-          font-size: clamp(28px, 3.2vw, 42px);
+          font-size: var(--pp-h2);
           font-weight: 800;
-          letter-spacing: -0.038em;
-          line-height: 1.12;
+          letter-spacing: var(--pp-h2-track);
+          line-height: var(--pp-h2-leading);
           margin: 0 0 20px;
           color: ${T.text};
         }
@@ -224,11 +224,11 @@ export function WhyPlatePieletSection({ visible }: { visible: boolean }) {
           color: ${T.accentSolid};
         }
         .why-pp__p {
-          font-size: 15.5px;
-          line-height: 1.75;
+          font-size: var(--pp-lede);
+          line-height: var(--pp-lede-leading);
           color: ${T.muted};
           margin: 0 0 14px;
-          max-width: 460px;
+          max-width: var(--pp-copy-w);
         }
         .why-pp__feats {
           display: grid;

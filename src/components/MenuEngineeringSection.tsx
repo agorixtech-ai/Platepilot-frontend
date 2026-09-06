@@ -149,7 +149,8 @@ export function MenuEngineeringSection({ visible }: { visible: boolean }) {
           background: #F4F6F4;
           font-family: 'Plus Jakarta Sans Variable', 'Plus Jakarta Sans', system-ui, sans-serif;
           color: ${T.text};
-          overflow: visible;
+          overflow-x: visible;
+          overflow-y: clip;
         }
         .me__inner {
           position: relative;
@@ -159,38 +160,18 @@ export function MenuEngineeringSection({ visible }: { visible: boolean }) {
         }
         .me__grid {
           display: grid;
-          grid-template-columns: minmax(280px, 0.88fr) minmax(0, 1.62fr);
-          gap: clamp(24px, 3.5vw, 40px);
+          grid-template-columns: var(--pp-split);
+          gap: var(--pp-split-gap);
           align-items: start;
-        }
-
-        .me__logo {
-          display: inline-flex;
-          align-items: baseline;
-          gap: 0;
-          margin-bottom: 22px;
-          font-size: 22px;
-          font-weight: 800;
-          letter-spacing: -0.04em;
-          color: ${T.accent};
-          line-height: 1;
-          text-decoration: none;
-        }
-        .me__logo span {
-          color: ${T.accent};
-        }
-        .me__logo em {
-          font-style: normal;
-          margin-left: 1px;
         }
 
         .me__tag {
           display: flex;
           align-items: center;
           gap: 10px;
-          font-size: 11px;
+          font-size: var(--pp-eyebrow);
           font-weight: 800;
-          letter-spacing: 0.2em;
+          letter-spacing: var(--pp-eyebrow-track);
           text-transform: uppercase;
           color: ${T.accentSolid};
           margin-bottom: 12px;
@@ -203,19 +184,19 @@ export function MenuEngineeringSection({ visible }: { visible: boolean }) {
           flex-shrink: 0;
         }
         .me__h2 {
-          font-size: clamp(30px, 3.8vw, 44px);
+          font-size: var(--pp-h2);
           font-weight: 800;
-          letter-spacing: -0.045em;
-          line-height: 1.05;
+          letter-spacing: var(--pp-h2-track);
+          line-height: var(--pp-h2-leading);
           margin: 0 0 14px;
           color: ${T.text};
         }
         .me__lede {
           margin: 0 0 26px;
-          font-size: 14.5px;
-          line-height: 1.7;
+          font-size: var(--pp-lede);
+          line-height: var(--pp-lede-leading);
           color: ${T.muted};
-          max-width: 390px;
+          max-width: var(--pp-copy-w);
         }
         .me__feats {
           display: flex;
@@ -343,7 +324,9 @@ export function MenuEngineeringSection({ visible }: { visible: boolean }) {
 
         .me__kpis {
           display: grid;
-          grid-template-columns: repeat(4, minmax(0, 1fr));
+          /* Last tile holds a dish name, not a short number — give it the slack
+             so it isn't the only one that ellipsises. */
+          grid-template-columns: repeat(3, minmax(0, 1fr)) minmax(0, 1.12fr);
           gap: 8px;
           margin-bottom: 0;
         }
@@ -752,7 +735,6 @@ export function MenuEngineeringSection({ visible }: { visible: boolean }) {
           .me__dash-wrap { padding: 0; }
           .me__decor { display: none; }
           .me__side { grid-template-columns: 1fr; }
-          .me__logo { font-size: 20px; }
         }
         @media (max-width: 560px) {
           .me__kpis { grid-template-columns: 1fr; }
@@ -778,9 +760,6 @@ export function MenuEngineeringSection({ visible }: { visible: boolean }) {
       <div className="me__inner">
         <div className="me__grid">
           <div>
-            <Link to="/" className="me__logo" aria-label="PlatePielet">
-              plate pielet<em>.</em>
-            </Link>
             <div className="me__tag">Menu Engineering</div>
             <h2 className="me__h2">
               See every dish.
