@@ -2,36 +2,17 @@ import { AppPage } from "@/components/ionic/AppPage";
 // Self-hosted, landing-only: imported here (not main.tsx) so the dashboard's
 // route chunk never downloads it — mirrors main.tsx's Inter setup.
 import "@fontsource-variable/plus-jakarta-sans";
-import {
-  useEffect,
-  useRef,
-  useState,
-  type CSSProperties,
-  type ReactNode,
-} from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Link, useHistory } from "react-router-dom";
 import Lenis from "lenis";
-import {
-  ArrowRight,
-  ArrowUp,
-  ArrowUpRight,
-  BarChart3,
-  Bell,
-  FileText,
-  LayoutDashboard,
-  Package,
-  Receipt,
-  ShoppingCart,
-  Sparkles,
-  Trash2,
-  TrendingUp,
-  Zap,
-} from "lucide-react";
+import { ArrowUp, ArrowUpRight } from "lucide-react";
 import { PlatePieletHero, T } from "@/components/PlatePieletHero";
 import { WhyPlatePieletSection } from "@/components/WhyPlatePieletSection";
 import { SolutionSection } from "@/components/SolutionSection";
 import { DataDecisionSection } from "@/components/DataDecisionSection";
 import { MenuEngineeringSection } from "@/components/MenuEngineeringSection";
+import { AiInsightsSection } from "@/components/AiInsightsSection";
+import { WasteManagementSection } from "@/components/WasteManagementSection";
 import { PlatePieletNav } from "@/components/PlatePieletNav";
 import InteractiveBentoGallery, {
   type BentoMediaItem,
@@ -485,14 +466,6 @@ const FAQS: [string, string][] = [
   ],
 ];
 
-/* ─── Waste AI recommendation cards ─────────────────────────────────────── */
-const WASTE_RECOMMENDATIONS = [
-  ["OVERPRODUCTION", "More prepared than sold", "Reduce preparation quantities based on actual sales and demand patterns.", "Reduce Prep · Improve Forecasting", "#2563EB"],
-  ["HIGH WASTE", "Unusually high ingredient loss", "Review preparation, storage, handling, portion control, and supplier quality.", "Investigate · Reduce Loss", "#B91C1C"],
-  ["STOCK VARIANCE", "Stock usage is higher than expected", "Review recipes, portions, stock movements, and wastage records.", "Review · Investigate · Correct", "#B7791F"],
-  ["SPOILAGE RISK", "Stock may expire before it is used", "Prioritise existing stock, reduce future purchases, or promote dishes that use those ingredients.", "Use First · Reduce Orders", "#15803D"],
-] as const;
-
 /* ─── Scroll reveal hook ─────────────────────────────────────────────────── */
 function useReveal(threshold = 0.18) {
   const ref = useRef<HTMLDivElement | null>(null);
@@ -583,6 +556,7 @@ function Index() {
   const sec5 = useReveal();
   const sec6 = useReveal();
   const sec10 = useReveal();
+  const secWaste = useReveal();
 
   return (
     <div
@@ -608,6 +582,23 @@ function Index() {
         /* ── Reveal animation ── */
         .reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.75s ease, transform 0.75s ease; }
         .reveal.show { opacity: 1; transform: none; }
+
+        /* ── Section copy scale ──
+           One source of truth for every section's left-hand copy column
+           (eyebrow / h2 / lede) and its copy-vs-visual split. Sections used to
+           each carry their own sizes and had drifted to five different scales. */
+        .pp-landing {
+          --pp-eyebrow: 11px;
+          --pp-eyebrow-track: 0.22em;
+          --pp-h2: clamp(28px, 3.2vw, 42px);
+          --pp-h2-track: -0.038em;
+          --pp-h2-leading: 1.12;
+          --pp-lede: 15.5px;
+          --pp-lede-leading: 1.75;
+          --pp-copy-w: 460px;
+          --pp-split: minmax(0, 0.92fr) minmax(0, 1.18fr);
+          --pp-split-gap: 40px;
+        }
 
         /* ── Section shared ── */
         .sw-section {
@@ -1499,30 +1490,6 @@ function Index() {
           .hiw-journey-footer span::after { display: none; }
         }
 
-        .waste-lede { max-width: 760px; }
-        .waste-metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 2.5rem; }
-        .waste-metrics > div { display: flex; flex-direction: column; gap: 5px; padding: 1.2rem 1.3rem; border: 1px solid #DDE7E1; border-radius: 16px; background: #F7FAF8; }
-        .waste-metrics strong { color: #152019; font-size: 0.85rem; }
-        .waste-metrics span { color: #66736B; font-size: 0.75rem; line-height: 1.5; }
-        .waste-ai-heading { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; margin: 3.5rem 0 1.25rem; }
-        .waste-ai-heading span { color: #152019; font-size: 1.1rem; font-weight: 800; }
-        .waste-ai-heading small { color: #15803D; font-size: 0.75rem; font-weight: 700; }
-        .waste-recommendations { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
-        .waste-card { min-height: 245px; padding: 1.35rem; border: 1px solid #DDE7E1; border-top: 4px solid var(--waste-color); border-radius: 16px; background: #FFFFFF; box-shadow: 0 10px 24px -20px rgba(21,32,25,0.55); }
-        .waste-card-label { color: var(--waste-color); font-size: 0.62rem; font-weight: 800; letter-spacing: 0.12em; }
-        .waste-card h3 { margin: 0.65rem 0 0.9rem; color: #152019; font-size: 0.95rem; line-height: 1.3; }
-        .waste-card-ai { display: inline-block; padding: 4px 8px; border-radius: 999px; background: #E8F7ED; color: #15803D; font-size: 0.6rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; }
-        .waste-card p { margin: 0.7rem 0 1rem; color: #66736B; font-size: 0.77rem; line-height: 1.55; }
-        .waste-card-action { color: #152019; font-size: 0.7rem; line-height: 1.4; }
-        .waste-footer { margin: 3.5rem auto 0; text-align: center; max-width: 620px; }
-        .waste-footer strong { display: block; color: #152019; font-size: 1.4rem; }
-        .waste-footer span { display: block; margin-top: 0.45rem; color: #15803D; font-weight: 800; }
-        .waste-footer p { margin: 0.7rem 0 0; color: #66736B; font-size: 0.85rem; line-height: 1.6; }
-        @media (max-width: 980px) { .waste-recommendations { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-        @media (max-width: 700px) {
-          .waste-metrics, .waste-recommendations { grid-template-columns: 1fr; }
-          .waste-ai-heading { flex-direction: column; gap: 0.4rem; }
-        }
         .about-section { padding: 5rem 0; }
         .about-intro { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(300px, 0.9fr); gap: 4rem; align-items: end; }
         .about-intro .sw-section-body { margin-bottom: 0; }
@@ -1554,16 +1521,6 @@ function Index() {
           align-items: center;
         }
         @media (max-width: 900px) { .tm-split { grid-template-columns: 1fr; gap: 2.5rem; } }
-        .tm-badge {
-          display: inline-flex;
-          align-items: center;
-          background: #66736B;
-          color: #FFFFFF;
-          font-size: 0.8rem;
-          font-weight: 600;
-          padding: 0.5rem 1.1rem;
-          border-radius: 9999px;
-        }
         .tm-cta {
           display: inline-flex;
           align-items: center;
@@ -2112,26 +2069,36 @@ function Index() {
 
         /* ── New platform section styles (exact match to reference) ── */
         .sw-section-tag {
-          font-size: 0.65rem;
-          font-weight: 700;
-          letter-spacing: 0.25em;
-          color: #66736B;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          font-size: var(--pp-eyebrow);
+          font-weight: 800;
+          letter-spacing: var(--pp-eyebrow-track);
+          color: #15803D;
           text-transform: uppercase;
-          margin-bottom: 1.5rem;
+          margin-bottom: 18px;
+        }
+        .sw-section-tag::before {
+          content: '';
+          width: 2px;
+          height: 12px;
+          background: #16A34A;
+          flex-shrink: 0;
         }
         .sw-section-h2 {
-          font-size: clamp(2.25rem, 4vw, 3.5rem);
+          font-size: var(--pp-h2);
           font-weight: 800;
-          letter-spacing: -0.04em;
-          line-height: 1.1;
-          margin-bottom: 1rem;
-          max-width: 700px;
+          letter-spacing: var(--pp-h2-track);
+          line-height: var(--pp-h2-leading);
+          margin-bottom: 20px;
+          max-width: 640px;
         }
         .sw-section-body {
-          font-size: 0.9rem;
+          font-size: var(--pp-lede);
           color: #66736B;
-          line-height: 1.75;
-          max-width: 560px;
+          line-height: var(--pp-lede-leading);
+          max-width: var(--pp-copy-w);
           margin-bottom: 3.5rem;
         }
         /* Heading-left / intro-right header row (Solution section only) */
@@ -2149,14 +2116,14 @@ function Index() {
         /* ── Split gallery section: half copy / half bento ── */
         .pp-landing .gallery-split {
           display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 3rem;
+          grid-template-columns: var(--pp-split);
+          gap: var(--pp-split-gap);
           align-items: center;
           width: 100%;
         }
         .pp-landing .gallery-split-copy {
           text-align: left;
-          max-width: 480px;
+          max-width: var(--pp-copy-w);
         }
         .pp-landing .gallery-split-copy .sw-section-tag,
         .pp-landing .gallery-split-copy .sw-section-h2,
@@ -2249,15 +2216,15 @@ function Index() {
           box-shadow: 0 1px 2px rgba(21, 32, 25, 0.04);
         }
         .pp-landing .xp-title {
-          font-size: clamp(2.1rem, 4.5vw, 3.4rem);
+          font-size: var(--pp-h2);
           font-weight: 800;
-          letter-spacing: -0.045em;
-          line-height: 1.05;
+          letter-spacing: var(--pp-h2-track);
+          line-height: var(--pp-h2-leading);
           color: #152019;
           margin: 0 0 0.75rem !important;
         }
         .pp-landing .xp-sub {
-          font-size: 1.05rem;
+          font-size: var(--pp-lede);
           color: #66736B;
           margin: 0 0 2.75rem !important;
           max-width: 420px;
@@ -2538,186 +2505,6 @@ function Index() {
           color: #FFFFFF;
         }
 
-        /* ── Capabilities section (exact match to reference) ── */
-        /* ── Feature bento grid ── */
-        .ft-grid {
-          display: grid;
-          grid-template-columns: repeat(6, 1fr);
-          gap: 1.25rem;
-          margin-top: 3rem;
-        }
-        .ft-card { grid-column: span 2; }
-        .ft-card.ft-wide { grid-column: span 3; }
-        @media (max-width: 1024px) {
-          .ft-grid { grid-template-columns: repeat(2, 1fr); }
-          .ft-card, .ft-card.ft-wide { grid-column: span 1; }
-          .ft-card:last-child { grid-column: span 2; }
-        }
-        @media (max-width: 640px) {
-          .ft-grid { grid-template-columns: 1fr; gap: 1rem; }
-          .ft-card, .ft-card.ft-wide, .ft-card:last-child { grid-column: span 1; }
-        }
-        .ft-card {
-          background: #F6FAF8;
-          border: 1px solid #DDE7E1;
-          border-radius: 18px;
-          padding: 1.5rem;
-          display: flex;
-          flex-direction: column;
-          transition: border-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
-        }
-        .ft-card:hover {
-          border-color: #B6DCC6;
-          transform: translateY(-3px);
-          box-shadow: 0 18px 40px -24px rgba(15,42,28,0.35);
-        }
-        .ft-vis {
-          position: relative;
-          height: 200px;
-          margin-bottom: 1.5rem;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          overflow: hidden;
-        }
-        .ft-card.ft-wide .ft-vis { height: 244px; }
-        .ft-title {
-          font-size: 1.3rem;
-          font-weight: 700;
-          letter-spacing: -0.025em;
-          line-height: 1.25;
-          margin-bottom: 0.55rem;
-        }
-        .ft-card.ft-wide .ft-title { font-size: 1.45rem; }
-        .ft-desc { font-size: 0.85rem; color: #66736B; line-height: 1.65; }
-
-        /* window chrome shared by the feature mock-ups */
-        .ft-win {
-          background: #FFFFFF;
-          border: 1px solid #E4EDE8;
-          border-radius: 12px;
-          box-shadow: 0 12px 30px -18px rgba(15,42,28,0.45);
-          overflow: hidden;
-        }
-        .ft-win-bar {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          padding: 9px 12px;
-          border-bottom: 1px solid #EFF5F2;
-        }
-        .ft-dot { width: 7px; height: 7px; border-radius: 50%; background: #16A34A; flex-shrink: 0; }
-        .ft-sk { display: block; height: 7px; border-radius: 999px; background: #E6EDE9; }
-        .ft-sk-a { background: rgba(22,163,74,0.28); }
-
-        /* 1 · Pilot AI */
-        .ft-ai-win { width: 88%; }
-        .ft-ai-body { padding: 14px 14px 36px; display: flex; flex-direction: column; gap: 12px; }
-        .ft-ai-q {
-          align-self: flex-end;
-          max-width: 80%;
-          font-size: 0.72rem;
-          font-weight: 600;
-          color: #15803D;
-          background: #E8F7ED;
-          border: 1px solid #C9E9D6;
-          padding: 7px 11px;
-          border-radius: 12px 12px 3px 12px;
-        }
-        .ft-ai-a { display: flex; gap: 9px; }
-        .ft-ai-ico {
-          width: 20px; height: 20px; border-radius: 7px; flex-shrink: 0;
-          background: linear-gradient(135deg, #0F7A4C, #16A34A);
-          color: #FFFFFF; display: grid; place-items: center;
-        }
-        .ft-ai-lines { flex: 1; display: flex; flex-direction: column; gap: 7px; padding-top: 5px; }
-        .ft-ai-bar {
-          position: absolute;
-          left: 10%; right: 10%; bottom: 4px;
-          display: flex; align-items: center; justify-content: space-between; gap: 10px;
-          padding: 6px 6px 6px 13px;
-          background: #FFFFFF;
-          border: 1.5px solid #16A34A;
-          border-radius: 11px;
-          box-shadow: 0 12px 26px -12px rgba(15,122,76,0.55);
-          font-size: 0.68rem;
-          color: #8A968F;
-        }
-        .ft-ai-btn {
-          display: inline-flex; align-items: center; gap: 5px; flex-shrink: 0;
-          background: linear-gradient(135deg, #0F7A4C, #16A34A);
-          color: #FFFFFF; font-size: 0.66rem; font-weight: 700;
-          padding: 6px 12px; border-radius: 8px;
-        }
-
-        /* 2 · Realtime dashboards */
-        .ft-stack { position: relative; width: 90%; padding-top: 28px; }
-        .ft-layer-2 { position: absolute; top: 0; left: 8%; right: 8%; height: 36px; opacity: 0.45; z-index: 1; }
-        .ft-layer-1 { position: absolute; top: 14px; left: 4%; right: 4%; height: 36px; opacity: 0.7; z-index: 2; }
-        .ft-layer-0 { position: relative; z-index: 3; }
-        .ft-live {
-          margin-left: auto; flex-shrink: 0;
-          font-size: 0.55rem; font-weight: 800; letter-spacing: 0.12em;
-          color: #15803D; background: #E8F7ED; border: 1px solid #C9E9D6;
-          padding: 2px 7px; border-radius: 999px;
-        }
-        .ft-dash-body { padding: 13px 14px 15px; display: flex; flex-direction: column; gap: 13px; }
-        .ft-kpis { display: flex; gap: 22px; }
-        .ft-kpis b { display: block; font-size: 0.95rem; font-weight: 800; color: #152019; line-height: 1; }
-        .ft-kpis span { display: block; font-size: 0.6rem; color: #8A968F; margin-top: 4px; }
-        .ft-bars { display: flex; align-items: flex-end; gap: 5px; height: 58px; }
-        .ft-bars i {
-          flex: 1; border-radius: 3px 3px 0 0; background: #D8EEE1;
-          transform-origin: bottom;
-          animation: ft-grow 0.9s cubic-bezier(0.22,1,0.36,1) backwards;
-        }
-        .ft-bars i:last-child { background: linear-gradient(180deg, #16A34A, #0F7A4C); }
-        @keyframes ft-grow { from { transform: scaleY(0.12); opacity: 0; } }
-
-        /* 3 · Integrations orbit */
-        .ft-orbit { position: relative; width: 230px; height: 230px; display: grid; place-items: center; }
-        .ft-ring { position: absolute; border-radius: 50%; border: 1px dashed #D6E5DC; }
-        .ft-ring-1 { inset: 36px; }
-        .ft-ring-2 { inset: 0; }
-        .ft-hub {
-          width: 48px; height: 48px; border-radius: 15px; position: relative; z-index: 2;
-          background: linear-gradient(135deg, #0F7A4C, #16A34A);
-          color: #FFFFFF; display: grid; place-items: center;
-          box-shadow: 0 14px 28px -10px rgba(15,122,76,0.7);
-        }
-        .ft-node {
-          position: absolute; z-index: 2;
-          font-size: 0.62rem; font-weight: 700; color: #3C4A42;
-          background: #FFFFFF; border: 1px solid #E4EDE8; border-radius: 999px;
-          padding: 5px 10px; white-space: nowrap;
-          box-shadow: 0 8px 16px -10px rgba(15,42,28,0.55);
-        }
-
-        /* 4 · Alerts */
-        .ft-alerts { display: flex; flex-direction: column; gap: 9px; width: 100%; }
-        .ft-alert {
-          display: flex; align-items: center; gap: 10px;
-          background: #FFFFFF; border: 1px solid #E4EDE8; border-radius: 10px;
-          padding: 9px 11px;
-          box-shadow: 0 10px 20px -16px rgba(15,42,28,0.6);
-        }
-        .ft-alert b { display: block; font-size: 0.72rem; font-weight: 700; color: #152019; }
-        .ft-alert span { display: block; font-size: 0.63rem; color: #8A968F; margin-top: 2px; }
-        .ft-alert-ico { width: 26px; height: 26px; border-radius: 8px; display: grid; place-items: center; flex-shrink: 0; }
-
-        /* 5 · Reports */
-        .ft-doc { width: 84%; }
-        .ft-doc-body { padding: 13px 14px 15px; display: flex; flex-direction: column; gap: 10px; }
-        .ft-doc-h { display: flex; align-items: center; gap: 7px; font-size: 0.72rem; font-weight: 700; color: #152019; }
-        .ft-doc-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-        .ft-doc-row em { font-style: normal; font-size: 0.65rem; font-weight: 700; color: #152019; flex-shrink: 0; }
-        .ft-badge {
-          align-self: flex-start; margin-top: 2px;
-          font-size: 0.6rem; font-weight: 700; color: #15803D;
-          background: #E8F7ED; border: 1px solid #C9E9D6;
-          padding: 4px 9px; border-radius: 999px;
-        }
-
         /* ── Product-preview tile animations ── */
         @keyframes pp-scroll-x { from { transform: translateX(0); } to { transform: translateX(-50%); } }
         @keyframes pp-blink { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
@@ -2786,222 +2573,11 @@ function Index() {
         </div>
 
         {/* ══════════════════════════════════════════════════════════════════ */}
-        {/* CAPABILITIES TABS                                                  */}
+        {/* AI-POWERED INSIGHTS                                                */}
         {/* ══════════════════════════════════════════════════════════════════ */}
         <div className="sw-rule" />
-        <div className="sw-section">
-          <div ref={sec4.ref} className={`caps-section reveal${sec4.visible ? " show" : ""}`}>
-            <div className="sw-section-tag">AI-Powered Insights</div>
-            <h2 className="sw-section-h2">
-              Everything You Need to Run a Smarter, More Profitable Restaurant.
-            </h2>
-            <p className="sw-section-body">
-              Connect your restaurant data, understand performance in real time, and turn insights
-              into actions that improve your business.
-            </p>
-            <div className="ft-grid">
-              <article className="ft-card ft-wide">
-                <div className="ft-vis">
-                  <div className="ft-win ft-ai-win">
-                    <div className="ft-win-bar">
-                      <span className="ft-dot" />
-                      <span className="ft-sk" style={{ width: "46%" }} />
-                    </div>
-                    <div className="ft-ai-body">
-                      <div className="ft-ai-q">Why is food cost up in Velachery?</div>
-                      <div className="ft-ai-a">
-                        <span className="ft-ai-ico">
-                          <Sparkles size={11} strokeWidth={2.2} />
-                        </span>
-                        <div className="ft-ai-lines">
-                          <span className="ft-sk" style={{ width: "100%" }} />
-                          <span className="ft-sk" style={{ width: "84%" }} />
-                          <span className="ft-sk ft-sk-a" style={{ width: "44%" }} />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="ft-ai-bar">
-                    <span>Ask Pilot anything about your outlets…</span>
-                    <span className="ft-ai-btn">
-                      <Zap size={11} strokeWidth={2.4} /> Ask
-                    </span>
-                  </div>
-                </div>
-                <h3 className="ft-title">Pilot AI Insights</h3>
-                <p className="ft-desc">
-                  Ask in plain language, get an answer from your own numbers. Pilot reads every
-                  bill, voucher, and stock movement, then tells you where money is leaking.
-                </p>
-              </article>
-
-              <article className="ft-card ft-wide">
-                <div className="ft-vis">
-                  <div className="ft-stack">
-                    <div className="ft-win ft-layer-2" />
-                    <div className="ft-win ft-layer-1" />
-                    <div className="ft-win ft-layer-0">
-                      <div className="ft-win-bar">
-                        <span className="ft-dot" />
-                        <span className="ft-sk" style={{ width: "34%" }} />
-                        <span className="ft-live">LIVE</span>
-                      </div>
-                      <div className="ft-dash-body">
-                        <div className="ft-kpis">
-                          <div>
-                            <b>₹2.4L</b>
-                            <span>Sales today</span>
-                          </div>
-                          <div>
-                            <b>28.4%</b>
-                            <span>Food cost</span>
-                          </div>
-                          <div>
-                            <b>847</b>
-                            <span>Bills</span>
-                          </div>
-                        </div>
-                        <div className="ft-bars">
-                          {[38, 56, 44, 72, 58, 84, 66, 94].map((h, i) => (
-                            <i key={i} style={{ height: `${h}%`, animationDelay: `${i * 60}ms` }} />
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <h3 className="ft-title">Realtime Dashboards</h3>
-                <p className="ft-desc">
-                  Sales, food cost, stock, and receivables update as they happen — not at month-end.
-                  Drill from the group view to a single outlet or invoice in two taps.
-                </p>
-              </article>
-
-              <article className="ft-card">
-                <div className="ft-vis">
-                  <div className="ft-orbit">
-                    <span className="ft-ring ft-ring-2" />
-                    <span className="ft-ring ft-ring-1" />
-                    <span className="ft-hub">
-                      <Zap size={20} strokeWidth={2} />
-                    </span>
-                    <span
-                      className="ft-node"
-                      style={{ top: 0, left: "50%", transform: "translateX(-50%)" }}
-                    >
-                      Tally ERP
-                    </span>
-                    <span
-                      className="ft-node"
-                      style={{ top: "50%", right: 0, transform: "translateY(-50%)" }}
-                    >
-                      POS
-                    </span>
-                    <span
-                      className="ft-node"
-                      style={{ bottom: 0, left: "50%", transform: "translateX(-50%)" }}
-                    >
-                      Zoho
-                    </span>
-                    <span
-                      className="ft-node"
-                      style={{ top: "50%", left: 0, transform: "translateY(-50%)" }}
-                    >
-                      Excel
-                    </span>
-                  </div>
-                </div>
-                <h3 className="ft-title">Tally &amp; POS Sync</h3>
-                <p className="ft-desc">
-                  No migration, no new hardware. Your books reconcile themselves against POS
-                  billing.
-                </p>
-              </article>
-
-              <article className="ft-card">
-                <div className="ft-vis">
-                  <div className="ft-alerts">
-                    {(
-                      [
-                        [
-                          Package,
-                          "#EF4444",
-                          "rgba(239,68,68,0.12)",
-                          "Tomatoes below par",
-                          "Reorder 12 kg before service",
-                        ],
-                        [
-                          Trash2,
-                          "#D97706",
-                          "rgba(217,119,6,0.12)",
-                          "Prep waste up 18%",
-                          "Anna Nagar · dinner shift",
-                        ],
-                        [
-                          ShoppingCart,
-                          "#16A34A",
-                          "rgba(22,163,74,0.12)",
-                          "Paneer price dropped 6%",
-                          "Good day to buy 40 kg",
-                        ],
-                      ] as const
-                    ).map(([Icon, color, bg, title, sub]) => (
-                      <div
-                        key={title}
-                        className="ft-alert"
-                        style={{ borderLeft: `3px solid ${color}` }}
-                      >
-                        <span className="ft-alert-ico" style={{ background: bg, color }}>
-                          <Icon size={13} strokeWidth={2.2} />
-                        </span>
-                        <div>
-                          <b>{title}</b>
-                          <span>{sub}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                <h3 className="ft-title">Stock &amp; Waste Alerts</h3>
-                <p className="ft-desc">
-                  Get told before you run out, over-order, or quietly bleed margin to spoilage.
-                </p>
-              </article>
-
-              <article className="ft-card">
-                <div className="ft-vis">
-                  <div className="ft-win ft-doc">
-                    <div className="ft-win-bar">
-                      <span className="ft-dot" />
-                      <span className="ft-sk" style={{ width: "38%" }} />
-                    </div>
-                    <div className="ft-doc-body">
-                      <div className="ft-doc-h">
-                        <FileText size={13} strokeWidth={2} /> VAT Summary · August
-                      </div>
-                      {(
-                        [
-                          ["72%", "₹18.4L"],
-                          ["58%", "₹92,100"],
-                          ["64%", "₹4,820"],
-                        ] as const
-                      ).map(([w, amt]) => (
-                        <div key={amt} className="ft-doc-row">
-                          <span className="ft-sk" style={{ width: w }} />
-                          <em>{amt}</em>
-                        </div>
-                      ))}
-                      <span className="ft-badge">Ready to file</span>
-                    </div>
-                  </div>
-                </div>
-                <h3 className="ft-title">Reports &amp; VAT</h3>
-                <p className="ft-desc">
-                  Filing-ready summaries built from reconciled data, with mismatches flagged early.
-                </p>
-              </article>
-            </div>
-          </div>
+        <div ref={sec4.ref}>
+          <AiInsightsSection visible={sec4.visible} />
         </div>
 
         {/* ══════════════════════════════════════════════════════════════════ */}
@@ -3015,45 +2591,9 @@ function Index() {
         {/* ══════════════════════════════════════════════════════════════════ */}
         {/* WASTE MANAGEMENT                                                  */}
         {/* ══════════════════════════════════════════════════════════════════ */}
-        <div className="sw-rule" id="waste-management" />
-        <div className="sw-section sw-glow-wrap">
-          <div className="platforms-section waste-section">
-            <div className="sw-section-tag">↳ Waste Management</div>
-            <h2 className="sw-section-h2">See Where Waste Happens. Understand Why. Reduce It.</h2>
-            <p className="sw-section-body waste-lede">
-              PlatePielet gives you a clear view of where food and inventory waste is happening, what
-              it is costing your business, and how to reduce it.
-              <br /><br />
-              By connecting stock movements, consumption, sales, and wastage data, PlatePielet helps
-              you identify patterns, investigate unusual losses, and take action before waste impacts
-              profitability.
-            </p>
-            <div className="waste-metrics">
-              <div><strong>Track the true cost</strong><span>By item, category, branch, and time period.</span></div>
-              <div><strong>Identify waste patterns</strong><span>Overproduction, spoilage, excess consumption, and slow-moving stock.</span></div>
-              <div><strong>Compare stock vs sales</strong><span>Spot unexpected variances and unrecorded usage.</span></div>
-            </div>
-            <div className="waste-ai-heading">
-              <span>AI-Powered Waste Recommendations</span>
-              <small>Understand the cause. Know what to do next.</small>
-            </div>
-            <div className="waste-recommendations">
-              {WASTE_RECOMMENDATIONS.map(([label, issue, recommendation, action, color]) => (
-                <article className="waste-card" key={label} style={{ "--waste-color": color } as CSSProperties}>
-                  <div className="waste-card-label">{label}</div>
-                  <h3>{issue}</h3>
-                  <div className="waste-card-ai">AI recommendation</div>
-                  <p>{recommendation}</p>
-                  <strong className="waste-card-action">Action: {action}</strong>
-                </article>
-              ))}
-            </div>
-            <div className="waste-footer">
-              <strong>Turn Waste Into Savings</strong>
-              <span>Detect. Understand. Recommend. Reduce.</span>
-              <p>PlatePielet turns waste data into clear actions that help reduce food cost, improve inventory control, and protect your margins.</p>
-            </div>
-          </div>
+        <div className="sw-rule" />
+        <div ref={secWaste.ref}>
+          <WasteManagementSection visible={secWaste.visible} />
         </div>
 
         {/* ══════════════════════════════════════════════════════════════════ */}
@@ -3065,31 +2605,34 @@ function Index() {
             <div className="sw-section-tag">About Us</div>
             <div className="about-intro">
               <div>
-                <h2 className="sw-section-h2">Optimise Your Restaurant’s Performance with PlatePielet</h2>
+                <h2 className="sw-section-h2">
+                  Optimise Your Restaurant’s Performance with PlatePielet
+                </h2>
               </div>
               <p className="sw-section-body">
                 PlatePielet is built for restaurateurs who want a smarter, clearer way to run their
                 business.
-                <br /><br />
-                Our mission is to help restaurants improve performance by turning everyday operational
-                data into meaningful insights and actions. We put your business goals at the centre of
-                everything we build.
+                <br />
+                <br />
+                Our mission is to help restaurants improve performance by turning everyday
+                operational data into meaningful insights and actions. We put your business goals at
+                the centre of everything we build.
               </p>
             </div>
             <div className="about-grid">
               <div className="about-copy">
                 <p>
-                  Restaurant owners often manage sales, inventory, food costs, wastage, and financial
-                  information across multiple disconnected systems. PlatePielet brings this data
-                  together, giving you one clear view of your restaurant’s performance and helping you
-                  make faster, better-informed decisions.
+                  Restaurant owners often manage sales, inventory, food costs, wastage, and
+                  financial information across multiple disconnected systems. PlatePielet brings
+                  this data together, giving you one clear view of your restaurant’s performance and
+                  helping you make faster, better-informed decisions.
                 </p>
               </div>
               <article className="about-card">
                 <div className="about-card-label">Built for the Restaurant Industry</div>
                 <p>
-                  We understand that every restaurant operates differently. PlatePielet is designed to
-                  work alongside your existing systems and simplify the way you understand your
+                  We understand that every restaurant operates differently. PlatePielet is designed
+                  to work alongside your existing systems and simplify the way you understand your
                   business, whether you operate a single restaurant or multiple locations.
                 </p>
               </article>
@@ -3115,12 +2658,14 @@ function Index() {
             <div className="tm-section">
               <div className="tm-split">
                 <div className="tm-copy">
-                  <img className="pp-mascot pp-mascot--testimonial" src="/hero/hero-mascot.png" alt="" />
-                  <span className="tm-badge">Testimonials &amp; Reviews</span>
-                  <h2 className="sw-section-h2" style={{ marginTop: "1.5rem", maxWidth: 420 }}>
-                    Restaurant owners run on PlatePielet.
-                  </h2>
-                  <p className="sw-section-body" style={{ maxWidth: 380 }}>
+                  <img
+                    className="pp-mascot pp-mascot--testimonial"
+                    src="/hero/hero-mascot.png"
+                    alt=""
+                  />
+                  <div className="sw-section-tag">Testimonials &amp; Reviews</div>
+                  <h2 className="sw-section-h2">Restaurant owners run on PlatePielet.</h2>
+                  <p className="sw-section-body">
                     Real feedback from outlet owners and finance leads who use PlatePielet every day
                     to control cost and cut manual work.
                   </p>
@@ -3173,7 +2718,7 @@ function Index() {
           <div ref={sec2.ref} className={`platforms-section reveal${sec2.visible ? " show" : ""}`}>
             <div className="gallery-split">
               <div className="gallery-split-copy">
-                <div className="sw-section-tag">↳ Product Preview</div>
+                <div className="sw-section-tag">Product Preview</div>
                 <h2 className="sw-section-h2">
                   See PlatePielet in <span style={{ color: "#15803D" }}>Action</span>
                 </h2>

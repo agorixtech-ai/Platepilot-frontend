@@ -140,9 +140,9 @@ export function SolutionSection({ visible }: { visible: boolean }) {
           display: flex;
           align-items: center;
           gap: 10px;
-          font-size: 11px;
+          font-size: var(--pp-eyebrow);
           font-weight: 800;
-          letter-spacing: 0.22em;
+          letter-spacing: var(--pp-eyebrow-track);
           text-transform: uppercase;
           color: ${T.accentSolid};
           margin-bottom: 16px;
@@ -155,10 +155,10 @@ export function SolutionSection({ visible }: { visible: boolean }) {
           flex-shrink: 0;
         }
         .sol__h2 {
-          font-size: clamp(32px, 4.2vw, 48px);
+          font-size: var(--pp-h2);
           font-weight: 800;
-          letter-spacing: -0.04em;
-          line-height: 1.08;
+          letter-spacing: var(--pp-h2-track);
+          line-height: var(--pp-h2-leading);
           margin: 0;
           color: ${T.text};
           max-width: 640px;
@@ -168,11 +168,11 @@ export function SolutionSection({ visible }: { visible: boolean }) {
           color: ${T.accent};
         }
         .sol__body {
-          font-size: 15px;
-          line-height: 1.7;
+          font-size: var(--pp-lede);
+          line-height: var(--pp-lede-leading);
           color: ${T.muted};
           margin: 0;
-          max-width: 360px;
+          max-width: var(--pp-copy-w);
           justify-self: end;
           padding-bottom: 4px;
         }

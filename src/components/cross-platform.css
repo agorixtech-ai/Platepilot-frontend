@@ -30,10 +30,10 @@
 .xp-title {
   margin: 1rem auto 0.5rem;
   max-width: 16ch;
-  font-size: clamp(2rem, 4vw, 3rem);
+  font-size: var(--pp-h2);
   font-weight: 800;
-  letter-spacing: -0.04em;
-  line-height: 1.1;
+  letter-spacing: var(--pp-h2-track);
+  line-height: var(--pp-h2-leading);
   color: #152019;
 }
 
