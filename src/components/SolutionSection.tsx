@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import type { ReactNode } from "react";
 import { T } from "@/components/PlatePieletHero";
+import { LiveNumber } from "@/components/ui/live-number";
 
 type Overlay =
   | { kind: "waste" }
@@ -69,8 +70,12 @@ function CardOverlay({ overlay }: { overlay: Overlay }) {
     return (
       <div className="sol-overlay sol-overlay--waste" aria-hidden>
         <div className="sol-overlay-lab">Waste Detected</div>
-        <div className="sol-overlay-val">2.4 kg</div>
-        <div className="sol-overlay-pill">↓ 18% vs last month</div>
+        <div className="sol-overlay-val">
+          <LiveNumber value={2.4} decimals={1} suffix=" kg" />
+        </div>
+        <div className="sol-overlay-pill">
+          ↓ <LiveNumber value={18} suffix="% vs last month" />
+        </div>
       </div>
     );
   }
@@ -80,15 +85,21 @@ function CardOverlay({ overlay }: { overlay: Overlay }) {
       <ul>
         <li>
           <span>Chicken</span>
-          <b>15 kg</b>
+          <b>
+            <LiveNumber value={15} suffix=" kg" />
+          </b>
         </li>
         <li>
           <span>Tomatoes</span>
-          <b>20 kg</b>
+          <b>
+            <LiveNumber value={20} suffix=" kg" />
+          </b>
         </li>
         <li>
           <span>Onions</span>
-          <b>12 kg</b>
+          <b>
+            <LiveNumber value={12} suffix=" kg" />
+          </b>
         </li>
       </ul>
       <div className="sol-overlay-btn">Approve Order</div>
@@ -347,7 +358,7 @@ export function SolutionSection({ visible }: { visible: boolean }) {
         <div>
           <div className="sol__tag">The Solution</div>
           <h2 className="sol__h2">
-            Stop guessing. Run your restaurant on <em>data.</em>
+            Stop guessing. Run your restaurant <em>on data.</em>
           </h2>
         </div>
         <p className="sol__body">

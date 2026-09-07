@@ -15,6 +15,8 @@ import {
   FileText,
 } from "lucide-react";
 import { T } from "@/components/PlatePieletHero";
+import { LiveNumber } from "@/components/ui/live-number";
+import { useLiveJitter } from "@/hooks/useLiveJitter";
 
 const NAV = [
   { icon: LayoutDashboard, label: "Dashboard", active: true },
@@ -90,6 +92,11 @@ function LiveFoodCost() {
   );
 }
 
+function BranchBar({ pct }: { pct: number }) {
+  const live = useLiveJitter(pct);
+  return <span style={{ height: `${Math.min(100, Math.max(4, live))}%` }} />;
+}
+
 function DashboardMock() {
   return (
     <div className="why-dash">
@@ -116,13 +123,21 @@ function DashboardMock() {
         <div className="why-kpis">
           <div className="why-kpi">
             <div className="why-kpi-lab">Total Sales</div>
-            <div className="why-kpi-val">AED 45,231</div>
-            <div className="why-kpi-delta">↑ 12.5% vs yesterday</div>
+            <div className="why-kpi-val">
+              <LiveNumber value={45231} commas prefix="AED " />
+            </div>
+            <div className="why-kpi-delta">
+              ↑ <LiveNumber value={12.5} decimals={1} suffix="% vs yesterday" />
+            </div>
           </div>
           <div className="why-kpi">
             <div className="why-kpi-lab">Gross Profit</div>
-            <div className="why-kpi-val">AED 15,620</div>
-            <div className="why-kpi-delta">↑ 8.3% vs yesterday</div>
+            <div className="why-kpi-val">
+              <LiveNumber value={15620} commas prefix="AED " />
+            </div>
+            <div className="why-kpi-delta">
+              ↑ <LiveNumber value={8.3} decimals={1} suffix="% vs yesterday" />
+            </div>
           </div>
           <div className="why-kpi">
             <div className="why-kpi-lab">Food Cost %</div>
@@ -130,8 +145,12 @@ function DashboardMock() {
           </div>
           <div className="why-kpi">
             <div className="why-kpi-lab">Waste %</div>
-            <div className="why-kpi-val">4.2%</div>
-            <div className="why-kpi-delta why-kpi-delta--warn">↑ 0.6% vs yesterday</div>
+            <div className="why-kpi-val">
+              <LiveNumber value={4.2} decimals={1} suffix="%" />
+            </div>
+            <div className="why-kpi-delta why-kpi-delta--warn">
+              ↑ <LiveNumber value={0.6} decimals={1} suffix="% vs yesterday" />
+            </div>
           </div>
         </div>
         <div className="why-charts">
@@ -158,7 +177,9 @@ function DashboardMock() {
                     <i style={{ width: `${item.pct}%` }} />
                   </div>
                 </div>
-                <span>{item.pct}%</span>
+                <span>
+                  <LiveNumber value={item.pct} suffix="%" />
+                </span>
               </div>
             ))}
           </div>
@@ -166,7 +187,7 @@ function DashboardMock() {
             <div className="why-panel-h">Branch Performance</div>
             <div className="why-bars">
               {[72, 54, 88, 41].map((h, i) => (
-                <span key={i} style={{ height: `${h}%` }} />
+                <BranchBar key={i} pct={h} />
               ))}
             </div>
           </div>

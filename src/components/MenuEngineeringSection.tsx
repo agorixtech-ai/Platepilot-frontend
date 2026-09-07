@@ -15,6 +15,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { T } from "@/components/PlatePieletHero";
+import { LiveNumber } from "@/components/ui/live-number";
 
 const FEATURES: { Icon: LucideIcon; title: string; desc: string }[] = [
   {
@@ -34,12 +35,42 @@ const FEATURES: { Icon: LucideIcon; title: string; desc: string }[] = [
   },
 ];
 
-const KPIS = [
-  { label: "Total Revenue", value: "AED 24.8K", delta: "18.6%", trophy: false },
-  { label: "Gross Profit", value: "AED 11.2K", delta: "21.3%", trophy: false },
-  { label: "Avg. Profit Margin", value: "45.1%", delta: "2.8pp", trophy: false },
+type Kpi = {
+  label: string;
+  value: string;
+  live?: { value: number; decimals?: number; prefix?: string; suffix?: string };
+  delta: string | null;
+  deltaLive?: { value: number; decimals?: number; suffix?: string };
+  trophy: boolean;
+};
+
+const KPIS: Kpi[] = [
+  {
+    label: "Total Revenue",
+    value: "AED 24.8K",
+    live: { value: 24.8, decimals: 1, prefix: "AED ", suffix: "K" },
+    delta: "18.6%",
+    deltaLive: { value: 18.6, decimals: 1, suffix: "%" },
+    trophy: false,
+  },
+  {
+    label: "Gross Profit",
+    value: "AED 11.2K",
+    live: { value: 11.2, decimals: 1, prefix: "AED ", suffix: "K" },
+    delta: "21.3%",
+    deltaLive: { value: 21.3, decimals: 1, suffix: "%" },
+    trophy: false,
+  },
+  {
+    label: "Avg. Profit Margin",
+    value: "45.1%",
+    live: { value: 45.1, decimals: 1, suffix: "%" },
+    delta: "2.8pp",
+    deltaLive: { value: 2.8, decimals: 1, suffix: "pp" },
+    trophy: false,
+  },
   { label: "Top Performer", value: "Mango Smoothie", delta: null, trophy: true },
-] as const;
+];
 
 const QUADS: {
   key: string;
@@ -103,42 +134,10 @@ const ACTIONS: { Icon: LucideIcon; label: string; count: string; tint: string; c
 ];
 
 const OPPORTUNITIES = [
-  { name: "Mango Smoothie", lift: "+AED 2.1K" },
-  { name: "Paneer Wrap", lift: "+AED 1.6K" },
-  { name: "Pesto Pasta", lift: "+AED 1.2K" },
+  { name: "Mango Smoothie", lift: 2.1 },
+  { name: "Paneer Wrap", lift: 1.6 },
+  { name: "Pesto Pasta", lift: 1.2 },
 ];
-
-function BasilLeaf({ className, flip }: { className: string; flip?: boolean }) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 48 64"
-      fill="none"
-      aria-hidden
-      style={flip ? { transform: "scaleX(-1)" } : undefined}
-    >
-      <path
-        d="M24 2C14 14 6 28 8 44c2 12 10 18 16 18s14-6 16-18C42 28 34 14 24 2Z"
-        fill="#2F9E4A"
-        opacity="0.92"
-      />
-      <path
-        d="M24 8c0 14-1 28-1 42"
-        stroke="#1B6B32"
-        strokeWidth="1.4"
-        strokeLinecap="round"
-        opacity="0.55"
-      />
-      <path
-        d="M24 22c-6 4-10 10-12 16M24 30c6 4 9 9 11 14"
-        stroke="#1B6B32"
-        strokeWidth="1.1"
-        strokeLinecap="round"
-        opacity="0.4"
-      />
-    </svg>
-  );
-}
 
 export function MenuEngineeringSection({ visible }: { visible: boolean }) {
   return (
@@ -191,6 +190,10 @@ export function MenuEngineeringSection({ visible }: { visible: boolean }) {
           margin: 0 0 14px;
           color: ${T.text};
         }
+        .me__h2 em {
+          font-style: normal;
+          color: ${T.accent};
+        }
         .me__lede {
           margin: 0 0 26px;
           font-size: var(--pp-lede);
@@ -234,44 +237,11 @@ export function MenuEngineeringSection({ visible }: { visible: boolean }) {
           color: ${T.muted};
         }
 
-        .me__insight-row {
-          display: flex;
-          align-items: flex-end;
-          gap: 8px;
-          max-width: 420px;
-        }
-        .me__mascot {
-          width: 78px;
+        .me__mascot-img {
+          display: block;
+          width: 260px;
           height: auto;
-          flex-shrink: 0;
-          filter: drop-shadow(0 10px 16px rgba(0,0,0,0.14));
-          margin-bottom: -2px;
-        }
-        .me__insight {
-          flex: 1;
-          min-width: 0;
-          padding: 14px 16px;
-          border: 1.5px solid rgba(22,163,74,0.45);
-          border-radius: 14px;
-          background: #fff;
-          box-shadow: 0 10px 24px rgba(7,26,20,0.07);
-        }
-        .me__insight-tag {
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          font-size: 10px;
-          font-weight: 800;
-          letter-spacing: 0.1em;
-          text-transform: uppercase;
-          color: ${T.accentSolid};
-          margin-bottom: 6px;
-        }
-        .me__insight p {
-          margin: 0;
-          font-size: 13px;
-          line-height: 1.5;
-          color: ${T.muted};
+          margin: 20px auto 0 60px;
         }
 
         /* Dashboard stage */
@@ -628,57 +598,9 @@ export function MenuEngineeringSection({ visible }: { visible: boolean }) {
         .me__decor {
           position: relative;
           z-index: 4;
-          height: clamp(148px, 16vw, 176px);
+          height: clamp(76px, 8vw, 88px);
           margin-top: 10px;
           pointer-events: none;
-        }
-        .me__float {
-          position: absolute;
-          pointer-events: none;
-          filter: drop-shadow(0 14px 24px rgba(0,0,0,0.16));
-        }
-        .me__float img {
-          width: 100%;
-          height: auto;
-          display: block;
-        }
-        .me__float--plate img {
-          border-radius: 50%;
-        }
-        .me__float--pasta {
-          left: clamp(-28px, -2.5vw, -8px);
-          bottom: 8px;
-          width: clamp(112px, 13vw, 136px);
-          z-index: 5;
-        }
-        .me__float--brownie {
-          right: clamp(-24px, -2vw, -4px);
-          bottom: 8px;
-          width: clamp(112px, 13vw, 136px);
-          z-index: 5;
-        }
-        .me__leaf {
-          position: absolute;
-          z-index: 6;
-          pointer-events: none;
-          filter: drop-shadow(0 4px 6px rgba(0,0,0,0.12));
-        }
-        .me__float--pasta .me__leaf,
-        .me__float--brownie .me__leaf {
-          position: absolute;
-          width: 22px;
-          z-index: 6;
-        }
-        .me__float--pasta .me__leaf {
-          top: 8px;
-          right: -4px;
-          transform: rotate(-36deg);
-        }
-        .me__float--brownie .me__leaf {
-          top: 10px;
-          left: -4px;
-          width: 20px;
-          transform: rotate(48deg);
         }
 
         .me__hand {
@@ -710,24 +632,20 @@ export function MenuEngineeringSection({ visible }: { visible: boolean }) {
 
         @media (max-width: 1280px) {
           .me__matrix-wrap { min-height: 320px; }
-          .me__decor { height: clamp(140px, 15vw, 160px); }
+          .me__decor { height: clamp(72px, 8vw, 84px); }
         }
         @media (max-width: 1100px) {
           .me__kpis { grid-template-columns: 1fr 1fr; }
           .me__body { grid-template-columns: 1fr; }
           .me__side { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-          .me__float--pasta,
-          .me__float--brownie { width: clamp(100px, 13vw, 118px); }
           .me__matrix-wrap { min-height: 280px; }
           .me__hand { font-size: 20px; right: clamp(88px, 13vw, 120px); }
-          .me__decor { height: 140px; margin-top: 8px; }
+          .me__decor { height: 72px; margin-top: 8px; }
         }
         @media (max-width: 1024px) {
           .me__inner { padding: 48px 28px 40px; }
-          .me__float--pasta { left: -12px; width: 104px; }
-          .me__float--brownie { right: -8px; width: 104px; }
           .me__hand { right: 84px; bottom: 20px; }
-          .me__decor { height: 128px; }
+          .me__decor { height: 68px; }
         }
         @media (max-width: 900px) {
           .me__inner { padding: 48px 20px 72px; }
@@ -752,7 +670,6 @@ export function MenuEngineeringSection({ visible }: { visible: boolean }) {
             row-gap: 8px;
           }
           .me__footer-link { width: 100%; justify-content: flex-end; }
-          .me__insight-row { flex-direction: column; align-items: flex-start; }
           .me__h2 { font-size: 28px; }
         }
       `}</style>
@@ -764,7 +681,7 @@ export function MenuEngineeringSection({ visible }: { visible: boolean }) {
             <h2 className="me__h2">
               See every dish.
               <br />
-              Grow every profit.
+              <em>Grow every profit.</em>
             </h2>
             <p className="me__lede">
               PlatePielet&apos;s Menu Engineering shows you what&apos;s working, what&apos;s not, and
@@ -784,19 +701,11 @@ export function MenuEngineeringSection({ visible }: { visible: boolean }) {
                 </div>
               ))}
             </div>
-
-            <div className="me__insight-row">
-              <img className="me__mascot" src="/hero/hero-mascot.png" alt="" />
-              <div className="me__insight">
-                <div className="me__insight-tag">
-                  <Sparkles size={12} strokeWidth={2.2} />
-                  AI Insight
-                </div>
-                <p>
-                  Mango Smoothie is a top performer. Consider featuring it in summer specials.
-                </p>
-              </div>
-            </div>
+            <img
+              className="me__mascot-img"
+              src="/mascot/WhatsApp_Image_2026-09-07_at_23.00.19-removebg-preview.png"
+              alt=""
+            />
           </div>
 
           <div className="me__dash-wrap">
@@ -814,12 +723,29 @@ export function MenuEngineeringSection({ visible }: { visible: boolean }) {
                     <div className="me__kpi-lab">{k.label}</div>
                     <div className="me__kpi-val">
                       {k.trophy && <Trophy size={14} strokeWidth={2.2} />}
-                      {k.value}
+                      {k.live ? (
+                        <LiveNumber
+                          value={k.live.value}
+                          decimals={k.live.decimals}
+                          prefix={k.live.prefix}
+                          suffix={k.live.suffix}
+                        />
+                      ) : (
+                        k.value
+                      )}
                     </div>
                     {k.delta && (
                       <div className="me__kpi-delta">
                         <TrendingUp size={10} strokeWidth={2.6} />
-                        {k.delta}
+                        {k.deltaLive ? (
+                          <LiveNumber
+                            value={k.deltaLive.value}
+                            decimals={k.deltaLive.decimals}
+                            suffix={k.deltaLive.suffix}
+                          />
+                        ) : (
+                          k.delta
+                        )}
                       </div>
                     )}
                   </div>
@@ -887,7 +813,9 @@ export function MenuEngineeringSection({ visible }: { visible: boolean }) {
                     {OPPORTUNITIES.map((o) => (
                       <div key={o.name} className="me__opp">
                         <span>{o.name}</span>
-                        <b>{o.lift}</b>
+                        <b>
+                          +<LiveNumber value={o.lift} decimals={1} prefix="AED " suffix="K" />
+                        </b>
                       </div>
                     ))}
                   </div>
@@ -907,14 +835,6 @@ export function MenuEngineeringSection({ visible }: { visible: boolean }) {
             </div>
 
             <div className="me__decor" aria-hidden>
-              <div className="me__float me__float--plate me__float--pasta">
-                <img src="/hero/menu/pasta.jpg" alt="" />
-                <BasilLeaf className="me__leaf" />
-              </div>
-              <div className="me__float me__float--plate me__float--brownie">
-                <img src="/hero/menu/brownie.jpg" alt="" />
-                <BasilLeaf className="me__leaf" flip />
-              </div>
               <div className="me__hand">
                 Smart menu.
                 <small>

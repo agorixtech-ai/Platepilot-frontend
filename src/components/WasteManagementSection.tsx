@@ -1,22 +1,14 @@
 import { Link } from "react-router-dom";
 import "@fontsource/caveat/600.css";
 import "@fontsource/caveat/700.css";
-import {
-  ArrowRight,
-  BarChart3,
-  CalendarDays,
-  Leaf,
-  Search,
-  TrendingDown,
-  TrendingUp,
-  type LucideIcon,
-} from "lucide-react";
-import { T } from "@/components/PlatePieletHero";
-
+import { BarChart3, CalendarDays, ChevronDown, Leaf, Search, type LucideIcon } from "lucide-react";
+import { LiveNumber } from "@/components/ui/live-number";
 const INK = "#152019";
-const MUTED = "#5C6B74";
+const MUTED = "#66736B";
 const MINT = "#E8F6EC";
 const BORDER = "#E8EEEA";
+const RED = "#E02424";
+const GREEN = "#15803D";
 
 const PILLARS: { Icon: LucideIcon; title: string; desc: string }[] = [
   {
@@ -37,27 +29,55 @@ const PILLARS: { Icon: LucideIcon; title: string; desc: string }[] = [
 ];
 
 const KPIS = [
-  { label: "Total Waste Cost", value: "₹12,480", delta: "+18%", up: true, warn: true },
-  { label: "Waste % of Purchases", value: "6.8%", delta: "-2.1%", up: false, warn: false },
-  { label: "Items at Risk", value: "8", delta: "+33%", up: true, warn: true },
-  { label: "Potential Savings", value: "₹4,320", delta: "+28%", up: true, warn: false },
+  {
+    label: "Total Waste Cost",
+    live: { value: 12480, commas: true, prefix: "₹" },
+    delta: 18,
+    deltaDecimals: 0,
+    up: true,
+    warn: true,
+  },
+  {
+    label: "Waste % of Purchases",
+    live: { value: 6.8, decimals: 1, suffix: "%" },
+    delta: 2.1,
+    deltaDecimals: 1,
+    up: false,
+    warn: false,
+  },
+  {
+    label: "Items at Risk",
+    live: { value: 8 },
+    delta: 33,
+    deltaDecimals: 0,
+    up: true,
+    warn: true,
+  },
+  {
+    label: "Potential Savings",
+    live: { value: 4320, commas: true, prefix: "₹" },
+    delta: 28,
+    deltaDecimals: 0,
+    up: true,
+    warn: false,
+  },
 ] as const;
 
 const CATEGORIES = [
-  { name: "Vegetables", pct: 32, color: "#2FA65A" },
-  { name: "Meat & Poultry", pct: 24, color: "#E8483F" },
+  { name: "Vegetables", pct: 32, color: "#22C55E" },
+  { name: "Meat & Poultry", pct: 24, color: "#E56B6B" },
   { name: "Dairy", pct: 18, color: "#F5B942" },
   { name: "Grains", pct: 12, color: "#F0873F" },
-  { name: "Sauces & Condiments", pct: 8, color: "#57C98A" },
-  { name: "Other", pct: 6, color: "#7BA7E8" },
+  { name: "Sauces & Condiments", pct: 8, color: "#2DD4BF" },
+  { name: "Other", pct: 6, color: "#94A3B8" },
 ] as const;
 
 const ITEMS = [
-  { rank: 1, name: "Tomatoes", amount: "₹2,480", pct: 100 },
-  { rank: 2, name: "Chicken", amount: "₹1,960", pct: 79 },
-  { rank: 3, name: "Lettuce", amount: "₹1,250", pct: 50 },
-  { rank: 4, name: "Paneer", amount: "₹980", pct: 40 },
-  { rank: 5, name: "Bread", amount: "₹620", pct: 25 },
+  { rank: 1, name: "Tomatoes", amount: 2480, pct: 100, img: "/hero/hero-tomatoes2.jpg" },
+  { rank: 2, name: "Chicken", amount: 1960, pct: 79, img: "/hero/waste/chicken.jpg" },
+  { rank: 3, name: "Lettuce", amount: 1250, pct: 50, img: "/hero/hero-salad.jpg" },
+  { rank: 4, name: "Paneer", amount: 980, pct: 40, img: "/hero/hero-paneer.jpg" },
+  { rank: 5, name: "Bread", amount: 620, pct: 25, img: "/hero/waste/bread.jpg" },
 ] as const;
 
 const DONUT = (() => {
@@ -70,11 +90,15 @@ const DONUT = (() => {
 })();
 
 function Spark({ up, warn }: { up: boolean; warn: boolean }) {
-  const color = warn ? "#E8483F" : "#16833C";
-  const d = up ? "M1 11 L5 7 L8 9 L13 3" : "M1 3 L5 7 L8 5 L13 11";
+  const color = warn ? RED : GREEN;
+  const fill = warn ? "rgba(224,36,36,0.16)" : "rgba(21,128,61,0.16)";
+  const line = up
+    ? "M0 16 C7 14 11 11 16 8 C22 4.5 28 7 40 2"
+    : "M0 3.5 C8 5 12 9 18 11 C25 14 30 9 40 16";
   return (
-    <svg className="wm-spark" viewBox="0 0 14 14" aria-hidden>
-      <path d={d} fill="none" stroke={color} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+    <svg className="wm-spark" viewBox="0 0 40 18" aria-hidden>
+      <path d={`${line} L40 18 L0 18 Z`} fill={fill} />
+      <path d={line} fill="none" stroke={color} strokeWidth="1.7" strokeLinecap="round" />
     </svg>
   );
 }
@@ -86,10 +110,9 @@ export function WasteManagementSection({ visible }: { visible: boolean }) {
         .wm {
           position: relative;
           isolation: isolate;
-          z-index: 1;
           overflow: hidden;
           scroll-margin-top: 88px;
-          background: linear-gradient(180deg, #F4FAF5 0%, #FFFFFF 72%, #FFFFFF 100%);
+          background: #FFFFFF;
           font-family: 'Plus Jakarta Sans Variable', 'Plus Jakarta Sans', system-ui, sans-serif;
           color: ${INK};
         }
@@ -100,48 +123,40 @@ export function WasteManagementSection({ visible }: { visible: boolean }) {
           border-radius: 50%;
         }
         .wm__blob--tr {
-          right: -120px; top: -80px;
-          width: 480px; height: 480px;
+          right: -90px; top: -110px;
+          width: 420px; height: 420px;
           background: #DFF3E4;
-          filter: blur(40px);
-          opacity: 0.9;
+          opacity: 0.72;
         }
-        .wm__blob--mid {
-          right: 18%; top: 28%;
+        .wm__blob--tr2 {
+          right: 70px; top: -40px;
           width: 260px; height: 260px;
-          background: #DFF3E4;
-          filter: blur(36px);
-          opacity: 0.7;
-        }
-        .wm__blob--bl {
-          left: -140px; bottom: -160px;
-          width: 340px; height: 340px;
-          background: #DFF3E4;
+          background: #E7F6EC;
           opacity: 0.85;
         }
         .wm__dots {
           position: absolute;
-          right: 6%;
-          top: 14%;
-          width: 168px;
-          height: 96px;
+          right: 28px;
+          top: 28px;
+          width: 132px;
+          height: 88px;
           z-index: 0;
           pointer-events: none;
-          background-image: radial-gradient(#9EC9A8 1.4px, transparent 1.5px);
-          background-size: 14px 12px;
-          opacity: 0.15;
+          background-image: radial-gradient(#B7D4BF 1.35px, transparent 1.45px);
+          background-size: 12px 12px;
+          opacity: 0.55;
         }
         .wm__inner {
           position: relative;
           z-index: 1;
-          max-width: 1440px;
+          max-width: 1280px;
           margin: 0 auto;
-          padding: 52px 48px 56px;
+          padding: 56px 40px 52px;
         }
         .wm__grid {
           display: grid;
-          grid-template-columns: minmax(0, 1fr) minmax(0, 460px) 260px;
-          column-gap: 40px;
+          grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.2fr);
+          column-gap: 12px;
           align-items: start;
         }
         .wm__copy {
@@ -149,42 +164,51 @@ export function WasteManagementSection({ visible }: { visible: boolean }) {
           display: flex;
           flex-direction: column;
           align-items: flex-start;
+          padding-right: 8px;
         }
         .wm__eyebrow {
-          display: inline-flex;
+          display: flex;
           align-items: center;
-          gap: 8px;
-          margin: 0 0 14px;
-          font-size: 12px;
-          font-weight: 600;
-          letter-spacing: 0.18em;
+          gap: 10px;
+          margin: 0 0 16px;
+          font-size: var(--pp-eyebrow);
+          font-weight: 800;
+          letter-spacing: var(--pp-eyebrow-track);
           text-transform: uppercase;
-          color: ${MUTED};
+          color: ${GREEN};
         }
-        .wm__eyebrow svg { color: ${T.accentSolid}; }
+        .wm__eyebrow::before {
+          content: '';
+          width: 2px;
+          height: 12px;
+          background: ${GREEN};
+          flex-shrink: 0;
+        }
         .wm__h2 {
           margin: 0 0 18px;
-          max-width: 100%;
-          font-size: clamp(22px, 1.85vw, 28px);
+          font-size: var(--pp-h2);
           font-weight: 800;
-          letter-spacing: -0.028em;
-          line-height: 1.12;
+          letter-spacing: var(--pp-h2-track);
+          line-height: var(--pp-h2-leading);
           color: ${INK};
-          white-space: nowrap;
+        }
+        .wm__h2 em {
+          font-style: normal;
+          color: ${GREEN};
         }
         .wm__lede {
           margin: 0 0 12px;
-          max-width: 42ch;
-          font-size: 15.5px;
+          max-width: var(--pp-copy-w);
+          font-size: var(--pp-lede);
           font-weight: 400;
-          line-height: 1.65;
+          line-height: var(--pp-lede-leading);
           color: ${MUTED};
         }
         .wm__lede:last-of-type { margin-bottom: 0; }
         .wm__pillars {
           display: grid;
           grid-template-columns: repeat(3, minmax(0, 1fr));
-          gap: 24px;
+          gap: 22px;
           width: 100%;
           margin: 28px 0 28px;
         }
@@ -196,16 +220,16 @@ export function WasteManagementSection({ visible }: { visible: boolean }) {
         }
         .wm__pillar-ico {
           width: 40px; height: 40px;
-          border-radius: 12px;
+          border-radius: 10px;
           background: ${MINT};
-          color: ${T.accentSolid};
+          color: ${GREEN};
           display: grid;
           place-items: center;
           margin-bottom: 12px;
         }
         .wm__pillar strong {
           margin: 0 0 6px;
-          font-size: 14px;
+          font-size: 14.5px;
           font-weight: 700;
           color: ${INK};
           line-height: 1.3;
@@ -215,63 +239,35 @@ export function WasteManagementSection({ visible }: { visible: boolean }) {
           line-height: 1.5;
           color: ${MUTED};
         }
-        .wm__ctas {
-          display: flex;
-          flex-wrap: nowrap;
-          align-items: center;
-          gap: 14px;
-        }
-        .wm__cta {
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          gap: 8px;
-          min-height: 48px;
-          padding: 12px 22px;
-          border-radius: 10px;
-          font-size: 14px;
-          font-weight: 600;
-          line-height: 1;
-          white-space: nowrap;
-          transition: transform 0.2s ease, background 0.2s ease;
-        }
-        .wm__cta--primary {
-          background: ${T.accentSolid};
-          color: #fff !important;
-        }
-        .wm__cta--primary:hover { background: #0A5428; }
-        .wm__cta--ghost {
-          background: transparent;
-          color: ${T.accentSolid} !important;
-          border: 1.5px solid ${T.accentSolid};
-        }
-        .wm__cta--ghost:hover { background: ${MINT}; }
-
         .wm__stage {
           position: relative;
           min-width: 0;
+          min-height: 580px;
           display: flex;
-          justify-content: center;
-          padding-top: 30px;
+          align-items: center;
+          justify-content: flex-start;
+          padding: 28px 200px 12px 0;
         }
         .wm__dash {
           position: relative;
-          z-index: 2;
-          width: 100%;
-          max-width: 460px;
-          min-width: 0;
+          z-index: 3;
           background: #fff;
-          border: 1px solid rgba(21,128,61,0.08);
+          border: 1px solid rgba(21,128,61,0.07);
           border-radius: 18px;
-          box-shadow: 0 12px 40px rgba(16,60,35,0.08);
-          padding: 12px;
+          box-shadow:
+            0 4px 10px rgba(16,60,35,0.04),
+            0 22px 48px rgba(16,60,35,0.12);
+          padding: 14px 14px 12px;
+          transform: rotate(-4deg);
+          transform-origin: 70% 80%;
         }
         .wm__dash-head {
           display: flex;
           align-items: center;
           justify-content: space-between;
           gap: 10px;
-          margin-bottom: 10px;
+          margin-bottom: 12px;
+          padding: 0 2px;
         }
         .wm__dash-head strong {
           display: inline-flex;
@@ -281,7 +277,7 @@ export function WasteManagementSection({ visible }: { visible: boolean }) {
           font-weight: 700;
           color: ${INK};
         }
-        .wm__dash-head strong svg { color: ${T.accentSolid}; flex-shrink: 0; }
+        .wm__dash-head strong svg { color: ${GREEN}; flex-shrink: 0; }
         .wm__date {
           display: inline-flex;
           align-items: center;
@@ -300,14 +296,14 @@ export function WasteManagementSection({ visible }: { visible: boolean }) {
           display: grid;
           grid-template-columns: repeat(4, minmax(0, 1fr));
           gap: 8px;
-          margin-bottom: 8px;
+          margin-bottom: 10px;
         }
         .wm__kpi {
           min-width: 0;
           background: #fff;
           border: 1px solid ${BORDER};
           border-radius: 12px;
-          padding: 8px 8px 7px;
+          padding: 9px 9px 7px;
         }
         .wm__kpi span {
           display: block;
@@ -318,25 +314,25 @@ export function WasteManagementSection({ visible }: { visible: boolean }) {
         }
         .wm__kpi b {
           display: block;
-          margin: 4px 0 2px;
-          font-size: 15px;
-          font-weight: 700;
+          margin: 4px 0 3px;
+          font-size: 16px;
+          font-weight: 800;
           letter-spacing: -0.03em;
           color: ${INK};
         }
         .wm__kpi-row {
           display: flex;
           align-items: center;
-          gap: 4px;
+          gap: 3px;
           font-size: 11px;
           font-weight: 600;
         }
-        .wm__kpi-row[data-warn="true"] { color: #E8483F; }
-        .wm__kpi-row[data-warn="false"] { color: #16833C; }
-        .wm-spark { width: 28px; height: 14px; margin-left: auto; }
+        .wm__kpi-row[data-warn="true"] { color: ${RED}; }
+        .wm__kpi-row[data-warn="false"] { color: ${GREEN}; }
+        .wm-spark { width: 100%; height: 18px; margin-top: 4px; display: block; }
         .wm__split {
           display: grid;
-          grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+          grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
           gap: 8px;
         }
         .wm__panel {
@@ -344,32 +340,46 @@ export function WasteManagementSection({ visible }: { visible: boolean }) {
           background: #fff;
           border: 1px solid ${BORDER};
           border-radius: 14px;
-          padding: 10px;
+          padding: 11px 11px 10px;
+        }
+        .wm__panel-h {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 8px;
+          margin-bottom: 10px;
         }
         .wm__panel h3 {
-          margin: 0 0 8px;
-          font-size: 12px;
+          margin: 0;
+          font-size: 12.5px;
           font-weight: 700;
           color: ${INK};
         }
+        .wm__more {
+          font-size: 11px;
+          font-weight: 600;
+          color: ${GREEN} !important;
+          white-space: nowrap;
+        }
         .wm__donut-wrap {
           display: grid;
-          grid-template-columns: 88px minmax(0, 1fr);
-          gap: 10px;
+          grid-template-columns: 100px minmax(0, 1fr);
+          gap: 8px;
           align-items: center;
         }
         .wm__donut {
           position: relative;
           isolation: isolate;
-          width: 88px;
-          height: 88px;
+          width: 100px;
+          height: 100px;
           border-radius: 50%;
           background: conic-gradient(${DONUT});
+          flex-shrink: 0;
         }
         .wm__donut::after {
           content: "";
           position: absolute;
-          inset: 22px;
+          inset: 24px;
           z-index: 0;
           background: #fff;
           border-radius: 50%;
@@ -383,10 +393,10 @@ export function WasteManagementSection({ visible }: { visible: boolean }) {
           text-align: center;
           pointer-events: none;
         }
-        .wm__donut-lab b { font-size: 11px; font-weight: 800; color: ${INK}; }
+        .wm__donut-lab b { font-size: 12px; font-weight: 800; color: ${INK}; letter-spacing: -0.02em; }
         .wm__donut-lab em {
           font-style: normal;
-          font-size: 8px;
+          font-size: 8.5px;
           font-weight: 500;
           color: ${MUTED};
         }
@@ -411,7 +421,9 @@ export function WasteManagementSection({ visible }: { visible: boolean }) {
           align-items: center;
           gap: 6px;
           min-width: 0;
+          overflow: hidden;
         }
+        .wm__legend b { font-weight: 600; color: ${INK}; flex-shrink: 0; }
         .wm__swatch {
           width: 7px; height: 7px;
           border-radius: 50%;
@@ -419,86 +431,105 @@ export function WasteManagementSection({ visible }: { visible: boolean }) {
         }
         .wm__item {
           display: grid;
-          grid-template-columns: 14px minmax(0, 1fr) auto;
+          grid-template-columns: 12px 22px 52px minmax(0, 1fr) auto;
           align-items: center;
-          column-gap: 8px;
-          row-gap: 3px;
-          margin-bottom: 6px;
-          font-size: 11px;
+          column-gap: 7px;
+          margin-bottom: 8px;
+          font-size: 11.5px;
         }
         .wm__item:last-child { margin-bottom: 0; }
-        .wm__item b { font-weight: 600; color: ${MUTED}; }
-        .wm__item em { font-style: normal; font-weight: 600; color: ${INK}; }
+        .wm__item b { font-weight: 600; color: #8A968F; }
+        .wm__item img {
+          width: 22px; height: 22px;
+          border-radius: 50%;
+          object-fit: cover;
+          display: block;
+        }
+        .wm__item em {
+          font-style: normal;
+          font-weight: 600;
+          color: ${INK};
+          white-space: nowrap;
+        }
+        .wm__item-name {
+          font-weight: 600;
+          color: ${INK};
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
         .wm__bar {
-          grid-column: 2 / 3;
-          height: 3px;
+          height: 5px;
           border-radius: 99px;
-          background: #EDF2EF;
+          background: #F1F5F3;
           overflow: hidden;
         }
         .wm__bar i {
           display: block;
           height: 100%;
-          background: #E8483F;
           border-radius: 99px;
+          background: linear-gradient(90deg, #E02424 0%, #F87171 100%);
         }
 
         .wm__art {
-          position: relative;
-          z-index: 3;
-          align-self: end;
+          position: absolute;
+          right: -72px;
+          bottom: -28px;
+          z-index: 2;
           width: 260px;
-          margin: 28px -12px -12px 8px;
           pointer-events: none;
         }
         .wm__art-img {
           width: 100%;
           height: auto;
           display: block;
-          filter: drop-shadow(0 16px 24px rgba(15,42,28,0.14));
         }
         .wm__hand {
           position: absolute;
-          left: 42%;
-          top: -34px;
-          z-index: 5;
+          right: 18px;
+          top: 18px;
+          bottom: auto;
+          z-index: 4;
+          width: 188px;
+          pointer-events: none;
           font-family: 'Caveat', cursive;
-          font-size: 20px;
+          font-size: 21px;
           font-weight: 700;
-          color: ${T.accentSolid};
+          color: ${GREEN};
           transform: rotate(-8deg);
-          line-height: 1.15;
-          max-width: 148px;
+          line-height: 1.12;
         }
-        .wm__hand svg {
+        .wm__hand-spark {
+          position: absolute;
+          left: -20px;
+          top: 0;
+        }
+        .wm__hand-arrow {
           display: block;
-          width: 72px;
-          height: 16px;
-          margin: 2px 0 0 42px;
+          width: 78px;
+          height: 30px;
+          margin: 0 0 0 auto;
         }
 
-        @media (max-width: 1280px) {
-          .wm__inner { padding: 48px 36px 48px; }
-          .wm__grid { grid-template-columns: minmax(0, 1fr) minmax(0, 420px) 220px; column-gap: 28px; }
-          .wm__art { width: 220px; }
-          .wm__dash { max-width: 420px; }
-          .wm__h2 { font-size: clamp(22px, 2.1vw, 26px); }
+        @media (max-width: 1180px) {
+          .wm__inner { padding: 48px 32px 44px; }
+          .wm__stage { padding-right: 180px; min-height: 500px; }
+          .wm__art { width: 300px; right: -36px; }
         }
         @media (max-width: 1024px) {
-          .wm__grid { grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr); column-gap: 28px; }
-          .wm__art { display: none; }
-          .wm__stage { padding-top: 8px; }
+          .wm__grid { grid-template-columns: 1fr; gap: 12px; }
+          .wm__stage { padding: 12px 0 0; min-height: 0; justify-content: center; }
+          .wm__dash { transform: none; max-width: none; }
+          .wm__art, .wm__hand { display: none; }
         }
         @media (max-width: 900px) {
           .wm__inner { padding: 44px 24px 40px; }
-          .wm__grid { grid-template-columns: 1fr; gap: 28px; }
-          .wm__dash { max-width: none; }
         }
         @media (max-width: 720px) {
-          .wm__pillars { grid-template-columns: 1fr; gap: 20px; }
+          .wm__pillars { grid-template-columns: 1fr; gap: 18px; }
           .wm__kpis, .wm__split { grid-template-columns: 1fr 1fr; }
-          .wm__ctas { flex-wrap: wrap; }
           .wm__blob, .wm__dots { display: none; }
+          .wm__h2 { font-size: 32px; }
         }
         @media (max-width: 520px) {
           .wm__kpis, .wm__split { grid-template-columns: 1fr; }
@@ -507,23 +538,19 @@ export function WasteManagementSection({ visible }: { visible: boolean }) {
       `}</style>
 
       <div className="wm__blob wm__blob--tr" aria-hidden />
-      <div className="wm__blob wm__blob--mid" aria-hidden />
-      <div className="wm__blob wm__blob--bl" aria-hidden />
+      <div className="wm__blob wm__blob--tr2" aria-hidden />
       <div className="wm__dots" aria-hidden />
 
       <div className="wm__inner">
         <div className="wm__grid">
           <div className="wm__copy">
-            <div className="wm__eyebrow">
-              <BarChart3 size={16} strokeWidth={2.3} />
-              Waste Management
-            </div>
+            <div className="wm__eyebrow">Waste Management</div>
             <h2 className="wm__h2">
               See Where Waste
               <br />
               Happens. Understand
               <br />
-              Why. Reduce It.
+              Why. <em>Reduce It.</em>
             </h2>
             <p className="wm__lede">
               PlatePielet gives you a clear view of where food and inventory waste is happening,
@@ -545,14 +572,6 @@ export function WasteManagementSection({ visible }: { visible: boolean }) {
                 </div>
               ))}
             </div>
-            <div className="wm__ctas">
-              <Link to="/demo" className="wm__cta wm__cta--primary">
-                Book a Demo <ArrowRight size={15} strokeWidth={2.4} />
-              </Link>
-              <Link to="/product" className="wm__cta wm__cta--ghost">
-                Explore All Features
-              </Link>
-            </div>
           </div>
 
           <div className="wm__stage">
@@ -565,32 +584,38 @@ export function WasteManagementSection({ visible }: { visible: boolean }) {
                 <span className="wm__date">
                   <CalendarDays size={12} strokeWidth={2.2} />
                   1 Sep 2024 - 30 Sep 2024
+                  <ChevronDown size={12} strokeWidth={2.2} />
                 </span>
               </div>
               <div className="wm__kpis">
                 {KPIS.map((k) => (
                   <div key={k.label} className="wm__kpi">
                     <span>{k.label}</span>
-                    <b>{k.value}</b>
+                    <b>
+                      <LiveNumber {...k.live} />
+                    </b>
                     <div className="wm__kpi-row" data-warn={k.warn}>
-                      {k.up ? (
-                        <TrendingUp size={11} strokeWidth={2.6} />
-                      ) : (
-                        <TrendingDown size={11} strokeWidth={2.6} />
-                      )}
-                      {k.delta}
-                      <Spark up={k.up} warn={k.warn} />
+                      {k.up ? "↑" : "↓"}{" "}
+                      <LiveNumber value={k.delta} decimals={k.deltaDecimals} suffix="%" />
                     </div>
+                    <Spark up={k.up} warn={k.warn} />
                   </div>
                 ))}
               </div>
               <div className="wm__split">
                 <div className="wm__panel">
-                  <h3>Waste by Category</h3>
+                  <div className="wm__panel-h">
+                    <h3>Waste by Category</h3>
+                    <Link to="/product" className="wm__more">
+                      View Details →
+                    </Link>
+                  </div>
                   <div className="wm__donut-wrap">
                     <div className="wm__donut" aria-hidden>
                       <div className="wm__donut-lab">
-                        <b>₹12,480</b>
+                        <b>
+                          <LiveNumber value={12480} commas prefix="₹" />
+                        </b>
                         <em>Total Waste</em>
                       </div>
                     </div>
@@ -601,42 +626,74 @@ export function WasteManagementSection({ visible }: { visible: boolean }) {
                             <span className="wm__swatch" style={{ background: c.color }} />
                             {c.name}
                           </span>
-                          <b>{c.pct}%</b>
+                          <b>
+                            <LiveNumber value={c.pct} suffix="%" />
+                          </b>
                         </i>
                       ))}
                     </div>
                   </div>
                 </div>
                 <div className="wm__panel">
-                  <h3>Top Waste Items</h3>
+                  <div className="wm__panel-h">
+                    <h3>Top Waste Items</h3>
+                    <Link to="/product" className="wm__more">
+                      View All →
+                    </Link>
+                  </div>
                   {ITEMS.map((item) => (
                     <div key={item.name} className="wm__item">
                       <b>{item.rank}</b>
-                      <span>{item.name}</span>
-                      <em>{item.amount}</em>
+                      <img src={item.img} alt="" />
+                      <span className="wm__item-name">{item.name}</span>
                       <span className="wm__bar">
                         <i style={{ width: `${item.pct}%` }} />
                       </span>
+                      <em>
+                        <LiveNumber value={item.amount} commas prefix="₹" />
+                      </em>
                     </div>
                   ))}
                 </div>
               </div>
             </div>
-          </div>
 
-          <div className="wm__art" aria-hidden>
-            <div className="wm__hand">
+            <div className="wm__hand" aria-hidden>
+              <svg
+                className="wm__hand-spark"
+                width="22"
+                height="22"
+                viewBox="0 0 22 22"
+                fill="none"
+              >
+                <path d="M3 7 L12 3" stroke={GREEN} strokeWidth="1.7" strokeLinecap="round" />
+                <path d="M2 12 L12 12" stroke={GREEN} strokeWidth="1.7" strokeLinecap="round" />
+                <path d="M4 17 L12 20" stroke={GREEN} strokeWidth="1.7" strokeLinecap="round" />
+              </svg>
               Small changes make a big difference!
-              <svg viewBox="0 0 72 16" fill="none">
-                <path d="M2 10c14-8 32-10 56 1" stroke="#0E6B32" strokeWidth="1.7" strokeLinecap="round" />
-                <path d="M50 4l16 7-12 3" stroke="#0E6B32" strokeWidth="1.7" strokeLinecap="round" />
+              <svg className="wm__hand-arrow" viewBox="0 0 86 34" fill="none">
+                <path
+                  d="M4 6 C28 2 58 4 78 22"
+                  stroke={GREEN}
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                />
+                <path
+                  d="M68 16 l12 8 -14 4"
+                  stroke={GREEN}
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
               </svg>
             </div>
-            <img
-              className="wm__art-img"
-              src="/mascot/waste-analysis-removebg-preview.png"
-              alt=""
-            />
+            <div className="wm__art" aria-hidden>
+              <img
+                className="wm__art-img"
+                src="/mascot/WhatsApp_Image_2026-09-05_at_12.04.58-removebg-preview.png"
+                alt=""
+              />
+            </div>
           </div>
         </div>
       </div>

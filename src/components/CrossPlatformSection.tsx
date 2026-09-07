@@ -1,5 +1,6 @@
 import { useId } from "react";
 import { Check, Globe } from "lucide-react";
+import { LiveNumber } from "@/components/ui/live-number";
 import "./cross-platform.css";
 
 const FEATURES = [
@@ -27,11 +28,15 @@ function ScreenUI({ variant = "desktop" }: { variant?: "desktop" | "phone" }) {
           <div className="xp-phone-kpis">
             <div>
               <small>Sales</small>
-              <strong>₹2.4L</strong>
+              <strong>
+                <LiveNumber value={2.4} decimals={1} prefix="₹" suffix="L" />
+              </strong>
             </div>
             <div>
               <small>Food cost</small>
-              <strong>28%</strong>
+              <strong>
+                <LiveNumber value={28} suffix="%" />
+              </strong>
             </div>
           </div>
           <svg className="xp-chart" viewBox="0 0 120 40" preserveAspectRatio="none" aria-hidden>
