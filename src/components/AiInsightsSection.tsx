@@ -1,7 +1,5 @@
-import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import { type ReactNode } from "react";
 import { Link } from "react-router-dom";
-import "@fontsource/caveat/600.css";
-import "@fontsource/caveat/700.css";
 import {
   ArrowRight,
   BarChart3,
@@ -9,7 +7,6 @@ import {
   Check,
   ChevronDown,
   ChevronRight,
-  Crown,
   Leaf,
   Lightbulb,
   PieChart,
@@ -21,6 +18,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { T } from "@/components/PlatePieletHero";
+import { LiveNumber } from "@/components/ui/live-number";
 
 const NAVY = "#152019";
 const BLUE_GRAY = "#5C6B74";
@@ -35,11 +33,11 @@ const VALUES: { Icon: LucideIcon; label: string }[] = [
 ];
 
 const DISHES = [
-  { rank: 1, name: "Chicken Biryani", amount: "₹48,320", img: "/hero/aii-biryani.png" },
-  { rank: 2, name: "Alfredo Pasta", amount: "₹32,410", img: "/hero/aii-alfredo.png" },
-  { rank: 3, name: "Paneer Tikka", amount: "₹28,190", img: "/hero/hero-paneer.jpg" },
-  { rank: 4, name: "Caesar Salad", amount: "₹21,560", img: "/hero/aii-caesar.png" },
-  { rank: 5, name: "Margherita Pizza", amount: "₹18,430", img: "/hero/menu/pizza.jpg" },
+  { rank: 1, name: "Chicken Biryani", amount: 48320, img: "/hero/aii-biryani.png" },
+  { rank: 2, name: "Alfredo Pasta", amount: 32410, img: "/hero/aii-alfredo.png" },
+  { rank: 3, name: "Paneer Tikka", amount: 28190, img: "/hero/hero-paneer.jpg" },
+  { rank: 4, name: "Caesar Salad", amount: 21560, img: "/hero/aii-caesar.png" },
+  { rank: 5, name: "Margherita Pizza", amount: 18430, img: "/hero/menu/pizza.jpg" },
 ] as const;
 
 const ALERTS = [
@@ -47,38 +45,6 @@ const ALERTS = [
   { name: "Lettuce", detail: "Expiring in 2 days", img: "/hero/hero-salad.jpg", tone: "alert" },
   { name: "Paneer", detail: "Usage down 40%", img: "/hero/hero-paneer.jpg", tone: "info" },
 ] as const;
-
-function BasilLeaf({ className, flip }: { className: string; flip?: boolean }) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 48 64"
-      fill="none"
-      aria-hidden
-      style={flip ? { transform: "scaleX(-1) rotate(-12deg)" } : undefined}
-    >
-      <path
-        d="M24 2C14 14 6 28 8 44c2 12 10 18 16 18s14-6 16-18C42 28 34 14 24 2Z"
-        fill="#2F9E4A"
-        opacity="0.92"
-      />
-      <path
-        d="M24 8c0 14-1 28-1 42"
-        stroke="#1B6B32"
-        strokeWidth="1.4"
-        strokeLinecap="round"
-        opacity="0.55"
-      />
-      <path
-        d="M24 22c-6 4-10 10-12 16M24 30c6 4 9 9 11 14"
-        stroke="#1B6B32"
-        strokeWidth="1.1"
-        strokeLinecap="round"
-        opacity="0.4"
-      />
-    </svg>
-  );
-}
 
 function CardHead({ Icon, title, extra }: { Icon: LucideIcon; title: string; extra?: ReactNode }) {
   return (
@@ -89,141 +55,6 @@ function CardHead({ Icon, title, extra }: { Icon: LucideIcon; title: string; ext
       <strong>{title}</strong>
       {extra}
     </div>
-  );
-}
-
-function FoodCutout({
-  src,
-  className,
-  crop,
-  children,
-}: {
-  src: string;
-  className: string;
-  crop?: string;
-  children?: ReactNode;
-}) {
-  return (
-    <div className={`aii-food ${className}`}>
-      {children}
-      <svg className="aii-food-svg" viewBox={crop ?? "0 0 1 1"} preserveAspectRatio="xMidYMid slice">
-        <image
-          href={src}
-          x="0"
-          y="0"
-          width="1"
-          height="1"
-          preserveAspectRatio="xMidYMid meet"
-          filter="url(#aiiKnockWhite)"
-        />
-      </svg>
-    </div>
-  );
-}
-
-function ConnectorLines() {
-  const ref = useRef<SVGSVGElement>(null);
-  const [box, setBox] = useState({ w: 0, h: 0, paths: [] as string[] });
-
-  useLayoutEffect(() => {
-    const svg = ref.current;
-    if (!svg) return;
-    const scene = svg.closest(".aii__scene");
-    const root = svg.closest(".aii");
-    if (!scene || !root) return;
-
-    const update = () => {
-      const s = scene.getBoundingClientRect();
-      const w = s.width;
-      const h = s.height;
-      const boxOf = (sel: string) => {
-        const el = root.querySelector(sel);
-        if (!el) return null;
-        const r = el.getBoundingClientRect();
-        return {
-          l: r.left - s.left,
-          t: r.top - s.top,
-          r: r.right - s.left,
-          b: r.bottom - s.top,
-          cx: r.left - s.left + r.width / 2,
-          cy: r.top - s.top + r.height / 2,
-          w: r.width,
-          h: r.height,
-        };
-      };
-
-      const dishes = boxOf(".aii__card--dishes");
-      const recs = boxOf(".aii__card--recs");
-      const biryani = boxOf(".aii-food--biryani");
-      const pasta = boxOf(".aii-food--pasta");
-      const salad = boxOf(".aii-food--salad");
-      const mascot = boxOf(".aii-mascot");
-      const quote = boxOf(".aii-hand");
-      if (!dishes || !recs || !biryani || !pasta || !salad || !mascot) return;
-
-      const pt = (x: number, y: number) => `${x.toFixed(1)} ${y.toFixed(1)}`;
-      const cubic = (
-        a: { x: number; y: number },
-        b: { x: number; y: number },
-        drop: number,
-      ) => {
-        const dx = b.x - a.x;
-        return `M${pt(a.x, a.y)} C${pt(a.x + dx * 0.28, a.y + drop)} ${pt(b.x - dx * 0.22, b.y + drop * 0.35)} ${pt(b.x, b.y)}`;
-      };
-
-      const s1 = { x: dishes.l + 22, y: dishes.b + 5 };
-      const e1 = { x: biryani.r - 4, y: biryani.t + 10 };
-      const d1 = cubic(s1, e1, 14);
-
-      const s2 = { x: recs.l - 8, y: recs.b + 6 };
-      const e2 = { x: salad.l + salad.w * 0.22, y: salad.t + 4 };
-      const d2 = cubic(s2, e2, 42);
-
-      const s3 = { x: salad.r + 10, y: salad.cy };
-      const e3 = { x: mascot.l + mascot.w * 0.1, y: mascot.t + mascot.h * 0.48 };
-      const quoteFloor = quote ? quote.b + 12 : s3.y;
-      const c3y = Math.max(s3.y, e3.y, quoteFloor) + 24;
-      const d3 = `M${pt(s3.x, s3.y)} C${pt(s3.x + (e3.x - s3.x) * 0.32, c3y)} ${pt(s3.x + (e3.x - s3.x) * 0.7, c3y - 6)} ${pt(e3.x, e3.y)}`;
-
-      setBox({ w, h, paths: [d1, d2, d3] });
-    };
-
-    update();
-    requestAnimationFrame(update);
-    const ro = new ResizeObserver(update);
-    ro.observe(scene);
-    ro.observe(root);
-    const mo = new MutationObserver(update);
-    mo.observe(root, { attributes: true, attributeFilter: ["class"] });
-    window.addEventListener("resize", update);
-    return () => {
-      ro.disconnect();
-      mo.disconnect();
-      window.removeEventListener("resize", update);
-    };
-  }, []);
-
-  return (
-    <svg
-      ref={ref}
-      className="aii__wires"
-      viewBox={`0 0 ${Math.max(box.w, 1)} ${Math.max(box.h, 1)}`}
-      preserveAspectRatio="none"
-      aria-hidden
-    >
-      {box.paths.map((d) => (
-        <path
-          key={d}
-          d={d}
-          fill="none"
-          stroke="#86EFAC"
-          strokeWidth="1.4"
-          strokeDasharray="5 7"
-          strokeLinecap="round"
-          opacity="0.88"
-        />
-      ))}
-    </svg>
   );
 }
 
@@ -322,7 +153,9 @@ function SalesChart() {
       </svg>
       <div className="aii-peak" style={{ left: `${(peakX / 360) * 100}%` }} aria-hidden>
         <b>Peak Sale</b>
-        <span>₹12,450</span>
+        <span>
+          <LiveNumber value={12450} commas prefix="₹" />
+        </span>
       </div>
     </div>
   );
@@ -363,14 +196,9 @@ export function AiInsightsSection({ visible }: { visible: boolean }) {
         .aii__inner {
           position: relative;
           z-index: 1;
-          max-width: 1536px;
+          max-width: 1280px;
           margin: 0 auto;
-          padding: 56px 48px 312px;
-        }
-        @media (min-width: 1280px) {
-          .aii__inner {
-            padding: 56px 56px 324px;
-          }
+          padding: 56px 40px 80px;
         }
         .aii__grid {
           display: grid;
@@ -395,6 +223,10 @@ export function AiInsightsSection({ visible }: { visible: boolean }) {
           letter-spacing: -0.045em;
           line-height: 1.08;
           color: ${NAVY};
+        }
+        .aii__h2 em {
+          font-style: normal;
+          color: ${T.accentSolid};
         }
         .aii__lede {
           margin: 0 0 20px;
@@ -457,6 +289,12 @@ export function AiInsightsSection({ visible }: { visible: boolean }) {
           place-items: center;
           flex-shrink: 0;
         }
+        .aii__mascot {
+          display: block;
+          width: 260px;
+          height: auto;
+          margin: 20px auto 0 60px;
+        }
 
         .aii__stage { position: relative; min-height: 0; z-index: 3; }
         .aii__cards {
@@ -464,8 +302,8 @@ export function AiInsightsSection({ visible }: { visible: boolean }) {
           grid-template-columns: minmax(0, 1.15fr) minmax(240px, 0.85fr);
           grid-template-areas:
             "sales cost"
-            "dishes waste"
-            "dishes recs";
+            "waste dishes"
+            "recs dishes";
           gap: 14px;
           padding-bottom: 0;
         }
@@ -744,125 +582,21 @@ export function AiInsightsSection({ visible }: { visible: boolean }) {
           font-weight: 600;
         }
 
-        .aii__scene {
-          position: absolute;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          height: 580px;
-          z-index: 4;
-          pointer-events: none;
-        }
-        .aii__wires {
-          position: absolute;
-          inset: 0;
-          width: 100%;
-          height: 100%;
-          overflow: visible;
-          z-index: 1;
-          pointer-events: none;
-        }
-        .aii-food {
-          position: absolute;
-          z-index: 2;
-          background: transparent;
-        }
-        .aii-food-svg {
-          display: block;
-          width: 100%;
-          height: auto;
-          aspect-ratio: 1;
-          overflow: visible;
-          filter: drop-shadow(0 24px 28px rgba(20, 40, 28, 0.18));
-        }
-        .aii-food--biryani { left: 7%; bottom: 92px; width: 232px; }
-        .aii-food--pasta { left: 21%; bottom: 18px; width: 244px; z-index: 3; }
-        .aii-food--salad { left: 39%; bottom: 42px; width: 148px; z-index: 2; }
-        .aii-best {
-          position: absolute;
-          top: 18px;
-          right: 8px;
-          z-index: 4;
-          display: inline-flex;
-          align-items: center;
-          gap: 4px;
-          background: ${T.accentSolid};
-          color: #fff;
-          font-size: 12px;
-          font-weight: 800;
-          padding: 6px 11px;
-          border-radius: 999px;
-          box-shadow: 0 8px 16px rgba(21,128,61,0.28);
-          white-space: nowrap;
-        }
-        .aii-leaf {
-          position: absolute;
-          width: 34px;
-          height: 46px;
-          z-index: 3;
-          filter: drop-shadow(0 4px 6px rgba(21,128,61,0.18));
-        }
-        .aii-leaf--1 { left: 20%; bottom: 268px; transform: rotate(-28deg); }
-        .aii-leaf--2 { left: 36%; bottom: 292px; transform: rotate(18deg); }
-        .aii-leaf--3 { left: 50%; bottom: 168px; transform: rotate(-12deg); width: 26px; height: 36px; }
-        .aii-mascot {
-          position: absolute;
-          right: 1%;
-          bottom: 8px;
-          width: clamp(168px, 14vw, 220px);
-          z-index: 6;
-          filter: drop-shadow(0 16px 24px rgba(15,122,76,0.2));
-        }
-        .aii-hand {
-          position: absolute;
-          right: clamp(184px, 16vw, 240px);
-          bottom: 148px;
-          z-index: 7;
-          font-family: 'Caveat', cursive;
-          font-size: clamp(24px, 2.3vw, 32px);
-          font-weight: 700;
-          color: #0F766E;
-          transform: rotate(-6deg);
-          line-height: 1.05;
-          white-space: nowrap;
-          text-align: left;
-        }
-        .aii-hand svg {
-          display: block;
-          width: 168px;
-          height: 10px;
-          margin-top: -2px;
-          margin-left: 8px;
-        }
-
         @media (max-width: 1100px) {
-          .aii__inner { min-height: 0; display: block; padding: 64px 28px 260px; }
+          .aii__inner { min-height: 0; display: block; padding: 64px 28px 64px; }
           .aii__grid { grid-template-columns: 1fr; gap: 28px; }
           .aii__copy { padding-top: 0; max-width: none; }
           .aii__stage { min-height: 0; }
-          .aii__scene { height: 420px; }
-          .aii-mascot { width: 156px; right: 2%; }
-          .aii-hand { right: 168px; bottom: 108px; font-size: 22px; }
-          .aii-food--biryani { width: 188px; left: 4%; bottom: 64px; }
-          .aii-food--pasta { width: 200px; left: 24%; bottom: 8px; }
-          .aii-food--salad { width: 128px; left: 48%; }
         }
         @media (max-width: 760px) {
-          .aii__inner { padding: 56px 20px 220px; }
+          .aii__inner { padding: 56px 20px 56px; }
           .aii__blob { display: none; }
           .aii__cards {
             grid-template-columns: 1fr;
-            grid-template-areas: "sales" "cost" "dishes" "waste" "recs";
+            grid-template-areas: "sales" "cost" "waste" "recs" "dishes";
           }
           .aii__ctas { flex-direction: column; }
           .aii__cta { width: 100%; }
-          .aii__scene { height: 280px; }
-          .aii-food--biryani { left: 2%; width: 156px; bottom: 28px; }
-          .aii-food--pasta { left: 30%; width: 164px; }
-          .aii-food--salad { left: 56%; width: 108px; }
-          .aii-mascot { width: 128px; }
-          .aii__wires, .aii-leaf { display: none; }
-          .aii-hand { font-size: 18px; right: 160px; bottom: 74px; }
         }
         @media (prefers-reduced-motion: reduce) {
           .aii__cta:hover { transform: none; }
@@ -877,7 +611,9 @@ export function AiInsightsSection({ visible }: { visible: boolean }) {
         <div className="aii__grid">
           <div className="aii__copy">
             <div className="aii__eyebrow">AI-Powered Insights</div>
-            <h2 className="aii__h2">Turn Your Restaurant Data Into Real Growth.</h2>
+            <h2 className="aii__h2">
+              Turn Your Restaurant Data Into <em>Real Growth.</em>
+            </h2>
             <p className="aii__lede">
               See what&apos;s selling, control costs, reduce waste, and get AI-powered
               recommendations — all in one place.
@@ -900,6 +636,11 @@ export function AiInsightsSection({ visible }: { visible: boolean }) {
                 </div>
               ))}
             </div>
+            <img
+              className="aii__mascot"
+              src="/mascot/WhatsApp_Image_2026-09-07_at_23.02.49-removebg-preview.png"
+              alt=""
+            />
           </div>
 
           <div className="aii__stage">
@@ -911,10 +652,12 @@ export function AiInsightsSection({ visible }: { visible: boolean }) {
                   extra={<FilterChip label="Last 30 Days" />}
                 />
                 <div className="aii-metric">
-                  <b>₹2,48,320</b>
+                  <b>
+                    <LiveNumber value={248320} commas locale="en-IN" prefix="₹" />
+                  </b>
                   <span className="aii-delta">
-                    <TrendingUp size={11} strokeWidth={2.6} />
-                    +12.6%
+                    <TrendingUp size={11} strokeWidth={2.6} />+
+                    <LiveNumber value={12.6} decimals={1} suffix="%" />
                   </span>
                 </div>
                 <div className="aii-metric-lab">Total Sales</div>
@@ -924,10 +667,12 @@ export function AiInsightsSection({ visible }: { visible: boolean }) {
               <article className="aii__card aii__card--cost">
                 <CardHead Icon={PieChart} title="Food Cost" />
                 <div className="aii-metric">
-                  <b>28.4%</b>
+                  <b>
+                    <LiveNumber value={28.4} decimals={1} suffix="%" />
+                  </b>
                   <span className="aii-delta">
-                    <TrendingDown size={11} strokeWidth={2.6} />
-                    -2.3%
+                    <TrendingDown size={11} strokeWidth={2.6} />-
+                    <LiveNumber value={2.3} decimals={1} suffix="%" />
                   </span>
                 </div>
                 <div className="aii-metric-lab">of total sales</div>
@@ -956,7 +701,9 @@ export function AiInsightsSection({ visible }: { visible: boolean }) {
                     <span className="aii-dish-rank">{d.rank}</span>
                     <img src={d.img} alt="" />
                     <strong>{d.name}</strong>
-                    <em>{d.amount}</em>
+                    <em>
+                      <LiveNumber value={d.amount} commas prefix="₹" />
+                    </em>
                   </div>
                 ))}
               </article>
@@ -1005,59 +752,6 @@ export function AiInsightsSection({ visible }: { visible: boolean }) {
                 </div>
               </article>
             </div>
-          </div>
-        </div>
-
-        <div className="aii__scene" aria-hidden>
-          <svg
-            aria-hidden
-            style={{
-              position: "absolute",
-              width: 1,
-              height: 1,
-              overflow: "hidden",
-              opacity: 0,
-              pointerEvents: "none",
-            }}
-          >
-            <defs>
-              <filter
-                id="aiiKnockWhite"
-                x="-20%"
-                y="-20%"
-                width="140%"
-                height="140%"
-                colorInterpolationFilters="sRGB"
-              >
-                <feColorMatrix
-                  type="matrix"
-                  values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  -1.1 -1.1 -1.1 2.85 0"
-                />
-              </filter>
-            </defs>
-          </svg>
-          <ConnectorLines />
-          <BasilLeaf className="aii-leaf aii-leaf--1" />
-          <BasilLeaf className="aii-leaf aii-leaf--2" flip />
-          <BasilLeaf className="aii-leaf aii-leaf--3" />
-          <FoodCutout className="aii-food--biryani" src="/hero/aii-biryani.png" />
-          <FoodCutout className="aii-food--pasta" src="/hero/aii-alfredo.png">
-            <span className="aii-best">
-              <Crown size={11} strokeWidth={2.4} /> Bestseller!
-            </span>
-          </FoodCutout>
-          <FoodCutout className="aii-food--salad" src="/hero/aii-caesar.png" />
-          <img className="aii-mascot" src="/hero/hero-mascot.png" alt="" />
-          <div className="aii-hand">
-            Insights plated fresh!
-            <svg viewBox="0 0 156 10" fill="none">
-              <path
-                d="M2 6c20-4 44-5 78-3 30 2 54 3 74 1"
-                stroke="#15803D"
-                strokeWidth="2"
-                strokeLinecap="round"
-              />
-            </svg>
           </div>
         </div>
       </div>

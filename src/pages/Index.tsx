@@ -23,6 +23,7 @@ import { Seo } from "@/components/Seo";
 import { SALES_PHONE, SALES_PHONE_HREF } from "@/lib/contact";
 import { getStoredUser } from "@/lib/auth";
 import { isNativeApp } from "@/lib/native";
+import { LiveNumber } from "@/components/ui/live-number";
 
 /* ─── Product-preview tiles ──────────────────────────────────────────────────
    Coded mini-mockups of the real dashboard modules (src/pages/dashboard/*):
@@ -80,15 +81,18 @@ function OverviewTile() {
   return (
     <Tile label="Dashboard · Overview">
       <div style={{ display: "flex", gap: 14 }}>
-        {[
-          ["₹2.4L", "Sales Today"],
-          ["847", "Bills"],
-        ].map(([v, l]) => (
-          <div key={l}>
-            <div style={{ fontSize: 15, fontWeight: 800, color: T.text, lineHeight: 1 }}>{v}</div>
-            <div style={{ fontSize: 8.5, color: T.muted, marginTop: 2 }}>{l}</div>
+        <div>
+          <div style={{ fontSize: 15, fontWeight: 800, color: T.text, lineHeight: 1 }}>
+            <LiveNumber value={2.4} decimals={1} prefix="₹" suffix="L" />
           </div>
-        ))}
+          <div style={{ fontSize: 8.5, color: T.muted, marginTop: 2 }}>Sales Today</div>
+        </div>
+        <div>
+          <div style={{ fontSize: 15, fontWeight: 800, color: T.text, lineHeight: 1 }}>
+            <LiveNumber value={847} />
+          </div>
+          <div style={{ fontSize: 8.5, color: T.muted, marginTop: 2 }}>Bills</div>
+        </div>
       </div>
       <div style={{ display: "flex", alignItems: "flex-end", gap: 3, flex: 1, minHeight: 14 }}>
         {[38, 55, 44, 70, 58, 82, 64, 92].map((h, i) => (
@@ -219,7 +223,7 @@ function InventoryTile() {
             />
           </div>
           <span style={{ fontSize: 8.5, fontWeight: 700, color, width: 26, textAlign: "right" }}>
-            {pct}%
+            <LiveNumber value={pct} suffix="%" />
           </span>
         </div>
       ))}
@@ -263,21 +267,23 @@ function PilotAiTile() {
   );
 }
 
-const PRICES: [string, string, string, string][] = [
-  ["Tomato", "₹38/kg", "▼ 4%", T.accent],
-  ["Onion", "₹52/kg", "▲ 6%", "#EF4444"],
-  ["Paneer", "₹340/kg", "▼ 2%", T.accent],
+const PRICES: [string, number, boolean, number, string][] = [
+  ["Tomato", 38, false, 4, T.accent],
+  ["Onion", 52, true, 6, "#EF4444"],
+  ["Paneer", 340, false, 2, T.accent],
 ];
 
 function MarketPricesTile() {
   return (
     <Tile label="Market Prices">
-      {PRICES.map(([name, price, delta, color]) => (
+      {PRICES.map(([name, price, up, delta, color]) => (
         <div key={name} style={{ display: "flex", alignItems: "center", gap: 6 }}>
           <span style={{ fontSize: 9, color: T.muted, flex: 1 }}>{name}</span>
-          <span style={{ fontSize: 9.5, fontWeight: 700, color: T.text }}>{price}</span>
+          <span style={{ fontSize: 9.5, fontWeight: 700, color: T.text }}>
+            <LiveNumber value={price} prefix="₹" suffix="/kg" />
+          </span>
           <span style={{ fontSize: 8.5, fontWeight: 700, color, width: 32, textAlign: "right" }}>
-            {delta}
+            {up ? "▲" : "▼"} <LiveNumber value={delta} suffix="%" />
           </span>
         </div>
       ))}
@@ -289,17 +295,25 @@ function ReportsTile() {
   return (
     <Tile label="Reports · Monthly">
       <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
-        <span style={{ fontSize: 15, fontWeight: 800, color: T.text, lineHeight: 1 }}>28.4%</span>
-        <span style={{ fontSize: 8.5, fontWeight: 700, color: T.accent }}>▼ 1.2%</span>
+        <span style={{ fontSize: 15, fontWeight: 800, color: T.text, lineHeight: 1 }}>
+          <LiveNumber value={28.4} decimals={1} suffix="%" />
+        </span>
+        <span style={{ fontSize: 8.5, fontWeight: 700, color: T.accent }}>
+          ▼ <LiveNumber value={1.2} decimals={1} suffix="%" />
+        </span>
       </div>
       <div style={{ fontSize: 8.5, color: T.muted, marginTop: -3 }}>Food cost vs last month</div>
-      {[
-        ["Sales", "₹68.2L"],
-        ["Wastage", "₹1.9L"],
-      ].map(([l, v]) => (
+      {(
+        [
+          ["Sales", 68.2],
+          ["Wastage", 1.9],
+        ] as [string, number][]
+      ).map(([l, v]) => (
         <div key={l} style={{ display: "flex", justifyContent: "space-between" }}>
           <span style={{ fontSize: 8.5, color: T.muted }}>{l}</span>
-          <span style={{ fontSize: 9, fontWeight: 700, color: T.text }}>{v}</span>
+          <span style={{ fontSize: 9, fontWeight: 700, color: T.text }}>
+            <LiveNumber value={v} decimals={1} prefix="₹" suffix="L" />
+          </span>
         </div>
       ))}
     </Tile>
@@ -373,7 +387,7 @@ const GALLERY_MEDIA: BentoMediaItem[] = [
 
 /* One string, two consumers: AppPage owns document.title, Seo owns og:title.
    Keeping them in sync by hand is how they drift. */
-const PAGE_TITLE = "Restaurant Management Software for UAE Restaurants | PlatePielet";
+const PAGE_TITLE = "PlatePielet — AI-Powered Restaurant Intelligence";
 const PAGE_DESCRIPTION =
   "PlatePielet unifies your Tally books, POS sales and inventory into one restaurant intelligence platform — live margin dashboards, waste alerts and AI purchase calls. Book a demo.";
 
@@ -629,8 +643,6 @@ function Index() {
         }
         .pp-mascot--intro { top: -16px; right: 0; width: 120px; animation-delay: 0.2s; }
         .pp-mascot--loop { bottom: -8px; right: 4px; width: 100px; animation-delay: 0.6s; }
-        .pp-mascot--testimonial { left: -8px; bottom: -28px; width: 110px; animation-delay: 1s; }
-        .pp-mascot--cta { right: 48px; bottom: 100%; width: 140px; margin-bottom: -18px; animation-delay: 0.4s; }
         @media (max-width: 960px) {
           .pp-mascot { display: none; }
         }
@@ -1492,6 +1504,8 @@ function Index() {
 
         .about-section { padding: 5rem 0; }
         .about-intro { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(300px, 0.9fr); gap: 4rem; align-items: end; }
+        .about-heading-row { display: flex; align-items: center; gap: 20px; }
+        .about-mascot { width: 260px; height: auto; flex-shrink: 0; }
         .about-intro .sw-section-body { margin-bottom: 0; }
         .about-grid { display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 14px; margin-top: 3.5rem; }
         .about-copy, .about-card { min-height: 220px; padding: 1.5rem; border: 1px solid #DDE7E1; border-radius: 18px; background: #F7FAF8; }
@@ -1521,6 +1535,7 @@ function Index() {
           align-items: center;
         }
         @media (max-width: 900px) { .tm-split { grid-template-columns: 1fr; gap: 2.5rem; } }
+        .tm-mascot { display: block; width: 260px; height: auto; margin: 20px 0; }
         .tm-cta {
           display: inline-flex;
           align-items: center;
@@ -2094,6 +2109,10 @@ function Index() {
           margin-bottom: 20px;
           max-width: 640px;
         }
+        .sw-section-h2 em {
+          font-style: normal;
+          color: ${T.accent};
+        }
         .sw-section-body {
           font-size: var(--pp-lede);
           color: #66736B;
@@ -2604,10 +2623,15 @@ function Index() {
           <div className="about-section">
             <div className="sw-section-tag">About Us</div>
             <div className="about-intro">
-              <div>
-                <h2 className="sw-section-h2">
-                  Optimise Your Restaurant’s Performance with PlatePielet
+              <div className="about-heading-row">
+                <h2 className="sw-section-h2" style={{ marginBottom: 0 }}>
+                  Optimise Your Restaurant’s Performance with <em>PlatePielet</em>
                 </h2>
+                <img
+                  className="about-mascot"
+                  src="/mascot/WhatsApp_Image_2026-09-07_at_23.01.10-removebg-preview.png"
+                  alt=""
+                />
               </div>
               <p className="sw-section-body">
                 PlatePielet is built for restaurateurs who want a smarter, clearer way to run their
@@ -2658,13 +2682,8 @@ function Index() {
             <div className="tm-section">
               <div className="tm-split">
                 <div className="tm-copy">
-                  <img
-                    className="pp-mascot pp-mascot--testimonial"
-                    src="/hero/hero-mascot.png"
-                    alt=""
-                  />
                   <div className="sw-section-tag">Testimonials &amp; Reviews</div>
-                  <h2 className="sw-section-h2">Restaurant owners run on PlatePielet.</h2>
+                  <h2 className="sw-section-h2">Restaurant owners run on <em>PlatePielet.</em></h2>
                   <p className="sw-section-body">
                     Real feedback from outlet owners and finance leads who use PlatePielet every day
                     to control cost and cut manual work.
@@ -2675,6 +2694,11 @@ function Index() {
                       <ArrowUpRight size={16} strokeWidth={2.5} />
                     </span>
                   </Link>
+                  <img
+                    className="tm-mascot"
+                    src="/mascot/WhatsApp_Image_2026-09-07_at_23.02.20-removebg-preview.png"
+                    alt=""
+                  />
                 </div>
                 <div className="tm-stack">
                   <div className="tm-stack-track">
@@ -2773,7 +2797,6 @@ function Index() {
       <PlatePieletFooter>
         <div className="sw-section" id="contact">
           <div className="cta-band">
-            <img className="pp-mascot pp-mascot--cta" src="/hero/hero-mascot.png" alt="" />
             <h2 className="cta-heading">Start optimizing your restaurant today.</h2>
             <div className="cta-actions">
               <a href="/demo" className="btn-white">

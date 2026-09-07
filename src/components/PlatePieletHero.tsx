@@ -1,5 +1,6 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { SALES_PHONE, SALES_PHONE_HREF } from "@/lib/contact";
+import { LiveNumber } from "@/components/ui/live-number";
 
 /** Matches PlatePielet brand palette — light landing (soft green-white).
  *  Exported as the shared landing color theme (Index.tsx product tiles). */
@@ -46,7 +47,7 @@ const gradientClip = (gradient: string) =>
 
 const IMG = {
   chefs: ["/hero/hero-chef.jpg", "/hero/hero-chef-2.jpg", "/hero/hero-chef-3.jpg"] as const,
-  mascot: "/hero/hero-mascot.png",
+  mascot: "/mascot/WhatsApp_Image_2026-09-07_at_22.57.23-removebg-preview.png",
   tomatoes: "/hero/hero-tomatoes1.jpg",
   salad: "/hero/hero-salad.jpg",
   butter: "/hero/hero-butter-chicken.jpg",
@@ -220,7 +221,9 @@ function WasteAlertCard() {
         <div className="pp-hero__waste-copy">
           <div className="pp-hero__title">Waste Alert</div>
           <div className="pp-hero__body">High wastage detected</div>
-          <div className="pp-hero__warn-text">Tomatoes • 8.5 kg</div>
+          <div className="pp-hero__warn-text">
+            Tomatoes • <LiveNumber value={8.5} decimals={1} suffix=" kg" />
+          </div>
         </div>
       </div>
       <img className="pp-hero__waste-bowl" src={IMG.tomatoes} alt="" draggable={false} />
@@ -242,7 +245,9 @@ function TopSellingCard() {
               <div className="pp-hero__sell-name">{item.name}</div>
               <ProgressBar pct={item.pct} delay={`${0.5 + i * 0.1}s`} />
             </div>
-            <div className="pp-hero__sell-pct">{item.pct}%</div>
+            <div className="pp-hero__sell-pct">
+              <LiveNumber value={item.pct} suffix="%" />
+            </div>
           </div>
         ))}
       </div>
@@ -717,10 +722,10 @@ export function PlatePieletHero() {
           filter: drop-shadow(0 8px 16px rgba(0,0,0,0.12));
         }
         .pp-hero__prop--mascot {
-          left: 0;
-          bottom: 18%;
-          width: clamp(64px, 9vw, 88px);
-          height: clamp(64px, 9vw, 88px);
+          left: -80px;
+          bottom: 9%;
+          width: clamp(110px, 14vw, 150px);
+          height: clamp(110px, 14vw, 150px);
           z-index: 7;
         }
         .pp-hero__prop--salad {

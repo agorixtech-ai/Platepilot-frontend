@@ -105,40 +105,13 @@ function Tile({
   return (
     <div className={`dd__tile dd__tile--${side}`} style={{ ["--dot" as string]: color }}>
       <div className="dd__tile-ico" style={{ background: tint, color }}>
-        <Icon size={16} strokeWidth={1.9} />
+        <Icon size={18} strokeWidth={1.9} />
       </div>
       <div className="dd__tile-copy">
         <strong>{label}</strong>
         <p>{desc}</p>
       </div>
     </div>
-  );
-}
-
-function ScribbleArrow({ flip }: { flip?: boolean }) {
-  return (
-    <svg
-      className={`dd__scribble${flip ? " dd__scribble--flip" : ""}`}
-      width="22"
-      height="28"
-      viewBox="0 0 28 34"
-      fill="none"
-      aria-hidden
-    >
-      <path
-        d="M14 2c1.2 7.5-1.8 14.2-1.2 21.5"
-        stroke="currentColor"
-        strokeWidth="2.2"
-        strokeLinecap="round"
-      />
-      <path
-        d="M7.5 19.5c3.2 2.8 5.8 5.2 6.3 8.8 2.4-3.6 5.8-5.6 9.2-7"
-        stroke="currentColor"
-        strokeWidth="2.2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
   );
 }
 
@@ -243,13 +216,27 @@ export function DataDecisionSection({ visible }: { visible: boolean }) {
           z-index: 1;
           max-width: 1280px;
           margin: 0 auto;
-          padding: 72px 40px 48px;
+          padding: 88px 40px 72px;
+        }
+        .dd__grid {
+          display: grid;
+          grid-template-columns: minmax(280px, 0.72fr) minmax(0, 1.28fr);
+          gap: 40px;
+          align-items: center;
         }
 
         .dd__copy {
           text-align: left;
-          max-width: 640px;
-          margin: 0 0 48px;
+          max-width: 460px;
+          margin: 0;
+        }
+        .dd__eyebrow {
+          margin: 0 0 16px;
+          font-size: 11px;
+          font-weight: 800;
+          letter-spacing: 0.22em;
+          text-transform: uppercase;
+          color: ${T.accentSolid};
         }
         .dd__h2 {
           margin: 0 0 20px;
@@ -261,6 +248,7 @@ export function DataDecisionSection({ visible }: { visible: boolean }) {
           text-align: left;
         }
         .dd__h2 em {
+          display: block;
           font-style: normal;
           color: ${T.accentSolid};
         }
@@ -277,11 +265,11 @@ export function DataDecisionSection({ visible }: { visible: boolean }) {
           display: inline-flex;
           align-items: center;
           gap: 7px;
-          padding: 12px 24px;
+          padding: 14px 28px;
           border-radius: 999px;
           background: ${T.accentSolid};
           color: #fff !important;
-          font-size: 14px;
+          font-size: 15px;
           font-weight: 700;
           text-decoration: none;
           box-shadow: 0 12px 24px rgba(21,128,61,0.28);
@@ -293,46 +281,65 @@ export function DataDecisionSection({ visible }: { visible: boolean }) {
           background: #166534;
         }
 
+        .dd__viz { position: relative; min-width: 0; }
+        .dd__mascot-row {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 12px;
+          margin-top: 4px;
+        }
+        .dd__mascot-fig {
+          position: relative;
+          flex-shrink: 0;
+          line-height: 0;
+        }
+        .dd__mascot {
+          width: 260px;
+          height: auto;
+          margin-top: 18px;
+          display: block;
+          filter: drop-shadow(0 18px 26px rgba(15,122,76,0.18));
+        }
+        .dd__spark {
+          position: absolute;
+          left: 26px;
+          top: 30%;
+          width: 26px;
+          height: 36px;
+          color: #22C55E;
+        }
+        .dd__hand {
+          margin-bottom: 26px;
+          font-family: 'Caveat', cursive;
+          font-size: clamp(22px, 2.3vw, 34px);
+          font-weight: 700;
+          line-height: 1.08;
+          color: #0F766E;
+          transform: rotate(-7deg);
+          white-space: nowrap;
+        }
+        .dd__hand svg {
+          display: block;
+          width: 100%;
+          height: 24px;
+          margin-top: 2px;
+          overflow: visible;
+        }
+
         .dd__flow {
           position: relative;
           display: grid;
-          grid-template-columns: minmax(0, 5fr) minmax(160px, 2fr) minmax(0, 5fr);
-          grid-template-rows: 28px repeat(3, 78px);
+          grid-template-columns: minmax(0, 5fr) minmax(140px, 3fr) minmax(0, 5fr);
+          grid-template-rows: repeat(3, 106px);
           grid-template-areas:
-            "hin .    hout"
             "i0  hub  o0"
             "i1  hub  o1"
             "i2  hub  o2";
-          column-gap: 36px;
-          row-gap: 12px;
+          column-gap: 22px;
+          row-gap: 22px;
           align-items: stretch;
         }
-        .dd__label {
-          font-family: 'Caveat', cursive;
-          font-size: 22px;
-          font-weight: 700;
-          letter-spacing: 0.06em;
-          text-transform: uppercase;
-          color: ${T.accent};
-          display: flex;
-          align-items: center;
-          gap: 4px;
-          height: 28px;
-          line-height: 1;
-          min-width: 0;
-          white-space: nowrap;
-        }
-        .dd__label--in { grid-area: hin; }
-        .dd__label--out {
-          grid-area: hout;
-          justify-content: flex-end;
-          flex-direction: row-reverse;
-        }
-        .dd__scribble {
-          color: ${T.accent};
-          flex-shrink: 0;
-        }
-        .dd__scribble--flip { transform: scaleX(-1); }
 
         .dd__cell {
           min-width: 0;
@@ -349,41 +356,41 @@ export function DataDecisionSection({ visible }: { visible: boolean }) {
         .dd__tile {
           position: relative;
           display: grid;
-          grid-template-columns: 40px minmax(0, 1fr);
-          gap: 10px;
+          grid-template-columns: 44px minmax(0, 1fr);
+          gap: 12px;
           align-items: center;
-          padding: 12px 16px;
+          padding: 16px 18px;
           width: 100%;
           height: 100%;
-          min-height: 78px;
+          min-height: 100px;
           background: #fff;
           border: 1px solid rgba(21,32,25,0.06);
-          border-radius: 16px;
+          border-radius: 18px;
           box-shadow: 0 8px 22px rgba(7,26,20,0.06);
           box-sizing: border-box;
         }
         .dd__tile-ico {
-          width: 40px;
-          height: 40px;
-          border-radius: 11px;
+          width: 44px;
+          height: 44px;
+          border-radius: 13px;
           display: grid;
           place-items: center;
           flex-shrink: 0;
         }
         .dd__tile-copy { min-width: 0; }
         .dd__tile strong {
-          font-size: 14px;
+          font-size: 15.5px;
           font-weight: 800;
           letter-spacing: -0.02em;
           color: ${T.text};
           display: block;
           line-height: 1.2;
-          margin-bottom: 3px;
+          margin-bottom: 4px;
         }
         .dd__tile p {
           margin: 0;
-          font-size: 11.5px;
-          line-height: 1.35;
+          font-size: 12.5px;
+          line-height: 1.4;
           color: ${T.muted};
           display: -webkit-box;
           -webkit-line-clamp: 2;
@@ -394,16 +401,16 @@ export function DataDecisionSection({ visible }: { visible: boolean }) {
           content: '';
           position: absolute;
           top: 50%;
-          width: 10px;
-          height: 10px;
+          width: 11px;
+          height: 11px;
           border-radius: 50%;
           background: var(--dot);
           transform: translateY(-50%);
           box-shadow: 0 0 0 3px #fff, 0 0 0 5px color-mix(in srgb, var(--dot) 22%, transparent);
           z-index: 2;
         }
-        .dd__tile--in::after { right: -5px; }
-        .dd__tile--out::after { left: -5px; }
+        .dd__tile--in::after { right: -5.5px; }
+        .dd__tile--out::after { left: -5.5px; }
 
         .dd__hub-col {
           grid-area: hub;
@@ -427,8 +434,8 @@ export function DataDecisionSection({ visible }: { visible: boolean }) {
           left: 50%;
           top: 50%;
           transform: translate(-50%, -50%);
-          width: 180px;
-          height: 180px;
+          width: 224px;
+          height: 224px;
           pointer-events: none;
           z-index: 0;
         }
@@ -441,8 +448,8 @@ export function DataDecisionSection({ visible }: { visible: boolean }) {
         .dd__hub {
           position: relative;
           z-index: 2;
-          width: 78px;
-          height: 78px;
+          width: 96px;
+          height: 96px;
           border-radius: 50%;
           background: radial-gradient(circle at 38% 28%, #22C55E, #15803D 72%);
           color: #fff;
@@ -450,7 +457,7 @@ export function DataDecisionSection({ visible }: { visible: boolean }) {
           flex-direction: column;
           align-items: center;
           justify-content: center;
-          gap: 1px;
+          gap: 2px;
           border: 3px solid #fff;
           box-shadow:
             0 0 0 5px rgba(34,197,94,0.14),
@@ -458,7 +465,7 @@ export function DataDecisionSection({ visible }: { visible: boolean }) {
           flex-shrink: 0;
         }
         .dd__hub b {
-          font-size: 10px;
+          font-size: 11.5px;
           font-weight: 800;
           letter-spacing: 0.02em;
         }
@@ -472,20 +479,21 @@ export function DataDecisionSection({ visible }: { visible: boolean }) {
           overflow: visible;
         }
 
+        @media (max-width: 1100px) {
+          .dd__grid { grid-template-columns: 1fr; gap: 32px; }
+          .dd__copy { max-width: none; }
+        }
         @media (max-width: 900px) {
-          .dd__inner { padding: 48px 20px 40px; }
-          .dd__copy { margin-bottom: 32px; }
+          .dd__inner { padding: 56px 20px 40px; }
           .dd__blob { display: none; }
           .dd__flow {
             grid-template-columns: 1fr;
             grid-template-rows: auto;
             grid-template-areas:
-              "hin"
               "i0"
               "i1"
               "i2"
               "hub"
-              "hout"
               "o0"
               "o1"
               "o2";
@@ -495,12 +503,12 @@ export function DataDecisionSection({ visible }: { visible: boolean }) {
           .dd__wires,
           .dd__orbits { display: none; }
           .dd__hub-col { min-height: 120px; }
-          .dd__label--out {
-            justify-content: flex-start;
-            flex-direction: row;
-          }
+          .dd__mascot { width: 148px; }
+          .dd__spark { display: none; }
+          .dd__hand { font-size: 22px; margin-bottom: 18px; }
           .dd__tile {
             height: auto;
+            min-height: 0;
           }
           .dd__tile--in::after,
           .dd__tile--out::after { display: none; }
@@ -515,88 +523,98 @@ export function DataDecisionSection({ visible }: { visible: boolean }) {
       <div className="dd__blob dd__blob--r" aria-hidden />
 
       <div className="dd__inner">
-        <div className="dd__copy">
-          <h2 className="dd__h2">
-            From data in <em>to decisions out.</em>
-          </h2>
-          <p className="dd__p">Connect your Tally, POS, and inventory data in one place.</p>
-          <p className="dd__p">
-            PlatePielet turns those numbers into live dashboards, risk alerts, and clear
-            recommendations for purchasing, stock control, costs, and daily operations.
-          </p>
-          <Link to="/demo" className="dd__cta">
-            See it on your data <ArrowRight size={14} strokeWidth={2.4} />
-          </Link>
-        </div>
-
-        <div className="dd__flow" ref={flowRef}>
-          <svg
-            className="dd__wires"
-            width={wires.w}
-            height={wires.h}
-            viewBox={`0 0 ${Math.max(wires.w, 1)} ${Math.max(wires.h, 1)}`}
-            aria-hidden
-          >
-            {wires.paths.map((p) => (
-              <path
-                key={p.d + p.stroke}
-                d={p.d}
-                fill="none"
-                stroke={p.stroke}
-                strokeWidth="2"
-                strokeDasharray="3 6.5"
-                strokeLinecap="round"
-                opacity="0.88"
-              />
-            ))}
-          </svg>
-
-          <div className="dd__label dd__label--in">
-            DATA SOURCES
-            <ScribbleArrow />
-          </div>
-          <div className="dd__label dd__label--out">
-            DECISIONS &amp; ACTIONS
-            <ScribbleArrow flip />
+        <div className="dd__grid">
+          <div className="dd__copy">
+            <p className="dd__eyebrow">Data in. Decisions out.</p>
+            <h2 className="dd__h2">
+              From data in <em>to decisions out.</em>
+            </h2>
+            <p className="dd__p">Connect your Tally, POS, and inventory data in one place.</p>
+            <p className="dd__p">
+              PlatePielet turns those numbers into live dashboards, risk alerts, and clear
+              recommendations for purchasing, stock control, costs, and daily operations.
+            </p>
+            <Link to="/demo" className="dd__cta">
+              See it on your data <ArrowRight size={16} strokeWidth={2.4} />
+            </Link>
           </div>
 
-          {SOURCES.map((s, i) => (
-            <div
-              key={s.label}
-              className={`dd__cell dd__cell--i${i}`}
-              ref={(el) => {
-                inRefs.current[i] = el;
-              }}
-            >
-              <Tile {...s} side="in" />
-            </div>
-          ))}
-
-          <div className="dd__hub-col">
-            <div className="dd__hub-wrap">
-              <svg className="dd__orbits" viewBox="0 0 180 180" aria-hidden>
-                <circle cx="90" cy="90" r="50" />
-                <circle cx="90" cy="90" r="68" />
-                <circle cx="90" cy="90" r="86" />
+          <div className="dd__viz">
+            <div className="dd__flow" ref={flowRef}>
+              <svg
+                className="dd__wires"
+                width={wires.w}
+                height={wires.h}
+                viewBox={`0 0 ${Math.max(wires.w, 1)} ${Math.max(wires.h, 1)}`}
+                aria-hidden
+              >
+                {wires.paths.map((p) => (
+                  <path
+                    key={p.d + p.stroke}
+                    d={p.d}
+                    fill="none"
+                    stroke={p.stroke}
+                    strokeWidth="2"
+                    strokeDasharray="3 6.5"
+                    strokeLinecap="round"
+                    opacity="0.88"
+                  />
+                ))}
               </svg>
-              <div className="dd__hub" ref={hubRef}>
-                <Sparkles size={18} strokeWidth={2} />
-                <b>Pilot AI</b>
+
+              {SOURCES.map((s, i) => (
+                <div
+                  key={s.label}
+                  className={`dd__cell dd__cell--i${i}`}
+                  ref={(el) => {
+                    inRefs.current[i] = el;
+                  }}
+                >
+                  <Tile {...s} side="in" />
+                </div>
+              ))}
+
+              <div className="dd__hub-col">
+                <div className="dd__hub-wrap">
+                  <svg className="dd__orbits" viewBox="0 0 224 224" aria-hidden>
+                    <circle cx="112" cy="112" r="62" />
+                    <circle cx="112" cy="112" r="85" />
+                    <circle cx="112" cy="112" r="108" />
+                  </svg>
+                  <div className="dd__hub" ref={hubRef}>
+                    <Sparkles size={22} strokeWidth={2} />
+                    <b>Pilot AI</b>
+                  </div>
+                </div>
+              </div>
+
+              {OUTPUTS.map((s, i) => (
+                <div
+                  key={s.label}
+                  className={`dd__cell dd__cell--o${i}`}
+                  ref={(el) => {
+                    outRefs.current[i] = el;
+                  }}
+                >
+                  <Tile {...s} side="out" />
+                </div>
+              ))}
+            </div>
+
+            <div className="dd__mascot-row">
+              <div className="dd__mascot-fig">
+                <svg className="dd__spark" viewBox="0 0 26 36" fill="none" aria-hidden>
+                  <path
+                    d="M4 12 1 4M13 8 13 0M21 13 25 6"
+                    stroke="currentColor"
+                    strokeWidth="2.6"
+                    strokeLinecap="round"
+                  />
+                </svg>
+                <img className="dd__mascot" src="/mascot/WhatsApp_Image_2026-09-05_at_12.04.44-removebg-preview.png" alt="" />
               </div>
             </div>
           </div>
-
-          {OUTPUTS.map((s, i) => (
-            <div
-              key={s.label}
-              className={`dd__cell dd__cell--o${i}`}
-              ref={(el) => {
-                outRefs.current[i] = el;
-              }}
-            >
-              <Tile {...s} side="out" />
-            </div>
-          ))}
         </div>
       </div>
     </section>
