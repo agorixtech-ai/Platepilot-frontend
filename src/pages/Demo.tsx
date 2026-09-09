@@ -7,7 +7,7 @@ import { API_URL } from "@/lib/apiBase";
 import { SALES_PHONE, SALES_PHONE_HREF } from "@/lib/contact";
 
 function DemoPage() {
-  const location = useLocation<{ email?: string } | undefined>();
+  const location = useLocation<{ email?: string; message?: string } | undefined>();
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -19,7 +19,7 @@ function DemoPage() {
     restaurant: "",
     phone: "",
     posSystem: "",
-    message: "",
+    message: location.state?.message ?? "",
   });
 
   const update =
