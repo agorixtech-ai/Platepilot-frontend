@@ -246,29 +246,9 @@ export function MarketingShell({
           border-top: 1px solid rgba(21,32,25,0.08);
         }
         .mkt-anchor:first-of-type { border-top: none; padding-top: 0; }
-        .mkt-pricing-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-          gap: 1rem;
-          margin-top: 1.75rem;
-        }
-        .mkt-price-card {
-          padding: 1.75rem 1.5rem;
-          border-radius: 18px;
-          border: 1px solid #DDE7E1;
-          background: #fff;
-        }
-        .mkt-price-card.featured {
-          border-color: #16A34A;
-          box-shadow: 0 12px 32px rgba(22,163,74,0.12);
-        }
-        .mkt-price-name { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #15803D; }
-        .mkt-price-amt { font-size: 2rem; font-weight: 800; letter-spacing: -0.03em; margin: 0.5rem 0 0.25rem; }
-        .mkt-price-amt span { font-size: 0.95rem; font-weight: 600; color: #66736B; }
-        .mkt-price-desc { font-size: 0.9rem; color: #66736B; line-height: 1.5; margin-bottom: 1.25rem; }
       `}</style>
 
-      <PlatePieletNav variant="light" sticky />
+      <PlatePieletNav variant="brand" sticky />
       <main className="mkt-wrap">{children}</main>
       <PlatePieletFooter mode="static">
         <div className="mkt-wrap" style={{ paddingBottom: "3.5rem" }} id="contact">

@@ -1,8 +1,20 @@
-import { useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useParams, Redirect, useLocation } from "react-router-dom";
 import { AppPage } from "@/components/ionic/AppPage";
 import { MarketingHero, MarketingShell } from "@/components/marketing/MarketingShell";
-import { BookOpen, Compass, HelpCircle, Plug, Sparkles, UtensilsCrossed } from "lucide-react";
+import {
+  BookOpen,
+  Boxes,
+  Building2,
+  Compass,
+  HelpCircle,
+  Minus,
+  Plug,
+  Plus,
+  Sparkles,
+  UtensilsCrossed,
+  Users,
+} from "lucide-react";
 import { Marquee } from "@/components/ui/marquee";
 import { BentoGrid } from "@/components/ui/bento-grid";
 import { MagicCard } from "@/components/ui/magic-card";
@@ -15,6 +27,7 @@ import { TextReveal } from "@/components/ui/text-reveal";
 import { NumberTicker } from "@/components/ui/number-ticker";
 import { AnimatedShinyText } from "@/components/ui/animated-shiny-text";
 import { BorderBeam } from "@/components/ui/border-beam";
+import { SALES_PHONE, SALES_PHONE_HREF } from "@/lib/contact";
 import {
   DATA_MARQUEE,
   getProductFeature,
@@ -758,57 +771,352 @@ export function IntegrationsPage() {
   );
 }
 
-export function PricingPage() {
-  const plans = [
-    {
-      name: "Starter",
-      price: "₹4,999",
-      period: "/ month",
-      desc: "Single outlet. POS + Tally sync, dashboards, and Pilot AI essentials.",
-      featured: false,
-    },
-    {
-      name: "Growth",
-      price: "₹12,999",
-      period: "/ month",
-      desc: "Multi-branch. Inventory, menu engineering, alerts, and priority onboarding.",
-      featured: true,
-    },
-    {
-      name: "Group",
-      price: "Custom",
-      period: "",
-      desc: "Restaurant groups and cloud kitchens. Dedicated success and API access.",
-      featured: false,
-    },
+const CORE_INCLUDED = ["POS sync", "Tally sync", "Live dashboards", "Alerts"];
+
+const PRICING_ADDONS = [
+  {
+    key: "multiBranch",
+    icon: Building2,
+    label: "Multi-branch rollup",
+    desc: "Group-level view with drill-down to any branch.",
+  },
+  {
+    key: "inventory",
+    icon: Boxes,
+    label: "Inventory intelligence",
+    desc: "Live stock, low-stock and overstock signals.",
+  },
+  {
+    key: "menuEngineering",
+    icon: UtensilsCrossed,
+    label: "Menu engineering",
+    desc: "Every dish graded on sell rate and profit per plate.",
+  },
+  {
+    key: "pilotAi",
+    icon: Sparkles,
+    label: "Pilot AI",
+    desc: "Ask questions about your bills and books in plain language.",
+  },
+  {
+    key: "onboarding",
+    icon: Users,
+    label: "Dedicated onboarding",
+    desc: "A success contact for setup, training, and rollout.",
+  },
+  {
+    key: "api",
+    icon: Plug,
+    label: "API access",
+    desc: "Pull every number into your own tools.",
+  },
+] as const;
+
+type AddonKey = (typeof PRICING_ADDONS)[number]["key"];
+
+/**
+ * Local heuristic only, not a quote — recommends a starting point so the
+ * call has less ground to cover. "Group" also has no addon ceiling of its
+ * own: past 5 outlets we assume group-level rollout regardless of picks.
+ */
+function recommendPlan(outlets: number, addons: Set<AddonKey>): string {
+  if (outlets > 5 || addons.has("api")) return "Group";
+  if (outlets > 1 || addons.size > 0) return "Growth";
+  return "Starter";
+}
+
+function PricingConfigurator() {
+  const [outlets, setOutlets] = useState(1);
+  const [addons, setAddons] = useState<Set<AddonKey>>(new Set());
+
+  const plan = useMemo(() => recommendPlan(outlets, addons), [outlets, addons]);
+
+  const toggleAddon = (key: AddonKey) =>
+    setAddons((prev) => {
+      const next = new Set(prev);
+      next.has(key) ? next.delete(key) : next.add(key);
+      return next;
+    });
+
+  const pickedAddons = PRICING_ADDONS.filter((a) => addons.has(a.key));
+  const summaryLines = [
+    `Outlets: ${outlets}`,
+    `Modules: ${pickedAddons.length ? pickedAddons.map((a) => a.label).join(", ") : "core only"}`,
+    `Starting point: ${plan} plan`,
   ];
+  const demoMessage = `Pricing configurator —\n${summaryLines.join("\n")}\n\nPlease send a quote for this setup.`;
 
   return (
+    <div className="pp-cfg">
+      <style>{`
+        .pp-cfg {
+          display: grid;
+          grid-template-columns: 1.1fr 0.9fr;
+          gap: 1.5rem;
+          margin-top: 1.75rem;
+          align-items: stretch;
+        }
+        @media (max-width: 860px) {
+          .pp-cfg { grid-template-columns: 1fr; }
+        }
+        .pp-cfg-panel {
+          border: 1px solid ${CARD_BORDER};
+          border-radius: 18px;
+          background: #fff;
+          padding: 1.5rem;
+        }
+        .pp-cfg-row {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 1rem;
+        }
+        .pp-cfg-stepper {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.9rem;
+          border: 1px solid ${CARD_BORDER};
+          border-radius: 12px;
+          padding: 0.4rem 0.6rem;
+        }
+        .pp-cfg-stepper button {
+          display: grid;
+          place-items: center;
+          width: 30px;
+          height: 30px;
+          border-radius: 8px;
+          border: 1px solid #16A34A;
+          background: #fff;
+          color: #15803D;
+          cursor: pointer;
+        }
+        .pp-cfg-stepper button:disabled {
+          opacity: 0.4;
+          cursor: not-allowed;
+        }
+        .pp-cfg-stepper strong {
+          min-width: 2ch;
+          text-align: center;
+          font-size: 1.1rem;
+        }
+        .pp-cfg-addons {
+          margin-top: 1.25rem;
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+          gap: 0.65rem;
+        }
+        .pp-cfg-addon {
+          display: flex;
+          align-items: flex-start;
+          gap: 0.7rem;
+          padding: 0.85rem;
+          border: 1px solid ${CARD_BORDER};
+          border-radius: 12px;
+          cursor: pointer;
+          text-align: left;
+          background: #fff;
+          transition: border-color 0.15s ease, background 0.15s ease;
+        }
+        .pp-cfg-addon.active {
+          border-color: #16A34A;
+          background: #F1F6F3;
+        }
+        .pp-cfg-addon-icon {
+          display: grid;
+          place-items: center;
+          width: 32px;
+          height: 32px;
+          border-radius: 9px;
+          background: #E8F7ED;
+          color: #15803D;
+          flex-shrink: 0;
+        }
+        .pp-cfg-addon-title {
+          font-size: 0.9rem;
+          font-weight: 700;
+          color: ${INK};
+        }
+        .pp-cfg-addon-desc {
+          margin-top: 0.15rem;
+          font-size: 0.8rem;
+          line-height: 1.4;
+          color: ${MUTED};
+        }
+        .pp-cfg-check {
+          margin-left: auto;
+          width: 18px;
+          height: 18px;
+          border-radius: 5px;
+          border: 1.5px solid #9AA8A0;
+          flex-shrink: 0;
+        }
+        .pp-cfg-addon.active .pp-cfg-check {
+          background: #16A34A;
+          border-color: #16A34A;
+        }
+        .pp-cfg-summary {
+          display: flex;
+          flex-direction: column;
+          border-radius: 18px;
+          padding: 1.5rem;
+          background: linear-gradient(160deg, #0F7A4C 0%, #16A34A 55%, #22C55E 100%);
+          color: #fff;
+          position: sticky;
+          top: 96px;
+        }
+        .pp-cfg-summary-plan {
+          font-size: 0.75rem;
+          font-weight: 700;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+          opacity: 0.85;
+        }
+        .pp-cfg-summary-name {
+          font-size: 1.7rem;
+          font-weight: 800;
+          letter-spacing: -0.02em;
+          margin: 0.35rem 0 1rem;
+        }
+        .pp-cfg-summary-list {
+          display: grid;
+          gap: 0.5rem;
+          margin-bottom: 1.35rem;
+        }
+        .pp-cfg-summary-list li {
+          display: flex;
+          gap: 0.5rem;
+          font-size: 0.88rem;
+          line-height: 1.4;
+        }
+        .pp-cfg-summary-note {
+          font-size: 0.78rem;
+          opacity: 0.85;
+          margin-top: 1rem;
+          line-height: 1.5;
+        }
+      `}</style>
+
+      <div className="pp-cfg-panel">
+        <div className="pp-cfg-row">
+          <div>
+            <div className="mkt-card-title">Outlets</div>
+            <div className="pp-cfg-addon-desc" style={{ marginTop: 2 }}>
+              How many outlets go live on PlatePielet?
+            </div>
+          </div>
+          <div className="pp-cfg-stepper">
+            <button
+              type="button"
+              aria-label="Fewer outlets"
+              onClick={() => setOutlets((n) => Math.max(1, n - 1))}
+              disabled={outlets <= 1}
+            >
+              <Minus size={14} />
+            </button>
+            <strong>{outlets}</strong>
+            <button
+              type="button"
+              aria-label="More outlets"
+              onClick={() => setOutlets((n) => Math.min(50, n + 1))}
+              disabled={outlets >= 50}
+            >
+              <Plus size={14} />
+            </button>
+          </div>
+        </div>
+
+        <div className="mkt-card-title" style={{ marginTop: "1.5rem" }}>
+          What do you need?
+        </div>
+        <p className="pp-cfg-addon-desc">
+          POS sync, Tally sync, dashboards, and alerts are included in every plan. Add what else
+          your operation runs on:
+        </p>
+        <div className="pp-cfg-addons">
+          {PRICING_ADDONS.map(({ key, icon: Icon, label, desc }) => {
+            const active = addons.has(key);
+            return (
+              <button
+                key={key}
+                type="button"
+                className={`pp-cfg-addon${active ? " active" : ""}`}
+                onClick={() => toggleAddon(key)}
+                aria-pressed={active}
+              >
+                <span className="pp-cfg-addon-icon">
+                  <Icon size={16} strokeWidth={2} />
+                </span>
+                <span>
+                  <span className="pp-cfg-addon-title">{label}</span>
+                  <span className="pp-cfg-addon-desc" style={{ display: "block" }}>
+                    {desc}
+                  </span>
+                </span>
+                <span className="pp-cfg-check" />
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="pp-cfg-summary">
+        <div className="pp-cfg-summary-plan">Starting point</div>
+        <div className="pp-cfg-summary-name">{plan} plan</div>
+        <ul className="pp-cfg-summary-list">
+          <li>↳ {outlets} outlet{outlets > 1 ? "s" : ""}</li>
+          {CORE_INCLUDED.map((c) => (
+            <li key={c}>↳ {c}</li>
+          ))}
+          {pickedAddons.map((a) => (
+            <li key={a.key}>↳ {a.label}</li>
+          ))}
+        </ul>
+        <div style={{ display: "grid", gap: "0.6rem", marginTop: "auto" }}>
+          <a
+            href={SALES_PHONE_HREF}
+            className="mkt-btn-primary"
+            style={{ width: "100%", background: "#fff", color: "#15803D", boxShadow: "none" }}
+          >
+            CALL {SALES_PHONE}
+          </a>
+          <Link
+            to={{ pathname: "/demo", state: { message: demoMessage } }}
+            className="mkt-btn-ghost"
+            style={{
+              width: "100%",
+              background: "transparent",
+              borderColor: "rgba(255,255,255,0.55)",
+              color: "#fff",
+            }}
+          >
+            BOOK A DEMO WITH THIS SETUP
+          </Link>
+        </div>
+        <p className="pp-cfg-summary-note">
+          This is a starting point, not a quote — the exact price is worked out on the call.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+export function PricingPage() {
+  return (
     <AppPage title="Pricing — PlatePielet">
-      <MarketingShell ctaHeading="Not sure which plan fits? Book a walkthrough.">
+      <MarketingShell ctaHeading="One call. We'll quote it on the spot.">
         <MarketingHero
           eyebrow="Pricing"
-          title="Simple plans for serious operators"
-          lead="Start with a free trial. No credit card required. Upgrade when every outlet is live."
+          title="One phone call. Make your restaurant easy."
+          lead="No fixed tiers to squeeze your setup into. Configure your outlets and modules below, then call — the price is built around how you actually run."
         />
-        <div className="mkt-pricing-grid">
-          {plans.map((p) => (
-            <div key={p.name} className={`mkt-price-card${p.featured ? " featured" : ""}`}>
-              <div className="mkt-price-name">{p.name}</div>
-              <div className="mkt-price-amt">
-                {p.price}
-                {p.period ? <span>{p.period}</span> : null}
-              </div>
-              <p className="mkt-price-desc">{p.desc}</p>
-              <Link to="/demo" className="mkt-btn-primary" style={{ width: "100%" }}>
-                BOOK A DEMO
-              </Link>
-            </div>
-          ))}
-        </div>
-        <p className="mkt-body" style={{ marginTop: "1.75rem" }}>
-          Pricing is indicative for India launches and may vary by outlet count and connectors. Talk
-          to us for a quote.
+        <PricingConfigurator />
+        <p className="mkt-body" style={{ marginTop: "2.5rem" }}>
+          Every quote is worked out on the call, based on your outlets, connectors, and onboarding
+          needs — not a generic tier.{" "}
+          <Link to="/demo" style={{ color: "#15803D", fontWeight: 700 }}>
+            Prefer to see it first? Book a demo
+          </Link>{" "}
+          and we'll price it right after.
         </p>
       </MarketingShell>
     </AppPage>

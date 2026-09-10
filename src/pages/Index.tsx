@@ -2696,7 +2696,7 @@ function Index() {
                   </Link>
                   <img
                     className="tm-mascot"
-                    src="/mascot/WhatsApp_Image_2026-09-07_at_23.02.20-removebg-preview.png"
+                    src="/mascot/WhatsApp_Image_2026-09-08_at_22.44.58-removebg-preview.png"
                     alt=""
                   />
                 </div>
@@ -2750,6 +2750,11 @@ function Index() {
                   Drag and explore the surfaces your team will use every day — live dashboards,
                   inventory alerts, and Pilot AI insights.
                 </p>
+                <img
+                  className="tm-mascot"
+                  src="/mascot/WhatsApp_Image_2026-09-07_at_23.02.20-removebg-preview.png"
+                  alt=""
+                />
               </div>
               <div className="gallery-split-media">
                 <InteractiveBentoGallery mediaItems={GALLERY_MEDIA} showHeader={false} />
