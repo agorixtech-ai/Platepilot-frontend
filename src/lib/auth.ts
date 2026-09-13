@@ -277,6 +277,17 @@ export interface PageInfo {
   group: string;
 }
 
+export interface AuditLogEntry {
+  id: string;
+  admin_id: string | null;
+  admin_email: string | null;
+  action: string;
+  target_type: string;
+  target_id: string | null;
+  detail: Record<string, unknown>;
+  created_at: string;
+}
+
 export interface DemoRequest {
   id: string;
   first_name: string;
@@ -331,6 +342,10 @@ export async function deleteUser(userId: string): Promise<void> {
 
 export async function listDemoRequests(): Promise<DemoRequest[]> {
   return (await adminFetch<{ items: DemoRequest[] }>("/demo-requests")).items;
+}
+
+export async function listAuditLog(): Promise<AuditLogEntry[]> {
+  return (await adminFetch<{ items: AuditLogEntry[] }>("/audit-log?limit=200")).items;
 }
 
 /** Partial update — send only the fields that change. */

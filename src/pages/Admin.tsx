@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import {
   Building2,
   Copy,
+  History,
   Inbox,
   KeyRound,
   LayoutDashboard,
@@ -81,6 +82,7 @@ import {
   deleteTenant,
   deleteUser,
   getStoredUser,
+  listAuditLog,
   listDemoRequests,
   listPages,
   listRoles,
@@ -93,6 +95,7 @@ import {
   updateUser,
   type AdminTenant,
   type AdminUser,
+  type AuditLogEntry,
   type DemoRequest,
   type PageInfo,
   type Role,
@@ -104,6 +107,7 @@ const NAV_ITEMS = [
   { icon: KeyRound, label: "Roles", to: "/admin/roles" },
   { icon: Building2, label: "Clients", to: "/admin/clients" },
   { icon: Inbox, label: "Demo requests", to: "/admin/demo-requests" },
+  { icon: History, label: "Audit log", to: "/admin/audit-log" },
 ];
 
 /* Shared queries — react-query dedupes them across the admin screens. */
@@ -131,6 +135,14 @@ function useDemoRequests() {
   return useQuery({
     queryKey: ["admin", "demo-requests"],
     queryFn: listDemoRequests,
+    staleTime: 30_000,
+  });
+}
+
+function useAuditLog() {
+  return useQuery({
+    queryKey: ["admin", "audit-log"],
+    queryFn: listAuditLog,
     staleTime: 30_000,
   });
 }
@@ -1254,6 +1266,101 @@ function AdminDemoRequests() {
   );
 }
 
+/* ── Audit log ───────────────────────────────────────────── */
+const AUDIT_ACTION_LABELS: Record<string, string> = {
+  grant_admin: "Granted admin",
+  revoke_admin: "Revoked admin",
+  reassign_role: "Reassigned role",
+  reassign_tenant: "Reassigned client",
+  reset_password: "Reset password",
+  rotate_db_credentials: "Rotated DB credentials",
+};
+
+function AdminAuditLog() {
+  const { data: entries, isLoading, error } = useAuditLog();
+  const [q, setQ] = useState("");
+
+  const filtered = (entries ?? []).filter((e: AuditLogEntry) =>
+    `${e.admin_email ?? ""} ${AUDIT_ACTION_LABELS[e.action] ?? e.action} ${e.target_type}`
+      .toLowerCase()
+      .includes(q.toLowerCase()),
+  );
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between gap-3">
+        <div className="relative w-full max-w-xs">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="Search admin, action…"
+            className="pl-9"
+          />
+        </div>
+        <span className="shrink-0 text-[12px] text-muted-foreground">
+          {filtered.length} of {entries?.length ?? 0}
+        </span>
+      </div>
+
+      {error && <p className="text-sm text-destructive">{(error as Error).message}</p>}
+
+      <div className="rounded-xl border border-border/60 bg-card">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>When</TableHead>
+              <TableHead>Admin</TableHead>
+              <TableHead>Action</TableHead>
+              <TableHead>Target</TableHead>
+              <TableHead>Detail</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {isLoading && (
+              <TableRow>
+                <TableCell colSpan={5} className="py-8 text-center text-muted-foreground">
+                  Loading audit log…
+                </TableCell>
+              </TableRow>
+            )}
+            {filtered.map((e) => (
+              <TableRow key={e.id}>
+                <TableCell className="whitespace-nowrap text-muted-foreground">
+                  {new Date(e.created_at).toLocaleString()}
+                </TableCell>
+                <TableCell className="font-medium">{e.admin_email ?? "(deleted admin)"}</TableCell>
+                <TableCell>
+                  <Badge variant="secondary" className="text-[10px] font-medium">
+                    {AUDIT_ACTION_LABELS[e.action] ?? e.action}
+                  </Badge>
+                </TableCell>
+                <TableCell className="text-muted-foreground">
+                  {e.target_type} #{e.target_id ?? "—"}
+                </TableCell>
+                <TableCell className="text-[12px] text-muted-foreground">
+                  {Object.entries(e.detail)
+                    .map(([k, v]) => `${k}: ${v}`)
+                    .join(", ") || "—"}
+                </TableCell>
+              </TableRow>
+            ))}
+            {!isLoading && filtered.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={5} className="py-8 text-center text-muted-foreground">
+                  {entries?.length === 0
+                    ? "No admin actions logged yet."
+                    : `No entries match "${q}".`}
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
+    </div>
+  );
+}
+
 export default function AdminPage() {
   // Declarative guard (see Dashboard.tsx) — the backend enforces it too.
   const user = getStoredUser();
@@ -1269,6 +1376,7 @@ export default function AdminPage() {
           <Route exact path="/admin/roles" component={AdminRoles} />
           <Route exact path="/admin/clients" component={AdminClients} />
           <Route exact path="/admin/demo-requests" component={AdminDemoRequests} />
+          <Route exact path="/admin/audit-log" component={AdminAuditLog} />
           <Redirect to="/admin" />
         </Switch>
       </AdminShell>
