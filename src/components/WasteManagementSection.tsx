@@ -31,7 +31,7 @@ const PILLARS: { Icon: LucideIcon; title: string; desc: string }[] = [
 const KPIS = [
   {
     label: "Total Waste Cost",
-    live: { value: 12480, commas: true, prefix: "₹" },
+    live: { value: 12480, commas: true, prefix: "AED " },
     delta: 18,
     deltaDecimals: 0,
     up: true,
@@ -55,7 +55,7 @@ const KPIS = [
   },
   {
     label: "Potential Savings",
-    live: { value: 4320, commas: true, prefix: "₹" },
+    live: { value: 4320, commas: true, prefix: "AED " },
     delta: 28,
     deltaDecimals: 0,
     up: true,
@@ -614,7 +614,7 @@ export function WasteManagementSection({ visible }: { visible: boolean }) {
                     <div className="wm__donut" aria-hidden>
                       <div className="wm__donut-lab">
                         <b>
-                          <LiveNumber value={12480} commas prefix="₹" />
+                          <LiveNumber value={12480} commas prefix="AED " />
                         </b>
                         <em>Total Waste</em>
                       </div>
@@ -650,7 +650,7 @@ export function WasteManagementSection({ visible }: { visible: boolean }) {
                         <i style={{ width: `${item.pct}%` }} />
                       </span>
                       <em>
-                        <LiveNumber value={item.amount} commas prefix="₹" />
+                        <LiveNumber value={item.amount} commas prefix="AED " />
                       </em>
                     </div>
                   ))}

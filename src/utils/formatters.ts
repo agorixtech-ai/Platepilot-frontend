@@ -1,15 +1,15 @@
 import { formatDistanceToNow, format } from "date-fns";
 
 export const formatters = {
-  currency: (value: number, currency = "INR") => {
-    return new Intl.NumberFormat("en-IN", {
+  currency: (value: number, currency = "AED") => {
+    return new Intl.NumberFormat("en-AE", {
       style: "currency",
       currency,
     }).format(value);
   },
 
   number: (value: number, decimals = 0) => {
-    return value.toLocaleString("en-IN", {
+    return value.toLocaleString("en-US", {
       minimumFractionDigits: decimals,
       maximumFractionDigits: decimals,
     });

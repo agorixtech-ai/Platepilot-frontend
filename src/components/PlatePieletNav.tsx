@@ -6,10 +6,12 @@ import {
   Bell,
   BookOpen,
   Boxes,
+  Briefcase,
   Building2,
   Calculator,
   ChefHat,
   ChevronDown,
+  ClipboardList,
   Coffee,
   CreditCard,
   FileSpreadsheet,
@@ -18,6 +20,7 @@ import {
   Phone,
   PieChart,
   Plug,
+  ShieldCheck,
   ShoppingCart,
   Sparkles,
   Store,
@@ -42,6 +45,7 @@ const themes = {
     borderStrong: "rgba(21,32,25,0.2)",
     dropdownBg: "#FFFFFF",
     dropdownBorder: "#DDE7E1",
+    dropdownText: "#152019",
     dropdownItem: "#152019",
     dropdownHover: "#E8F7ED",
     iconBg: "#E8F7ED",
@@ -59,6 +63,7 @@ const themes = {
     borderStrong: "rgba(255,255,255,0.42)",
     dropdownBg: "#FFFFFF",
     dropdownBorder: "#DDE7E1",
+    dropdownText: "#152019",
     dropdownItem: "#152019",
     dropdownHover: "#E8F7ED",
     iconBg: "#E8F7ED",
@@ -75,6 +80,7 @@ const themes = {
     borderStrong: "rgba(255,255,255,0.22)",
     dropdownBg: "rgba(17, 17, 19, 0.96)",
     dropdownBorder: "rgba(255, 255, 255, 0.12)",
+    dropdownText: "#fff",
     dropdownItem: "rgba(255, 255, 255, 0.75)",
     dropdownHover: "rgba(255, 255, 255, 0.06)",
     iconBg: "rgba(255, 255, 255, 0.08)",
@@ -148,6 +154,17 @@ const defaultLinks: NavItem[] = [
           { label: "Cafes", href: "/solutions/cafes", icon: Coffee },
           { label: "Cloud Kitchens", href: "/solutions/cloud-kitchens", icon: ChefHat },
           { label: "Restaurant Groups", href: "/solutions/restaurant-groups", icon: Users },
+        ],
+      },
+      {
+        title: "By role",
+        href: "/solutions",
+        links: [
+          { label: "Owners & Founders", href: "/solutions/owners", icon: Briefcase },
+          { label: "Operations Leaders", href: "/solutions/operations", icon: ClipboardList },
+          { label: "Finance Teams", href: "/solutions/finance", icon: Calculator },
+          { label: "General Managers", href: "/solutions/general-managers", icon: Store },
+          { label: "IT & Systems", href: "/solutions/it", icon: ShieldCheck },
         ],
       },
     ],
@@ -414,7 +431,7 @@ export function PlatePieletNav({
           margin-bottom: 16px;
           font-size: 0.95rem;
           font-weight: 600;
-          color: ${T.text};
+          color: ${T.dropdownText};
           text-decoration: none;
         }
         .pp-nav__mega-title svg {
@@ -438,7 +455,7 @@ export function PlatePieletNav({
         }
         .pp-nav__mega-link:hover {
           background: ${T.dropdownHover};
-          color: ${T.text};
+          color: ${T.dropdownText};
         }
         .pp-nav__mega-icon {
           display: grid;

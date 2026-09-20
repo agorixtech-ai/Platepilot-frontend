@@ -1,7 +1,46 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ComponentType } from "react";
 import { Link, useParams, Redirect, useLocation } from "react-router-dom";
 import { AppPage } from "@/components/ionic/AppPage";
 import { MarketingHero, MarketingShell } from "@/components/marketing/MarketingShell";
+import { MockAiChat, MockAiFlow, MockAiQuestions } from "@/components/marketing/AiMock";
+import {
+  MockCostVariance,
+  MockDishGrade,
+  MockMarketPrices,
+  MockMenuTiers,
+  MockStockItems,
+  MockStockKpis,
+  MockWasteList,
+} from "@/components/marketing/IntelligenceMock";
+import {
+  DashboardMock,
+  MockAiInsights,
+  MockAlerts,
+  MockBranches,
+  MockAlertStates,
+  MockKpis,
+  MockLive,
+  MockRecon,
+  MockTrends,
+} from "@/components/marketing/DashboardMock";
+import { AlertsMock } from "@/components/marketing/AlertsMock";
+import {
+  BranchCompare,
+  BranchHonest,
+  BranchInsights,
+  BranchLeaderboard,
+  BranchOpenIssues,
+  BranchesMock,
+} from "@/components/marketing/BranchMock";
+import {
+  PosChannels,
+  PosFlow,
+  PosKpis,
+  PosLog,
+  PosMock,
+  PosSale,
+} from "@/components/marketing/SalesMock";
+import { UploadConcept, UploadFlow, UploadSchema } from "@/components/marketing/UploadMock";
 import {
   BookOpen,
   Boxes,
@@ -34,9 +73,12 @@ import {
   getSolutionSegment,
   INTEGRATION_SECTIONS,
   PRODUCT_FEATURES,
+  ROLE_SEGMENTS,
   SOLUTION_SEGMENTS,
   type FeatureCard,
+  type AppMockKey,
   type FeaturePreview,
+  type MockKey,
 } from "./content";
 
 const CARD_BORDER = "#DDE7E1";
@@ -57,7 +99,7 @@ const STATUS_PILL: Record<string, { bg: string; fg: string }> = {
 
 /**
  * Animates the numeric part of a preview value while keeping its formatting —
- * "₹4.82L" must land on "₹4.82L", not a bare 4.82. Mirrors the same split the
+ * "AED 482K" must land on "AED 482K", not a bare 4.82. Mirrors the same split the
  * real KPI cards do in Overview.tsx.
  */
 function TickerValue({ value }: { value: string }) {
@@ -188,14 +230,14 @@ function PreviewBody({ preview }: { preview: FeaturePreview }) {
           overflowX: "auto",
         }}
       >
-        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.85rem" }}>
+        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.8rem" }}>
           <thead>
             <tr style={{ background: "#F1F6F3" }}>
               {preview.columns.map((c) => (
                 <th
                   key={c}
                   style={{
-                    padding: "0.7rem 0.9rem",
+                    padding: "0.65rem 0.6rem",
                     textAlign: "left",
                     fontSize: "0.65rem",
                     fontWeight: 700,
@@ -219,7 +261,7 @@ function PreviewBody({ preview }: { preview: FeaturePreview }) {
                     <td
                       key={`${row[0]}-${i}`}
                       style={{
-                        padding: "0.7rem 0.9rem",
+                        padding: "0.65rem 0.6rem",
                         whiteSpace: "nowrap",
                         fontWeight: i === 0 ? 700 : 500,
                         color: i === 0 ? "#152019" : "#3D4A43",
@@ -481,19 +523,20 @@ function PreviewBody({ preview }: { preview: FeaturePreview }) {
   );
 }
 
-function FeaturePreviewSection({
+function PreviewVisual({
   preview,
   caption,
+  heading,
 }: {
   preview: FeaturePreview;
   caption?: string;
+  heading?: string;
 }) {
   const copy = PREVIEW_COPY[preview.kind];
   return (
-    <section className="mkt-section">
-      <div className="mkt-section-tag">↳ On screen</div>
-      <h2 className="mkt-h2">{copy.heading}</h2>
-      <div style={{ marginTop: "1.5rem", position: "relative", borderRadius: 14 }}>
+    <div>
+      <div className="mkt-section-tag">↳ {heading ?? copy.heading}</div>
+      <div style={{ position: "relative", borderRadius: 14 }}>
         <PreviewBody preview={preview} />
         {/* ponytail: beam is decoration — the steps timeline has no card edge to trace. */}
         {preview.kind === "steps" ? null : (
@@ -503,9 +546,104 @@ function FeaturePreviewSection({
       <p style={{ fontSize: "0.8rem", color: MUTED, marginTop: "0.9rem" }}>
         {caption ?? copy.caption}
       </p>
-    </section>
+    </div>
   );
 }
+
+function DataMarquee() {
+  return (
+    <div
+      style={{
+        position: "relative",
+        marginBottom: "3.5rem",
+        padding: "1.4rem 0",
+        border: `1px solid ${CARD_BORDER}`,
+        borderRadius: 16,
+        background: "#fff",
+        overflow: "hidden",
+      }}
+    >
+      <div className="mkt-section-tag" style={{ marginBottom: "0.9rem", paddingLeft: "1.4rem" }}>
+        ↳ What PlatePielet reads today
+      </div>
+      <Marquee pauseOnHover className="[--duration:32s] [--gap:1rem]">
+        {DATA_MARQUEE.map((d) => (
+          <span
+            key={d}
+            style={{
+              padding: "0.5rem 1.05rem",
+              borderRadius: 999,
+              border: `1px solid ${CARD_BORDER}`,
+              background: "#F1F6F3",
+              color: INK,
+              fontSize: "0.85rem",
+              fontWeight: 600,
+              whiteSpace: "nowrap",
+            }}
+          >
+            {d}
+          </span>
+        ))}
+      </Marquee>
+    </div>
+  );
+}
+
+const MOCKS: Record<MockKey, ComponentType> = {
+  kpis: MockKpis,
+  trends: MockTrends,
+  outlets: MockBranches,
+  alerts: MockAlerts,
+  live: MockLive,
+  sale: PosSale,
+  log: () => <PosLog compact />,
+  channels: PosChannels,
+  "pos-kpis": () => <PosKpis columns={2} />,
+  flow: PosFlow,
+  "branch-table": () => <BranchLeaderboard cols="compact" />,
+  "branch-insights": BranchInsights,
+  "branch-compare": BranchCompare,
+  "branch-trend": () => <BranchLeaderboard cols="trend" />,
+  "branch-honest": BranchHonest,
+  "alert-states": MockAlertStates,
+  "open-issues": BranchOpenIssues,
+  recon: MockRecon,
+  "upload-flow": UploadFlow,
+  "upload-schema": UploadSchema,
+  "upload-concept": UploadConcept,
+  "ai-chat": MockAiChat,
+  "ai-flow": MockAiFlow,
+  "ai-questions": MockAiQuestions,
+  "ai-insights": MockAiInsights,
+  "menu-tiers": MockMenuTiers,
+  "dish-grade": MockDishGrade,
+  "cost-variance": MockCostVariance,
+  "stock-kpis": MockStockKpis,
+  "stock-items": MockStockItems,
+  "waste-list": MockWasteList,
+  "market-prices": MockMarketPrices,
+};
+
+/** Full-screen replicas shown under a page's hero. */
+const SAMPLE = "Sample data. ";
+const APP_MOCKS: Record<AppMockKey, { Screen: ComponentType; caption: string }> = {
+  overview: {
+    Screen: DashboardMock,
+    caption: `${SAMPLE}This is the Overview screen your team opens, filled with example numbers.`,
+  },
+  pos: {
+    Screen: PosMock,
+    caption: `${SAMPLE}This is the POS Sales screen your team opens, filled with example numbers.`,
+  },
+  branches: {
+    Screen: BranchesMock,
+    caption: `${SAMPLE}This is the Branch Insights screen your team opens, filled with example numbers.`,
+  },
+  alerts: {
+    Screen: AlertsMock,
+    caption: `${SAMPLE}These are the alert, insight, and reconciliation cards from your Overview and Branch Insights screens, filled with example numbers.`,
+  },
+};
 
 function FeatureGrid({ items, basePath }: { items: FeatureCard[]; basePath: string }) {
   return (
@@ -524,62 +662,109 @@ function FeatureGrid({ items, basePath }: { items: FeatureCard[]; basePath: stri
   );
 }
 
+/** parentHref doubles as the base path of `siblings` (/product, /solutions). */
 function FeatureDetail({
   item,
+  siblings,
   parentHref,
   parentLabel,
 }: {
   item: FeatureCard;
+  siblings: FeatureCard[];
   parentHref: string;
   parentLabel: string;
 }) {
-  const Icon = item.icon;
+  const at = siblings.findIndex((s) => s.slug === item.slug);
+  const related = [1, 2, 3].map((n) => siblings[(at + n) % siblings.length]);
+  const hero = (
+    <header className="mkt-hero" style={{ border: "none", margin: 0, padding: 0 }}>
+      <div className="mkt-eyebrow">{item.label}</div>
+      <h1 className="mkt-h1">{item.title}</h1>
+      <p className="mkt-lead">{item.desc}</p>
+      <div className="mkt-actions">
+        <Link to="/demo" className="mkt-btn-primary">
+          BOOK A DEMO
+        </Link>
+        <Link to={parentHref} className="mkt-btn-ghost">
+          ALL {parentLabel.toUpperCase()}
+        </Link>
+      </div>
+    </header>
+  );
   return (
     <>
-      <header
-        className="mkt-hero"
-        style={{ borderBottom: "none", marginBottom: "2rem", paddingBottom: 0 }}
-      >
-        <div className="mkt-eyebrow">{item.label}</div>
-        <h1 className="mkt-h1">{item.title}</h1>
-        <p className="mkt-lead">{item.desc}</p>
-        <div className="mkt-actions">
-          <Link to="/demo" className="mkt-btn-primary">
-            BOOK A DEMO
-          </Link>
-          <Link to={parentHref} className="mkt-btn-ghost">
-            ALL {parentLabel.toUpperCase()}
-          </Link>
+      {item.mock ? (
+        <>
+          <div style={{ padding: "2.5rem 0 2rem" }}>{hero}</div>
+          <section className="mkt-section">
+            {(() => {
+              const { Screen, caption } = APP_MOCKS[item.mock];
+              return (
+                <>
+                  <Screen />
+                  <p style={{ fontSize: "0.8rem", color: MUTED, marginTop: "0.9rem" }}>{caption}</p>
+                </>
+              );
+            })()}
+          </section>
+        </>
+      ) : item.image ? (
+        <div className="mkt-split" style={{ borderTop: "none", paddingTop: "2.5rem" }}>
+          {hero}
+          <img
+            src={item.image.src}
+            alt={item.image.alt}
+            style={{
+              width: "100%",
+              maxWidth: 460,
+              justifySelf: "center",
+              filter: "drop-shadow(0 28px 36px rgba(22,101,52,0.22))",
+            }}
+          />
         </div>
-      </header>
-      {item.preview ? (
-        <FeaturePreviewSection preview={item.preview} caption={item.previewCaption} />
-      ) : null}
+      ) : item.preview ? (
+        <div className="mkt-split" style={{ borderTop: "none", paddingTop: "2.5rem" }}>
+          {hero}
+          <PreviewVisual
+            preview={item.preview}
+            caption={item.previewCaption}
+            heading={item.previewHeading}
+          />
+        </div>
+      ) : (
+        <div style={{ padding: "2.5rem 0 2rem" }}>{hero}</div>
+      )}
 
       {item.sections ? (
-        item.sections.map((s) => (
-          <section key={s.tag} className="mkt-section">
-            <div className="mkt-section-tag">↳ {s.tag}</div>
-            <h2 className="mkt-h2">
-              {s.title}
-              {s.roadmap ? <RoadmapBadge /> : null}
-            </h2>
-            {s.body ? <p className="mkt-body">{s.body}</p> : null}
+        item.sections.map((s, i) => {
+          const Mock = s.mock ? MOCKS[s.mock] : null;
+          const bullets = (
             <ul className="mkt-bullets">
               {s.bullets.map((b) => (
                 <li key={b}>{b}</li>
               ))}
             </ul>
-          </section>
-        ))
+          );
+          return (
+            <section key={s.tag} className={`mkt-split${i % 2 ? " flip" : ""}`}>
+              <div>
+                <div className="mkt-section-tag">↳ {s.tag}</div>
+                <h2 className="mkt-h2">
+                  {s.title}
+                  {s.roadmap ? <RoadmapBadge /> : null}
+                </h2>
+                {s.body ? <p className="mkt-body">{s.body}</p> : null}
+                {Mock ? bullets : null}
+              </div>
+              {Mock ? <Mock /> : <div className="mkt-panel">{bullets}</div>}
+            </section>
+          );
+        })
       ) : (
         <section className="mkt-section">
           <div className="mkt-section-tag">↳ What you get</div>
           <h2 className="mkt-h2">Built into PlatePielet</h2>
-          <div style={{ display: "flex", gap: 14, alignItems: "flex-start", marginTop: 8 }}>
-            <span className="mkt-card-icon" style={{ marginTop: 4 }}>
-              <Icon size={18} />
-            </span>
+          <div style={{ marginTop: 8 }}>
             <ul className="mkt-bullets" style={{ marginTop: 0 }}>
               {item.bullets.map((b) => (
                 <li key={b}>{b}</li>
@@ -588,11 +773,42 @@ function FeatureDetail({
           </div>
         </section>
       )}
+
+      {item.faqs ? (
+        <section className="mkt-section" style={{ marginTop: "1.5rem" }}>
+          <div className="mkt-section-tag">↳ FAQ</div>
+          <h2 className="mkt-h2">Straight answers</h2>
+          <div style={{ marginTop: "1.75rem" }}>
+            {item.faqs.map((f) => (
+              <details key={f.q} className="mkt-faq">
+                <summary>{f.q}</summary>
+                <p className="mkt-faq-body">{f.a}</p>
+              </details>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      <section className="mkt-section" style={{ marginTop: "1.5rem" }}>
+        <div className="mkt-section-tag">↳ Keep exploring</div>
+        <h2 className="mkt-h2">More in {parentLabel}</h2>
+        <FeatureGrid items={related} basePath={parentHref} />
+      </section>
     </>
   );
 }
 
+/** Connect → see → analyse → compare → act. Each needs a `preview`, which plays the screenshot. */
+const CORE_CAPABILITIES: [slug: string, step: string][] = [
+  ["data-upload", "Aggregate"],
+  ["dashboard", "Monitor"],
+  ["sales-analytics", "Analyse"],
+  ["branch-performance", "Compare"],
+  ["alerts-insights", "Act"],
+];
+
 export function ProductHub() {
+  const core = new Set(CORE_CAPABILITIES.map(([slug]) => slug));
   return (
     <AppPage title="Product — PlatePielet">
       <MarketingShell>
@@ -601,14 +817,58 @@ export function ProductHub() {
           title="Restaurant intelligence from the systems you already run"
           lead="Dashboards, sales analytics, inventory, menu performance, and PlatePielet AI — one product for every outlet."
         />
-        <section className="mkt-section">
-          <div className="mkt-section-tag">↳ Capabilities</div>
-          <h2 className="mkt-h2">Explore the product</h2>
-          <p className="mkt-body">
-            Every module below maps to a surface your team can open in PlatePielet.
-          </p>
-          <FeatureGrid items={PRODUCT_FEATURES} basePath="/product" />
+
+        {CORE_CAPABILITIES.map(([slug, step], i) => {
+          const item = getProductFeature(slug);
+          if (!item?.preview) return null;
+          return (
+            <section key={slug} className={`mkt-split${i % 2 ? " flip" : ""}`}>
+              <div>
+                <div className="mkt-section-tag">
+                  ↳ {String(i + 1).padStart(2, "0")} · {step}
+                </div>
+                <h2 className="mkt-h2">{item.title}</h2>
+                <p className="mkt-body">{item.desc}</p>
+                <ul className="mkt-bullets">
+                  {item.bullets.map((b) => (
+                    <li key={b}>{b}</li>
+                  ))}
+                </ul>
+                <Link
+                  to={`/product/${slug}`}
+                  className="mkt-card-link"
+                  style={{ display: "inline-block", marginTop: "1.1rem" }}
+                >
+                  Learn more →
+                </Link>
+              </div>
+              <PreviewVisual preview={item.preview} caption={item.previewCaption} />
+            </section>
+          );
+        })}
+
+        <section className="mkt-section" style={{ marginTop: "1rem" }}>
+          <div className="mkt-section-tag">↳ And more</div>
+          <h2 className="mkt-h2">Everything else your team can open</h2>
+          <FeatureGrid
+            items={PRODUCT_FEATURES.filter((f) => !core.has(f.slug))}
+            basePath="/product"
+          />
         </section>
+
+        <section className="mkt-section">
+          <div className="mkt-section-tag">↳ Solutions</div>
+          <h2 className="mkt-h2">Built for the way you run your restaurants</h2>
+          <p className="mkt-body">
+            The same product, set up for a single cafe, a cloud kitchen, or a multi-city group.
+          </p>
+          <FeatureGrid items={SOLUTION_SEGMENTS} basePath="/solutions" />
+        </section>
+
+        <DataMarquee />
+        <Link to="/integrations" className="mkt-card-link">
+          See all integrations →
+        </Link>
       </MarketingShell>
     </AppPage>
   );
@@ -623,7 +883,12 @@ export function ProductFeaturePage() {
   return (
     <AppPage title={`${item.label} — PlatePielet`}>
       <MarketingShell>
-        <FeatureDetail item={item} parentHref="/product" parentLabel="Product" />
+        <FeatureDetail
+          item={item}
+          siblings={PRODUCT_FEATURES}
+          parentHref="/product"
+          parentLabel="Product"
+        />
       </MarketingShell>
     </AppPage>
   );
@@ -643,6 +908,11 @@ export function SolutionsHub() {
           <h2 className="mkt-h2">Pick your path</h2>
           <FeatureGrid items={SOLUTION_SEGMENTS} basePath="/solutions" />
         </section>
+        <section className="mkt-section">
+          <div className="mkt-section-tag">↳ By role</div>
+          <h2 className="mkt-h2">What your job needs from the numbers</h2>
+          <FeatureGrid items={ROLE_SEGMENTS} basePath="/solutions" />
+        </section>
       </MarketingShell>
     </AppPage>
   );
@@ -657,7 +927,12 @@ export function SolutionSegmentPage() {
   return (
     <AppPage title={`${item.label} — PlatePielet`}>
       <MarketingShell>
-        <FeatureDetail item={item} parentHref="/solutions" parentLabel="Solutions" />
+        <FeatureDetail
+          item={item}
+          siblings={ROLE_SEGMENTS.includes(item) ? ROLE_SEGMENTS : SOLUTION_SEGMENTS}
+          parentHref="/solutions"
+          parentLabel="Solutions"
+        />
       </MarketingShell>
     </AppPage>
   );
@@ -684,43 +959,7 @@ export function IntegrationsPage() {
           lead="No new hardware at the outlet. PlatePielet reads the systems you already run — and fills the gaps with CSV, Excel, and APIs."
         />
 
-        <div
-          style={{
-            position: "relative",
-            marginBottom: "3.5rem",
-            padding: "1.4rem 0",
-            border: `1px solid ${CARD_BORDER}`,
-            borderRadius: 16,
-            background: "#fff",
-            overflow: "hidden",
-          }}
-        >
-          <div
-            className="mkt-section-tag"
-            style={{ marginBottom: "0.9rem", paddingLeft: "1.4rem" }}
-          >
-            ↳ What PlatePielet reads today
-          </div>
-          <Marquee pauseOnHover className="[--duration:32s] [--gap:1rem]">
-            {DATA_MARQUEE.map((d) => (
-              <span
-                key={d}
-                style={{
-                  padding: "0.5rem 1.05rem",
-                  borderRadius: 999,
-                  border: `1px solid ${CARD_BORDER}`,
-                  background: "#F1F6F3",
-                  color: INK,
-                  fontSize: "0.85rem",
-                  fontWeight: 600,
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {d}
-              </span>
-            ))}
-          </Marquee>
-        </div>
+        <DataMarquee />
 
         {INTEGRATION_SECTIONS.map((s) => {
           const Icon = s.icon;
@@ -1063,7 +1302,9 @@ function PricingConfigurator() {
         <div className="pp-cfg-summary-plan">Starting point</div>
         <div className="pp-cfg-summary-name">{plan} plan</div>
         <ul className="pp-cfg-summary-list">
-          <li>↳ {outlets} outlet{outlets > 1 ? "s" : ""}</li>
+          <li>
+            ↳ {outlets} outlet{outlets > 1 ? "s" : ""}
+          </li>
           {CORE_INCLUDED.map((c) => (
             <li key={c}>↳ {c}</li>
           ))}

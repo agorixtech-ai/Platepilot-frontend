@@ -92,7 +92,7 @@ function SalesChart() {
       <svg
         viewBox="0 0 360 148"
         role="img"
-        aria-label="Sales trend from 1 Sep to 30 Sep, peaking at ₹12,450 on 15 Sep"
+        aria-label="Sales trend from 1 Sep to 30 Sep, peaking at AED 12,450 on 15 Sep"
       >
         <defs>
           <linearGradient id="aiiSalesFill" x1="0" y1="0" x2="0" y2="1">
@@ -104,14 +104,14 @@ function SalesChart() {
           <g key={k}>
             <path d={`M46 ${y(k)} H346`} stroke="#E8EEEA" strokeWidth="1" />
             <text
-              x="40"
+              x="44"
               y={y(k) + 3}
               textAnchor="end"
               fontSize="8.5"
               fill="#8A968F"
               fontWeight="600"
             >
-              ₹{k === 0 ? "0" : `${k}K`}
+              AED {k === 0 ? "0" : `${k}K`}
             </text>
           </g>
         ))}
@@ -154,7 +154,7 @@ function SalesChart() {
       <div className="aii-peak" style={{ left: `${(peakX / 360) * 100}%` }} aria-hidden>
         <b>Peak Sale</b>
         <span>
-          <LiveNumber value={12450} commas prefix="₹" />
+          <LiveNumber value={12450} commas prefix="AED " />
         </span>
       </div>
     </div>
@@ -653,7 +653,7 @@ export function AiInsightsSection({ visible }: { visible: boolean }) {
                 />
                 <div className="aii-metric">
                   <b>
-                    <LiveNumber value={248320} commas locale="en-IN" prefix="₹" />
+                    <LiveNumber value={248320} commas prefix="AED " />
                   </b>
                   <span className="aii-delta">
                     <TrendingUp size={11} strokeWidth={2.6} />+
@@ -702,7 +702,7 @@ export function AiInsightsSection({ visible }: { visible: boolean }) {
                     <img src={d.img} alt="" />
                     <strong>{d.name}</strong>
                     <em>
-                      <LiveNumber value={d.amount} commas prefix="₹" />
+                      <LiveNumber value={d.amount} commas prefix="AED " />
                     </em>
                   </div>
                 ))}

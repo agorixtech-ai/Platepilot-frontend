@@ -89,6 +89,26 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://platepilotsystems.com/solutions/owners</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://platepilotsystems.com/solutions/operations</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://platepilotsystems.com/solutions/finance</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://platepilotsystems.com/solutions/general-managers</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://platepilotsystems.com/solutions/it</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://platepilotsystems.com/integrations</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
