@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
 export const LOGO_SRC = "/logo.png";
+export const FAVICON_SRC = "/favicon.png";
 export const LOGO_ALT = "PlatePielet";
 
 const iconSizes = {
@@ -38,7 +39,16 @@ export function AppLogo({
       <img
         src={LOGO_SRC}
         alt={LOGO_ALT}
-        className={cn(iconSizes[size], "shrink-0 object-contain", iconClassName)}
+        className={cn(
+          iconSizes[size],
+          "shrink-0 object-contain group-data-[collapsible=icon]:hidden",
+          iconClassName,
+        )}
+      />
+      <img
+        src={FAVICON_SRC}
+        alt={LOGO_ALT}
+        className="hidden h-8 w-8 shrink-0 object-contain group-data-[collapsible=icon]:block"
       />
       {showText && (
         <div className={cn("min-w-0", textWrapperClassName)}>

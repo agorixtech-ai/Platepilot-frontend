@@ -18,7 +18,7 @@ export function LiveNumber({
   suffix?: string;
   /** Group the integer part with commas (e.g. 12,480). */
   commas?: boolean;
-  /** Grouping locale — use "en-IN" for lakh-style grouping (2,48,320). */
+  /** Grouping locale. */
   locale?: string;
 }) {
   const live = useLiveJitter(value);

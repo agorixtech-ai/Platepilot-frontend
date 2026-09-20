@@ -240,6 +240,28 @@ export function MarketingShell({
           color: #66736B;
           max-width: 44rem;
         }
+        /* Text + visual row; .flip swaps sides on alternate rows, stacks under 820px. */
+        .mkt-split {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: clamp(1.5rem, 4vw, 3.5rem);
+          align-items: center;
+          padding: 3rem 0;
+          border-top: 1px solid rgba(21,32,25,0.08);
+        }
+        .mkt-hero + .mkt-split { border-top: none; padding-top: 0; }
+        .mkt-split.flip > :first-child { order: 2; }
+        .mkt-panel {
+          border: 1px solid #DDE7E1;
+          border-radius: 16px;
+          background: #fff;
+          padding: 1.35rem 1.4rem;
+        }
+        .mkt-panel .mkt-bullets { margin-top: 0; max-width: none; }
+        @media (max-width: 820px) {
+          .mkt-split { grid-template-columns: minmax(0, 1fr); padding: 2rem 0; }
+          .mkt-split.flip > :first-child { order: 0; }
+        }
         .mkt-anchor {
           scroll-margin-top: 110px;
           padding: 2rem 0;

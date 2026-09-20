@@ -83,7 +83,7 @@ function OverviewTile() {
       <div style={{ display: "flex", gap: 14 }}>
         <div>
           <div style={{ fontSize: 15, fontWeight: 800, color: T.text, lineHeight: 1 }}>
-            <LiveNumber value={2.4} decimals={1} prefix="₹" suffix="L" />
+            <LiveNumber value={240} prefix="AED " suffix="K" />
           </div>
           <div style={{ fontSize: 8.5, color: T.muted, marginTop: 2 }}>Sales Today</div>
         </div>
@@ -112,12 +112,12 @@ function OverviewTile() {
 }
 
 const POS_BILLS = [
-  ["#2249", "₹430"],
-  ["#2250", "₹1,120"],
-  ["#2251", "₹260"],
-  ["#2252", "₹840"],
-  ["#2253", "₹1,560"],
-  ["#2254", "₹375"],
+  ["#2249", "AED 430"],
+  ["#2250", "AED 1,120"],
+  ["#2251", "AED 260"],
+  ["#2252", "AED 840"],
+  ["#2253", "AED 1,560"],
+  ["#2254", "AED 375"],
 ];
 
 function PosTile() {
@@ -160,9 +160,9 @@ function PosTile() {
 }
 
 const VOUCHERS: [string, string, string, "Matched" | "Pending"][] = [
-  ["INV-8821", "Sales · Anna Nagar", "₹84,200", "Matched"],
-  ["PO-1192", "Purchase · Head Office", "₹18,400", "Pending"],
-  ["JV-5521", "Journal · Accounts", "₹2,100", "Matched"],
+  ["INV-8821", "Sales · Anna Nagar", "AED 84,200", "Matched"],
+  ["PO-1192", "Purchase · Head Office", "AED 18,400", "Pending"],
+  ["JV-5521", "Journal · Accounts", "AED 2,100", "Matched"],
 ];
 
 function TallyTile() {
@@ -250,7 +250,7 @@ function PilotAiTile() {
         "Why is food cost up this week?"
       </div>
       <div style={{ fontSize: 9.5, color: T.muted, lineHeight: 1.5 }}>
-        Velachery over-ordered paneer by 18% — ₹6,300 recoverable.
+        Velachery over-ordered paneer by 18% — AED 6,300 recoverable.
         <span
           style={{
             display: "inline-block",
@@ -280,7 +280,7 @@ function MarketPricesTile() {
         <div key={name} style={{ display: "flex", alignItems: "center", gap: 6 }}>
           <span style={{ fontSize: 9, color: T.muted, flex: 1 }}>{name}</span>
           <span style={{ fontSize: 9.5, fontWeight: 700, color: T.text }}>
-            <LiveNumber value={price} prefix="₹" suffix="/kg" />
+            <LiveNumber value={price} prefix="AED " suffix="/kg" />
           </span>
           <span style={{ fontSize: 8.5, fontWeight: 700, color, width: 32, textAlign: "right" }}>
             {up ? "▲" : "▼"} <LiveNumber value={delta} suffix="%" />
@@ -305,14 +305,14 @@ function ReportsTile() {
       <div style={{ fontSize: 8.5, color: T.muted, marginTop: -3 }}>Food cost vs last month</div>
       {(
         [
-          ["Sales", 68.2],
-          ["Wastage", 1.9],
-        ] as [string, number][]
-      ).map(([l, v]) => (
+          ["Sales", 6.82, 2, "M"],
+          ["Wastage", 190, 0, "K"],
+        ] as [string, number, number, string][]
+      ).map(([l, v, d, u]) => (
         <div key={l} style={{ display: "flex", justifyContent: "space-between" }}>
           <span style={{ fontSize: 8.5, color: T.muted }}>{l}</span>
           <span style={{ fontSize: 9, fontWeight: 700, color: T.text }}>
-            <LiveNumber value={v} decimals={1} prefix="₹" suffix="L" />
+            <LiveNumber value={v} decimals={d} prefix="AED " suffix={u} />
           </span>
         </div>
       ))}
@@ -412,7 +412,7 @@ const TESTIMONIALS: { quote: string; name: string; place: string; role: string; 
   [
     {
       quote:
-        "PlatePielet found ₹40,000 a month we didn't know we were losing. It paid for itself in the first week.",
+        "PlatePielet found AED 40,000 a month we didn't know we were losing. It paid for itself in the first week.",
       name: "Priya R.",
       place: "3-outlet restaurant group · Chennai",
       role: "Owner",

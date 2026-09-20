@@ -29,7 +29,7 @@ function ScreenUI({ variant = "desktop" }: { variant?: "desktop" | "phone" }) {
             <div>
               <small>Sales</small>
               <strong>
-                <LiveNumber value={2.4} decimals={1} prefix="₹" suffix="L" />
+                <LiveNumber value={240} prefix="AED " suffix="K" />
               </strong>
             </div>
             <div>
