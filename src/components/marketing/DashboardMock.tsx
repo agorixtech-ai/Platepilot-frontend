@@ -1108,6 +1108,209 @@ function Stage({ w, h, children }: { w: number; h: number; children: ReactNode }
   );
 }
 
+const CC_KPIS: [string, string, string, string][] = [
+  ["REVENUE", "AED 482.0k", "+12.4%", "#16a34a"],
+  ["ORDERS", "1,284", "+6.1%", "#16a34a"],
+  ["FOOD COST", "31.2%", "−0.8pp", "#16a34a"],
+  ["WASTE", "2.4%", "−0.3pp", "#16a34a"],
+];
+
+const CC_BRANCHES: [string, string, number][] = [
+  ["Marina", "AED 148.2k", 14.2],
+  ["Business Bay", "AED 121.6k", 9.8],
+  ["Deira", "AED 71.3k", -13.1],
+];
+
+const CC_ALERTS: [string, string, string][] = [
+  ["Paneer", "Out of stock · Marina", "#dc2626"],
+  ["Tomato", "Below 5 units · Deira", "#d97706"],
+];
+
+const CC_TREND = [11, 12.4, 11.8, 13.1, 12.6, 14.2, 13.8, 15.1, 14.6, 16.2, 15.8, 17.4];
+
+/**
+ * The Command Center hero composition: the overview snapshot floating above
+ * branch cards and the alert feed. Sample data, stated in the header; figures
+ * agree with BranchMock (branches sum to the AED 482.0k network revenue).
+ */
+export function MockCommandCenter() {
+  const w = 300;
+  const h = 46;
+  const min = Math.min(...CC_TREND);
+  const span = Math.max(...CC_TREND) - min || 1;
+  const pts = CC_TREND.map(
+    (v, i) =>
+      [(i * w) / (CC_TREND.length - 1), 4 + (1 - (v - min) / span) * (h - 10)] as [number, number],
+  );
+  const line = pts.map(([x, y], i) => `${i ? "L" : "M"}${x.toFixed(1)},${y.toFixed(1)}`).join(" ");
+  return (
+    <div className="dm">
+      <Styles />
+      <div style={{ position: "relative", paddingBottom: 4 }}>
+        <div
+          className="dm-card"
+          style={{
+            marginLeft: "6%",
+            paddingBottom: 26,
+            boxShadow: "0 18px 40px rgba(7,26,20,.12)",
+            position: "relative",
+            zIndex: 1,
+          }}
+        >
+          <div className="dm-card-h" style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <div style={{ flex: 1 }}>
+              <div className="dm-card-t">Overview · All locations</div>
+              <div className="dm-card-s">This month vs last month</div>
+            </div>
+            <span className="dm-live" style={{ ["--dot" as string]: "#16a34a" }} />
+            <span style={{ fontSize: 10, fontWeight: 700, color: "#16a34a" }}>LIVE</span>
+          </div>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(84px, 1fr))",
+              gap: 8,
+              padding: "14px 16px 6px",
+            }}
+          >
+            {CC_KPIS.map(([l, v, d, c]) => (
+              <div key={l}>
+                <div
+                  style={{ fontSize: 9, fontWeight: 700, letterSpacing: ".08em", color: "#66736b" }}
+                >
+                  {l}
+                </div>
+                <div
+                  style={{
+                    marginTop: 3,
+                    fontSize: 17,
+                    fontWeight: 900,
+                    fontVariantNumeric: "tabular-nums",
+                  }}
+                >
+                  {v}
+                </div>
+                <div style={{ fontSize: 10, fontWeight: 700, color: c }}>{d}</div>
+              </div>
+            ))}
+          </div>
+          <div style={{ padding: "0 16px" }}>
+            <svg
+              viewBox={`0 0 ${w} ${h}`}
+              style={{ width: "100%", height: "auto", display: "block" }}
+            >
+              <defs>
+                <linearGradient id="ccFill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#16a34a" stopOpacity=".24" />
+                  <stop offset="100%" stopColor="#16a34a" stopOpacity="0" />
+                </linearGradient>
+              </defs>
+              <path d={`${line} L${w},${h} L0,${h} Z`} fill="url(#ccFill)" />
+              <path d={line} fill="none" stroke="#16a34a" strokeWidth={2} strokeLinejoin="round" />
+            </svg>
+          </div>
+        </div>
+
+        <div
+          className="dm-card"
+          style={{
+            marginTop: -16,
+            marginRight: "10%",
+            padding: "14px 16px 12px",
+            boxShadow: "0 14px 32px rgba(7,26,20,.10)",
+            position: "relative",
+            zIndex: 2,
+          }}
+        >
+          <div
+            style={{
+              fontSize: 9,
+              fontWeight: 700,
+              letterSpacing: ".08em",
+              color: "#66736b",
+              marginBottom: 8,
+            }}
+          >
+            BRANCHES
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8 }}>
+            {CC_BRANCHES.map(([name, rev, delta]) => (
+              <div
+                key={name}
+                style={{ padding: "9px 10px", borderRadius: 10, border: "1px solid #e8efeb" }}
+              >
+                <div style={{ fontSize: 10.5, fontWeight: 700 }}>{name}</div>
+                <div
+                  style={{
+                    marginTop: 2,
+                    fontSize: 12.5,
+                    fontWeight: 800,
+                    fontVariantNumeric: "tabular-nums",
+                  }}
+                >
+                  {rev}
+                </div>
+                <div
+                  style={{
+                    fontSize: 10,
+                    fontWeight: 700,
+                    color: delta < 0 ? "#dc2626" : "#16a34a",
+                  }}
+                >
+                  {delta > 0 ? "▲" : "▼"} {Math.abs(delta)}%
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div
+          className="dm-card"
+          style={{
+            marginTop: -12,
+            marginLeft: "18%",
+            padding: "12px 16px",
+            boxShadow: "0 14px 32px rgba(7,26,20,.10)",
+            position: "relative",
+            zIndex: 3,
+          }}
+        >
+          <div
+            style={{
+              fontSize: 9,
+              fontWeight: 700,
+              letterSpacing: ".08em",
+              color: "#66736b",
+              marginBottom: 6,
+            }}
+          >
+            NEEDS ATTENTION
+          </div>
+          {CC_ALERTS.map(([name, detail, color]) => (
+            <div
+              key={name}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                padding: "6px 0",
+                fontSize: 11.5,
+              }}
+            >
+              <span style={{ width: 6, height: 6, borderRadius: 99, background: color }} />
+              <b>{name}</b>
+              <span style={{ color: "#66736b" }}>{detail}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div style={{ marginTop: 10, fontSize: 10.5, color: "#66736b" }}>
+        Sample data. Your Overview fills with your own outlets and numbers.
+      </div>
+    </div>
+  );
+}
+
 /** Browser frame + sidebar + top bar of the real dashboard shell; `children` is the page content. */
 export function AppFrame({
   active,

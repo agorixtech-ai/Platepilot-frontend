@@ -36,10 +36,10 @@ const CARDS: SolutionCard[] = [
     icon: Package,
   },
   {
-    title: "Waste Detection",
+    title: "Waste Intelligence",
     description:
-      "Pilot AI flags spoilage, over-prep, and shrinkage patterns per outlet — before they hit your month-end P&L.",
-    href: "#menu-engineering",
+      "See the waste before it becomes a habit — what is wasted, where, and what it costs, per outlet and per ingredient.",
+    href: "/product/waste-intelligence",
     image: "/hero/solution/waste.jpg",
     icon: Trash2,
     overlay: { kind: "waste" },

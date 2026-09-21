@@ -10,12 +10,20 @@ import {
   MockMenuTiers,
   MockStockItems,
   MockStockKpis,
+  MockSuppliers,
+  MockWasteComposition,
   MockWasteList,
 } from "@/components/marketing/IntelligenceMock";
+import {
+  MockAiSources,
+  MockIngredientFlow,
+  MockIntegrationFlow,
+} from "@/components/marketing/FlowMock";
 import {
   DashboardMock,
   MockAiInsights,
   MockAlerts,
+  MockCommandCenter,
   MockBranches,
   MockAlertStates,
   MockKpis,
@@ -590,6 +598,7 @@ function DataMarquee() {
 }
 
 const MOCKS: Record<MockKey, ComponentType> = {
+  "command-center": MockCommandCenter,
   kpis: MockKpis,
   trends: MockTrends,
   outlets: MockBranches,
@@ -621,6 +630,10 @@ const MOCKS: Record<MockKey, ComponentType> = {
   "stock-kpis": MockStockKpis,
   "stock-items": MockStockItems,
   "waste-list": MockWasteList,
+  "waste-composition": MockWasteComposition,
+  suppliers: MockSuppliers,
+  "ingredient-flow": MockIngredientFlow,
+  "ai-sources": MockAiSources,
   "market-prices": MockMarketPrices,
 };
 
@@ -680,7 +693,7 @@ function FeatureDetail({
     <header className="mkt-hero" style={{ border: "none", margin: 0, padding: 0 }}>
       <div className="mkt-eyebrow">{item.label}</div>
       <h1 className="mkt-h1">{item.title}</h1>
-      <p className="mkt-lead">{item.desc}</p>
+      <p className="mkt-lead">{item.lead ?? item.desc}</p>
       <div className="mkt-actions">
         <Link to="/demo" className="mkt-btn-primary">
           BOOK A DEMO
@@ -798,13 +811,14 @@ function FeatureDetail({
   );
 }
 
-/** Connect → see → analyse → compare → act. Each needs a `preview`, which plays the screenshot. */
+/** The product's pillars, in menu order. Each needs a `preview` or an `image` for its visual. */
 const CORE_CAPABILITIES: [slug: string, step: string][] = [
-  ["data-upload", "Aggregate"],
-  ["dashboard", "Monitor"],
-  ["sales-analytics", "Analyse"],
-  ["branch-performance", "Compare"],
-  ["alerts-insights", "Act"],
+  ["dashboard", "Command Center"],
+  ["food-cost-analysis", "Inventory & Food Cost"],
+  ["menu-performance", "Menu Engineering"],
+  ["waste-intelligence", "Waste Intelligence"],
+  ["purchase-suggestions", "Purchasing Intelligence"],
+  ["ai", "PlatePielet AI"],
 ];
 
 export function ProductHub() {
@@ -815,12 +829,12 @@ export function ProductHub() {
         <MarketingHero
           eyebrow="Product"
           title="Restaurant intelligence from the systems you already run"
-          lead="Dashboards, sales analytics, inventory, menu performance, and PlatePielet AI — one product for every outlet."
+          lead="Command center, inventory and food cost, menu engineering, waste, purchasing, and PlatePielet AI — one product for every outlet."
         />
 
         {CORE_CAPABILITIES.map(([slug, step], i) => {
           const item = getProductFeature(slug);
-          if (!item?.preview) return null;
+          if (!item) return null;
           return (
             <section key={slug} className={`mkt-split${i % 2 ? " flip" : ""}`}>
               <div>
@@ -828,7 +842,7 @@ export function ProductHub() {
                   ↳ {String(i + 1).padStart(2, "0")} · {step}
                 </div>
                 <h2 className="mkt-h2">{item.title}</h2>
-                <p className="mkt-body">{item.desc}</p>
+                <p className="mkt-body">{item.lead ?? item.desc}</p>
                 <ul className="mkt-bullets">
                   {item.bullets.map((b) => (
                     <li key={b}>{b}</li>
@@ -842,7 +856,15 @@ export function ProductHub() {
                   Learn more →
                 </Link>
               </div>
-              <PreviewVisual preview={item.preview} caption={item.previewCaption} />
+              {item.preview ? (
+                <PreviewVisual preview={item.preview} caption={item.previewCaption} />
+              ) : item.image ? (
+                <img
+                  src={item.image.src}
+                  alt={item.image.alt}
+                  style={{ width: "100%", maxWidth: 460, justifySelf: "center" }}
+                />
+              ) : null}
             </section>
           );
         })}
@@ -955,9 +977,16 @@ export function IntegrationsPage() {
       <MarketingShell>
         <MarketingHero
           eyebrow="Integrations"
-          title="Connect POS, Tally, and the files you already use"
-          lead="No new hardware at the outlet. PlatePielet reads the systems you already run — and fills the gaps with CSV, Excel, and APIs."
+          title="Keep the tools you use. Connect the data you need."
+          lead="PlatePielet sits above your operational systems and brings their data into one consistent restaurant intelligence layer. Connect POS sales, inventory data, accounting and operational files so teams can work from the same numbers without replacing the systems they already depend on."
         />
+
+        <section className="mkt-section">
+          <MockIntegrationFlow />
+          <p style={{ fontSize: "0.8rem", color: MUTED, marginTop: "0.9rem" }}>
+            {SAMPLE}POS, Tally, inventory, and your own files converge into one set of numbers.
+          </p>
+        </section>
 
         <DataMarquee />
 
@@ -1368,7 +1397,7 @@ const RESOURCE_TILES = [
   {
     icon: Compass,
     title: "Product tour",
-    desc: "See the dashboard, your Tally books, and Pilot AI in a guided walkthrough on your own numbers.",
+    desc: "See the command center, your Tally books, and PlatePielet AI in a guided walkthrough on your own numbers.",
     href: "/demo",
     cta: "Book a walkthrough",
   },
@@ -1395,10 +1424,10 @@ const RESOURCE_TILES = [
   },
   {
     icon: Sparkles,
-    title: "Pilot AI",
-    desc: "Ask questions about your bills and books in plain language, answered from your own data.",
+    title: "PlatePielet AI",
+    desc: "Ask your restaurant anything, in plain language — answered from your own connected data.",
     href: "/product/ai",
-    cta: "Meet Pilot AI",
+    cta: "Meet PlatePielet AI",
   },
   {
     icon: HelpCircle,

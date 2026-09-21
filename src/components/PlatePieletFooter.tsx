@@ -12,8 +12,10 @@ const COLUMNS: FooterColumn[] = [
     title: "Product",
     links: [
       { label: "Overview", href: "/product" },
+      { label: "Command Center", href: "/product/dashboard" },
+      { label: "Menu Engineering", href: "/product/menu-performance" },
+      { label: "Waste Intelligence", href: "/product/waste-intelligence" },
       { label: "PlatePielet AI", href: "/product/ai" },
-      { label: "Menu Performance", href: "/product/menu-performance" },
       { label: "Pricing", href: "/pricing" },
     ],
   },

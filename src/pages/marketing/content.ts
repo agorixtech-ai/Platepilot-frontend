@@ -20,6 +20,7 @@ import {
   Sparkles,
   Store,
   Table2,
+  Trash2,
   TrendingUp,
   Upload,
   Users,
@@ -59,6 +60,11 @@ export type MockKey =
   | "stock-kpis"
   | "stock-items"
   | "waste-list"
+  | "command-center"
+  | "waste-composition"
+  | "suppliers"
+  | "ingredient-flow"
+  | "ai-sources"
   | "market-prices";
 
 /** Which real screen a page renders in full under its hero. */
@@ -103,7 +109,10 @@ export type FeatureCard = {
   slug: string;
   label: string;
   title: string;
+  /** Short blurb — used on the grid cards, so keep it to a line or two. */
   desc: string;
+  /** Full intro paragraph for the page hero. Falls back to `desc`. */
+  lead?: string;
   icon: LucideIcon;
   bullets: string[];
   preview?: FeaturePreview;
@@ -123,15 +132,16 @@ export type FeatureCard = {
 export const PRODUCT_FEATURES: FeatureCard[] = [
   {
     slug: "dashboard",
-    label: "Dashboard",
-    title: "One live view of every outlet",
-    desc: "Sales, bills, food cost, and margin in a single overview — drill from the group down to a branch in two taps.",
+    label: "Command Center",
+    title: "Start every day knowing where to focus",
+    desc: "Your restaurant. One screen. No blind spots.",
+    lead: "Your Daily Command Center brings the numbers that matter into one place. Track sales, food cost, stock movement, purchasing and waste across every location without jumping between systems or spreadsheets. Instead of searching for problems, PlatePielet surfaces the branches, categories and items that need attention.",
     icon: LayoutDashboard,
     mock: "overview",
     bullets: [
-      "Group and branch KPIs on one screen",
-      "Day, week, and month comparisons",
-      "Honest data freshness from daily sync",
+      "Sales, food cost, stock, purchasing, and waste on one screen",
+      "Every location in a single rollup, or one branch at a time",
+      "The branches, categories, and items that need attention, surfaced for you",
     ],
     preview: {
       kind: "kpi",
@@ -144,6 +154,18 @@ export const PRODUCT_FEATURES: FeatureCard[] = [
       ],
     },
     sections: [
+      {
+        tag: "Snapshot",
+        mock: "command-center",
+        title: "One screen, no blind spots",
+        body: "The whole business in one composition: the overview snapshot, every branch beside it, and the handful of things that need attention today — without opening a second system.",
+        bullets: [
+          "Sales, food cost, stock movement, purchasing and waste in one place",
+          "Every location rolled up, or one branch at a time",
+          "Branches, categories and items that need attention, surfaced for you",
+          "No jumping between systems or spreadsheets",
+        ],
+      },
       {
         tag: "Live KPIs",
         mock: "kpis",
@@ -640,14 +662,15 @@ export const PRODUCT_FEATURES: FeatureCard[] = [
   },
   {
     slug: "food-cost-analysis",
-    label: "Food Cost Analysis",
-    title: "Food cost on one page",
-    desc: "Food cost and gross margin from the purchases and sales PlatePielet already loads, checked against what your recipes say it should have cost.",
+    label: "Inventory & Food Cost",
+    title: "Know where every percentage point of food cost is going",
+    desc: "Keep stock tight and food cost under control.",
+    lead: "Bring sales and inventory together to understand theoretical usage, actual stock movement and the gaps between them. Spot unusual consumption, stock mismatches and rising ingredient costs before they become month-end surprises.",
     icon: PieChart,
     bullets: [
-      "Food cost % and margin by period",
-      "POS revenue reconciled to Tally purchases",
-      "Should-cost against actual spend",
+      "Theoretical usage against actual stock movement",
+      "Unusual consumption and stock mismatches, flagged early",
+      "Rising ingredient costs caught before month-end",
     ],
     preview: {
       kind: "kpi",
@@ -661,6 +684,18 @@ export const PRODUCT_FEATURES: FeatureCard[] = [
     previewHeading: "The numbers you close the month on",
     previewCaption: "Sample values. Your figures come from your own POS and Tally loads.",
     sections: [
+      {
+        tag: "Sales meets inventory",
+        mock: "ingredient-flow",
+        title: "Bring sales and inventory together",
+        body: "Every ingredient is priced from your own purchase vouchers, then read against what your recipes and POS say you should have used. Stock, COGS, and variance all fall out of the same join.",
+        bullets: [
+          "Ingredient costs from a 90-day weighted average of your purchases",
+          "Stock on hand counted from Material In and Material Out",
+          "COGS as net purchase cost against POS revenue",
+          "Variance as the gap between the two — priced at what you paid",
+        ],
+      },
       {
         tag: "The formula",
         mock: "recon",
@@ -677,13 +712,25 @@ export const PRODUCT_FEATURES: FeatureCard[] = [
       {
         tag: "Should cost vs actual",
         mock: "cost-variance",
-        title: "What it should have cost, and what you actually bought",
-        body: "Each dish's recipe is priced from your Tally purchases and multiplied by the units sold on POS. Anything bought beyond that is wastage.",
+        title: "Theoretical usage against actual stock movement",
+        body: "Each dish's recipe is priced from your Tally purchases and multiplied by the units sold on POS. That is what your kitchen should have used. Anything bought beyond it is the gap — unusual consumption, a stock mismatch, or a supplier price that moved.",
         bullets: [
           "Should have cost = recipe cost × units sold",
           "Actually purchased = what the Tally purchase vouchers add up to",
           "Wastage = purchased beyond what the sold dishes required, as a share of revenue",
           "Recipe lines use a 90-day weighted-average Tally price, or a saved estimate when nothing matches",
+        ],
+      },
+      {
+        tag: "Stock movement",
+        mock: "stock-kpis",
+        title: "Keep stock tight, item by item",
+        body: "Food cost is decided on the shelf. Current stock is counted from the Material In and Material Out your Tally already records, per outlet.",
+        bullets: [
+          "Current stock per item = Material In − Material Out",
+          "Critical at zero or negative, low under five units remaining",
+          "Inventory Health is the share of items that are neither critical nor low",
+          "Full item list, most at-risk first, with a plain next step on every row",
         ],
       },
       {
@@ -727,14 +774,15 @@ export const PRODUCT_FEATURES: FeatureCard[] = [
   },
   {
     slug: "menu-performance",
-    label: "Menu Performance",
-    title: "Every dish gets a report card",
-    desc: "Every dish is graded on how often it sells and how much it earns per plate, then given a plain next step: keep, re-price, promote, or rework.",
+    label: "Menu Engineering",
+    title: "Know what to promote, reprice, rethink or remove",
+    desc: "Build a menu that works harder.",
+    lead: "PlatePielet combines menu sales with food cost to show which dishes drive both demand and contribution. Every item is placed into a simple menu-engineering view so teams can make faster pricing, promotion and recipe decisions.",
     icon: UtensilsCrossed,
     bullets: [
-      "Four grades from sell rate and margin",
-      "Profit per plate from live Tally costs",
-      "A plain next step for every dish",
+      "Every item placed in a simple menu-engineering view",
+      "Demand and contribution, dish by dish",
+      "A plain next step: promote, reprice, rethink, or remove",
     ],
     preview: {
       kind: "table",
@@ -816,10 +864,124 @@ export const PRODUCT_FEATURES: FeatureCard[] = [
     ],
   },
   {
+    slug: "waste-intelligence",
+    label: "Waste Intelligence",
+    title: "Waste less food. Lose less margin.",
+    desc: "See the waste before it becomes a habit.",
+    lead: "Understand what is being wasted, where it is happening and how much it is costing the business. PlatePielet turns waste records into trends that teams can actually act on. Compare waste by branch, ingredient, category or period, and connect waste patterns with sales and inventory to identify over-prep, spoilage, stock issues and recurring operational problems.",
+    icon: Trash2,
+    bullets: [
+      "Waste cost by branch, ingredient, category, and period",
+      "Waste patterns connected back to sales and inventory",
+      "Over-prep, spoilage, and recurring stock problems named",
+    ],
+    preview: {
+      kind: "bars",
+      items: [
+        { label: "Proteins", value: "AED 4,860", pct: 100 },
+        { label: "Dairy", value: "AED 2,410", pct: 50 },
+        { label: "Produce", value: "AED 1,980", pct: 41 },
+        { label: "Grains", value: "AED 1,540", pct: 32 },
+        { label: "Bakery", value: "AED 850", pct: 17 },
+      ],
+    },
+    previewHeading: "Where the waste cost sits",
+    previewCaption:
+      "Sample values. Your waste view ranks the AED cost of ingredients bought beyond what your sold dishes required.",
+    sections: [
+      {
+        tag: "The number",
+        mock: "waste-composition",
+        title: "What it is costing you, and which way it is moving",
+        body: "One figure for the month, a daily trend behind it, and the handful of ingredients driving it — with the likely cause named against each.",
+        bullets: [
+          "Waste cost in AED, and as a share of revenue",
+          "A daily trend, so a fix shows up within the week",
+          "The few ingredients carrying most of the cost, flagged",
+          "Over-prep, spoilage, and stock gaps separated by pattern",
+        ],
+      },
+      {
+        tag: "What it costs",
+        mock: "waste-list",
+        title: "Waste as a number, not a feeling",
+        body: "For every ingredient, PlatePielet compares what your Tally vouchers say you purchased with what the dishes you sold actually required. The gap is waste, priced at what you paid for it.",
+        bullets: [
+          "Bought against needed quantity, in kg, litres, or pieces",
+          "The AED cost of the surplus and its share of the total",
+          "Ranked by cost, so the most expensive habit is at the top",
+          "Portions bought and not sold, per dish",
+        ],
+      },
+      {
+        tag: "Where it happens",
+        title: "Compare by branch, ingredient, category, or period",
+        body: "One number for the group hides the kitchen with the problem. Every cut of the same data is one toggle away.",
+        bullets: [
+          "Switch between all locations and a single outlet from the header",
+          "Today, this week, this month, or this year, on the same basis",
+          "Ingredient and category views for buying decisions",
+          "Branch view for the conversation with a head chef",
+        ],
+      },
+      {
+        tag: "Why it happens",
+        mock: "cost-variance",
+        title: "Waste read against sales and inventory",
+        body: "A surplus on its own tells you nothing. Held against what you sold and what moved through stock, it starts naming causes — over-prep, spoilage, a stock count that never happened.",
+        bullets: [
+          "Should-have-cost from recipes × units sold, against what was actually purchased",
+          "Recurring surpluses separated from a one-off stock-up",
+          "Waste % tracked against revenue, so growth doesn't look like improvement",
+        ],
+      },
+      {
+        tag: "On the menu",
+        mock: "ai-insights",
+        title: "The waste hiding behind a popular dish",
+        body: "Surplus ingredients are allocated back to the dishes that use them, so a best seller quietly bleeding trim shows up next to its sales number.",
+        bullets: [
+          "Waste in AED and as a share of each dish's revenue",
+          "Flagged on the dish activity matrix alongside its grade",
+          "Filter to one grade to work through the menu dish by dish",
+        ],
+      },
+      {
+        tag: "What's next",
+        roadmap: true,
+        title: "Logged waste events and prep-level tracking",
+        body: "Not shipped yet. Today waste is measured as purchase-versus-recipe variance, which is accurate over a month and noisy over a single day.",
+        bullets: [
+          "Log spoilage and over-prep at the station, as it happens",
+          "Stock counts folded into the variance, so a stock-up stops reading as waste",
+        ],
+      },
+    ],
+    faqs: [
+      {
+        q: "How is waste measured?",
+        a: "As a variance: what your Tally purchase vouchers record, minus the recipe usage of the dishes your POS says you sold. The surplus is priced at your own purchase prices.",
+      },
+      {
+        q: "Why does a single day look wrong?",
+        a: "Because there are no stock counts in the calculation yet. Purchases count when they are bought, not when they are used, so a stock-up day reads as waste. Over a month or more the figure settles.",
+      },
+      {
+        q: "Do I need to log waste for this to work?",
+        a: "No. It is computed from data you already produce — purchases and sales. Logging spoilage and over-prep at the station is on the roadmap, and would make the daily figure reliable too.",
+      },
+      {
+        q: "Does it separate spoilage from over-prep?",
+        a: "Not automatically. It shows you the ingredient, the branch, the cost, and the pattern over time — recurring surpluses read as over-prep or portioning, spikes read as spoilage or a stock issue.",
+      },
+    ],
+  },
+  {
     slug: "purchase-suggestions",
-    label: "Purchase Suggestions",
-    title: "Order with the numbers in front of you",
-    desc: "What is running low, what you over-bought, and what a fair price looks like: the three signals behind every order, in one place.",
+    label: "Purchasing Intelligence",
+    title: "Buy smarter. Protect your margins.",
+    desc: "Buy smarter. Protect your margins.",
+    lead: "What is running low, what you over-bought, and what a fair price looks like: the three signals behind every order, in one place — with your own supplier spend and price movement beside them.",
     icon: ShoppingCart,
     bullets: [
       "Low-stock alerts from live Tally stock",
@@ -878,11 +1040,14 @@ export const PRODUCT_FEATURES: FeatureCard[] = [
       },
       {
         tag: "What you paid",
-        title: "Your own spend, by supplier",
+        mock: "suppliers",
+        title: "Your own spend, supplier by supplier",
+        body: "Market prices tell you what is fair. Your purchase vouchers tell you what you actually paid, and how that has moved.",
         bullets: [
-          "Ask Pilot AI: “How much did we spend with each supplier in May?”",
-          "Purchase vouchers can be grouped by supplier, period, and outlet",
+          "Ask PlatePielet AI: “How much did we spend with each supplier in May?”",
+          "Purchase vouchers grouped by supplier, period, and outlet",
           "Unit costs come from your own Tally purchase prices",
+          "A 90-day weighted average per ingredient, so a price rise is visible",
         ],
       },
       {
@@ -918,13 +1083,15 @@ export const PRODUCT_FEATURES: FeatureCard[] = [
   {
     slug: "ai",
     label: "PlatePielet AI",
-    title: "Ask your books anything",
-    desc: "Pilot AI reads bills, vouchers, and stock movements — then answers in plain language where money is leaking.",
+    title: "Ask your restaurant anything",
+    desc: "Grounded in your connected restaurant data, not a generic chatbot.",
+    lead: "PlatePielet AI works across your connected restaurant data to help answer operational questions in plain language.",
     icon: Sparkles,
     bullets: [
-      "Natural-language questions on your POS, Tally, and recipe data",
-      "Answers that name the branch and period they used",
-      "Recommended next actions on your Overview",
+      "“What caused food cost to increase this week?”",
+      "“Which branch has the highest stock variance?”",
+      "“Which menu items are profitable but underperforming?”",
+      "“Where did waste increase yesterday?”",
     ],
     image: {
       src: "/hero/ai-assistant.webp",
@@ -935,7 +1102,7 @@ export const PRODUCT_FEATURES: FeatureCard[] = [
         tag: "Ask",
         mock: "ai-chat",
         title: "Type the question. Skip the report.",
-        body: "Ask the way you would ask your accountant. Pilot AI looks up the numbers in your own records and answers in a few plain sentences.",
+        body: "Ask the way you would ask your accountant. PlatePielet AI looks up the numbers in your own connected data and answers in a few plain sentences — an assistant that only works because your restaurant data is already cleaned and connected.",
         bullets: [
           "Answers come from your POS bills, Tally vouchers, and recipe costs",
           "Missing a branch or period? It asks one short question instead of guessing",
@@ -944,12 +1111,24 @@ export const PRODUCT_FEATURES: FeatureCard[] = [
         ],
       },
       {
+        tag: "Grounded",
+        mock: "ai-sources",
+        title: "It only works because the data is already connected",
+        body: "PlatePielet AI is not a chatbot pointed at your restaurant. It reads sales, stock, waste, and purchasing after they have been cleaned and joined — which is why it can answer an operational question at all.",
+        bullets: [
+          "Sales, stock, waste, and purchasing, already reconciled against each other",
+          "Every answer computed from your own records, never recalled from training",
+          "Scoped to your tenant, behind an authenticated endpoint",
+          "No connected data, no answer — it says so rather than inventing one",
+        ],
+      },
+      {
         tag: "How it works",
         mock: "ai-flow",
         title: "Four checked steps between your question and the answer",
         body: "The model never touches your database directly. It proposes a query; PlatePielet validates and runs it.",
         bullets: [
-          "Pilot AI writes a structured spec, never raw SQL",
+          "PlatePielet AI writes a structured spec, never raw SQL",
           "Unknown tables, columns, or filters are rejected before anything runs",
           "Read-only, 5-second timeout, capped at 500 rows per query",
         ],
@@ -957,12 +1136,13 @@ export const PRODUCT_FEATURES: FeatureCard[] = [
       {
         tag: "What you can ask",
         mock: "ai-questions",
-        title: "Three books, one conversation",
-        body: "Sales, purchasing, and menu costing sit in different systems. Pilot AI reads all three in a single thread.",
+        title: "Sales, stock, waste, and purchasing — one conversation",
+        body: "Those four live in different systems. PlatePielet AI reads them in a single thread, because they were connected before the model ever saw them.",
         bullets: [
-          "POS sales by item, branch, channel, payment method, and time",
-          "Tally purchases, returns, and stock movements by supplier and branch",
-          "Menu price against ingredient cost, dish by dish",
+          "“What caused food cost to increase this week?”",
+          "“Which branch has the highest stock variance?”",
+          "“Which menu items are profitable but underperforming?”",
+          "“Where did waste increase yesterday?”",
         ],
       },
       {
@@ -990,7 +1170,7 @@ export const PRODUCT_FEATURES: FeatureCard[] = [
         tag: "What's next",
         roadmap: true,
         title: "Daily digests and risk flags",
-        body: "Not shipped yet. Today Pilot AI answers when you ask; these would have it speak up first.",
+        body: "Not shipped yet. Today PlatePielet AI answers when you ask; these would have it speak up first.",
         bullets: [
           "A daily digest of anomalies across your outlets",
           "VAT and reconciliation risk flags from POS-to-Tally gaps",
@@ -999,7 +1179,7 @@ export const PRODUCT_FEATURES: FeatureCard[] = [
     ],
     faqs: [
       {
-        q: "What data can Pilot AI read?",
+        q: "What data can PlatePielet AI read?",
         a: "Three sources: POS sales lines, Tally vouchers (purchases, returns, and stock movements), and your recipe costs. It cannot see anything outside those tables, and waste is answered by pointing you to the Waste dashboard rather than by a query.",
       },
       {
@@ -1012,7 +1192,7 @@ export const PRODUCT_FEATURES: FeatureCard[] = [
       },
       {
         q: "Where does my question go?",
-        a: "Your question, and a small sample of the rows a query returns, are sent to the language-model provider configured for Pilot AI so it can word the answer. The model never connects to your database — it only sees its own query spec and those rows.",
+        a: "Your question, and a small sample of the rows a query returns, are sent to the language-model provider configured for PlatePielet AI so it can word the answer. The model never connects to your database — it only sees its own query spec and those rows.",
       },
       {
         q: "Does it do daily digests or VAT checks today?",
@@ -1097,7 +1277,7 @@ export const SOLUTION_SEGMENTS: FeatureCard[] = [
     bullets: [
       "Nothing new at the counter",
       "Five numbers instead of a spreadsheet",
-      "Pilot AI instead of extra reports",
+      "PlatePielet AI instead of extra reports",
     ],
     preview: {
       kind: "kpi",
@@ -1131,7 +1311,7 @@ export const SOLUTION_SEGMENTS: FeatureCard[] = [
       },
       {
         tag: "Ask, don't report",
-        title: "Pilot AI answers in plain language",
+        title: "PlatePielet AI answers in plain language",
         body: "You do not have time to build a report. Ask the question instead.",
         bullets: [
           "Ask about your bills, vouchers, and stock in natural language",
@@ -1322,7 +1502,7 @@ export const SOLUTION_SEGMENTS: FeatureCard[] = [
       },
       {
         tag: "Ask the group",
-        title: "Pilot AI across every outlet",
+        title: "PlatePielet AI across every outlet",
         body: "Instead of commissioning a report, ask the question and get an answer computed from the group's own records.",
         bullets: [
           "Natural-language questions over bills, vouchers, and stock",
