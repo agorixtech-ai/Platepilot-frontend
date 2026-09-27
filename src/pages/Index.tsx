@@ -2683,7 +2683,9 @@ function Index() {
               <div className="tm-split">
                 <div className="tm-copy">
                   <div className="sw-section-tag">Testimonials &amp; Reviews</div>
-                  <h2 className="sw-section-h2">Restaurant owners run on <em>PlatePielet.</em></h2>
+                  <h2 className="sw-section-h2">
+                    Restaurant owners run on <em>PlatePielet.</em>
+                  </h2>
                   <p className="sw-section-body">
                     Real feedback from outlet owners and finance leads who use PlatePielet every day
                     to control cost and cut manual work.
@@ -2834,7 +2836,7 @@ export default function IndexRoute() {
   // IonPage so IonRouterOutlet isn't left blank (bare <Redirect> shows nothing).
   useEffect(() => {
     if (!isNativeApp()) return;
-    history.replace(getStoredUser() ? "/dashboard" : "/login");
+    history.replace(getStoredUser() ? "/dashboard" : "/welcome");
   }, [history]);
 
   if (isNativeApp()) {

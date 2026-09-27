@@ -42,6 +42,7 @@ import { LocationSwitcher } from "@/components/dashboard/LocationSwitcher";
 import { DateRangePicker } from "@/components/dashboard/DateRangePicker";
 import { FloatingAiAssistant } from "@/components/ui/glowing-ai-chat-assistant";
 import { MobileTabBar } from "@/components/dashboard/MobileTabBar";
+import { MobileHeader } from "@/components/dashboard/MobileHeader";
 import {
   ADMIN_ITEMS,
   AI_ITEMS,
@@ -64,7 +65,6 @@ export {
   OPS_ITEMS,
   pageKeyOf,
 } from "@/components/dashboard/navItems";
-
 
 /* Profile is never gated (everyone may see their own), and /admin is already
    guarded by is_admin — everything else needs the page in the user's role. */
@@ -311,54 +311,61 @@ function MainPanel({
   const compact = useIsMobile() || isNativeApp();
   const { pathname } = useLocation();
   const firstName = userName.split(" ")[0] ?? userName;
+  const initials = userName
+    .split(" ")
+    .map((w) => w[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+  // Full-screen chat on phones: own header, no tab bar (design screen 9).
+  const chat = compact && pathname === "/dashboard/ai";
   const hour = new Date().getHours();
   const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
 
   return (
     <SidebarInset className="flex flex-col overflow-hidden bg-background dashboard-canvas">
-      <header className="sticky top-0 z-[var(--z-sticky)] shrink-0 border-b border-border bg-white pt-[env(safe-area-inset-top)]">
-        <div className="dashboard-topbar-inner flex w-full items-center gap-3 px-4 sm:px-6 md:px-8">
-          {/* Sidebar hamburger stays for tablet/desktop; phones use bottom tabs. */}
-          {(state === "collapsed" || isMobile) && !compact && (
-            <SidebarTrigger className="h-9 w-9 shrink-0 rounded-xl text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground [&_svg]:size-4" />
-          )}
-          {compact && (
-            <SidebarTrigger className="h-9 w-9 shrink-0 rounded-xl text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground md:hidden [&_svg]:size-4" />
-          )}
-
-          <div className="min-w-0 flex-1">
-            <h1 className="truncate text-lg font-bold tracking-tight text-foreground sm:text-xl">
-              {greeting}, {firstName}!
-            </h1>
-            <p className="hidden text-[12px] text-muted-foreground sm:block">
-              Here&apos;s what&apos;s happening at your restaurant today.
-            </p>
-          </div>
-
-          <div className="ml-auto flex shrink-0 items-center gap-2 sm:gap-2.5">
-            <div
-              className="hidden h-9 shrink-0 items-center rounded-full border border-border/60 bg-muted/50 px-3 text-[12px] font-medium text-muted-foreground sm:flex"
-              suppressHydrationWarning
-            >
-              {new Date().toLocaleDateString("en-US", {
-                month: "short",
-                day: "numeric",
-                year: "numeric",
-              })}
+      {compact && !chat && <MobileHeader firstName={firstName} initials={initials} />}
+      {!compact && (
+        <header className="sticky top-0 z-[var(--z-sticky)] shrink-0 border-b border-border bg-white pt-[env(safe-area-inset-top)]">
+          <div className="dashboard-topbar-inner flex w-full items-center gap-3 px-4 sm:px-6 md:px-8">
+            {/* Sidebar hamburger stays for tablet/desktop; phones use bottom tabs. */}
+            {(state === "collapsed" || isMobile) && !compact && (
+              <SidebarTrigger className="h-9 w-9 shrink-0 rounded-xl text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground [&_svg]:size-4" />
+            )}
+            <div className="min-w-0 flex-1">
+              <h1 className="truncate text-lg font-bold tracking-tight text-foreground sm:text-xl">
+                {greeting}, {firstName}!
+              </h1>
+              <p className="hidden text-[12px] text-muted-foreground sm:block">
+                Here&apos;s what&apos;s happening at your restaurant today.
+              </p>
             </div>
 
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onLogout}
-              className="hidden h-9 gap-1.5 rounded-xl text-[12px] font-medium text-muted-foreground hover:text-destructive xl:flex"
-            >
-              <LogOut className="h-3.5 w-3.5" />
-              Sign out
-            </Button>
+            <div className="ml-auto flex shrink-0 items-center gap-2 sm:gap-2.5">
+              <div
+                className="hidden h-9 shrink-0 items-center rounded-full border border-border/60 bg-muted/50 px-3 text-[12px] font-medium text-muted-foreground sm:flex"
+                suppressHydrationWarning
+              >
+                {new Date().toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                  year: "numeric",
+                })}
+              </div>
+
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onLogout}
+                className="hidden h-9 gap-1.5 rounded-xl text-[12px] font-medium text-muted-foreground hover:text-destructive xl:flex"
+              >
+                <LogOut className="h-3.5 w-3.5" />
+                Sign out
+              </Button>
+            </div>
           </div>
-        </div>
-      </header>
+        </header>
+      )}
 
       {/* Location switcher + date range — the owner's first touch every visit.
           Hidden on Market Prices (external gov data, not branch/period scoped),
@@ -367,6 +374,7 @@ function MainPanel({
       <div
         className="shrink-0 border-b border-border/60 bg-background/60 backdrop-blur-xl"
         hidden={
+          compact ||
           pathname === "/dashboard/market-prices" ||
           pathname === "/dashboard/ai" ||
           pathname === "/dashboard/menu-engineering"
@@ -384,16 +392,19 @@ function MainPanel({
 
       <div
         className={cn(
-          "flex-1 overflow-y-auto px-4 py-5 sm:px-6 md:px-8 md:py-6",
-          compact && "pb-[calc(4.75rem+env(safe-area-inset-bottom))]",
+          "flex-1",
+          chat
+            ? "flex min-h-0 flex-col overflow-hidden"
+            : "overflow-y-auto px-4 py-5 sm:px-6 md:px-8 md:py-6",
+          compact && !chat && "py-4 pb-[calc(7.5rem+env(safe-area-inset-bottom))]",
         )}
       >
-        <div className="w-full">{children}</div>
+        <div className={cn("w-full", chat && "flex min-h-0 flex-1 flex-col")}>{children}</div>
       </div>
 
-      {/* On phones / Android app, Pilot lives in the tab bar — skip the floating chip. */}
+      {/* Phones / Android app: bottom tabs + green AI button replace the floating chip. */}
       {pathname !== "/dashboard/ai" && !compact && <FloatingAiAssistant />}
-      {compact && <MobileTabBar />}
+      {compact && !chat && <MobileTabBar />}
     </SidebarInset>
   );
 }

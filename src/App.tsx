@@ -17,6 +17,7 @@ import { reportLovableError } from "./lib/lovable-error-reporting";
 // Route-level chunks keep marketing and dashboard-only dependencies out of the
 // initial download. Each screen is fetched only when its route is opened.
 const IndexPage = lazy(() => import("./pages/Index"));
+const WelcomePage = lazy(() => import("./pages/Welcome"));
 const LoginPage = lazy(() => import("./pages/Login"));
 const SignupPage = lazy(() => import("./pages/Signup"));
 const DemoPage = lazy(() => import("./pages/Demo"));
@@ -105,6 +106,7 @@ export default function App() {
             <IonReactRouter>
               <IonRouterOutlet id="main">
                 <Route exact path="/" render={() => <LazyRoute component={IndexPage} />} />
+                <Route exact path="/welcome" render={() => <LazyRoute component={WelcomePage} />} />
                 <Route exact path="/login" render={() => <LazyRoute component={LoginPage} />} />
                 <Route exact path="/signup" render={() => <LazyRoute component={SignupPage} />} />
                 <Route exact path="/demo" render={() => <LazyRoute component={DemoPage} />} />

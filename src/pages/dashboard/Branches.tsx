@@ -83,7 +83,7 @@ function fmtPctOrDash(value: number | null): string {
 
 /* ── Small pieces ────────────────────────────────────────────────────────── */
 
-function Spark({ values, color }: { values: number[]; color: string }) {
+export function Spark({ values, color }: { values: number[]; color: string }) {
   if (values.length < 2) return null;
   const w = 88;
   const h = 24;
