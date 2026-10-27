@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { AlertTriangle, ChevronRight, Package, RefreshCw, XCircle } from "lucide-react";
+import { AlertTriangle, ChevronRight, Package, XCircle } from "lucide-react";
+import RefreshIcon from "@/components/ui/icons/refresh-icon";
 
 import { cn } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -156,7 +157,7 @@ export function InventoryAlertsCard({ className }: { className?: string }) {
               className="h-7 gap-1.5 text-[10px]"
               onClick={() => refetch()}
             >
-              <RefreshCw className={cn("h-3 w-3", isFetching && "animate-spin")} />
+              <RefreshIcon className={cn("h-3 w-3", isFetching && "animate-spin")} />
               Retry
             </Button>
           </div>

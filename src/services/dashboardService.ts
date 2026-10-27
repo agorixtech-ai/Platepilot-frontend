@@ -1,4 +1,5 @@
-import { API_URL as API_BASE } from "@/lib/apiBase";
+import { getApiUrl } from "@/lib/apiBase";
+import { authFetch } from "@/lib/auth";
 
 export type Period = "today" | "week" | "month" | "year";
 
@@ -71,6 +72,15 @@ export interface ReconciliationData {
   branches_both: string[];
   daily: { date: string; pos_revenue: number; tally_cost: number }[];
   currency: string;
+}
+
+/** A stock photo for a grocery item (Pixabay). All null when the server has no API
+    key or found no match — callers then fall back to initials. */
+export interface ItemImage {
+  url: string | null;
+  thumb: string | null;
+  credit: { name: string; url: string } | null;
+  source: "pixabay" | null;
 }
 
 export interface StockItem {
@@ -193,6 +203,13 @@ export interface MenuEngineeringItem {
   revenue: number;
   /** portions-worth of ingredient variance (purchases vs. recipe usage) over 30 days */
   waste_qty: number;
+  ingredient_quantities?: {
+    name: string;
+    unit: string;
+    needed_qty: number;
+    bought_qty: number;
+    excess_qty: number;
+  }[];
   /** allocated ingredient-variance cost (AED) over the trailing 30 days */
   waste_cost: number;
   /** allocated waste cost as % of the dish's 30-day revenue */
@@ -203,10 +220,9 @@ export interface MenuEngineeringItem {
 }
 
 async function apiFetch<T>(path: string): Promise<T> {
-  const token = typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
-  const headers: Record<string, string> = { "Content-Type": "application/json" };
-  if (token) headers["Authorization"] = `Bearer ${token}`;
-  const res = await fetch(`${API_BASE}${path}`, { headers });
+  const res = await authFetch(`${getApiUrl()}${path}`, {
+    headers: { "Content-Type": "application/json" },
+  });
   if (!res.ok) throw new Error(`API ${res.status}: ${path}`);
   return res.json();
 }
@@ -279,6 +295,10 @@ export const dashboardService = {
     return apiFetch<WasteCompositionData>(
       `/dashboard/waste-composition${qs({ period, branch, limit })}`,
     );
+  },
+
+  getItemImage(name: string) {
+    return apiFetch<ItemImage>(`/dashboard/item-image${qs({ q: name })}`);
   },
 
   getMenuEngineering(period: Period = "month", branch?: string | null) {

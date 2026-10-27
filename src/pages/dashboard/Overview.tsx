@@ -2,24 +2,9 @@ import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import {
-  DollarSign,
-  AlertTriangle,
-  ArrowDownRight,
-  ArrowUpRight,
-  Percent,
-  RefreshCw,
-  TrendingUp,
-  TrendingDown,
-  Package,
-  ShoppingCart,
-  Activity,
-  ChevronRight,
-  Check,
-  Building2,
-  Wallet,
-  Lightbulb,
-} from "lucide-react";
+import { DollarSign, ArrowDownRight, ArrowUpRight, Percent, TrendingUp, TrendingDown, Package, ShoppingCart, Activity, ChevronRight, Check, Building2, Wallet, Lightbulb } from "lucide-react";
+import TriangleAlertIcon from "@/components/ui/icons/triangle-alert-icon";
+import RefreshIcon from "@/components/ui/icons/refresh-icon";
 import { toast } from "sonner";
 import {
   ResponsiveContainer,
@@ -497,7 +482,7 @@ function OverviewPage() {
             disabled={isLiveFetching}
             className="group/refresh h-9 gap-1.5 border-white/30 bg-white/10 text-[12px] text-white hover:bg-white/20 hover:text-white"
           >
-            <RefreshCw
+            <RefreshIcon
               className={`h-3.5 w-3.5 transition-transform ${isLiveFetching ? "animate-spin" : "group-hover/refresh:rotate-45"}`}
             />{" "}
             Refresh
@@ -508,7 +493,7 @@ function OverviewPage() {
       {/* ── Error Banner ──────────────────────────────────────────────────── */}
       {hasCriticalError && (
         <div className="flex items-start gap-2.5 rounded-xl border border-destructive/30 bg-destructive/5 p-3 text-[12px]">
-          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
+          <TriangleAlertIcon className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
           <div>
             <p className="font-bold text-destructive">Could not load dashboard data</p>
             <p className="text-muted-foreground mt-0.5">
@@ -970,7 +955,7 @@ function OverviewPage() {
                 {/* Alert for mismatches */}
                 {(recon.branches_only_pos.length > 0 || recon.branches_only_tally.length > 0) && (
                   <div className="flex items-start gap-1.5 rounded-lg bg-warning/10 p-2 border border-warning/20">
-                    <AlertTriangle className="h-3.5 w-3.5 text-warning shrink-0 mt-0.5" />
+                    <TriangleAlertIcon className="h-3.5 w-3.5 text-warning shrink-0 mt-0.5" />
                     <p className="text-[10px] text-warning font-medium">
                       {recon.branches_only_tally.length > 0
                         ? `${recon.branches_only_tally.length} branch(es) have Tally data but no POS sales`
@@ -1461,7 +1446,7 @@ function OverviewPage() {
                     {(recon.branches_only_pos.length > 0 ||
                       recon.branches_only_tally.length > 0) && (
                       <div className="flex items-start gap-1.5 rounded-lg bg-warning/10 p-2.5 border border-warning/20 mt-3">
-                        <AlertTriangle className="h-3.5 w-3.5 text-warning shrink-0 mt-0.5" />
+                        <TriangleAlertIcon className="h-3.5 w-3.5 text-warning shrink-0 mt-0.5" />
                         <p className="text-[10px] text-warning font-medium">
                           Branch mismatch detected. Ensure all branches are configured in both POS
                           and Tally systems for accurate reconciliation.

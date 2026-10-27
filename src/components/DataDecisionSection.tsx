@@ -2,17 +2,8 @@ import { Link } from "react-router-dom";
 import { useLayoutEffect, useRef, useState } from "react";
 import "@fontsource/caveat/600.css";
 import "@fontsource/caveat/700.css";
-import {
-  ArrowRight,
-  Bell,
-  FileText,
-  LayoutDashboard,
-  Package,
-  Receipt,
-  ShoppingCart,
-  Sparkles,
-  type LucideIcon,
-} from "lucide-react";
+import { ArrowRight, Bell, FileText, LayoutDashboard, Package, Receipt, ShoppingCart, type LucideIcon } from "lucide-react";
+import SparklesIcon from "@/components/ui/icons/sparkles-icon";
 import { T } from "@/components/PlatePieletHero";
 
 const SOURCES: { Icon: LucideIcon; tint: string; color: string; label: string; desc: string }[] = [
@@ -582,7 +573,7 @@ export function DataDecisionSection({ visible }: { visible: boolean }) {
                     <circle cx="112" cy="112" r="108" />
                   </svg>
                   <div className="dd__hub" ref={hubRef}>
-                    <Sparkles size={22} strokeWidth={2} />
+                    <SparklesIcon size={22} strokeWidth={2} />
                     <b>Pilot AI</b>
                   </div>
                 </div>

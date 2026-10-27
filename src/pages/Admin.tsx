@@ -2,24 +2,9 @@ import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { Link, Redirect, Route, Switch, useHistory, useLocation } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import {
-  Building2,
-  Copy,
-  History,
-  Inbox,
-  KeyRound,
-  LayoutDashboard,
-  LogOut,
-  MailCheck,
-  Pencil,
-  Plus,
-  Search,
-  ShieldCheck,
-  Trash2,
-  UserPlus,
-  Users as UsersIcon,
-  X,
-} from "lucide-react";
+import { Building2, Copy, History, Inbox, KeyRound, LayoutDashboard, MailCheck, Pencil, Plus, Search, ShieldCheck, UserPlus, Users as UsersIcon, X } from "lucide-react";
+import LogoutIcon from "@/components/ui/icons/logout-icon";
+import TrashIcon from "@/components/ui/icons/trash-icon";
 
 import { AppPage } from "@/components/ionic/AppPage";
 import { AppLogo } from "@/components/AppLogo";
@@ -242,7 +227,7 @@ function AdminShell({ children }: { children: ReactNode }) {
               onClick={handleLogout}
               className="h-8 flex-1 justify-start gap-2 rounded-lg px-2 text-[11px] font-medium text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-destructive"
             >
-              <LogOut className="h-3.5 w-3.5" />
+              <LogoutIcon className="h-3.5 w-3.5" />
               Sign out
             </Button>
           </div>
@@ -698,7 +683,7 @@ function AdminUsers() {
                       disabled={u.id === me?.id || removeUser.isPending}
                       onClick={() => setDeletingUser(u)}
                     >
-                      <Trash2 className="h-3.5 w-3.5" />
+                      <TrashIcon className="h-3.5 w-3.5" />
                     </Button>
                   </div>
                 </TableCell>
@@ -948,7 +933,7 @@ function AdminRoles() {
                     disabled={remove.isPending}
                     onClick={() => remove.mutate(r.id)}
                   >
-                    <Trash2 className="h-3.5 w-3.5" />
+                    <TrashIcon className="h-3.5 w-3.5" />
                   </Button>
                 </div>
               </div>
@@ -1150,7 +1135,7 @@ function AdminClients() {
                     disabled={remove.isPending}
                     onClick={() => setDeleting(t)}
                   >
-                    <Trash2 className="h-3.5 w-3.5" />
+                    <TrashIcon className="h-3.5 w-3.5" />
                   </Button>
                 </div>
               </div>

@@ -1,23 +1,9 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import {
-  ShoppingCart,
-  Search,
-  Filter,
-  RefreshCw,
-  ChevronLeft,
-  ChevronRight,
-  CreditCard,
-  MapPin,
-  User,
-  Tag,
-  DollarSign,
-  TrendingUp,
-  Percent,
-  Clock,
-  Download,
-  ChevronRight as ChevronRightIcon,
-} from "lucide-react";
+import { Search, Filter, ChevronLeft, ChevronRight, CreditCard, MapPin, User, Tag, DollarSign, TrendingUp, Percent, Clock, ChevronRight as ChevronRightIcon } from "lucide-react";
+import ShoppingCartIcon from "@/components/ui/icons/shopping-cart-icon";
+import RefreshIcon from "@/components/ui/icons/refresh-icon";
+import DownloadIcon from "@/components/ui/icons/download-icon";
 import {
   BarChart,
   Bar,
@@ -191,7 +177,7 @@ function PosSalesPage() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-[20px] font-bold tracking-tight text-foreground flex items-center gap-2">
-            <ShoppingCart className="h-5 w-5 text-primary" />
+            <ShoppingCartIcon className="h-5 w-5 text-primary" />
             POS Sales
           </h1>
           <p className="mt-0.5 text-[12px] text-muted-foreground">
@@ -200,7 +186,7 @@ function PosSalesPage() {
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" className="gap-1.5 text-[11px]">
-            <Download className="h-3.5 w-3.5" />
+            <DownloadIcon className="h-3.5 w-3.5" />
             Export logs
           </Button>
           <Button
@@ -210,7 +196,7 @@ function PosSalesPage() {
             disabled={isFetching}
             className="text-[11px]"
           >
-            <RefreshCw className={cn("h-3.5 w-3.5", isFetching && "animate-spin")} />
+            <RefreshIcon className={cn("h-3.5 w-3.5", isFetching && "animate-spin")} />
           </Button>
         </div>
       </div>
@@ -597,7 +583,7 @@ function PosSalesPage() {
         <DialogContent className="max-w-lg border-border bg-card shadow-2xl">
           <DialogHeader>
             <DialogTitle className="text-[15px] font-bold text-foreground flex items-center gap-2">
-              <ShoppingCart className="h-4 w-4 text-primary" />
+              <ShoppingCartIcon className="h-4 w-4 text-primary" />
               {String(detail?.invoice_no ?? "Sale Detail")}
             </DialogTitle>
           </DialogHeader>

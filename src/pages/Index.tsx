@@ -24,6 +24,7 @@ import { SALES_PHONE, SALES_PHONE_HREF } from "@/lib/contact";
 import { getStoredUser } from "@/lib/auth";
 import { isNativeApp } from "@/lib/native";
 import { LiveNumber } from "@/components/ui/live-number";
+import { PhotoCarouselSection } from "@/components/PhotoCarouselSection";
 
 /* ─── Product-preview tiles ──────────────────────────────────────────────────
    Coded mini-mockups of the real dashboard modules (src/pages/dashboard/*):
@@ -571,6 +572,7 @@ function Index() {
   const sec6 = useReveal();
   const sec10 = useReveal();
   const secWaste = useReveal();
+  const secPhotos = useReveal();
 
   return (
     <div
@@ -2683,7 +2685,9 @@ function Index() {
               <div className="tm-split">
                 <div className="tm-copy">
                   <div className="sw-section-tag">Testimonials &amp; Reviews</div>
-                  <h2 className="sw-section-h2">Restaurant owners run on <em>PlatePielet.</em></h2>
+                  <h2 className="sw-section-h2">
+                    Restaurant owners run on <em>PlatePielet.</em>
+                  </h2>
                   <p className="sw-section-body">
                     Real feedback from outlet owners and finance leads who use PlatePielet every day
                     to control cost and cut manual work.
@@ -2764,6 +2768,16 @@ function Index() {
         </div>
 
         {/* ══════════════════════════════════════════════════════════════════ */}
+        {/* PHOTO CAROUSEL — gallery photos on a draggable, auto-advancing track */}
+        {/* ══════════════════════════════════════════════════════════════════ */}
+        <div className="sw-rule" id="photos" />
+        <div className="sw-section" ref={secPhotos.ref}>
+          <div className={`reveal${secPhotos.visible ? " show" : ""}`}>
+            <PhotoCarouselSection />
+          </div>
+        </div>
+
+        {/* ══════════════════════════════════════════════════════════════════ */}
         {/* CROSS-PLATFORM                                                     */}
         {/* ══════════════════════════════════════════════════════════════════ */}
         <div ref={sec6.ref} className={`reveal${sec6.visible ? " show" : ""}`}>
@@ -2834,7 +2848,7 @@ export default function IndexRoute() {
   // IonPage so IonRouterOutlet isn't left blank (bare <Redirect> shows nothing).
   useEffect(() => {
     if (!isNativeApp()) return;
-    history.replace(getStoredUser() ? "/dashboard" : "/login");
+    history.replace(getStoredUser() ? "/dashboard" : "/welcome");
   }, [history]);
 
   if (isNativeApp()) {

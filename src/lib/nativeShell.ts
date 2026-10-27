@@ -4,6 +4,18 @@ import { Keyboard, KeyboardResize } from "@capacitor/keyboard";
 import { StatusBar, Style } from "@capacitor/status-bar";
 import { SplashScreen } from "@capacitor/splash-screen";
 
+/** Match the OS status bar to the header under it: forest (light icons) or white (dark icons). */
+export async function setStatusBarTone(tone: "forest" | "white"): Promise<void> {
+  if (!Capacitor.isNativePlatform()) return;
+  try {
+    // Capacitor naming: Style.Dark = light icons for dark backgrounds.
+    await StatusBar.setStyle({ style: tone === "forest" ? Style.Dark : Style.Light });
+    await StatusBar.setBackgroundColor({ color: tone === "forest" ? "#071A14" : "#FFFFFF" });
+  } catch {
+    /* plugin unavailable in some preview builds */
+  }
+}
+
 /**
  * Wire Capacitor plugins for the Android (and iOS) shell.
  * Safe on web — every call is gated by Capacitor.isNativePlatform().

@@ -1,20 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import {
-  BarChart3,
-  Download,
-  RefreshCw,
-  Calendar,
-  FileSpreadsheet,
-  TrendingUp,
-  DollarSign,
-  ShoppingCart,
-  Package,
-  Percent,
-  PieChart,
-  List,
-  Layers,
-} from "lucide-react";
+import { BarChart3, Calendar, FileSpreadsheet, TrendingUp, DollarSign, ShoppingCart, Package, Percent, PieChart, List, Layers } from "lucide-react";
+import DownloadIcon from "@/components/ui/icons/download-icon";
+import RefreshIcon from "@/components/ui/icons/refresh-icon";
 import {
   BarChart,
   Bar,
@@ -33,7 +21,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useBranchFilter } from "@/contexts/BranchFilterContext";
+import { dashboardService } from "@/services/dashboardService";
 import {
+  DASHBOARD_LIVE_QUERY,
   paletteColor,
   fmtCurrency,
   TONE_ICON_BG,
@@ -42,7 +32,9 @@ import {
   deepFillY,
 } from "@/components/dashboard/shared";
 import type { Tone } from "@/components/dashboard/shared";
-import { API_URL as API_BASE } from "@/lib/apiBase";
+import { getApiUrl } from "@/lib/apiBase";
+import { authFetch } from "@/lib/auth";
+import { toast } from "sonner";
 
 interface ReportSummary {
   total_revenue: number;
@@ -175,6 +167,23 @@ function ReportsPage() {
   const [toDate, setToDate] = useState(todayStr);
   const [activeTab, setActiveTab] = useState<ReportTab>("daily");
 
+  // Data syncs daily, so "the last 30 days ending today" can be mostly empty when the sync
+  // is behind. Until the user picks dates, open on the 30 days ending at the last sync.
+  const [edited, setEdited] = useState(false);
+  const { data: fresh, isLoading: freshLoading } = useQuery({
+    queryKey: ["dashboard", "metrics", "today", branch],
+    queryFn: () => dashboardService.getMetrics("today", branch),
+    ...DASHBOARD_LIVE_QUERY,
+  });
+  const lastSync = fresh?.last_sync?.slice(0, 10);
+  useEffect(() => {
+    if (edited || !lastSync) return;
+    const from = new Date(`${lastSync}T00:00:00Z`);
+    from.setUTCDate(from.getUTCDate() - 29);
+    setFromDate(from.toISOString().slice(0, 10));
+    setToDate(lastSync);
+  }, [lastSync, edited]);
+
   const queryKey = ["reports", "summary", fromDate, toDate, branch];
 
   const { data, isLoading, refetch, isFetching } = useQuery<ReportData>({
@@ -182,13 +191,38 @@ function ReportsPage() {
     queryFn: async () => {
       const params = new URLSearchParams({ from_date: fromDate, to_date: toDate });
       if (branch && branch !== "all") params.set("branch", branch);
-      const res = await fetch(`${API_BASE}/reports/summary?${params}`);
+      const res = await authFetch(`${getApiUrl()}/reports/summary?${params}`);
       if (!res.ok) throw new Error("Failed to generate report");
       return res.json();
     },
     staleTime: 30_000,
-    enabled: !!fromDate && !!toDate,
+    enabled: !!fromDate && !!toDate && (edited || !freshLoading),
   });
+
+  // The CSV endpoint needs the login token, which window.open() can't send — fetch it
+  // as a blob and save that instead.
+  const [exporting, setExporting] = useState(false);
+  const exportCsv = async () => {
+    setExporting(true);
+    try {
+      const params = new URLSearchParams({ from_date: fromDate, to_date: toDate });
+      if (branch && branch !== "all") params.set("branch", branch);
+      const res = await authFetch(`${getApiUrl()}/reports/summary/csv?${params}`);
+      if (!res.ok) throw new Error(`Export failed (${res.status})`);
+      const url = URL.createObjectURL(await res.blob());
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `report_${fromDate}_to_${toDate}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Couldn't export the report.");
+    } finally {
+      setExporting(false);
+    }
+  };
 
   const summary = data?.summary;
   const daily = data?.daily ?? [];
@@ -216,14 +250,10 @@ function ReportsPage() {
             variant="outline"
             size="sm"
             className="gap-1.5 text-[11px]"
-            disabled={!data || isLoading}
-            onClick={() => {
-              const params = new URLSearchParams({ from_date: fromDate, to_date: toDate });
-              if (branch && branch !== "all") params.set("branch", branch);
-              window.open(`${API_BASE}/reports/summary/csv?${params}`, "_blank");
-            }}
+            disabled={!data || isLoading || exporting}
+            onClick={exportCsv}
           >
-            <Download className="h-3.5 w-3.5" />
+            <DownloadIcon className="h-3.5 w-3.5" />
             Export CSV
           </Button>
           <Button
@@ -233,7 +263,7 @@ function ReportsPage() {
             disabled={isFetching}
             className="text-[11px]"
           >
-            <RefreshCw className={cn("h-3.5 w-3.5", isFetching && "animate-spin")} />
+            <RefreshIcon className={cn("h-3.5 w-3.5", isFetching && "animate-spin")} />
           </Button>
         </div>
       </div>
@@ -251,7 +281,10 @@ function ReportsPage() {
                 <input
                   type="date"
                   value={fromDate}
-                  onChange={(e) => setFromDate(e.target.value)}
+                  onChange={(e) => {
+                    setEdited(true);
+                    setFromDate(e.target.value);
+                  }}
                   className="h-9 w-[180px] rounded-lg border border-border/60 bg-background pl-9 pr-3 text-[12px] text-foreground outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition"
                 />
               </div>
@@ -265,7 +298,10 @@ function ReportsPage() {
                 <input
                   type="date"
                   value={toDate}
-                  onChange={(e) => setToDate(e.target.value)}
+                  onChange={(e) => {
+                    setEdited(true);
+                    setToDate(e.target.value);
+                  }}
                   className="h-9 w-[180px] rounded-lg border border-border/60 bg-background pl-9 pr-3 text-[12px] text-foreground outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition"
                 />
               </div>

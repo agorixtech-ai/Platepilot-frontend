@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
-import { LayoutDashboard, ShoppingCart, FileText, Users, Settings, LogOut } from "lucide-react";
+import { LayoutDashboard, ShoppingCart, FileText, Users, Settings } from "lucide-react";
+import LogoutIcon from "@/components/ui/icons/logout-icon";
 import { AppLogo } from "@/components/AppLogo";
 import {
   Sidebar as SidebarComponent,
@@ -107,7 +108,7 @@ export function Sidebar() {
             title="Sign out"
             className="h-7 w-7 shrink-0 text-sidebar-foreground/50 hover:text-destructive hover:bg-destructive/10 group-data-[collapsible=icon]:hidden"
           >
-            <LogOut className="h-3.5 w-3.5" />
+            <LogoutIcon className="h-3.5 w-3.5" />
           </Button>
         </div>
       </SidebarFooter>

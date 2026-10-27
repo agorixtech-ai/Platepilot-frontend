@@ -1,19 +1,8 @@
 import { lazy, Suspense, useMemo } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  AlertTriangle,
-  ArrowDownRight,
-  ArrowUpRight,
-  Building2,
-  CheckCircle2,
-  Crown,
-  DollarSign,
-  MapPin,
-  RefreshCw,
-  Scale,
-  ShoppingCart,
-  TrendingUp,
-} from "lucide-react";
+import { AlertTriangle, ArrowDownRight, ArrowUpRight, Building2, CheckCircle2, Crown, DollarSign, Scale, ShoppingCart, TrendingUp } from "lucide-react";
+import MapPinIcon from "@/components/ui/icons/map-pin-icon";
+import RefreshIcon from "@/components/ui/icons/refresh-icon";
 import {
   Bar,
   BarChart,
@@ -83,7 +72,7 @@ function fmtPctOrDash(value: number | null): string {
 
 /* ── Small pieces ────────────────────────────────────────────────────────── */
 
-function Spark({ values, color }: { values: number[]; color: string }) {
+export function Spark({ values, color }: { values: number[]; color: string }) {
   if (values.length < 2) return null;
   const w = 88;
   const h = 24;
@@ -288,7 +277,7 @@ function BranchesPage() {
           disabled={summaryQuery.isFetching || snapshotsQuery.isFetching}
           className="text-[11px]"
         >
-          <RefreshCw
+          <RefreshIcon
             className={cn(
               "h-3.5 w-3.5",
               (summaryQuery.isFetching || snapshotsQuery.isFetching) && "animate-spin",
@@ -640,7 +629,7 @@ function BranchesPage() {
           <Card className="border border-border/60 bg-card shadow-sm">
             <CardHeader className="border-b border-border/40 px-5 pb-3 pt-4">
               <div className="flex items-center gap-1.5">
-                <MapPin className="h-3.5 w-3.5 text-muted-foreground" />
+                <MapPinIcon className="h-3.5 w-3.5 text-muted-foreground" />
                 <CardTitle className="text-[13px] font-bold text-foreground">
                   Branch locations
                 </CardTitle>

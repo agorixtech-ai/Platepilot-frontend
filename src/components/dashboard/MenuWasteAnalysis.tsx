@@ -1,14 +1,7 @@
 import { useMemo, useState } from "react";
-import {
-  AlertTriangle,
-  CheckCircle2,
-  Maximize2,
-  Rocket,
-  Search,
-  Sparkles,
-  Star,
-  TrendingDown,
-} from "lucide-react";
+import { AlertTriangle, CheckCircle2, Maximize2, Rocket, Star, TrendingDown } from "lucide-react";
+import MagnifierIcon from "@/components/ui/icons/magnifier-icon";
+import SparklesIcon from "@/components/ui/icons/sparkles-icon";
 import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
@@ -248,20 +241,30 @@ function QuadrantBadge({ zone }: { zone: Zone }) {
   return (
     <div
       className={cn(
-        "pointer-events-none flex h-[68px] w-[196px] items-start gap-2 rounded-xl border px-2.5 py-2 shadow-sm",
+        "pointer-events-none flex w-[92px] items-start gap-1 rounded-md border px-1.5 py-1 shadow-sm sm:h-[68px] sm:w-[196px] sm:gap-2 sm:rounded-xl sm:px-2.5 sm:py-2",
         config.card,
       )}
     >
       <span
-        className={cn("mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full", config.badge)}
+        className={cn(
+          "mt-0.5 grid h-4 w-4 shrink-0 place-items-center rounded-full sm:h-6 sm:w-6",
+          config.badge,
+        )}
       >
-        <Icon className="h-3.5 w-3.5" strokeWidth={2.5} />
+        <Icon className="h-2.5 w-2.5 sm:h-3.5 sm:w-3.5" strokeWidth={2.5} />
       </span>
       <div className="min-w-0">
-        <p className={cn("text-[11px] font-extrabold tracking-wide", config.text)}>
+        <p
+          className={cn(
+            "text-[9px] font-extrabold leading-[1.15] tracking-wide sm:text-[11px]",
+            config.text,
+          )}
+        >
           {config.label}
         </p>
-        <p className="mt-0.5 text-[10px] leading-snug text-slate-600">{config.blurb}</p>
+        <p className="mt-0.5 hidden text-[10px] leading-snug text-slate-600 sm:block">
+          {config.blurb}
+        </p>
       </div>
     </div>
   );
@@ -302,7 +305,7 @@ function WasteMatrix({
   const hoverPos = hover ? toPx(hover) : null;
 
   return (
-    <div className="relative h-full min-h-[28rem] w-full overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-border dark:bg-card">
+    <div className="relative aspect-[25/16] w-full overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-border dark:bg-card">
       <div className="pointer-events-none absolute inset-0 z-20 grid grid-cols-2 grid-rows-2 p-3">
         <div className="justify-self-start self-start">
           <QuadrantBadge zone="waste_risk" />
@@ -502,7 +505,7 @@ export function MenuWasteAnalysis({
 }: {
   items: MenuEngineeringItem[];
   period: Period;
-  onPeriodChange: (period: Period) => void;
+  onPeriodChange?: (period: Period) => void;
   isLoading?: boolean;
   /** Opens the page's existing DishDialog — the investigation surface. */
   onInvestigate?: (dish: string) => void;
@@ -546,23 +549,25 @@ export function MenuWasteAnalysis({
           Menu Waste Analysis: Stock Issued vs. Menu Sales
         </CardTitle>
         <div className="flex items-center gap-2">
-          <div className="flex items-center rounded-lg bg-slate-100 p-0.5 dark:bg-muted">
-            {PERIODS.map(({ label, value }) => (
-              <button
-                key={value}
-                type="button"
-                onClick={() => onPeriodChange(value)}
-                className={cn(
-                  "rounded-md px-3 py-1.5 text-[11px] font-semibold transition-colors",
-                  period === value
-                    ? "bg-slate-900 text-white shadow-sm dark:bg-primary dark:text-primary-foreground"
-                    : "text-slate-500 hover:text-slate-800 dark:text-muted-foreground dark:hover:text-foreground",
-                )}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
+          {onPeriodChange && (
+            <div className="flex items-center rounded-lg bg-slate-100 p-0.5 dark:bg-muted">
+              {PERIODS.map(({ label, value }) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => onPeriodChange(value)}
+                  className={cn(
+                    "rounded-md px-3 py-1.5 text-[11px] font-semibold transition-colors",
+                    period === value
+                      ? "bg-slate-900 text-white shadow-sm dark:bg-primary dark:text-primary-foreground"
+                      : "text-slate-500 hover:text-slate-800 dark:text-muted-foreground dark:hover:text-foreground",
+                  )}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          )}
           <button
             type="button"
             aria-label="Expand chart"
@@ -575,7 +580,7 @@ export function MenuWasteAnalysis({
 
       <CardContent className="flex flex-1 flex-col gap-4 px-5 pb-5 pt-4">
         {isLoading ? (
-          <div className="h-[28rem] animate-pulse rounded-xl bg-secondary" />
+          <div className="aspect-[25/16] w-full animate-pulse rounded-xl bg-secondary" />
         ) : !points.length ? (
           <EmptyState
             icon={AlertTriangle}
@@ -586,7 +591,7 @@ export function MenuWasteAnalysis({
           <>
             <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_260px]">
               <div className="grid grid-cols-[40px_minmax(0,1fr)] grid-rows-[minmax(0,1fr)_24px] gap-x-1">
-                <div className="relative row-start-1 min-h-[28rem]">
+                <div className="relative row-start-1">
                   <span className="absolute left-1/2 top-4 -translate-x-1/2 text-[10px] font-semibold uppercase tracking-wide text-slate-400">
                     High
                   </span>
@@ -598,7 +603,7 @@ export function MenuWasteAnalysis({
                   </span>
                 </div>
 
-                <div className="row-start-1 min-h-[28rem]">
+                <div className="row-start-1">
                   <WasteMatrix
                     points={points}
                     medSold={medSold}
@@ -660,7 +665,7 @@ export function MenuWasteAnalysis({
                 <div className="rounded-xl border border-sky-200/80 bg-sky-50/90 p-3.5 shadow-sm dark:border-sky-900/40 dark:bg-sky-950/30">
                   <div className="mb-2 flex items-center gap-2">
                     <span className="grid h-7 w-7 place-items-center rounded-lg bg-sky-500/15 text-sky-600 dark:text-sky-400">
-                      <Sparkles className="h-3.5 w-3.5" />
+                      <SparklesIcon className="h-3.5 w-3.5" />
                     </span>
                     <h3 className="text-[12px] font-bold text-sky-900 dark:text-sky-200">
                       Recommendations
@@ -689,16 +694,18 @@ export function MenuWasteAnalysis({
               </aside>
             </div>
 
-            <div className="flex flex-wrap items-center gap-2.5 border-t border-border/40 pt-4">
-              <button
-                type="button"
-                onClick={investigate}
-                className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-[12px] font-semibold text-white shadow-sm transition-opacity hover:opacity-90 dark:bg-primary dark:text-primary-foreground"
-              >
-                <Search className="h-3.5 w-3.5" />
-                Investigate Waste
-              </button>
-            </div>
+            {onInvestigate && (
+              <div className="flex flex-wrap items-center gap-2.5 border-t border-border/40 pt-4">
+                <button
+                  type="button"
+                  onClick={investigate}
+                  className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-[12px] font-semibold text-white shadow-sm transition-opacity hover:opacity-90 dark:bg-primary dark:text-primary-foreground"
+                >
+                  <MagnifierIcon className="h-3.5 w-3.5" />
+                  Investigate Waste
+                </button>
+              </div>
+            )}
           </>
         )}
       </CardContent>

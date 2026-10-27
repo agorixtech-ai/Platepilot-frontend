@@ -1,32 +1,25 @@
 import { ApiResponse } from "@/types/domain";
-import { API_URL as API_BASE } from "@/lib/apiBase";
+import { getApiUrl } from "@/lib/apiBase";
+import { authFetch, clearTokens } from "@/lib/auth";
 
 export class ApiClient {
-  private baseUrl: string;
-
-  constructor(baseUrl = API_BASE) {
-    this.baseUrl = baseUrl;
-  }
+  // Resolved per request (not at import) so the native-app host rewrite always applies.
+  constructor(private baseUrl?: string) {}
 
   private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-    const token = localStorage.getItem("access_token");
-    const headers: HeadersInit = {
-      "Content-Type": "application/json",
-      ...options.headers,
-    };
-
-    if (token) {
-      headers.Authorization = `Bearer ${token}`;
-    }
-
-    const response = await fetch(`${this.baseUrl}${endpoint}`, {
+    const response = await authFetch(`${this.baseUrl ?? getApiUrl()}${endpoint}`, {
       ...options,
-      headers,
+      headers: {
+        "Content-Type": "application/json",
+        ...(options.headers as Record<string, string>),
+      },
     });
 
     if (!response.ok) {
       if (response.status === 401) {
-        localStorage.removeItem("access_token");
+        // Refresh already failed inside authFetch — the session is really over. Clear the
+        // stored user too, otherwise the dashboard guard still thinks we're signed in.
+        clearTokens();
         window.location.href = "/login";
       }
       const error = await response.json().catch(() => ({}));

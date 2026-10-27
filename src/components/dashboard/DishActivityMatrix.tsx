@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { Sparkles } from "lucide-react";
+import SparklesIcon from "@/components/ui/icons/sparkles-icon";
 
 import { cn } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -166,7 +166,7 @@ export function DishActivityMatrix({
                 to="/dashboard/ai"
                 className="flex items-center justify-center gap-1.5 rounded-full bg-primary px-4 py-2 text-[11px] font-bold text-primary-foreground transition-opacity hover:opacity-90"
               >
-                <Sparkles className="h-3.5 w-3.5" />
+                <SparklesIcon className="h-3.5 w-3.5" />
                 Run Analysis
               </Link>
             </div>

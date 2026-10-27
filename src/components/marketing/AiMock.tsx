@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
-import { Bot, Send, User } from "lucide-react";
+import { Bot, User } from "lucide-react";
+import SendIcon from "@/components/ui/icons/send-icon";
 import { Styles } from "@/components/marketing/DashboardMock";
 
 /**
@@ -134,7 +135,7 @@ export function MockAiChat() {
               color: "#fff",
             }}
           >
-            <Send size={14} />
+            <SendIcon size={14} />
           </span>
         </div>
       </div>

@@ -1,15 +1,5 @@
-import {
-  AlertTriangle,
-  ArrowDownRight,
-  ArrowUpRight,
-  Building2,
-  CheckCircle2,
-  Crown,
-  DollarSign,
-  RefreshCw,
-  ShoppingCart,
-  type LucideIcon,
-} from "lucide-react";
+import { AlertTriangle, ArrowDownRight, ArrowUpRight, Building2, CheckCircle2, Crown, DollarSign, ShoppingCart, type LucideIcon } from "lucide-react";
+import RefreshIcon from "@/components/ui/icons/refresh-icon";
 import { AppFrame, Styles } from "./DashboardMock";
 
 /**
@@ -782,7 +772,7 @@ export function BranchesMock() {
           </div>
         </div>
         <span className="dm-btn">
-          <RefreshCw size={14} />
+          <RefreshIcon size={14} />
         </span>
       </div>
       <BranchKpis />

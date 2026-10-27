@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { BookOpenText, RefreshCw, Search, TriangleAlert } from "lucide-react";
+import { BookOpenText, Search, TriangleAlert } from "lucide-react";
+import RefreshIcon from "@/components/ui/icons/refresh-icon";
 
 import { cn } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -47,7 +48,7 @@ function MenuPage() {
           disabled={isFetching}
           className="text-[11px]"
         >
-          <RefreshCw className={cn("h-3.5 w-3.5", isFetching && "animate-spin")} />
+          <RefreshIcon className={cn("h-3.5 w-3.5", isFetching && "animate-spin")} />
         </Button>
       </div>
 
