@@ -2,7 +2,6 @@ import { useQuery } from "@tanstack/react-query";
 
 import { dashboardService } from "@/services/dashboardService";
 import { useBranchFilter } from "@/contexts/BranchFilterContext";
-import { useDateRange, rangeToPeriod } from "@/contexts/DateRangeContext";
 import { DASHBOARD_LIVE_QUERY, fmtCurrency } from "@/components/dashboard/shared";
 import {
   CARD,
@@ -14,11 +13,12 @@ import {
 } from "@/components/dashboard/MobileUI";
 import { Skeleton } from "@/components/ui/skeleton";
 
+// Over-purchasing only shows up over a stretch of days, so this always reads 30 days.
+const period = "month" as const;
+
 /** Waste = purchases (Tally) beyond what sold dishes' recipes needed (POS). */
 export default function Waste() {
   const { branch } = useBranchFilter();
-  const { range } = useDateRange();
-  const period = rangeToPeriod(range);
 
   const {
     data: w,
@@ -41,7 +41,7 @@ export default function Waste() {
 
       <div className="grid grid-cols-2 gap-3">
         <StatTile
-          label="Waste Cost"
+          label="Waste Cost · 30 days"
           value={w ? fmtCurrency(w.total_cost, w.currency) : "…"}
           tone="critical"
         />

@@ -1,5 +1,6 @@
 import { useId } from "react";
-import { Check, Globe } from "lucide-react";
+import { Check } from "lucide-react";
+import GlobeIcon from "@/components/ui/icons/globe-icon";
 import { LiveNumber } from "@/components/ui/live-number";
 import "./cross-platform.css";
 
@@ -121,7 +122,7 @@ export function CrossPlatformSection() {
     <section className="xp-section" id="platforms-everywhere" aria-labelledby="xp-heading">
       <div className="xp-inner">
         <div className="xp-badge">
-          <Globe size={14} strokeWidth={2.25} />
+          <GlobeIcon size={14} strokeWidth={2.25} />
           <span>Cross-platform</span>
         </div>
 

@@ -1,7 +1,11 @@
 import { AppPage } from "@/components/ionic/AppPage";
 import React, { useState } from "react";
 import { Link, useHistory } from "react-router-dom";
-import { Mail, Lock, Eye, EyeOff, User, ArrowRight, ShieldCheck } from "lucide-react";
+import { Mail, ArrowRight, ShieldCheck } from "lucide-react";
+import LockIcon from "@/components/ui/icons/lock-icon";
+import EyeIcon from "@/components/ui/icons/eye-icon";
+import EyeOffIcon from "@/components/ui/icons/eye-off-icon";
+import UserIcon from "@/components/ui/icons/user-icon";
 import { toast } from "sonner";
 import { register as apiRegister } from "../lib/auth";
 import { AuthPageShell, AuthVisualPanel } from "@/components/auth/AuthPageShell";
@@ -119,7 +123,7 @@ function SignupPage() {
     >
       <div className="auth-fade-up">
         <AuthIconBox>
-          <User className="w-5 h-5" />
+          <UserIcon className="w-5 h-5" />
         </AuthIconBox>
         <h1 className="text-[26px] font-extrabold text-foreground tracking-tight mb-1">
           Create your account
@@ -135,7 +139,7 @@ function SignupPage() {
               Full Name
             </label>
             <div className="relative">
-              <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <UserIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <input
                 type="text"
                 value={fullName}
@@ -170,7 +174,7 @@ function SignupPage() {
               Password
             </label>
             <div className="relative">
-              <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <LockIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <input
                 type={showPwd ? "text" : "password"}
                 value={password}
@@ -184,7 +188,7 @@ function SignupPage() {
                 onClick={() => setShowPwd(!showPwd)}
                 className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition"
               >
-                {showPwd ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                {showPwd ? <EyeOffIcon className="w-4 h-4" /> : <EyeIcon className="w-4 h-4" />}
               </button>
             </div>
             {password && (
@@ -224,7 +228,7 @@ function SignupPage() {
               Confirm Password
             </label>
             <div className="relative">
-              <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <LockIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <input
                 type={showConfirm ? "text" : "password"}
                 value={confirmPassword}
@@ -239,7 +243,7 @@ function SignupPage() {
                 onClick={() => setShowConfirm(!showConfirm)}
                 className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition"
               >
-                {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                {showConfirm ? <EyeOffIcon className="w-4 h-4" /> : <EyeIcon className="w-4 h-4" />}
               </button>
             </div>
             {confirmPassword && confirmPassword !== password && (

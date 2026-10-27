@@ -5,7 +5,6 @@ import { AlertCircle, Lightbulb } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { dashboardService } from "@/services/dashboardService";
 import { useBranchFilter } from "@/contexts/BranchFilterContext";
-import { useDateRange, rangeToPeriod } from "@/contexts/DateRangeContext";
 import { DASHBOARD_LIVE_QUERY, fmtCurrency } from "@/components/dashboard/shared";
 import {
   CARD,
@@ -21,10 +20,12 @@ import { Skeleton } from "@/components/ui/skeleton";
 // ponytail: fixed target; read from tenant_settings once it stores one.
 const TARGET_PCT = 30;
 
+// Purchases arrive in batches, so single-day food cost swings 0–100%+. This screen always
+// reads the trailing 30 days, the smallest window where the ratio means something.
+const period = "month" as const;
+
 export default function FoodCost() {
   const { branch } = useBranchFilter();
-  const { range } = useDateRange();
-  const period = rangeToPeriod(range);
 
   const metrics = useQuery({
     queryKey: ["dashboard", "metrics", period, branch],
@@ -52,7 +53,7 @@ export default function FoodCost() {
       )}
 
       <div className={cn(CARD, "p-4")}>
-        <p className="text-[12px] text-muted-foreground">Food Cost</p>
+        <p className="text-[12px] text-muted-foreground">Food Cost · last 30 days</p>
         <div className="mt-1 flex items-center justify-between">
           {metrics.isLoading ? (
             <Skeleton className="h-10 w-28" />
@@ -68,7 +69,7 @@ export default function FoodCost() {
                 delta > 0 ? "bg-destructive-soft text-destructive" : "bg-success-soft text-success",
               )}
             >
-              {delta > 0 ? "↑" : "↓"} {Math.abs(delta).toFixed(1)}%
+              {delta > 0 ? "↑" : "↓"} {Math.abs(delta).toFixed(1)} pts
             </span>
           )}
         </div>

@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react";
-import { Search, Star, MapPin, ThumbsUp, ThumbsDown, Loader2, ArrowLeft } from "lucide-react";
+import { Search, ThumbsUp, ThumbsDown, Loader2, ArrowLeft } from "lucide-react";
+import StarIcon from "@/components/ui/icons/star-icon";
+import MapPinIcon from "@/components/ui/icons/map-pin-icon";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { API_URL as API_BASE } from "@/lib/apiBase";
+import { getApiUrl } from "@/lib/apiBase";
+import { authFetch } from "@/lib/auth";
 
 const DEFAULT_PLACE_IDS = ["ChIJGYC22DMTXz4R3SvDLEgu8Z4"];
 
@@ -40,7 +43,7 @@ function StarRating({ rating, size = 16 }: { rating: number; size?: number }) {
   return (
     <div className="flex items-center gap-0.5">
       {[1, 2, 3, 4, 5].map((s) => (
-        <Star
+        <StarIcon
           key={s}
           className={s <= rating ? "text-warning fill-warning" : "text-muted-foreground/30"}
           style={{ width: size, height: size }}
@@ -109,8 +112,8 @@ function ReviewsPage() {
   useEffect(() => {
     async function loadDefault() {
       try {
-        const res = await fetch(
-          `${API_BASE}/reviews?placeIds=${DEFAULT_PLACE_IDS.map(encodeURIComponent).join(",")}`,
+        const res = await authFetch(
+          `${getApiUrl()}/reviews?placeIds=${DEFAULT_PLACE_IDS.map(encodeURIComponent).join(",")}`,
         );
         if (!res.ok) throw new Error(`${res.status}`);
         const data = await res.json();
@@ -136,7 +139,7 @@ function ReviewsPage() {
     setPlaceReviews(null);
 
     try {
-      const res = await fetch(`${API_BASE}/reviews/search?q=${encodeURIComponent(q)}`);
+      const res = await authFetch(`${getApiUrl()}/reviews/search?q=${encodeURIComponent(q)}`);
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
         throw new Error(err.detail || `Search failed (${res.status})`);
@@ -157,7 +160,9 @@ function ReviewsPage() {
     setPlaceReviews(null);
 
     try {
-      const res = await fetch(`${API_BASE}/reviews?placeIds=${encodeURIComponent(place.placeId)}`);
+      const res = await authFetch(
+        `${getApiUrl()}/reviews?placeIds=${encodeURIComponent(place.placeId)}`,
+      );
       if (!res.ok) throw new Error(`Failed to load reviews (${res.status})`);
       const data = await res.json();
       if (data.restaurants?.length > 0) {
@@ -249,7 +254,7 @@ function ReviewsPage() {
                 <div className="min-w-0 flex-1">
                   <h2 className="text-xl font-bold text-foreground">{selectedPlace.name}</h2>
                   <div className="mt-1.5 flex items-center gap-2 text-sm text-muted-foreground">
-                    <MapPin className="h-3.5 w-3.5 shrink-0" />
+                    <MapPinIcon className="h-3.5 w-3.5 shrink-0" />
                     <span className="truncate">{selectedPlace.address}</span>
                   </div>
                   <div className="mt-3 flex items-center gap-3">
@@ -366,7 +371,7 @@ function ReviewsPage() {
                       />
                     ) : (
                       <div className="flex h-40 w-full items-center justify-center rounded-t-xl bg-muted">
-                        <Star className="h-10 w-10 text-muted-foreground/30" />
+                        <StarIcon className="h-10 w-10 text-muted-foreground/30" />
                       </div>
                     )}
                     <div className="p-4">
@@ -374,7 +379,7 @@ function ReviewsPage() {
                         {place.name}
                       </h3>
                       <div className="mt-1.5 flex items-center gap-1.5 text-xs text-muted-foreground">
-                        <MapPin className="h-3 w-3 shrink-0" />
+                        <MapPinIcon className="h-3 w-3 shrink-0" />
                         <span className="truncate">{place.address}</span>
                       </div>
                       <div className="mt-3 flex items-center justify-between">
@@ -509,7 +514,7 @@ function ReviewsPage() {
             <Card>
               <CardContent className="flex flex-col items-center justify-center py-20">
                 <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary-soft">
-                  <Star className="h-8 w-8 text-primary" />
+                  <StarIcon className="h-8 w-8 text-primary" />
                 </div>
                 <h3 className="mt-5 text-base font-semibold text-foreground">
                   Search for a restaurant

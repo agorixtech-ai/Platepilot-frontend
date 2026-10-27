@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Link, useHistory, useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { LogOut } from "lucide-react";
+import LogoutIcon from "@/components/ui/icons/logout-icon";
 import { AppLogo } from "@/components/AppLogo";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -280,7 +280,7 @@ export function DashboardLayout({ children }: { children?: ReactNode }) {
                   onClick={handleLogout}
                   className="h-8 flex-1 justify-start gap-2 rounded-lg px-2 text-[11px] font-medium text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-destructive"
                 >
-                  <LogOut className="h-3.5 w-3.5" />
+                  <LogoutIcon className="h-3.5 w-3.5" />
                   Sign out
                 </Button>
               </div>
@@ -359,7 +359,7 @@ function MainPanel({
                 onClick={onLogout}
                 className="hidden h-9 gap-1.5 rounded-xl text-[12px] font-medium text-muted-foreground hover:text-destructive xl:flex"
               >
-                <LogOut className="h-3.5 w-3.5" />
+                <LogoutIcon className="h-3.5 w-3.5" />
                 Sign out
               </Button>
             </div>

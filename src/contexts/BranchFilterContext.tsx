@@ -1,8 +1,8 @@
 import { createContext, useContext, useState, useEffect, useMemo, type ReactNode } from "react";
-import { getAccessToken } from "@/lib/auth";
+import { authFetch } from "@/lib/auth";
 import { toLocations, type Location } from "@/lib/locations";
 
-import { API_URL as API_BASE } from "@/lib/apiBase";
+import { getApiUrl } from "@/lib/apiBase";
 const STORAGE_KEY = "platepilot_branch";
 
 interface BranchFilterState {
@@ -46,10 +46,7 @@ export function BranchFilterProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     async function load() {
       try {
-        const token = getAccessToken();
-        const res = await fetch(`${API_BASE}/dashboard/branches`, {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        });
+        const res = await authFetch(`${getApiUrl()}/dashboard/branches`);
         if (res.ok) {
           const data = await res.json();
           const items: string[] = data.items || data.branches || [];

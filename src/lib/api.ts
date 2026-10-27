@@ -1,9 +1,9 @@
 import { getAccessToken, clearTokens, refreshAccessToken } from "./auth";
 
-import { API_ORIGIN } from "./apiBase";
+import { getApiOrigin } from "./apiBase";
 
-// Request paths here start from the backend origin (/health, /api/...).
-const BASE = API_ORIGIN;
+// Request paths here start from the backend origin (/health, /api/...); resolved per
+// request so the Android host rewrite applies once Capacitor is ready.
 
 // ── Core fetch wrapper ────────────────────────────────────
 async function request<T>(path: string, options: RequestInit = {}, retry = true): Promise<T> {
@@ -14,7 +14,7 @@ async function request<T>(path: string, options: RequestInit = {}, retry = true)
   };
   if (token) headers["Authorization"] = `Bearer ${token}`;
 
-  const res = await fetch(`${BASE}${path}`, { ...options, headers });
+  const res = await fetch(`${getApiOrigin()}${path}`, { ...options, headers });
 
   if (res.status === 401 && retry) {
     const refreshed = await refreshAccessToken();

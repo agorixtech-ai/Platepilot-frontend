@@ -1,25 +1,8 @@
 import { useEffect, useState } from "react";
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
-import {
-  Search,
-  RefreshCw,
-  ChevronLeft,
-  ChevronRight,
-  Droplet,
-  AlertTriangle,
-  Store,
-  ArrowRight,
-  Check,
-  Wheat,
-  Milk,
-  Bean,
-  Candy,
-  Egg,
-  Sandwich,
-  Drumstick,
-  Package,
-  type LucideIcon,
-} from "lucide-react";
+import { Search, ChevronLeft, ChevronRight, Droplet, Store, ArrowRight, Check, Wheat, Milk, Bean, Candy, Egg, Sandwich, Drumstick, Package, type LucideIcon } from "lucide-react";
+import RefreshIcon from "@/components/ui/icons/refresh-icon";
+import TriangleAlertIcon from "@/components/ui/icons/triangle-alert-icon";
 
 import { cn } from "@/lib/utils";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
@@ -360,7 +343,7 @@ function MarketPrices() {
           onClick={() => query.refetch()}
           className="h-9 gap-1.5 text-[12px]"
         >
-          <RefreshCw className={`h-3.5 w-3.5 ${query.isFetching ? "animate-spin" : ""}`} />
+          <RefreshIcon className={`h-3.5 w-3.5 ${query.isFetching ? "animate-spin" : ""}`} />
           Refresh
         </Button>
       </div>
@@ -390,7 +373,7 @@ function MarketPrices() {
       {query.isError ? (
         <Card className="border-destructive/30 bg-destructive/5">
           <div className="p-6 flex items-start gap-2.5">
-            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
+            <TriangleAlertIcon className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
             <div>
               <p className="text-[12px] font-bold text-destructive">Could not load market prices</p>
               <p className="text-[11px] text-muted-foreground mt-0.5">

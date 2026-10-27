@@ -1391,32 +1391,45 @@ ion-app {
  * Android / mobile shell — bottom tab bar + more sheet
  * ═══════════════════════════════════════════════════════════════════════ */
 
-.mobile-tabbar {
+.mobile-dock {
   position: fixed;
   left: 0;
   right: 0;
-  bottom: 0;
+  bottom: calc(0.75rem + env(safe-area-inset-bottom));
   z-index: 60;
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  padding: 0.35rem 0.5rem calc(0.35rem + env(safe-area-inset-bottom));
-  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 0 1rem;
+  pointer-events: none; /* only the pill + button take taps */
+}
+
+/* Floating pill, icons only; the active tab sits in a soft primary-tinted circle */
+.mobile-tabbar {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.4rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
   background: var(--card, #fff);
-  box-shadow: 0 -6px 20px -14px rgba(7, 26, 20, 0.25);
+  box-shadow: 0 10px 30px -10px rgba(7, 26, 20, 0.35);
 }
 
 .mobile-tab {
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.2rem;
-  min-height: 3.1rem;
+  width: 3.1rem;
+  height: 3.1rem;
+  border-radius: 999px;
   color: var(--muted-foreground);
-  font-size: 0.66rem;
-  font-weight: 600;
   text-decoration: none;
-  transition: color 0.15s ease;
+  transition:
+    color 0.15s ease,
+    background-color 0.15s ease;
 }
 
 .mobile-tab-icon {
@@ -1426,20 +1439,17 @@ ion-app {
 
 .mobile-tab.is-active {
   color: var(--primary);
-  font-weight: 700;
+  background: color-mix(in srgb, var(--primary) 14%, transparent);
 }
 
-/* PlatePielet AI — floating green button above the tab bar */
+/* PlatePielet AI — round primary button beside the pill */
 .mobile-ai-fab {
-  position: fixed;
-  right: 1rem;
-  bottom: calc(4.6rem + env(safe-area-inset-bottom));
-  z-index: 61;
+  pointer-events: auto;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 3.1rem;
-  height: 3.1rem;
+  width: 3.9rem;
+  height: 3.9rem;
   border-radius: 999px;
   background: var(--primary);
   color: var(--primary-foreground);

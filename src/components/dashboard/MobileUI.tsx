@@ -1,17 +1,12 @@
-import type { ReactNode } from "react";
+import { useSyncExternalStore, type ReactNode } from "react";
 import { Link } from "react-router-dom";
-import {
-  AlertTriangle,
-  ArrowDown,
-  ArrowUp,
-  ChevronRight,
-  RefreshCw,
-  TrendingUp,
-  type LucideIcon,
-} from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
+import { AlertTriangle, ArrowDown, ArrowUp, ChevronRight, Clock, TrendingUp, type LucideIcon } from "lucide-react";
+import RefreshIcon from "@/components/ui/icons/refresh-icon";
 
 import { cn } from "@/lib/utils";
 import type { AlertSeverity, AppAlert } from "@/components/dashboard/useAlerts";
+import type { ItemImage } from "@/services/dashboardService";
 
 /* Phone-first building blocks (Home, Insights, Alerts, Food Cost, Purchasing,
    Waste, More …) — white cards on the pale canvas, brand-green accents, per the
@@ -259,6 +254,52 @@ export function EmptyNote({ children }: { children: ReactNode }) {
   );
 }
 
+/** Pixabay's terms require a visible credit wherever its photos appear.
+    Renders only once at least one item photo has actually loaded. */
+export function PhotoCredit() {
+  const qc = useQueryClient();
+  const hasPhotos = useSyncExternalStore(
+    (notify) => qc.getQueryCache().subscribe(notify),
+    () =>
+      qc
+        .getQueryCache()
+        .findAll({ queryKey: ["dashboard", "item-image"] })
+        .some((q) => !!(q.state.data as ItemImage | undefined)?.url),
+  );
+  if (!hasPhotos) return null;
+  return (
+    <p className="mt-3 text-center text-[10px] text-muted-foreground">
+      Photos from{" "}
+      <a
+        href="https://pixabay.com"
+        target="_blank"
+        rel="noreferrer"
+        className="underline underline-offset-2"
+      >
+        Pixabay
+      </a>
+    </p>
+  );
+}
+
+/** Data syncs once a day. When the latest sale is more than a day old the backend
+    reports sync_status "Stale" — say so at the top of the screen, because "Today"
+    then means the last day that has data, not the calendar day. */
+export function StaleBanner({ lastSync, status }: { lastSync?: string | null; status?: string }) {
+  if (!lastSync || status !== "Stale") return null;
+  const d = new Date(lastSync);
+  const days = Math.max(1, Math.floor((Date.now() - d.getTime()) / 86_400_000));
+  return (
+    <div className="flex items-center gap-2 bg-warning-soft px-4 py-1.5 text-[11px] font-medium text-warning-dark">
+      <Clock className="h-3.5 w-3.5 shrink-0" />
+      <span>
+        Showing data up to {d.toLocaleDateString([], { day: "numeric", month: "short" })} · last
+        sync {days} days ago
+      </span>
+    </div>
+  );
+}
+
 /** Data syncs once a day — every data view says how fresh it is. */
 export function SyncNote({ lastSync }: { lastSync?: string | null }) {
   return (
@@ -284,7 +325,7 @@ export function ErrorStrip({ onRetry }: { onRetry: () => void }) {
         onClick={onRetry}
         className="flex items-center gap-1 rounded-full bg-destructive px-3 py-1 font-semibold text-destructive-foreground"
       >
-        <RefreshCw className="h-3 w-3" />
+        <RefreshIcon className="h-3 w-3" />
         Retry
       </button>
     </div>

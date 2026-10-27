@@ -1,3 +1,4 @@
+import { useMemo, useSyncExternalStore } from "react";
 import { useQuery } from "@tanstack/react-query";
 
 import { dashboardService } from "@/services/dashboardService";
@@ -21,9 +22,56 @@ export interface AppAlert {
 
 const RANK: Record<AlertSeverity, number> = { critical: 0, warning: 1, opportunity: 2 };
 
+// ── Acknowledged alerts ─────────────────────────────────────────────────────
+// ponytail: acknowledgements live in this device's localStorage; move to a
+// backend table when acks must sync across devices/team members.
+// One shared store so the bell, Home card and Alerts tab always agree.
+const ACK_KEY = "platepielet_acked_alerts";
+const ACK_EVENT = "platepielet:acks";
+let memAcks: string | null = null; // used only if localStorage is blocked
+
+const readRaw = () => {
+  if (memAcks !== null) return memAcks;
+  try {
+    return localStorage.getItem(ACK_KEY) ?? "[]";
+  } catch {
+    return "[]";
+  }
+};
+const subscribe = (cb: () => void) => {
+  window.addEventListener(ACK_EVENT, cb);
+  window.addEventListener("storage", cb);
+  return () => {
+    window.removeEventListener(ACK_EVENT, cb);
+    window.removeEventListener("storage", cb);
+  };
+};
+
+function toggleAck(id: string) {
+  let ids: string[];
+  try {
+    ids = JSON.parse(readRaw());
+  } catch {
+    ids = [];
+  }
+  const next = ids.includes(id) ? ids.filter((x) => x !== id) : [...ids, id];
+  const raw = JSON.stringify(next);
+  try {
+    localStorage.setItem(ACK_KEY, raw);
+    memAcks = null;
+  } catch {
+    memAcks = raw;
+  }
+  window.dispatchEvent(new Event(ACK_EVENT));
+}
+
 /** Actionable alerts derived client-side from the live dashboard endpoints
     (stock levels, food cost, waste variance, branch sales). Query keys match
-    Overview/Inventory/Branches so the cache is shared. */
+    Overview/Inventory/Branches so the cache is shared.
+
+    Trend-type alerts (food cost, sales, waste, branch sales) compare stable
+    windows — week / month — never the selected day, because a single day of
+    purchases vs sales swings wildly and would flood the feed with noise. */
 export function useAlerts() {
   const { branch } = useBranchFilter();
   const { range } = useDateRange();
@@ -36,21 +84,28 @@ export function useAlerts() {
     enabled: can("overview", "inventory", "tally"),
     ...DASHBOARD_LIVE_QUERY,
   });
+  // Headline metrics for the selected period (Home hero).
   const metrics = useQuery({
     queryKey: ["dashboard", "metrics", period, branch],
     queryFn: () => dashboardService.getMetrics(period, branch),
     enabled: can("overview", "pos"),
     ...DASHBOARD_LIVE_QUERY,
   });
+  const week = useQuery({
+    queryKey: ["dashboard", "metrics", "week", branch],
+    queryFn: () => dashboardService.getMetrics("week", branch),
+    enabled: can("overview", "pos"),
+    ...DASHBOARD_LIVE_QUERY,
+  });
   const waste = useQuery({
-    queryKey: ["dashboard", "waste-composition", period, branch],
-    queryFn: () => dashboardService.getWasteComposition(period, branch, 10),
+    queryKey: ["dashboard", "waste-composition", "month", branch],
+    queryFn: () => dashboardService.getWasteComposition("month", branch, 10),
     enabled: can("overview", "inventory", "menu"),
     ...DASHBOARD_LIVE_QUERY,
   });
   const locations = useQuery({
-    queryKey: ["dashboard", "location-snapshots", period],
-    queryFn: () => dashboardService.getLocationSnapshots(period),
+    queryKey: ["dashboard", "location-snapshots", "week"],
+    queryFn: () => dashboardService.getLocationSnapshots("week"),
     enabled: can("overview", "branches"),
     ...DASHBOARD_LIVE_QUERY,
   });
@@ -70,34 +125,34 @@ export function useAlerts() {
     });
   }
 
-  const m = metrics.data;
-  if (m?.food_cost_pp_delta != null && m.food_cost_pp_delta >= 1) {
+  const w = week.data;
+  if (w?.food_cost_pp_delta != null && w.food_cost_pp_delta >= 1) {
     alerts.push({
-      id: `food-cost:${period}`,
+      id: "food-cost:week",
       severity: "warning",
       kind: "Food Cost Alert",
-      title: `Food cost up ${m.food_cost_pp_delta.toFixed(1)} pts to ${m.food_cost_pct.toFixed(1)}%`,
-      detail: m.compare_label,
+      title: `Food cost up ${w.food_cost_pp_delta.toFixed(1)} pts to ${w.food_cost_pct.toFixed(1)}%`,
+      detail: w.compare_label,
       to: "/dashboard/food-cost",
-      stat: { label: "Food Cost", value: `${m.food_cost_pct.toFixed(1)}%` },
+      stat: { label: "Food Cost", value: `${w.food_cost_pct.toFixed(1)}%` },
     });
   }
-  if (m?.total_sales_delta_pct != null && m.total_sales_delta_pct >= 10) {
+  if (w?.total_sales_delta_pct != null && w.total_sales_delta_pct >= 10) {
     alerts.push({
-      id: `sales-up:${period}`,
+      id: "sales-up:week",
       severity: "opportunity",
       kind: "Sales Opportunity",
-      title: `Sales up ${m.total_sales_delta_pct.toFixed(0)}%`,
-      detail: m.compare_label,
+      title: `Sales up ${w.total_sales_delta_pct.toFixed(0)}%`,
+      detail: w.compare_label,
       to: "/dashboard/pos",
-      stat: { label: "Sales Change", value: `↑${m.total_sales_delta_pct.toFixed(0)}%` },
+      stat: { label: "Sales Change", value: `↑${w.total_sales_delta_pct.toFixed(0)}%` },
     });
   }
 
   const topWaste = waste.data?.items[0];
   if (topWaste && topWaste.cost > 0) {
     alerts.push({
-      id: `waste:${topWaste.name}:${period}`,
+      id: `waste:${topWaste.name}:month`,
       severity: "warning",
       kind: "Waste Alert",
       title: `${topWaste.name} over-purchased by ${topWaste.qty.toFixed(1)} ${topWaste.unit}`,
@@ -111,11 +166,11 @@ export function useAlerts() {
     if (l.delta_pct == null || l.delta_pct > -10) continue;
     if (branch !== "all" && l.branch !== branch) continue;
     alerts.push({
-      id: `branch:${l.branch}:${period}`,
+      id: `branch:${l.branch}:week`,
       severity: "critical",
       kind: "Branch Alert",
       title: `${l.branch} sales down ${Math.abs(l.delta_pct).toFixed(0)}%`,
-      detail: "vs previous period",
+      detail: "vs previous week",
       to: "/dashboard/branches",
       stat: { label: "Sales Change", value: `↓${Math.abs(l.delta_pct).toFixed(0)}%` },
     });
@@ -123,14 +178,30 @@ export function useAlerts() {
 
   alerts.sort((a, b) => RANK[a.severity] - RANK[b.severity]);
 
+  const raw = useSyncExternalStore(subscribe, readRaw, () => "[]");
+  const acked = useMemo(() => {
+    try {
+      return new Set<string>(JSON.parse(raw));
+    } catch {
+      return new Set<string>();
+    }
+  }, [raw]);
+  const openAlerts = alerts.filter((a) => !acked.has(a.id));
+
   return {
+    /** every derived alert, acknowledged or not */
     alerts,
-    metrics: m,
+    /** alerts nobody has acknowledged — the number every screen should show */
+    openAlerts,
+    acked,
+    toggleAck,
+    metrics: metrics.data,
     isLoading: stock.isLoading || metrics.isLoading,
     isError: stock.isError || metrics.isError,
     refetch: () => {
       void stock.refetch();
       void metrics.refetch();
+      void week.refetch();
       void waste.refetch();
       void locations.refetch();
     },

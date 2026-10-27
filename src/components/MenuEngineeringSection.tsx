@@ -1,19 +1,8 @@
 import { Link } from "react-router-dom";
 import "@fontsource/caveat/600.css";
 import "@fontsource/caveat/700.css";
-import {
-  ArrowRight,
-  BarChart3,
-  ChevronDown,
-  ChevronRight,
-  Megaphone,
-  Sparkles,
-  Star,
-  Target,
-  Trophy,
-  TrendingUp,
-  type LucideIcon,
-} from "lucide-react";
+import { ArrowRight, BarChart3, ChevronDown, ChevronRight, Megaphone, Sparkles, Target, Trophy, TrendingUp, type LucideIcon } from "lucide-react";
+import StarIcon from "@/components/ui/icons/star-icon";
 import { T } from "@/components/PlatePieletHero";
 import { LiveNumber } from "@/components/ui/live-number";
 
@@ -779,7 +768,7 @@ export function MenuEngineeringSection({ visible }: { visible: boolean }) {
                         <img className="me__quad-img" src={q.img} alt="" />
                         {q.star && (
                           <div className="me__quad-star" aria-hidden>
-                            <Star size={12} strokeWidth={2.4} fill="currentColor" />
+                            <StarIcon size={12} strokeWidth={2.4} fill="currentColor" />
                           </div>
                         )}
                       </div>

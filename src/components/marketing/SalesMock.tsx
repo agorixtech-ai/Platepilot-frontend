@@ -1,24 +1,9 @@
 import type { ReactNode } from "react";
-import {
-  ChevronLeft,
-  ChevronRight,
-  Clock,
-  CreditCard,
-  DollarSign,
-  Download,
-  FileText,
-  LayoutDashboard,
-  MapPin,
-  Percent,
-  RefreshCw,
-  Search,
-  ShoppingCart,
-  Soup,
-  Tag,
-  TrendingUp,
-  User,
-  type LucideIcon,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight, Clock, CreditCard, DollarSign, FileText, LayoutDashboard, MapPin, Percent, Soup, Tag, TrendingUp, User, type LucideIcon } from "lucide-react";
+import DownloadIcon from "@/components/ui/icons/download-icon";
+import RefreshIcon from "@/components/ui/icons/refresh-icon";
+import MagnifierIcon from "@/components/ui/icons/magnifier-icon";
+import ShoppingCartIcon from "@/components/ui/icons/shopping-cart-icon";
 import { AppFrame, Styles } from "./DashboardMock";
 
 /**
@@ -402,7 +387,7 @@ export function PosLog({ compact, rows = 6 }: { compact?: boolean; rows?: number
           </div>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
             <span className="dm-field" style={{ minWidth: 170, color: "#66736b" }}>
-              <Search size={13} /> Invoice No...
+              <MagnifierIcon size={13} /> Invoice No...
             </span>
             <span className="dm-field">All Channels</span>
             <span className="dm-field">All Status</span>
@@ -495,7 +480,7 @@ export function PosSale() {
         <div
           style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 15, fontWeight: 700 }}
         >
-          <ShoppingCart size={16} color="#16a34a" /> INV-24815
+          <ShoppingCartIcon size={16} color="#16a34a" /> INV-24815
         </div>
         <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
           <Badge text="Completed" tone="success" big />
@@ -605,7 +590,7 @@ export function PosFlow() {
       <div className="dm-card" style={{ padding: 20 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <span className="dm-tile" style={{ background: TONE.primary.bg, color: "#16a34a" }}>
-            <ShoppingCart size={16} />
+            <ShoppingCartIcon size={16} />
           </span>
           <div>
             <div style={{ fontSize: 13, fontWeight: 700 }}>POS bills</div>
@@ -652,7 +637,7 @@ export function PosMock() {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div>
           <div className="dm-h1">
-            <ShoppingCart size={20} color="#16a34a" /> POS Sales
+            <ShoppingCartIcon size={20} color="#16a34a" /> POS Sales
           </div>
           <div style={{ marginTop: 2, fontSize: 12, color: "#66736b" }}>
             Transaction logs and branch sales aggregates
@@ -660,10 +645,10 @@ export function PosMock() {
         </div>
         <div style={{ display: "flex", gap: 8 }}>
           <span className="dm-btn">
-            <Download size={14} /> Export logs
+            <DownloadIcon size={14} /> Export logs
           </span>
           <span className="dm-btn">
-            <RefreshCw size={14} />
+            <RefreshIcon size={14} />
           </span>
         </div>
       </div>

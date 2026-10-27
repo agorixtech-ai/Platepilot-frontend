@@ -7,6 +7,7 @@ import { dashboardService, type MenuEngineeringItem } from "@/services/dashboard
 import { useBranchFilter } from "@/contexts/BranchFilterContext";
 import { DASHBOARD_LIVE_QUERY, fmtCurrency } from "@/components/dashboard/shared";
 import { ItemAvatar } from "@/components/dashboard/ItemAvatar";
+import { MenuWasteAnalysis } from "@/components/dashboard/MenuWasteAnalysis";
 import {
   CARD,
   EmptyNote,
@@ -18,7 +19,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 
 type Quadrant = MenuEngineeringItem["quadrant"];
-type Tab = "matrix" | "top" | "low";
+type Tab = "matrix" | "top" | "low" | "waste";
 
 const QUADRANTS: {
   key: Quadrant;
@@ -91,9 +92,10 @@ export default function MobileMenu() {
         value={tab}
         onChange={setTab}
         options={[
-          { value: "matrix", label: "Menu Matrix" },
-          { value: "top", label: "Top Items" },
-          { value: "low", label: "Low Performers" },
+          { value: "matrix", label: "Matrix" },
+          { value: "waste", label: "Waste" },
+          { value: "top", label: "Top" },
+          { value: "low", label: "Low" },
         ]}
       />
 
@@ -147,6 +149,10 @@ export default function MobileMenu() {
             </>
           )}
         </>
+      ) : tab === "waste" ? (
+        <div className="mt-3">
+          <MenuWasteAnalysis items={items} period="month" />
+        </div>
       ) : shown.length === 0 ? (
         <div className="mt-3">
           <EmptyNote>Nothing here — no dishes are low performers.</EmptyNote>

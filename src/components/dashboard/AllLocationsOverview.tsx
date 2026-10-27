@@ -9,13 +9,9 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import {
-  AlertTriangle,
-  ArrowDownRight,
-  ArrowUpRight,
-  CheckCircle2,
-  ShoppingCart,
-} from "lucide-react";
+import { ArrowDownRight, ArrowUpRight, CheckCircle2 } from "lucide-react";
+import TriangleAlertIcon from "@/components/ui/icons/triangle-alert-icon";
+import ShoppingCartIcon from "@/components/ui/icons/shopping-cart-icon";
 
 import { cn } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -135,7 +131,7 @@ function LocationCard({
         {fmtCurrency(count)}
       </p>
       <p className="text-[10.5px] text-muted-foreground">
-        <ShoppingCart className="mr-1 inline h-3 w-3 align-[-2px]" />
+        <ShoppingCartIcon className="mr-1 inline h-3 w-3 align-[-2px]" />
         {snap.orders.toLocaleString()} orders · AED {snap.avg_order.toFixed(0)} avg
       </p>
 
@@ -190,7 +186,7 @@ function NeedsAttentionStrip({
                 : "border-warning/30 bg-warning-soft/40 hover:border-warning/60",
             )}
           >
-            <AlertTriangle
+            <TriangleAlertIcon
               className={cn(
                 "h-3.5 w-3.5 shrink-0",
                 item.severity === "critical" ? "text-destructive" : "text-warning",
@@ -370,7 +366,7 @@ export function AllLocationsOverview() {
   if (!isLoadingBranches && branches.length === 0) {
     return (
       <div className="flex flex-col items-center gap-1.5 rounded-xl border border-border/60 bg-card px-4 py-8 text-center animate-fade-in-up">
-        <ShoppingCart className="h-5 w-5 text-muted-foreground/50" />
+        <ShoppingCartIcon className="h-5 w-5 text-muted-foreground/50" />
         <p className="text-[12px] font-medium text-muted-foreground">No location data yet</p>
         <p className="text-[10.5px] text-muted-foreground/70">
           Locations will appear here once POS sales are synced

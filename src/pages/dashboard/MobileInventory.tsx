@@ -6,7 +6,13 @@ import { dashboardService, type StockItem } from "@/services/dashboardService";
 import { useBranchFilter } from "@/contexts/BranchFilterContext";
 import { DASHBOARD_LIVE_QUERY } from "@/components/dashboard/shared";
 import { ItemAvatar } from "@/components/dashboard/ItemAvatar";
-import { EmptyNote, ErrorStrip, ListGroup, Segments } from "@/components/dashboard/MobileUI";
+import {
+  EmptyNote,
+  ErrorStrip,
+  ListGroup,
+  PhotoCredit,
+  Segments,
+} from "@/components/dashboard/MobileUI";
 import { Skeleton } from "@/components/ui/skeleton";
 
 type Filter = "all" | StockItem["status"];
@@ -85,7 +91,7 @@ export default function MobileInventory() {
           <ListGroup>
             {list.map((i) => (
               <div key={i.item} className="flex items-center gap-3 px-3.5 py-3">
-                <ItemAvatar name={i.item} size="lg" />
+                <ItemAvatar name={i.item} size="lg" variant="photo" />
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-[13px] font-semibold text-foreground">{i.item}</p>
                   <p className="text-[11px] text-muted-foreground">
@@ -104,6 +110,7 @@ export default function MobileInventory() {
             ))}
           </ListGroup>
         )}
+        <PhotoCredit />
       </div>
     </div>
   );

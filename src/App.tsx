@@ -9,9 +9,11 @@ import {
 import { IonApp, IonRouterOutlet, setupIonicReact } from "@ionic/react";
 import { IonReactRouter } from "@ionic/react-router";
 import { Route } from "react-router-dom";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
 
 import { ThemeProvider } from "./components/theme-provider";
+import { getStoredUser } from "./lib/auth";
+import { persistQueryCache, queryClient, restoreQueryCache } from "./lib/queryClient";
 import { reportLovableError } from "./lib/lovable-error-reporting";
 
 // Route-level chunks keep marketing and dashboard-only dependencies out of the
@@ -40,7 +42,9 @@ const NotFoundPage = lazy(() => import("./pages/NotFound"));
    containers instead of IonContent. */
 setupIonicReact({ mode: "md", animated: false });
 
-const queryClient = new QueryClient();
+// Show last launch's dashboard data instantly, then refresh it in the background.
+restoreQueryCache(getStoredUser()?.id);
+persistQueryCache(() => getStoredUser()?.id);
 
 function RouteFallback() {
   return <div className="min-h-screen bg-background" aria-busy="true" />;

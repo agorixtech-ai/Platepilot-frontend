@@ -1,21 +1,9 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import {
-  FileText,
-  Search,
-  Filter,
-  RefreshCw,
-  ChevronLeft,
-  ChevronRight,
-  Package,
-  Building2,
-  Warehouse,
-  BookOpen,
-  Download,
-  DollarSign,
-  Hash,
-  LayoutGrid,
-} from "lucide-react";
+import { Search, Filter, ChevronLeft, ChevronRight, Package, Building2, Warehouse, BookOpen, DollarSign, Hash, LayoutGrid } from "lucide-react";
+import FileDescriptionIcon from "@/components/ui/icons/file-description-icon";
+import RefreshIcon from "@/components/ui/icons/refresh-icon";
+import DownloadIcon from "@/components/ui/icons/download-icon";
 import {
   BarChart,
   Bar,
@@ -39,6 +27,10 @@ import { useDateRange, rangeToPeriod } from "@/contexts/DateRangeContext";
 import { dashboardService } from "@/services/dashboardService";
 import { DASHBOARD_LIVE_QUERY, paletteColor, fmtCurrency } from "@/components/dashboard/shared";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { DateRangePicker } from "@/components/dashboard/DateRangePicker";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { isNativeApp } from "@/lib/native";
+import { toast } from "sonner";
 
 const PAGE_SIZE = 25;
 
@@ -92,9 +84,64 @@ function fmtTallyDate(v: unknown): string {
   return s;
 }
 
+const LEDGER_COLUMNS = [
+  "record_no",
+  "vouchernumber",
+  "date",
+  "vouchertype",
+  "branch",
+  "godown",
+  "partyname",
+  "stockitem",
+  "category",
+  "quantity",
+  "unit",
+  "rate",
+  "amount",
+  "ledger",
+  "narration",
+];
+const EXPORT_LIMIT = 500; // the API's per-request maximum
+
 function TallyPage() {
   const { branch } = useBranchFilter();
   const period = rangeToPeriod(useDateRange().range);
+  // Phones hide the global branch/date bar, so this page shows its own period picker.
+  const compact = useIsMobile() || isNativeApp();
+  const [exporting, setExporting] = useState(false);
+
+  /** Save the vouchers matching the current branch + type filter as a CSV. */
+  const exportLedger = async () => {
+    setExporting(true);
+    try {
+      const res = await tallyApi.list({
+        skip: 0,
+        limit: EXPORT_LIMIT,
+        branch: branch && branch !== "all" ? branch : undefined,
+        voucher_type: typeFilter || undefined,
+      });
+      const cell = (v: unknown) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+      const csv = [
+        LEDGER_COLUMNS.join(","),
+        ...res.items.map((r) => LEDGER_COLUMNS.map((c) => cell(r[c])).join(",")),
+      ].join("\n");
+      const url = URL.createObjectURL(new Blob(["﻿" + csv], { type: "text/csv" }));
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "tally-ledger.csv";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      if (res.total > res.items.length) {
+        toast.message(`Exported the first ${res.items.length} of ${res.total} vouchers.`);
+      }
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Couldn't export the ledger.");
+    } finally {
+      setExporting(false);
+    }
+  };
   const [page, setPage] = useState(0);
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
@@ -200,7 +247,7 @@ function TallyPage() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-[20px] font-bold tracking-tight text-foreground flex items-center gap-2">
-            <FileText className="h-5 w-5 text-primary" />
+            <FileDescriptionIcon className="h-5 w-5 text-primary" />
             Tally Vouchers
           </h1>
           <p className="mt-0.5 text-[12px] text-muted-foreground">
@@ -208,8 +255,14 @@ function TallyPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" className="gap-1.5 text-[11px]">
-            <Download className="h-3.5 w-3.5" />
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-1.5 text-[11px]"
+            onClick={exportLedger}
+            disabled={exporting}
+          >
+            <DownloadIcon className="h-3.5 w-3.5" />
             Export ledger
           </Button>
           <Button
@@ -219,10 +272,16 @@ function TallyPage() {
             disabled={isFetching}
             className="text-[11px]"
           >
-            <RefreshCw className={cn("h-3.5 w-3.5", isFetching && "animate-spin")} />
+            <RefreshIcon className={cn("h-3.5 w-3.5", isFetching && "animate-spin")} />
           </Button>
         </div>
       </div>
+
+      {compact && (
+        <div className="flex justify-end">
+          <DateRangePicker />
+        </div>
+      )}
 
       {/* ── KPI Row ──────────────────────────────────────────────────── */}
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
@@ -688,7 +747,7 @@ function TallyPage() {
         <DialogContent className="max-w-lg border-border bg-card shadow-2xl">
           <DialogHeader>
             <DialogTitle className="text-[15px] font-bold text-foreground flex items-center gap-2">
-              <FileText className="h-4 w-4 text-primary" />
+              <FileDescriptionIcon className="h-4 w-4 text-primary" />
               {String(detail?.vouchernumber ?? "Voucher Detail")}
             </DialogTitle>
           </DialogHeader>

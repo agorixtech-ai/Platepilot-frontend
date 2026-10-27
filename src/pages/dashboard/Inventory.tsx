@@ -1,22 +1,10 @@
 import { useState } from "react";
 import { useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import {
-  Package,
-  AlertTriangle,
-  CheckCircle,
-  RefreshCw,
-  Search,
-  ArrowDownUp,
-  XCircle,
-  Download,
-  Warehouse,
-  TrendingDown,
-  ShieldAlert,
-  ChevronRight,
-  BarChart3,
-  Eye,
-} from "lucide-react";
+import { Package, AlertTriangle, CheckCircle, Search, ArrowDownUp, XCircle, Warehouse, TrendingDown, ShieldAlert, ChevronRight, BarChart3 } from "lucide-react";
+import RefreshIcon from "@/components/ui/icons/refresh-icon";
+import DownloadIcon from "@/components/ui/icons/download-icon";
+import EyeIcon from "@/components/ui/icons/eye-icon";
 import {
   BarChart,
   Bar,
@@ -202,7 +190,7 @@ function InventoryPage() {
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" className="gap-1.5 text-[11px]">
-            <Download className="h-3.5 w-3.5" />
+            <DownloadIcon className="h-3.5 w-3.5" />
             Export
           </Button>
           <Button
@@ -212,7 +200,7 @@ function InventoryPage() {
             disabled={isFetching}
             className="text-[11px]"
           >
-            <RefreshCw className={cn("h-3.5 w-3.5", isFetching && "animate-spin")} />
+            <RefreshIcon className={cn("h-3.5 w-3.5", isFetching && "animate-spin")} />
           </Button>
         </div>
       </div>
@@ -831,7 +819,7 @@ function InventoryPage() {
                           </div>
                         </td>
                         <td className="px-4 py-3">
-                          <Eye className="h-3.5 w-3.5 text-muted-foreground/40 hover:text-primary transition-colors" />
+                          <EyeIcon className="h-3.5 w-3.5 text-muted-foreground/40 hover:text-primary transition-colors" />
                         </td>
                       </tr>
                     );

@@ -1,38 +1,14 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import {
-  AlertTriangle,
-  BarChart3,
-  Check,
-  CheckCircle2,
-  ChevronRight,
-  MapPin,
-  Package,
-  Percent,
-  RotateCcw,
-  ShoppingCart,
-  Trash2,
-  TrendingUp,
-  type LucideIcon,
-} from "lucide-react";
+import { AlertTriangle, BarChart3, Check, CheckCircle2, ChevronRight, Package, Percent, RotateCcw, Trash2, TrendingUp, type LucideIcon } from "lucide-react";
+import ShoppingCartIcon from "@/components/ui/icons/shopping-cart-icon";
 
 import { useAlerts, type AlertSeverity, type AppAlert } from "@/components/dashboard/useAlerts";
-import { BranchPicker } from "@/components/dashboard/MobileHeader";
-import { EmptyNote, ErrorStrip } from "@/components/dashboard/MobileUI";
+import { BranchPill } from "@/components/dashboard/MobileHeader";
+import { ItemAvatar } from "@/components/dashboard/ItemAvatar";
+import { EmptyNote, ErrorStrip, PhotoCredit } from "@/components/dashboard/MobileUI";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
-
-const ACK_KEY = "platepielet_acked_alerts";
-
-// ponytail: acknowledgements live in this device's localStorage; move to a
-// backend table when acks must sync across devices/team members.
-function readAcked(): Set<string> {
-  try {
-    return new Set(JSON.parse(localStorage.getItem(ACK_KEY) ?? "[]"));
-  } catch {
-    return new Set();
-  }
-}
 
 const KIND_ICON: Record<string, LucideIcon> = {
   "Critical Stock": Package,
@@ -81,9 +57,18 @@ function AlertCard({
     <div className={cn("rounded-2xl p-3", tone.row)}>
       <div className="flex items-center gap-3">
         <div className="relative shrink-0">
-          <span className="flex h-14 w-14 items-center justify-center rounded-xl bg-card text-muted-foreground">
-            <Icon className="h-6 w-6" />
-          </span>
+          {isStock ? (
+            <ItemAvatar
+              name={alert.title}
+              size="lg"
+              variant="photo"
+              className="h-14 w-14 rounded-xl text-[16px]"
+            />
+          ) : (
+            <span className="flex h-14 w-14 items-center justify-center rounded-xl bg-card text-muted-foreground">
+              <Icon className="h-6 w-6" />
+            </span>
+          )}
           <span
             className={cn(
               "absolute -left-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full ring-2 ring-white",
@@ -116,7 +101,7 @@ function AlertCard({
         >
           {isStock ? (
             <>
-              <ShoppingCart className="h-3.5 w-3.5" /> Order Now
+              <ShoppingCartIcon className="h-3.5 w-3.5" /> Order Now
             </>
           ) : (
             <>
@@ -138,24 +123,10 @@ function AlertCard({
 }
 
 export default function Alerts() {
-  const { alerts, isLoading, isError, refetch } = useAlerts();
+  const { alerts, openAlerts: open, acked, toggleAck, isLoading, isError, refetch } = useAlerts();
   const [tab, setTab] = useState<"open" | "ack">("open");
-  const [acked, setAcked] = useState(readAcked);
   const [category, setCategory] = useState<Category>("All");
 
-  const toggle = (id: string) => {
-    const next = new Set(acked);
-    if (next.has(id)) next.delete(id);
-    else next.add(id);
-    setAcked(next);
-    try {
-      localStorage.setItem(ACK_KEY, JSON.stringify([...next]));
-    } catch {
-      /* storage blocked — ack lasts for this session only */
-    }
-  };
-
-  const open = alerts.filter((a) => !acked.has(a.id));
   const done = alerts.filter((a) => acked.has(a.id));
   const list = tab === "open" ? open : done;
 
@@ -182,10 +153,7 @@ export default function Alerts() {
             Stay ahead of stock issues, trends and important updates.
           </p>
         </div>
-        <div className="mt-1 flex shrink-0 items-center gap-1 rounded-full border border-border/70 px-3 py-2">
-          <MapPin className="h-3.5 w-3.5 text-muted-foreground" />
-          <BranchPicker className="text-foreground" />
-        </div>
+        <BranchPill className="mt-1" />
       </div>
 
       {isError && (
@@ -245,12 +213,18 @@ export default function Alerts() {
         {isLoading && <Skeleton className="h-32 w-full rounded-2xl" />}
         {!isLoading &&
           filtered.map((a) => (
-            <AlertCard key={a.id} alert={a} acked={tab === "ack"} onToggle={() => toggle(a.id)} />
+            <AlertCard
+              key={a.id}
+              alert={a}
+              acked={tab === "ack"}
+              onToggle={() => toggleAck(a.id)}
+            />
           ))}
         {!isLoading && filtered.length === 0 && (
           <EmptyNote>{tab === "open" ? "No open alerts." : "Nothing acknowledged yet."}</EmptyNote>
         )}
       </div>
+      <PhotoCredit />
     </div>
   );
 }

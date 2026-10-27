@@ -1,7 +1,7 @@
 import { getApiUrl } from "./apiBase";
+import { queryClient, QUERY_CACHE_KEY } from "./queryClient";
 
 const API_BASE = () => `${getApiUrl()}/auth`;
-
 
 export interface User {
   id: string;
@@ -64,6 +64,10 @@ export function clearTokens() {
   localStorage.removeItem("access_token");
   localStorage.removeItem("refresh_token");
   localStorage.removeItem("user");
+  // The session is over: drop every cached dashboard number too, in memory and on disk,
+  // so the next person to sign in on this device never sees the previous user's data.
+  queryClient.clear();
+  localStorage.removeItem(QUERY_CACHE_KEY);
 }
 
 export function isAuthenticated(): boolean {
@@ -71,14 +75,42 @@ export function isAuthenticated(): boolean {
 }
 
 // ── Core fetch ────────────────────────────────────────────
-async function apiFetch(path: string, options: RequestInit = {}): Promise<Response> {
-  const token = getAccessToken();
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-    ...(options.headers as Record<string, string>),
+/**
+ * fetch() with the Bearer token attached. Access tokens live 30 minutes, so on a
+ * 401 it refreshes once (shared with every other in-flight caller) and retries.
+ * Use this for every call to an authenticated endpoint — a bare fetch() silently
+ * 401s. Pass `refresh = false` for the login/register endpoints themselves.
+ */
+export async function authFetch(
+  url: string,
+  init: RequestInit = {},
+  refresh = true,
+): Promise<Response> {
+  const send = () => {
+    const token = getAccessToken();
+    const headers = new Headers(init.headers);
+    if (token) headers.set("Authorization", `Bearer ${token}`);
+    return fetch(url, { ...init, headers });
   };
-  if (token) headers["Authorization"] = `Bearer ${token}`;
-  return fetch(`${API_BASE()}${path}`, { ...options, headers });
+  const res = await send();
+  if (res.status !== 401 || !refresh || !getRefreshToken()) return res;
+  return (await refreshAccessToken()) ? send() : res;
+}
+
+const NO_REFRESH = ["/login", "/register", "/test-login"];
+
+async function apiFetch(path: string, options: RequestInit = {}): Promise<Response> {
+  return authFetch(
+    `${API_BASE()}${path}`,
+    {
+      ...options,
+      headers: {
+        "Content-Type": "application/json",
+        ...(options.headers as Record<string, string>),
+      },
+    },
+    !NO_REFRESH.includes(path),
+  );
 }
 
 async function handleResponse<T>(res: Response): Promise<T> {
@@ -294,7 +326,7 @@ export interface DemoRequest {
   last_name: string;
   email: string;
   restaurant: string;
-  phone: string; 
+  phone: string;
   pos_system: string;
   message: string;
   submitted_at: string;

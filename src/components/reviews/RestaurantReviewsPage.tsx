@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { API_URL as API_BASE } from "@/lib/apiBase";
+import { getApiUrl } from "@/lib/apiBase";
+import { authFetch } from "@/lib/auth";
 
 const PLACE_IDS = ["ChIJGYC22DMTXz4R3SvDLEgu8Z4"];
 
@@ -196,7 +197,7 @@ export function RestaurantReviewsPage() {
   useEffect(() => {
     async function fetchReviews() {
       try {
-        const res = await fetch(`${API_BASE}/reviews?placeIds=${PLACE_IDS.join(",")}`);
+        const res = await authFetch(`${getApiUrl()}/reviews?placeIds=${PLACE_IDS.join(",")}`);
         if (!res.ok) {
           throw new Error(`API returned ${res.status}`);
         }

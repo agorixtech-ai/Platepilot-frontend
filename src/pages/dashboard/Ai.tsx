@@ -1,6 +1,9 @@
 import { useState, useRef, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
-import { Send, Bot, User, RotateCcw, Trash2 } from "lucide-react";
+import { Bot, RotateCcw } from "lucide-react";
+import SendIcon from "@/components/ui/icons/send-icon";
+import UserIcon from "@/components/ui/icons/user-icon";
+import TrashIcon from "@/components/ui/icons/trash-icon";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -109,7 +112,7 @@ function RouteComponent() {
                       handleDelete(c.id);
                     }}
                   >
-                    <Trash2 className="h-3.5 w-3.5" />
+                    <TrashIcon className="h-3.5 w-3.5" />
                   </Button>
                 </div>
               ))}
@@ -168,7 +171,7 @@ function RouteComponent() {
                   {message.role === "user" && (
                     <Avatar className="h-8 w-8 shrink-0">
                       <AvatarFallback className="bg-primary/10 text-primary">
-                        <User className="h-4 w-4" />
+                        <UserIcon className="h-4 w-4" />
                       </AvatarFallback>
                     </Avatar>
                   )}
@@ -204,7 +207,7 @@ function RouteComponent() {
                 disabled={isTyping}
               />
               <Button onClick={handleSend} disabled={!input.trim() || isTyping} size="icon">
-                <Send className="h-4 w-4" />
+                <SendIcon className="h-4 w-4" />
               </Button>
             </div>
           </div>

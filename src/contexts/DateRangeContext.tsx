@@ -17,8 +17,30 @@ const DateRangeContext = createContext<DateRangeState>({
   setRange: () => {},
 });
 
+const STORAGE_KEY = "platepilot_range";
+
+/** Only the presets are remembered — a custom range is a fixed pair of dates that would
+    silently go stale by the next launch. */
+function loadRange(): DateRange {
+  try {
+    const kind = localStorage.getItem(STORAGE_KEY);
+    if (kind === "today" || kind === "7d" || kind === "30d") return { kind };
+  } catch {
+    /* storage blocked — start on Today */
+  }
+  return { kind: "today" };
+}
+
 export function DateRangeProvider({ children }: { children: ReactNode }) {
-  const [range, setRange] = useState<DateRange>({ kind: "today" });
+  const [range, setRangeState] = useState<DateRange>(loadRange);
+  const setRange = (r: DateRange) => {
+    setRangeState(r);
+    try {
+      if (r.kind !== "custom") localStorage.setItem(STORAGE_KEY, r.kind);
+    } catch {
+      /* selection just won't persist */
+    }
+  };
   return (
     <DateRangeContext.Provider value={{ range, setRange }}>{children}</DateRangeContext.Provider>
   );

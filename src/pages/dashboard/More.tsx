@@ -1,27 +1,9 @@
 import type { ReactNode } from "react";
 import { Link, useHistory } from "react-router-dom";
 import { toast } from "sonner";
-import {
-  BarChart3,
-  ChevronRight,
-  CircleDollarSign,
-  FileText,
-  HelpCircle,
-  Info,
-  LogOut,
-  Package,
-  Pencil,
-  Plug,
-  Plus,
-  Settings,
-  Star,
-  Truck,
-  TrendingUp,
-  Upload,
-  User,
-  Users,
-  type LucideIcon,
-} from "lucide-react";
+import { BookOpen, ChevronRight, CircleDollarSign, FileText, HelpCircle, Info, LogOut, Package, Pencil, Plug, Plus, Settings, Star, Truck, TrendingUp, Upload, Users, type LucideIcon } from "lucide-react";
+import ChartBarIcon from "@/components/ui/icons/chart-bar-icon";
+import UserIcon from "@/components/ui/icons/user-icon";
 
 import { CARD, SectionTitle } from "@/components/dashboard/MobileUI";
 import { canOpenPage, clearTokens, getStoredUser, logout } from "@/lib/auth";
@@ -75,6 +57,7 @@ const QUICK_ACTIONS: QuickAction[] = [
     sub: "Restaurant, branches, preferences",
     to: "/dashboard/settings",
     page: "settings",
+    soon: true,
     tone: "bg-purple-500/10",
     iconTone: "bg-purple-500/15 text-purple-600",
     accent: "text-purple-600",
@@ -86,6 +69,23 @@ function TallyGraphic() {
   return (
     <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-success/10">
       <TrendingUp className="h-5 w-5 text-success" />
+    </div>
+  );
+}
+
+/** Dish emoji cluster — Menu row (decorative, not data). */
+function MenuGraphic() {
+  return (
+    <div className="flex -space-x-2">
+      {["🍕", "🍝", "🥗"].map((e, i) => (
+        <span
+          key={i}
+          className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-muted text-[13px]"
+          style={{ zIndex: 3 - i }}
+        >
+          {e}
+        </span>
+      ))}
     </div>
   );
 }
@@ -141,10 +141,10 @@ function TeamGraphic() {
   return (
     <div className="flex items-center -space-x-2">
       <span className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-muted text-muted-foreground">
-        <User className="h-4 w-4" />
+        <UserIcon className="h-4 w-4" />
       </span>
       <span className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-muted text-muted-foreground">
-        <User className="h-4 w-4" />
+        <UserIcon className="h-4 w-4" />
       </span>
       <span className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-success text-success-foreground">
         <Plus className="h-4 w-4" />
@@ -162,6 +162,8 @@ type Row = {
   onClick?: () => void;
   visual?: ReactNode;
   showChevron?: boolean;
+  /** Module page is still a placeholder on web too — don't lead people into an empty screen. */
+  soon?: boolean;
 };
 
 function BusinessRow({ row }: { row: Row }) {
@@ -174,13 +176,22 @@ function BusinessRow({ row }: { row: Row }) {
         <p className="text-[15px] font-bold leading-tight text-foreground">{row.title}</p>
         {row.sub && <p className="truncate text-[12px] text-muted-foreground">{row.sub}</p>}
       </div>
-      {row.showChevron !== false && (
-        <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
+      {row.soon ? (
+        <span className="shrink-0 rounded-full bg-muted px-2.5 py-1 text-[10px] font-semibold text-muted-foreground">
+          Soon
+        </span>
+      ) : (
+        <>
+          {row.showChevron !== false && (
+            <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
+          )}
+          {row.visual && <div className="shrink-0">{row.visual}</div>}
+        </>
       )}
-      {row.visual && <div className="shrink-0">{row.visual}</div>}
     </>
   );
   const cls = cn(CARD, "flex items-center gap-3 p-3");
+  if (row.soon) return <div className={cn(cls, "opacity-60")}>{inner}</div>;
   return row.to ? (
     <Link to={row.to} className={cls}>
       {inner}
@@ -222,12 +233,21 @@ export default function More() {
       visual: <TallyGraphic />,
     },
     {
+      icon: BookOpen,
+      title: "Menu",
+      sub: "Items and selling prices",
+      to: "/dashboard/menu",
+      page: "menu",
+      visual: <MenuGraphic />,
+    },
+    {
       icon: Truck,
       title: "Suppliers",
       sub: "Vendors and orders",
       to: "/dashboard/suppliers",
       page: "suppliers",
       visual: <SuppliersGraphic />,
+      soon: true,
     },
     {
       icon: CircleDollarSign,
@@ -252,6 +272,7 @@ export default function More() {
       to: "/dashboard/team",
       page: "team",
       visual: <TeamGraphic />,
+      soon: true,
     },
   ].filter((r) => !r.page || canOpenPage(r.page, user));
 

@@ -1,39 +1,53 @@
+import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Area, AreaChart, Bar, ComposedChart, Line, ResponsiveContainer } from "recharts";
-import {
-  AlertTriangle,
-  Bell,
-  ChartColumn,
-  ChevronDown,
-  ChevronRight,
-  Coins,
-  FileText,
-  Package,
-  Receipt,
-  ShoppingCart,
-  Sparkles,
-  TrendingUp,
-  type LucideIcon,
-} from "lucide-react";
+import { Bell, ChartColumn, Check, ChevronDown, ChevronRight, Coins, FileText, Package, Receipt, ShoppingCart, Sparkles, TrendingUp, type LucideIcon } from "lucide-react";
+import TriangleAlertIcon from "@/components/ui/icons/triangle-alert-icon";
 
 import { useAlerts } from "@/components/dashboard/useAlerts";
 import {
-  AlertRow,
   CARD,
   Delta,
   EmptyNote,
   ErrorStrip,
+  PhotoCredit,
   SectionTitle,
   SyncNote,
 } from "@/components/dashboard/MobileUI";
 import { DASHBOARD_LIVE_QUERY, fmtCurrency } from "@/components/dashboard/shared";
+import { ItemAvatar } from "@/components/dashboard/ItemAvatar";
+import { BranchPicker } from "@/components/dashboard/MobileHeader";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useBranchFilter } from "@/contexts/BranchFilterContext";
 import { useDateRange, rangeToPeriod } from "@/contexts/DateRangeContext";
 import { dashboardService } from "@/services/dashboardService";
 import { canOpenPage, getStoredUser } from "@/lib/auth";
 import { cn } from "@/lib/utils";
+
+const PERIOD_CHOICES = [
+  { kind: "today", label: "Today" },
+  { kind: "7d", label: "Last 7 days" },
+  { kind: "30d", label: "Last 30 days" },
+] as const;
+const PERIOD_LABEL: Record<string, string> = {
+  today: "Today",
+  "7d": "7 days",
+  "30d": "30 days",
+  custom: "Custom",
+};
+const PERIOD_PHRASE: Record<string, string> = {
+  today: " today",
+  "7d": " this week",
+  "30d": " this month",
+  custom: "",
+};
 
 const SALES_LABEL: Record<string, string> = {
   today: "Today's Sales",
@@ -80,42 +94,120 @@ const QUICK: { label: string; to: string; icon: LucideIcon; page: string; tone: 
   },
 ];
 
-const AI_PROMPTS = ["Why did sales change?", "What should I reorder?", "Best sellers this week"];
-
 /** Staggered entrance for each Home section. */
 const ENTER = "animate-in fade-in slide-in-from-bottom-3 fill-mode-both duration-500";
 const delay = (i: number) => ({ animationDelay: `${i * 70}ms` });
 
+/** Tiny area chart of one real daily series (Recharts needs colour strings, not classes). */
+function Spark({ values, stroke, id }: { values: number[]; stroke: string; id: string }) {
+  if (values.length < 2) return null;
+  return (
+    <ResponsiveContainer width="100%" height="100%">
+      <AreaChart
+        data={values.map((v) => ({ v }))}
+        margin={{ top: 2, right: 0, bottom: 0, left: 0 }}
+      >
+        <defs>
+          <linearGradient id={id} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={stroke} stopOpacity={0.3} />
+            <stop offset="100%" stopColor={stroke} stopOpacity={0} />
+          </linearGradient>
+        </defs>
+        <Area
+          type="monotone"
+          dataKey="v"
+          stroke={stroke}
+          strokeWidth={1.5}
+          fill={`url(#${id})`}
+          isAnimationActive
+        />
+      </AreaChart>
+    </ResponsiveContainer>
+  );
+}
+
+function KpiCard({
+  to,
+  icon: Icon,
+  iconTone,
+  label,
+  value,
+  valueClass,
+  note,
+  chart,
+}: {
+  to: string;
+  icon: LucideIcon;
+  iconTone: string;
+  label: string;
+  value: ReactNode;
+  valueClass?: string;
+  note?: ReactNode;
+  chart?: ReactNode;
+}) {
+  return (
+    <Link to={to} className={cn(CARD, "flex flex-col p-4")}>
+      <div className="mb-2 flex items-center justify-between">
+        <span className={cn("flex h-10 w-10 items-center justify-center rounded-full", iconTone)}>
+          <Icon className="h-5 w-5" />
+        </span>
+        <ChevronRight className="h-4 w-4 text-muted-foreground" />
+      </div>
+      <p className="text-sm text-muted-foreground">{label}</p>
+      <p className={cn("mt-1 text-2xl font-bold", valueClass)}>{value}</p>
+      <div className="mt-2 min-h-4 text-xs text-muted-foreground">{note}</div>
+      <div className="mt-2 h-10">{chart}</div>
+    </Link>
+  );
+}
+
 /** Daily Command Center — phone Home tab (desktop keeps Overview). */
 export default function MobileHome() {
-  const { alerts, metrics: m, isLoading, isError, refetch } = useAlerts();
+  const { openAlerts, metrics: m, isLoading, isError, refetch } = useAlerts();
   const { branch } = useBranchFilter();
-  const { range } = useDateRange();
+  const { range, setRange } = useDateRange();
   const user = getStoredUser();
   const period = rangeToPeriod(range);
   const trendPeriod = period === "today" ? "week" : period === "year" ? "year" : period;
   const canSales = canOpenPage("overview") || canOpenPage("pos");
+  const canStock = canOpenPage("overview") || canOpenPage("inventory") || canOpenPage("tally");
 
-  // Same query keys as MobileSales/Overview so the cache is shared.
+  // Same query keys as MobileSales/Overview/useAlerts so the cache is shared.
   const trend = useQuery({
     queryKey: ["dashboard", "metrics-trend", trendPeriod, branch],
     queryFn: () => dashboardService.getMetricsTrend(trendPeriod, branch),
     enabled: canSales,
     ...DASHBOARD_LIVE_QUERY,
   });
-  const top = useQuery({
-    queryKey: ["dashboard", "top-items", period, branch],
-    queryFn: () => dashboardService.getTopItems(period, branch, 5),
+  // Food cost = purchases ÷ sales. Purchases arrive in batches, so a single day swings
+  // between 0% and 100%+ — the headline number uses the trailing 30 days instead.
+  const month = useQuery({
+    queryKey: ["dashboard", "metrics", "month", branch],
+    queryFn: () => dashboardService.getMetrics("month", branch),
     enabled: canSales,
     ...DASHBOARD_LIVE_QUERY,
   });
 
   const cur = m?.currency ?? "AED";
   const aov = m && m.orders > 0 ? m.total_sales / m.orders : 0;
-  const spark = (trend.data?.sales ?? []).map((v) => ({ v }));
-  const critical = alerts.filter((a) => a.severity === "critical").length;
-  const topItems = (top.data?.items ?? []).slice(0, 3);
-  const topMax = Math.max(1, ...topItems.map((t) => t.revenue));
+  const t = trend.data;
+  const sales = t?.sales ?? [];
+  const orderSeries = t?.orders ?? [];
+  const aovSeries = sales.map((s, i) => (orderSeries[i] ? s / orderSeries[i] : 0));
+  const spark = sales.map((v) => ({ v }));
+  const fc = month.data;
+
+  const critical = openAlerts.filter((a) => a.severity === "critical").length;
+  const warning = openAlerts.filter((a) => a.severity === "warning").length;
+  const other = openAlerts.length - critical - warning;
+  const attention = openAlerts.filter((a) => a.kind === "Critical Stock" || a.kind === "Low Stock");
+
+  const asOf = m?.last_sync ? new Date(m.last_sync) : null;
+  const stale = m?.sync_status === "Stale" && asOf;
+  const salesLabel =
+    period === "today" && stale
+      ? `Sales on ${asOf.toLocaleDateString([], { day: "numeric", month: "short" })}`
+      : (SALES_LABEL[period] ?? "Sales");
 
   const hour = new Date().getHours();
   const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
@@ -146,22 +238,33 @@ export default function MobileHome() {
                 </span>
               </h1>
               <p className="text-[13px] text-white/70 mt-1">
-                Here's how your restaurant is doing today.
+                Here's how your restaurant is doing{PERIOD_PHRASE[range.kind]}.
               </p>
+              <BranchPicker className="mt-1.5 text-white/80" />
             </div>
-            <button
-              className={cn(
-                "shrink-0 px-3 py-1.5 rounded-2xl text-sm font-semibold border border-white/25 text-white",
-              )}
-            >
-              Today <ChevronDown className="inline-block w-4 h-4 ml-1" />
-            </button>
+            <DropdownMenu>
+              <DropdownMenuTrigger className="shrink-0 rounded-2xl border border-white/25 px-3 py-1.5 text-sm font-semibold text-white outline-none">
+                {PERIOD_LABEL[range.kind]} <ChevronDown className="ml-1 inline-block h-4 w-4" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="min-w-40">
+                {PERIOD_CHOICES.map((c) => (
+                  <DropdownMenuItem
+                    key={c.kind}
+                    onSelect={() => setRange({ kind: c.kind })}
+                    className="justify-between"
+                  >
+                    {c.label}
+                    {range.kind === c.kind && <Check className="h-4 w-4 text-primary" />}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
           {/* Horizontal split: sales figures on the left, trend chart + callout on the right. */}
           <div className="flex items-start gap-3">
             <div className="min-w-0 flex-1">
-              <p className="text-[13px] text-white/70 mb-1.5">Today's Sales</p>
+              <p className="text-[13px] text-white/70 mb-1.5">{salesLabel}</p>
               {isLoading ? (
                 <Skeleton className="h-9 w-28 bg-white/15" />
               ) : (
@@ -246,200 +349,132 @@ export default function MobileHome() {
         </div>
       </section>
 
-      {/* Metric cards — 2x2 grid */}
+      {/* Metric cards — 2x2 grid; every chart is that metric's own daily series. */}
       <div style={delay(1)} className={cn(ENTER, "mt-4 grid grid-cols-2 gap-3 px-4")}>
-        {/* Orders Card */}
-        <Link to="/dashboard/pos" className={cn(CARD, "p-4 flex flex-col")}>
-          <div className="flex items-center justify-between mb-2">
-            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100 text-green-700">
-              <ShoppingCart className="h-5 w-5" />
-            </span>
-            <ChevronRight className="h-4 w-4 text-muted-foreground" />
-          </div>
-          <p className="text-sm text-muted-foreground">Orders</p>
-          <p className="text-2xl font-bold mt-1">{m?.orders ?? "—"}</p>
-          <Delta value={m?.orders_delta_pct} className="mt-2 text-xs" />
-          <div className="mt-3 h-10">
-            {spark.length > 1 && (
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={spark} margin={{ top: 2, right: 0, bottom: 0, left: 0 }}>
-                  <defs>
-                    <linearGradient id="ordersChart" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#22c55e" stopOpacity={0.3} />
-                      <stop offset="100%" stopColor="#22c55e" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <Area
-                    type="monotone"
-                    dataKey="v"
-                    stroke="#22c55e"
-                    strokeWidth={1.5}
-                    fill="url(#ordersChart)"
-                    isAnimationActive
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            )}
-          </div>
-        </Link>
-
-        {/* Avg Order Value Card */}
-        <Link to="/dashboard/pos" className={cn(CARD, "p-4 flex flex-col")}>
-          <div className="flex items-center justify-between mb-2">
-            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-100 text-amber-700">
-              <Receipt className="h-5 w-5" />
-            </span>
-            <ChevronRight className="h-4 w-4 text-muted-foreground" />
-          </div>
-          <p className="text-sm text-muted-foreground">Avg. Order Value</p>
-          <p className="text-2xl font-bold mt-1">{m ? fmtCurrency(aov, cur) : "—"}</p>
-          <p className="text-xs text-muted-foreground mt-2">per order</p>
-          <div className="mt-2 h-10">
-            {spark.length > 1 && (
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={spark} margin={{ top: 2, right: 0, bottom: 0, left: 0 }}>
-                  <defs>
-                    <linearGradient id="aovChart" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#f59e0b" stopOpacity={0.3} />
-                      <stop offset="100%" stopColor="#f59e0b" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <Area
-                    type="monotone"
-                    dataKey="v"
-                    stroke="#f59e0b"
-                    strokeWidth={1.5}
-                    fill="url(#aovChart)"
-                    isAnimationActive
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            )}
-          </div>
-        </Link>
-
-        {/* Food Cost Card */}
-        <Link to="/dashboard/food-cost" className={cn(CARD, "p-4 flex flex-col")}>
-          <div className="flex items-center justify-between mb-2">
-            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100 text-red-700">
-              <Coins className="h-5 w-5" />
-            </span>
-            <ChevronRight className="h-4 w-4 text-muted-foreground" />
-          </div>
-          <p className="text-sm text-muted-foreground">Food Cost</p>
-          <p className="text-2xl font-bold mt-1">{m ? `${m.food_cost_pct.toFixed(1)}%` : "—"}</p>
-          <Delta value={m?.food_cost_pp_delta} suffix=" pts" good="down" className="mt-2 text-xs" />
-          <div className="mt-2 h-10">
-            {spark.length > 1 && (
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={spark} margin={{ top: 2, right: 0, bottom: 0, left: 0 }}>
-                  <defs>
-                    <linearGradient id="costChart" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#ef4444" stopOpacity={0.3} />
-                      <stop offset="100%" stopColor="#ef4444" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <Area
-                    type="monotone"
-                    dataKey="v"
-                    stroke="#ef4444"
-                    strokeWidth={1.5}
-                    fill="url(#costChart)"
-                    isAnimationActive
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            )}
-          </div>
-        </Link>
-
-        {/* Active Alerts Card */}
-        <Link to="/dashboard/alerts" className={cn(CARD, "p-4 flex flex-col")}>
-          <div className="flex items-center justify-between mb-2">
-            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-blue-700">
-              <Bell className="h-5 w-5" />
-            </span>
-            <ChevronRight className="h-4 w-4 text-muted-foreground" />
-          </div>
-          <p className="text-sm text-muted-foreground">Active Alerts</p>
-          <p
-            className={cn(
-              "text-2xl font-bold mt-1",
-              critical > 0 ? "text-red-600" : "text-green-600",
-            )}
-          >
-            {critical}
-          </p>
-          <Link to="/dashboard/alerts" className="text-xs text-primary font-semibold mt-2">
-            View all →
-          </Link>
-          <div className="mt-2 h-10">
-            {spark.length > 1 && (
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={spark} margin={{ top: 2, right: 0, bottom: 0, left: 0 }}>
-                  <defs>
-                    <linearGradient id="alertChart" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.3} />
-                      <stop offset="100%" stopColor="#3b82f6" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <Area
-                    type="monotone"
-                    dataKey="v"
-                    stroke="#3b82f6"
-                    strokeWidth={1.5}
-                    fill="url(#alertChart)"
-                    isAnimationActive
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            )}
-          </div>
-        </Link>
-      </div>
-
-      {/* What needs your attention — inventory section */}
-      <div style={delay(2)} className={cn(ENTER, "mt-5 px-4")}>
-        <SectionTitle
-          right={
-            <Link to="/dashboard/inventory" className="text-[12px] font-semibold text-primary">
-              View all →
-            </Link>
+        <KpiCard
+          to="/dashboard/pos"
+          icon={ShoppingCart}
+          iconTone="bg-green-100 text-green-700"
+          label="Orders"
+          value={m?.orders ?? "—"}
+          valueClass="text-foreground"
+          note={<Delta value={m?.orders_delta_pct} />}
+          chart={<Spark values={orderSeries} stroke="#22c55e" id="kpiOrders" />}
+        />
+        <KpiCard
+          to="/dashboard/pos"
+          icon={Receipt}
+          iconTone="bg-amber-100 text-amber-700"
+          label="Avg. Order Value"
+          value={m ? fmtCurrency(aov, cur) : "—"}
+          note="per order"
+          chart={<Spark values={aovSeries} stroke="#f59e0b" id="kpiAov" />}
+        />
+        <KpiCard
+          to="/dashboard/food-cost"
+          icon={Coins}
+          iconTone="bg-red-100 text-red-700"
+          label="Food Cost · 30 days"
+          value={fc ? `${fc.food_cost_pct.toFixed(1)}%` : "—"}
+          note={<Delta value={fc?.food_cost_pp_delta} suffix=" pts" good="down" />}
+          chart={<Spark values={t?.food_cost_pct ?? []} stroke="#ef4444" id="kpiCost" />}
+        />
+        <KpiCard
+          to="/dashboard/alerts"
+          icon={Bell}
+          iconTone="bg-blue-100 text-blue-700"
+          label="Active Alerts"
+          value={openAlerts.length}
+          valueClass={
+            critical > 0 ? "text-red-600" : warning > 0 ? "text-amber-600" : "text-green-600"
           }
-        >
-          What needs your attention?
-        </SectionTitle>
-        <div className="overflow-x-auto -mx-4 px-4 pb-2 flex gap-2">
-          {[
-            { name: "Mozzarella Cheese", emoji: "🧀", status: "Out of stock" },
-            { name: "Lettuce", emoji: "🥬", status: "Out of stock" },
-            { name: "Pizza Dough", emoji: "🍞", status: "Out of stock" },
-            { name: "Pizza Sauce", emoji: "🍅", status: "Out of stock" },
-          ].map((item, idx) => (
-            <div
-              key={idx}
-              className={cn(CARD, "flex flex-col flex-shrink-0 rounded-xl overflow-hidden w-24")}
-            >
-              <div className="relative bg-gray-100 h-24 flex items-center justify-center text-4xl">
-                {item.emoji}
-                <div className="absolute -left-1 -top-1 bg-red-600 rounded-full p-1 ring-2 ring-white">
-                  <AlertTriangle className="h-3 w-3 text-white" />
+          note={
+            openAlerts.length === 0
+              ? "All clear"
+              : `${critical} critical · ${warning} warning${other ? ` · ${other} tip` : ""}`
+          }
+          chart={
+            openAlerts.length > 0 && (
+              <div className="flex h-full items-end">
+                <div className="flex h-2 w-full overflow-hidden rounded-full bg-muted">
+                  <span className="bg-red-500" style={{ flex: critical }} />
+                  <span className="bg-amber-500" style={{ flex: warning }} />
+                  <span className="bg-green-500" style={{ flex: other }} />
                 </div>
               </div>
-              <div className="p-2">
-                <p className="text-xs font-semibold line-clamp-2 leading-tight">{item.name}</p>
-                <p className="text-[10px] text-red-600 font-semibold mt-1">{item.status}</p>
-              </div>
-            </div>
-          ))}
-        </div>
+            )
+          }
+        />
       </div>
+
+      {/* What needs your attention — live stock alerts (critical first). */}
+      {canStock && (
+        <div style={delay(2)} className={cn(ENTER, "mt-5 px-4")}>
+          <SectionTitle
+            right={
+              <Link to="/dashboard/alerts" className="text-[12px] font-semibold text-primary">
+                View all →
+              </Link>
+            }
+          >
+            What needs your attention?
+          </SectionTitle>
+          {isLoading ? (
+            <div className="flex gap-2">
+              {[0, 1, 2].map((i) => (
+                <Skeleton key={i} className="h-40 w-24 shrink-0 rounded-xl" />
+              ))}
+            </div>
+          ) : attention.length === 0 ? (
+            <EmptyNote>Nothing needs your attention — stock levels look healthy.</EmptyNote>
+          ) : (
+            <div className="scrollbar-none -mx-4 flex gap-2 overflow-x-auto px-4 pb-2">
+              {attention.slice(0, 8).map((a) => (
+                <Link
+                  key={a.id}
+                  to={a.to}
+                  className={cn(CARD, "flex w-24 shrink-0 flex-col overflow-hidden rounded-xl")}
+                >
+                  <div className="relative h-24">
+                    <ItemAvatar
+                      name={a.title}
+                      size="lg"
+                      variant="photo"
+                      className="h-24 w-full rounded-none text-[22px]"
+                    />
+                    <div
+                      className={cn(
+                        "absolute -left-1 -top-1 rounded-full p-1 ring-2 ring-white",
+                        a.severity === "critical" ? "bg-red-600" : "bg-amber-500",
+                      )}
+                    >
+                      <TriangleAlertIcon className="h-3 w-3 text-white" />
+                    </div>
+                  </div>
+                  <div className="p-2">
+                    <p className="line-clamp-2 text-xs font-semibold leading-tight">{a.title}</p>
+                    <p
+                      className={cn(
+                        "mt-1 text-[10px] font-semibold",
+                        a.severity === "critical" ? "text-red-600" : "text-amber-600",
+                      )}
+                    >
+                      {a.detail}
+                    </p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
+          <PhotoCredit />
+        </div>
+      )}
 
       {/* Quick actions */}
       <div style={delay(3)} className={cn(ENTER, "mt-5 px-4")}>
         <SectionTitle
           right={
-            <Link to="/dashboard" className="text-primary text-[12px] font-semibold">
+            <Link to="/dashboard/insights" className="text-primary text-[12px] font-semibold">
               See all
             </Link>
           }
@@ -491,37 +526,6 @@ export default function MobileHome() {
       </div>
 
       <SyncNote lastSync={m?.last_sync} />
-    </div>
-  );
-}
-
-/** Donut showing a 0–100% value (food cost). */
-function Ring({ pct, bad }: { pct: number; bad: boolean }) {
-  const r = 22;
-  const c = 2 * Math.PI * r;
-  const p = Math.min(100, Math.max(0, pct));
-  return (
-    <div className="relative h-14 w-14 shrink-0">
-      <svg viewBox="0 0 56 56" className="h-full w-full -rotate-90">
-        <circle cx="28" cy="28" r={r} fill="none" strokeWidth="6" className="stroke-muted" />
-        <circle
-          cx="28"
-          cy="28"
-          r={r}
-          fill="none"
-          strokeWidth="6"
-          strokeLinecap="round"
-          strokeDasharray={c}
-          strokeDashoffset={c * (1 - p / 100)}
-          className={cn(
-            "transition-[stroke-dashoffset] duration-700",
-            bad ? "stroke-destructive" : "stroke-primary",
-          )}
-        />
-      </svg>
-      <span className="absolute inset-0 flex items-center justify-center text-[12px] font-bold tabular-nums">
-        {p.toFixed(0)}%
-      </span>
     </div>
   );
 }

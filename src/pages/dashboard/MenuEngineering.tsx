@@ -1,17 +1,7 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import {
-  AlertTriangle,
-  ChevronRight,
-  Eye,
-  Lightbulb,
-  RefreshCw,
-  Search,
-  Star,
-  TriangleAlert,
-  UtensilsCrossed,
-  Wallet,
-} from "lucide-react";
+import { AlertTriangle, ChevronRight, Eye, Lightbulb, Search, Star, TriangleAlert, UtensilsCrossed, Wallet } from "lucide-react";
+import RefreshIcon from "@/components/ui/icons/refresh-icon";
 
 import { cn } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -151,130 +141,145 @@ function DishDialog({
 }) {
   if (!dish) return null;
   const config = TIER[dish.quadrant];
+  const periodLabel = win === "today" ? "Today" : win === "7d" ? "Last 7 days" : win === "1y" ? "Last year" : "Last 30 days";
 
   return (
     <Dialog open={!!dish} onOpenChange={(open) => !open && onClose()}>
       {/* Capped + scrollable: the should-vs-actual block and a long recipe can
           together outgrow a short viewport, which pushed the close button
           off-screen. */}
-      <DialogContent className="max-h-[85vh] max-w-md gap-4 overflow-y-auto">
+      <DialogContent className="max-h-[90vh] max-w-lg gap-5 overflow-y-auto p-5 sm:p-6">
         <DialogHeader>
-          <div className="flex items-start gap-3">
+          <div className="flex items-start gap-3 pr-6">
             <ItemAvatar name={dish.dish} size="sm" variant="photo" />
             <div className="min-w-0 flex-1">
               <DialogTitle className="text-base font-bold text-foreground">{dish.dish}</DialogTitle>
               <p className="mt-0.5 text-xs text-muted-foreground">{dish.category}</p>
             </div>
-            <TierBadge tier={dish.quadrant} />
           </div>
         </DialogHeader>
 
-        <div className="grid grid-cols-2 gap-2">
-          {[
-            ["Price", fmtCurrency(dish.price)],
-            ["Should cost / plate", fmtCurrency(dish.cost)],
-            ["Profit / plate", fmtCurrency(dish.gross_profit)],
-            ["Food cost", fmtPct(dish.food_cost_pct)],
-            [`Sold (${win})`, dish.sold.toLocaleString()],
-            [`Revenue (${win})`, fmtCurrency(dish.revenue)],
-          ].map(([label, value]) => (
-            <div key={label} className="rounded-lg border border-border/50 bg-muted/30 px-3 py-2.5">
-              <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
-                {label}
-              </p>
-              <p className="mt-0.5 text-sm font-bold tabular-nums text-foreground">{value}</p>
+        <section aria-label="Sales summary" className="rounded-xl bg-muted/40 p-4">
+          <p className="text-xs font-medium text-muted-foreground">{periodLabel}</p>
+          <div className="mt-2 grid grid-cols-2 gap-4 divide-x divide-border">
+            <div>
+              <p className="text-2xl font-bold tabular-nums">{dish.sold.toLocaleString()}</p>
+              <p className="mt-1 text-xs text-muted-foreground">Servings sold</p>
             </div>
-          ))}
-        </div>
+            <div className="pl-4">
+              <p className="text-2xl font-bold tabular-nums">{fmtCurrency(dish.revenue)}</p>
+              <p className="mt-1 text-xs text-muted-foreground">Total sales</p>
+            </div>
+          </div>
+        </section>
 
-        {/* Theoretical vs actual for this dish over the selected window */}
-        <div className="rounded-xl border border-border/60 p-3.5">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-            Ingredients — should vs actual ({win})
+        <section aria-label="Cost and profit per serving">
+          <h3 className="text-sm font-semibold">For each serving</h3>
+          <div className="mt-3 flex items-center gap-2 rounded-xl border border-border/60 p-3 text-center sm:gap-3">
+            <div className="min-w-0 flex-1">
+              <p className="text-[11px] text-muted-foreground">Selling price</p>
+              <p className="mt-1 text-sm font-bold tabular-nums sm:text-base">{fmtCurrency(dish.price)}</p>
+            </div>
+            <span className="text-muted-foreground" aria-label="minus">−</span>
+            <div className="min-w-0 flex-1">
+              <p className="text-[11px] text-muted-foreground">Ingredient cost</p>
+              <p className="mt-1 text-sm font-bold tabular-nums sm:text-base">{fmtCurrency(dish.cost)}</p>
+            </div>
+            <span className="text-muted-foreground" aria-label="equals">=</span>
+            <div className="min-w-0 flex-1 rounded-lg bg-primary/10 px-1 py-2">
+              <p className="text-[11px] text-muted-foreground">Gross profit</p>
+              <p className="mt-1 text-sm font-bold tabular-nums text-primary sm:text-base">{fmtCurrency(dish.gross_profit)}</p>
+            </div>
+          </div>
+          <p className="mt-2 text-[11px] text-muted-foreground">
+            Ingredients use {fmtPct(dish.food_cost_pct)} of the price. Profit is before other expenses.
           </p>
-          <dl className="mt-2 space-y-1.5 text-xs">
-            <div className="flex justify-between gap-3">
-              <dt className="text-muted-foreground">
-                Should have cost ({dish.sold.toLocaleString()} sold)
-              </dt>
-              <dd className="font-semibold tabular-nums text-foreground">
-                {fmtCurrency(dish.cost * dish.sold)}
-              </dd>
-            </div>
-            <div className="flex justify-between gap-3">
-              <dt className="text-muted-foreground">Purchased beyond that (wastage)</dt>
-              <dd
-                className={cn(
-                  "font-semibold tabular-nums",
-                  dish.waste_cost > 0 ? WASTE_TEXT[wasteTone(dish.waste_pct)] : "text-foreground",
-                )}
-              >
-                {dish.waste_cost > 0
-                  ? `${fmtCurrency(dish.waste_cost)} · ${fmtPct(dish.waste_pct)}`
-                  : "None"}
-              </dd>
-            </div>
-            <div className="flex justify-between gap-3 border-t border-border/40 pt-1.5">
-              <dt className="font-medium text-foreground">Actual ingredient spend</dt>
-              <dd className="font-bold tabular-nums text-foreground">
-                {fmtCurrency(dish.cost * dish.sold + dish.waste_cost)}
-              </dd>
-            </div>
-          </dl>
-          {dish.waste_qty > 0 && (
-            <p className="mt-2 text-[11px] leading-snug text-muted-foreground">
-              Equivalent to {dish.waste_qty.toLocaleString()} portions of ingredients bought and not
-              sold.
+        </section>
+
+        <div className="rounded-xl border border-border/60 p-3.5">
+          <h3 className="text-sm font-semibold text-foreground">Ingredients needed</h3>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Your recipe × {dish.sold.toLocaleString()} servings sold
+          </p>
+          <div className="mt-3 space-y-2">
+            {dish.ingredients.map((ingredient, index) => {
+              const purchase = dish.ingredient_quantities?.find(
+                (row) => row.name.toLowerCase() === (ingredient.stockitem || ingredient.name).toLowerCase(),
+              );
+              const formatQuantity = (value: number, unit: string) => {
+                const factor = unit === "kg" || unit === "l" ? 1000 : 1;
+                const displayUnit = unit === "kg" ? "g" : unit === "l" ? "ml" : unit;
+                return `${(value * factor).toLocaleString(undefined, { maximumFractionDigits: 2 })} ${displayUnit}`;
+              };
+              return (
+                <div key={`${ingredient.name}-${index}`} className="rounded-lg bg-muted/30 px-3 py-2.5">
+                  <div className="flex items-center justify-between gap-3 text-sm font-semibold">
+                    <span>{ingredient.name}</span>
+                    <span className="tabular-nums">{formatQuantity(ingredient.qty * dish.sold, ingredient.unit)}</span>
+                  </div>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {formatQuantity(ingredient.qty, ingredient.unit)} per serving × {dish.sold.toLocaleString()} sold
+                  </p>
+                  {purchase ? (
+                    <dl className="mt-2 space-y-1 border-t border-border/40 pt-2 text-xs">
+                      <div className="flex justify-between gap-3">
+                        <dt className="text-muted-foreground">Bought for this dish (estimated)</dt>
+                        <dd className="font-medium tabular-nums">{formatQuantity(purchase.bought_qty, purchase.unit)}</dd>
+                      </div>
+                      <div className="flex justify-between gap-3">
+                        <dt className="text-muted-foreground">Extra bought</dt>
+                        <dd className="font-medium tabular-nums">{formatQuantity(purchase.excess_qty, purchase.unit)}</dd>
+                      </div>
+                    </dl>
+                  ) : null}
+
+                </div>
+              );
+            })}
+          </div>
+          {dish.ingredient_quantities?.length ? (
+            <p className="mt-3 text-[11px] leading-snug text-muted-foreground">
+              Bought quantities are shared across dishes based on sales. Extra bought may still be in stock.
+            </p>
+          ) : (
+            <p className="mt-3 text-[11px] leading-snug text-muted-foreground">
+              Bought quantities aren’t available yet. These totals are based on your recipe and sales.
             </p>
           )}
+
         </div>
 
         <div className="rounded-xl border border-primary/20 bg-primary/5 p-3.5">
           <div className="flex items-start gap-2">
             <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
             <div>
-              <p className="text-xs font-bold text-foreground">{config.label}</p>
+              <p className="mb-2 text-xs font-medium text-muted-foreground">What to do next</p>
+              <TierBadge tier={dish.quadrant} />
               <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
                 {recommendationCopy(dish)}
               </p>
-              <p className="mt-2 text-[11px] font-semibold text-primary">Next: {config.action}</p>
+              <p className="mt-2 text-[11px] font-semibold text-primary">{config.action}</p>
             </div>
           </div>
         </div>
 
         {dish.ingredients.length > 0 && (
-          <div>
-            <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-              Recipe ({dish.ingredients.length})
-            </p>
-            <div className="divide-y divide-border/40 rounded-lg border border-border/50">
-              {dish.ingredients.map((ing) => (
-                <div key={ing.name} className="flex items-center gap-2 px-3 py-2">
-                  <span className="min-w-0 flex-1 truncate text-xs font-medium text-foreground">
-                    {ing.name}
-                  </span>
-                  {/* which price this line was costed at — a live Tally purchase
-                      price, or the seeded estimate when nothing matched */}
-                  <span
-                    className={cn(
-                      "shrink-0 rounded px-1.5 py-0.5 text-[10px] font-semibold",
-                      ing.cost_source === "tally"
-                        ? "bg-success/10 text-success"
-                        : "bg-muted text-muted-foreground",
-                    )}
-                  >
-                    {ing.cost_source === "tally" ? "Tally" : "est."}
-                  </span>
-                  <span className="shrink-0 text-xs tabular-nums text-muted-foreground">
-                    {ing.qty.toLocaleString()} {ing.unit}
-                  </span>
-                  <span className="w-14 shrink-0 text-right text-xs font-semibold tabular-nums text-foreground">
-                    {fmtCurrency(ing.cost_aed)}
-                  </span>
+          <details className="rounded-xl border border-border/60 px-3.5 py-3">
+            <summary className="cursor-pointer text-xs font-medium">View ingredient costs per serving</summary>
+            <div className="mt-3 divide-y divide-border/40">
+              {dish.ingredients.map((ingredient, index) => (
+                <div key={`${ingredient.name}-${index}`} className="flex items-center justify-between gap-3 py-2 text-xs">
+                  <div>
+                    <p className="font-medium">{ingredient.name} · {ingredient.qty.toLocaleString()} {ingredient.unit}</p>
+                    <p className="mt-0.5 text-[11px] text-muted-foreground">
+                      {ingredient.cost_source === "tally" ? "Price from Tally" : "Estimated price"}
+                    </p>
+                  </div>
+                  <span className="font-semibold tabular-nums">{fmtCurrency(ingredient.cost_aed)}</span>
                 </div>
               ))}
             </div>
-          </div>
+          </details>
         )}
       </DialogContent>
     </Dialog>
@@ -364,7 +369,7 @@ export default function MenuEngineeringPage() {
           disabled={isFetching}
           className="gap-1.5 self-start"
         >
-          <RefreshCw className={cn("h-3.5 w-3.5", isFetching && "animate-spin")} />
+          <RefreshIcon className={cn("h-3.5 w-3.5", isFetching && "animate-spin")} />
           Refresh
         </Button>
       </div>

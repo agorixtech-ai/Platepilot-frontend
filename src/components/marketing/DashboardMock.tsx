@@ -6,35 +6,8 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import {
-  ArrowDownRight,
-  AlertTriangle,
-  ArrowUpRight,
-  BarChart3,
-  BookOpen,
-  ChevronDown,
-  ChevronRight,
-  DollarSign,
-  FileText,
-  Layers,
-  LayoutDashboard,
-  Lightbulb,
-  MapPin,
-  Package,
-  Percent,
-  RefreshCw,
-  Settings,
-  ShoppingCart,
-  Soup,
-  Sparkles,
-  Star,
-  TrendingDown,
-  Truck,
-  User,
-  Wallet,
-  XCircle,
-  type LucideIcon,
-} from "lucide-react";
+import { ArrowDownRight, AlertTriangle, ArrowUpRight, BarChart3, BookOpen, ChevronDown, ChevronRight, DollarSign, FileText, Layers, LayoutDashboard, Lightbulb, MapPin, Package, Percent, Settings, ShoppingCart, Soup, Sparkles, Star, TrendingDown, Truck, User, Wallet, XCircle, type LucideIcon } from "lucide-react";
+import RefreshIcon from "@/components/ui/icons/refresh-icon";
 import { LOGO_ALT, LOGO_SRC } from "@/components/AppLogo";
 
 /**
@@ -539,7 +512,7 @@ export function MockAlertStates() {
             Could not reach the stock feed
           </div>
           <span className="dm-btn" style={{ height: 28, fontSize: 10 }}>
-            <RefreshCw size={12} /> Retry
+            <RefreshIcon size={12} /> Retry
           </span>
         </div>
       </AlertsShell>
@@ -943,7 +916,7 @@ export function Banner({ compact }: { compact?: boolean }) {
         )}
         <span className="dm-pill on">Month</span>
         <span className="dm-pill">
-          <RefreshCw size={13} />
+          <RefreshIcon size={13} />
           Refresh
         </span>
       </div>

@@ -7,7 +7,13 @@ import { dashboardService } from "@/services/dashboardService";
 import { useBranchFilter } from "@/contexts/BranchFilterContext";
 import { DASHBOARD_LIVE_QUERY } from "@/components/dashboard/shared";
 import { ItemAvatar } from "@/components/dashboard/ItemAvatar";
-import { CARD, EmptyNote, ErrorStrip, Segments } from "@/components/dashboard/MobileUI";
+import {
+  CARD,
+  EmptyNote,
+  ErrorStrip,
+  PhotoCredit,
+  Segments,
+} from "@/components/dashboard/MobileUI";
 import { Skeleton } from "@/components/ui/skeleton";
 
 type Tab = "critical" | "low" | "ok";
@@ -50,7 +56,12 @@ export default function Purchasing() {
         {isLoading && <Skeleton className="h-24 w-full rounded-2xl" />}
         {list.map((i) => (
           <div key={i.item} className={cn(CARD, "flex items-center gap-3 p-3")}>
-            <ItemAvatar name={i.item} size="lg" className="h-14 w-14 rounded-xl text-[15px]" />
+            <ItemAvatar
+              name={i.item}
+              size="lg"
+              variant="photo"
+              className="h-14 w-14 rounded-xl text-[15px]"
+            />
             <div className="min-w-0 flex-1">
               <p className="truncate text-[14px] font-bold text-foreground">{i.item}</p>
               <p
@@ -78,6 +89,7 @@ export default function Purchasing() {
         ))}
         {!isLoading && list.length === 0 && <EmptyNote>Nothing here.</EmptyNote>}
       </div>
+      <PhotoCredit />
     </div>
   );
 }

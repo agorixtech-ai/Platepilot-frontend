@@ -120,9 +120,13 @@ export const METRIC_CONFIG: Record<
   },
 };
 
+// Data syncs once a day and the API caches every response for 5 minutes, so polling each
+// minute (as this used to) only burns battery, mobile data and backend capacity — a phone
+// screen fires 6–8 of these queries at once. Refresh every 5 minutes, and whenever the app
+// comes back to the foreground with data older than 2 minutes.
 export const DASHBOARD_LIVE_QUERY = {
-  refetchInterval: 60_000,
-  staleTime: 30_000,
+  refetchInterval: 5 * 60_000,
+  staleTime: 2 * 60_000,
   refetchOnWindowFocus: true,
 } as const;
 

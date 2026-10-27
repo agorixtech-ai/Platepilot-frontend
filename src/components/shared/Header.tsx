@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Bell, LogOut, Menu } from "lucide-react";
+import { Bell, Menu } from "lucide-react";
+import LogoutIcon from "@/components/ui/icons/logout-icon";
 import { Button } from "@/components/ui/button";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useAuthStore } from "@/store/authStore";
@@ -46,7 +47,7 @@ export function Header() {
         onClick={handleLogout}
         className="hidden h-9 gap-1.5 border border-border text-[12px] text-muted-foreground hover:border-destructive/20 hover:bg-destructive/10 hover:text-destructive sm:flex"
       >
-        <LogOut className="h-3.5 w-3.5" />
+        <LogoutIcon className="h-3.5 w-3.5" />
         Sign out
       </Button>
     </header>

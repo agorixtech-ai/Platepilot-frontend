@@ -1,6 +1,7 @@
 import { useHistory } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { AlertTriangle, ChevronRight, Crown } from "lucide-react";
+import { ChevronRight, Crown } from "lucide-react";
+import TriangleAlertIcon from "@/components/ui/icons/triangle-alert-icon";
 
 import { dashboardService } from "@/services/dashboardService";
 import { useBranchFilter } from "@/contexts/BranchFilterContext";
@@ -16,6 +17,7 @@ import {
 } from "@/components/dashboard/MobileUI";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+import { DateRangePicker } from "@/components/dashboard/DateRangePicker";
 import { Spark } from "./Branches";
 
 /** Branches — phone view: network totals + one ranked card per location.
@@ -48,6 +50,9 @@ export default function MobileBranches() {
 
   return (
     <div className="mx-auto max-w-xl">
+      <div className="mb-3 flex justify-end">
+        <DateRangePicker />
+      </div>
       {snaps.isError && <ErrorStrip onRetry={() => void snaps.refetch()} />}
 
       <div className="grid grid-cols-2 gap-3">
@@ -118,7 +123,7 @@ export default function MobileBranches() {
                     {share.toFixed(0)}% of network
                     {r.pending_issues > 0 && (
                       <span className="inline-flex items-center gap-0.5 font-semibold text-destructive">
-                        <AlertTriangle className="h-3 w-3" />
+                        <TriangleAlertIcon className="h-3 w-3" />
                         {r.pending_issues} issue{r.pending_issues !== 1 ? "s" : ""}
                       </span>
                     )}
