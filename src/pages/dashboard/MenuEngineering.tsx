@@ -130,6 +130,10 @@ function VarianceTile({
   );
 }
 
+/** Dish popup shows exact amounts; shared fmtCurrency abbreviates (1,254 → 1.3k). */
+const fmtExact = (v: number) =>
+  `AED ${v.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
 function DishDialog({
   dish,
   win,
@@ -167,7 +171,7 @@ function DishDialog({
               <p className="mt-1 text-xs text-muted-foreground">Servings sold</p>
             </div>
             <div className="pl-4">
-              <p className="text-2xl font-bold tabular-nums">{fmtCurrency(dish.revenue)}</p>
+              <p className="text-2xl font-bold tabular-nums">{fmtExact(dish.revenue)}</p>
               <p className="mt-1 text-xs text-muted-foreground">Total sales</p>
             </div>
           </div>
@@ -178,17 +182,17 @@ function DishDialog({
           <div className="mt-3 flex items-center gap-2 rounded-xl border border-border/60 p-3 text-center sm:gap-3">
             <div className="min-w-0 flex-1">
               <p className="text-[11px] text-muted-foreground">Selling price</p>
-              <p className="mt-1 text-sm font-bold tabular-nums sm:text-base">{fmtCurrency(dish.price)}</p>
+              <p className="mt-1 text-sm font-bold tabular-nums sm:text-base">{fmtExact(dish.price)}</p>
             </div>
             <span className="text-muted-foreground" aria-label="minus">−</span>
             <div className="min-w-0 flex-1">
               <p className="text-[11px] text-muted-foreground">Ingredient cost</p>
-              <p className="mt-1 text-sm font-bold tabular-nums sm:text-base">{fmtCurrency(dish.cost)}</p>
+              <p className="mt-1 text-sm font-bold tabular-nums sm:text-base">{fmtExact(dish.cost)}</p>
             </div>
             <span className="text-muted-foreground" aria-label="equals">=</span>
             <div className="min-w-0 flex-1 rounded-lg bg-primary/10 px-1 py-2">
               <p className="text-[11px] text-muted-foreground">Gross profit</p>
-              <p className="mt-1 text-sm font-bold tabular-nums text-primary sm:text-base">{fmtCurrency(dish.gross_profit)}</p>
+              <p className="mt-1 text-sm font-bold tabular-nums text-primary sm:text-base">{fmtExact(dish.gross_profit)}</p>
             </div>
           </div>
           <p className="mt-2 text-[11px] text-muted-foreground">
@@ -275,7 +279,7 @@ function DishDialog({
                       {ingredient.cost_source === "tally" ? "Price from Tally" : "Estimated price"}
                     </p>
                   </div>
-                  <span className="font-semibold tabular-nums">{fmtCurrency(ingredient.cost_aed)}</span>
+                  <span className="font-semibold tabular-nums">{fmtExact(ingredient.cost_aed)}</span>
                 </div>
               ))}
             </div>
