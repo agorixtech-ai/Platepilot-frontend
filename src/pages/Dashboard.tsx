@@ -31,6 +31,7 @@ const Alerts = lazy(() => import("./dashboard/Alerts"));
 const FoodCost = lazy(() => import("./dashboard/FoodCost"));
 const Purchasing = lazy(() => import("./dashboard/Purchasing"));
 const Waste = lazy(() => import("./dashboard/Waste"));
+const WasteManagement = lazy(() => import("./dashboard/WasteManagement"));
 const More = lazy(() => import("./dashboard/More"));
 const MobileSales = lazy(() => import("./dashboard/MobileSales"));
 const MobileInventory = lazy(() => import("./dashboard/MobileInventory"));
@@ -82,7 +83,11 @@ export default function DashboardPage() {
             <Route exact path="/dashboard/alerts" render={gate("overview", Alerts)} />
             <Route exact path="/dashboard/food-cost" render={gate("overview", FoodCost)} />
             <Route exact path="/dashboard/purchasing" render={gate("inventory", Purchasing)} />
-            <Route exact path="/dashboard/waste" render={gate("inventory", Waste)} />
+            <Route
+              exact
+              path="/dashboard/waste"
+              render={gate("inventory", compact ? Waste : WasteManagement)}
+            />
             <Route exact path="/dashboard/more" component={More} />
             <Route exact path="/dashboard/pos" render={gate("pos", compact ? MobileSales : Pos)} />
             <Route exact path="/dashboard/tally" render={gate("tally", Tally)} />

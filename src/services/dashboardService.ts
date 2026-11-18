@@ -173,6 +173,31 @@ export interface WasteCompositionData {
   totals: WasteUnitTotal[]; // sorted by cost desc
 }
 
+/** One ingredient's Tally/recipe reconciliation (all history, stock units). */
+export interface WasteManagementItem {
+  name: string;
+  unit: string; // "kg" | "l" | "pcs"
+  bought: number; // net purchases
+  remaining: number; // Material In − Material Out
+  used: number; // bought − remaining
+  should_use: number; // sold dishes × recipe qty
+  waste: number; // used − should_use (0 unless status is over/ok)
+  waste_cost: number;
+  waste_pct: number; // waste / used
+  /** over: ≥ tolerance · ok: within it · unreconciled: Tally in/out don't tie to purchases · no_recipe: not in a sold recipe */
+  status: "over" | "ok" | "unreconciled" | "no_recipe";
+}
+
+export interface WasteManagementData {
+  currency: string;
+  as_of: string | null;
+  tolerance_pct: number;
+  total_waste_cost: number;
+  flagged_count: number;
+  unreconciled_count: number;
+  items: WasteManagementItem[];
+}
+
 export interface RecipeIngredient {
   name: string;
   qty: number;
@@ -295,6 +320,10 @@ export const dashboardService = {
     return apiFetch<WasteCompositionData>(
       `/dashboard/waste-composition${qs({ period, branch, limit })}`,
     );
+  },
+
+  getWasteManagement(branch?: string | null, period: Period | "all" = "month") {
+    return apiFetch<WasteManagementData>(`/dashboard/waste-management${qs({ period, branch })}`);
   },
 
   getItemImage(name: string) {

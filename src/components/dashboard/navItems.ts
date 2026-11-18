@@ -12,6 +12,7 @@ import BrandOpenaiIcon from "@/components/ui/icons/brand-openai-icon";
 import ChartBarIcon from "@/components/ui/icons/chart-bar-icon";
 import UserIcon from "@/components/ui/icons/user-icon";
 import GearIcon from "@/components/ui/icons/gear-icon";
+import TrashIcon from "@/components/ui/icons/trash-icon";
 
 export type NavItem = {
   icon: typeof LayoutDashboardIcon;
@@ -29,6 +30,7 @@ export const MAIN_ITEMS: NavItem[] = [
 
 export const OPS_ITEMS: NavItem[] = [
   { icon: StackIcon, label: "Inventory", to: "/dashboard/inventory" },
+  { icon: TrashIcon, label: "Waste", to: "/dashboard/waste" },
   { icon: BookIcon, label: "Menu", to: "/dashboard/menu" },
   { icon: SoupIcon, label: "Menu Engineering", to: "/dashboard/menu-engineering" },
   { icon: TruckElectricIcon, label: "Suppliers", to: "/dashboard/suppliers" },
@@ -51,5 +53,7 @@ export const NAV_ITEMS = [...MAIN_ITEMS, ...OPS_ITEMS, ...AI_ITEMS, ...ADMIN_ITE
 
 /** "/dashboard" → "overview", "/dashboard/pos" → "pos" — matches backend PAGES. */
 export function pageKeyOf(to: string): string {
-  return to === "/dashboard" ? "overview" : to.replace("/dashboard/", "");
+  const key = to === "/dashboard" ? "overview" : to.replace("/dashboard/", "");
+  // Waste has no role page of its own — it is granted with Inventory (same as its route gate).
+  return key === "waste" ? "inventory" : key;
 }
